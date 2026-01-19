@@ -16,13 +16,13 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 @endphp
 
 <section class="register_page_sec">
-    <div class="auth-wrapper" style="width: 1000px; max-width: 95%;">
+    <div class="auth-wrapper">
         <div class="auth-image">
             <img src="https://media.istockphoto.com/id/2205696704/photo/online-registration-form-identity-verification-personal-information-verification-concept.jpg?s=612x612&w=0&k=20&c=2X_45rxke9VrEez-D7JPchhSQwM_Od2jR_vyS1O5MTY=" alt="Register Illustration">
         </div>
-        <div class="auth-form" style="width: 60%; padding: 40px;">
+        <div class="auth-form">
             <div class="text-center mb-4">
-                <h2 class="title" id="formTitle" style="font-size: 32px; font-weight: 700; color: #23AAE2;">Create Account</h2>
+                <h2 class="title" id="formTitle">Create Account</h2>
                 <p class="subtitle">Join UniCou and start managing your vouchers</p>
             </div>
 
@@ -92,7 +92,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                     </div>
                 </div>
 
-                <button type="button" class="btn-primary w-100" id="submitBtns" style="font-weight: 600; padding: 15px;">
+                <button type="button" class="btn-primary w-100" id="submitBtns">
                     Register Now
                 </button>
                 <button hidden type="submit" id="realSubmitBtn"></button>
@@ -108,8 +108,73 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
-
+<style>
+    .iti { width: 100%; }
+    .btn-type {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .btn-type.active {
+        background: #23AAE2;
+        color: #fff;
+        border-color: #23AAE2;
+    }
+</style>
 @endpush
 
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    let iti;
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.querySelector("#phone_input");
+        iti = window.intlTelInput(input, {
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            separateDialCode: true,
+            initialCountry: "auto",
+            geoIpLookup: function(success, failure) {
+                fetch("https://ipapi.co/json").then(res => res.json()).then(data => success(data.country_code)).catch(() => success("in"));
+            }
+        });
 
+        document.getElementById('submitBtns').addEventListener('click', function() {
+            document.getElementById('full_phone').value = iti.getNumber();
+            document.getElementById('country_code').value = iti.getSelectedCountryData().dialCode;
+
+            Swal.fire({
+                title: "Registration Fee",
+                text: "You must pay a €25 registration fee to become a verified user.",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Pay Now!",
+                cancelButtonText: "Pay Later!",
+                confirmButtonColor: '#23AAE2',
+                reverseButtons: true
+            }).then((result) => {
+                document.getElementById('regifeetaken').value = result.isConfirmed ? 'yes' : 'no';
+                const btn = document.getElementById('submitBtns');
+                if(btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Processing...';
+                }
+                document.getElementById('realSubmitBtn').click();
+            });
+        });
+    });
+
+    function setActive(type) {
+        document.getElementById('accountType').value = type;
+        document.querySelectorAll('.btn-type').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + type).classList.add('active');
+    }
+</script>
+@endpush
 @endsection
