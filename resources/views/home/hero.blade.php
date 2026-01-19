@@ -296,8 +296,8 @@
                         data-settings="{&quot;_animation&quot;:&quot;fadeInUp&quot;}"
                         data-widget_type="heading.default">
                         <div class="elementor-widget-container">
-                            <h1 class="elementor-heading-title elementor-size-default">Time is precious.<br>
-                                Let us handle the rest.</h1>
+                            <h1 class="elementor-heading-title elementor-size-default">Global Education Hub.<br>
+                                Study Abroad & Test Prep Specialist.</h1>
                         </div>
                     </div>
                     <div class="elementor-element elementor-element-03b3466 elementor-widget-mobile__width-inherit animated-fast elementor-invisible elementor-widget elementor-widget-text-editor"

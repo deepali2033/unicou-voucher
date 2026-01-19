@@ -9,15 +9,15 @@
         <div class="page-content clearfix the-content-parent">
             <div data-elementor-type="wp-page" data-elementor-id="17" class="elementor elementor-17" data-elementor-post-type="page">
                 <!--- START .elementor-section-wrap -->
-                @include('home.hero')
-@include('home.ratings')
+                @include('home.sh-home_baner_sec')
+<!-- @include('home.ratings')
                 @include('home.howitswork')
                 @include('home.whoweare')
                 @include('home.categories')
                 @include('home.testimonial')
                 @include('home.getquote')
                 @include('home.faq')
-                @include('home.fromourblog')
+                @include('home.fromourblog') -->
             </div>
         </div>
     </article>
