@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
-<section class="hero-section">
+<section class="hero-section cls_comman_cls">
     <div class="container">
     <div class="hero-container">
 

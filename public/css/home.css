@@ -10,6 +10,11 @@
     padding: 0 10px;
 }
 
+section.cls_comman_cls {
+    padding: 50px 0px;
+}
+
+
 /* menu section css start */
 .header {
   background: #fff;
@@ -304,3 +309,141 @@
         justify-content: center;
     }
 }
+
+
+/* eduction_cards section start */
+section.educ_card-section.cls_comman_cls {
+    background-color: #F4F4F4;
+}
+
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.exam-header h2 {
+  font-size: 28px;
+}
+
+.exam-btn {
+  padding: 12px 24px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+/* ===== TABS ===== */
+.exam-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.exam-tabs span {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.exam-tabs span.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* ===== GRID ===== */
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+/* ===== CARD ===== */
+.exam-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  animation: fadeUp 0.4s ease;
+}
+
+.exam-img img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.exam-body {
+  padding: 20px;
+}
+
+.exam-tag {
+  display: inline-block;
+  font-size: 12px;
+  background: #eee;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.exam-body h4 {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+.exam-price {
+  margin: 10px 0;
+}
+
+.exam-price strong {
+  font-size: 22px;
+}
+
+.exam-note {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.exam-action {
+  display: inline-block;
+  padding: 10px 18px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* SALE BADGE */
+.exam-sale {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: red;
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* eduction_cards section end */

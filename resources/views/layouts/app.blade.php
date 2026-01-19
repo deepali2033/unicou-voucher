@@ -12,8 +12,8 @@
    
         <!-- Header -->
         @include('layouts.header')
-         @yield('content')
-          @include('layouts.footer')
+         @yield('content') 
+        
 
     <script src="{{ asset('/js/home.js') }}"></script>
 </body>
