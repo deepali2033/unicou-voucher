@@ -24,54 +24,62 @@ This Laravel application is a complete conversion of the WordPress cleaning comp
 ### Setup Instructions
 
 1. **Clone or navigate to the project directory:**
-   ```bash
-   cd cleaning-company-laravel
-   ```
+
+    ```bash
+    cd cleaning-company-laravel
+    ```
 
 2. **Install PHP dependencies:**
-   ```bash
-   composer install
-   ```
+
+    ```bash
+    composer install
+    ```
 
 3. **Install Node.js dependencies:**
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 4. **Create environment file:**
-   ```bash
-   copy .env.example .env
-   ```
+
+    ```bash
+    copy .env.example .env
+    ```
 
 5. **Generate application key:**
-   ```bash
-   php artisan key:generate
-   ```
+
+    ```bash
+    php artisan key:generate
+    ```
 
 6. **Configure your database in `.env` file:**
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=cleaning_company
-   DB_USERNAME=your_username
-   DB_PASSWORD=your_password
-   ```
+
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=cleaning_company
+    DB_USERNAME=your_username
+    DB_PASSWORD=your_password
+    ```
 
 7. **Run database migrations (optional - for future blog/contact functionality):**
-   ```bash
-   php artisan migrate
-   ```
+
+    ```bash
+    php artisan migrate
+    ```
 
 8. **Build assets:**
-   ```bash
-   npm run build
-   ```
+
+    ```bash
+    npm run build
+    ```
 
 9. **Start the development server:**
-   ```bash
-   php artisan serve
-   ```
+    ```bash
+    php artisan serve
+    ```
 
 The application will be available at `http://localhost:8000`
 
@@ -128,11 +136,11 @@ The application uses CSS custom properties matching the original WordPress theme
 
 ```css
 :root {
-    --e-global-color-vamtam_accent_1: #F2D701; /* Primary yellow */
-    --e-global-color-vamtam_accent_2: #3CA200; /* Primary green */
-    --e-global-color-vamtam_accent_3: #E8F5D3; /* Light green */
-    --e-global-color-vamtam_accent_4: #F4F6F0; /* Light background */
-    --e-global-color-vamtam_accent_5: #FFFFFF; /* White */
+    --e-global-color-vamtam_accent_1: #23aae2; /* Primary yellow */
+    --e-global-color-vamtam_accent_2: #3ca200; /* Primary green */
+    --e-global-color-vamtam_accent_3: #e8f5d3; /* Light green */
+    --e-global-color-vamtam_accent_4: #f4f6f0; /* Light background */
+    --e-global-color-vamtam_accent_5: #ffffff; /* White */
     --e-global-color-vamtam_accent_6: #000000; /* Black */
     /* ... */
 }

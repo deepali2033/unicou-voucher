@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="elementor-kit-4">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,6 +14,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     @stack('styles')
 </head>
+
 <body class="elementor-kit-4 home wp-singular page-template-default page page-id-17 wp-custom-logo wp-embed-responsive wp-theme-clanyeco full header-layout-logo-menu has-page-header no-middle-header responsive-layout vamtam-is-elementor elementor-active elementor-pro-active vamtam-wc-cart-empty wc-product-gallery-slider-active vamtam-font-smoothing layout-full elementor-default elementor-kit-4 elementor-page elementor-page-17">
     <div id="top"></div>
     <div id="page" class="site">
@@ -44,21 +46,22 @@
     </div>
 
     @if(session('success'))
-        <div class="toast toast-success" role="alert">
-            <div class="toast-body">
-                {{ session('success') }}
-                <button type="button" class="toast-close" aria-label="Close">&times;</button>
-            </div>
+    <div class="toast toast-success" role="alert">
+        <div class="toast-body">
+            {{ session('success') }}
+            <button type="button" class="toast-close" aria-label="Close">&times;</button>
         </div>
+    </div>
     @endif
 
     @if(session('error'))
-        <div class="toast toast-error" role="alert">
-            <div class="toast-body">
-                {{ session('error') }}
-                <button type="button" class="toast-close" aria-label="Close">&times;</button>
-            </div>
+    <div class="toast toast-error" role="alert">
+        <div class="toast-body">
+            {{ session('error') }}
+            <button type="button" class="toast-close" aria-label="Close">&times;</button>
         </div>
+    </div>
     @endif
 </body>
+
 </html>
