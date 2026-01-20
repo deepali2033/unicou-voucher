@@ -5,17 +5,17 @@
 
 /* Global Color Variables from WordPress Theme */
 :root {
-    --e-global-color-vamtam_accent_1: #F2D701;
-    --e-global-color-vamtam_accent_2: #3CA200;
+    --e-global-color-vamtam_accent_1: #12325799;
+    --e-global-color-vamtam_accent_2: #23aae2;
     --e-global-color-vamtam_accent_3: #E8F5D3;
     --e-global-color-vamtam_accent_4: #F4F6F0;
     --e-global-color-vamtam_accent_5: #FFFFFF;
-    --e-global-color-vamtam_accent_6: #000000;
-    --e-global-color-vamtam_accent_7: #0000001A;
-    --e-global-color-vamtam_accent_8: #00000099;
+    --e-global-color-vamtam_accent_6: #123257;
+    --e-global-color-vamtam_accent_7: #1232571A;
+    --e-global-color-vamtam_accent_8: #12325799;
     --e-global-color-vamtam_sticky_header_bg_color: #FFFFFF33;
     --e-global-color-41c0642: #FFFFFF33;
-    --e-global-color-88b2176: #3CA2004D;
+    --e-global-color-88b2176: #23aae24D;
 
     /* Typography Variables */
     --e-global-typography-vamtam_primary_font-font-family: "Outfit";
@@ -443,6 +443,11 @@ label {
     display: flex !important;
     align-items: center;
     justify-content: center;
+
+        padding: 10px 10px 10px 10px;
+    border-radius: 15px 15px 15px 15px;
+    COLOR: WHITE;
+    BACKGROUND: #123257;
 }
 
 .elementor-button-text::before,
