@@ -53,62 +53,62 @@
                                 Users Management
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.jobs.*') ? 'active' : '' }}"
                                 href="{{ route('admin.jobs.index') }}">
                                 <i class="fas fa-briefcase me-2"></i>
                                 Job Management
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}"
                                 href="{{ route('admin.services.index') }}">
                                 <i class="fas fa-broom me-2"></i>
                                 Services
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}"
                                 href="{{ route('admin.plans.index') }}">
                                 <i class="fas fa-wallet me-2"></i>
                                 Plans
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.quotes.*') ? 'active' : '' }}"
                                 href="{{ route('admin.quotes.index') }}">
                                 <i class="fas fa-comment-alt me-2"></i>
                                 Quotes
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.book-services.*') ? 'active' : '' }}"
                                 href="{{ route('admin.book-services.index') }}">
                                 <i class="fas fa-calendar-check me-2"></i>
                                 Booked Services
                             </a>
-                        </li>
- <li class="nav-item">
+                        </li> -->
+ <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.booked-plans.*') ? 'active' : '' }}"
                                 href="{{ route('admin.testimonials.index') }}">
                                 <i class="fas fa-comments me-2"></i>
                                 Testimonials
                             </a>
-                        </li>
-                        {{-- <li class="nav-item">
+                        </li> -->
+                        <!-- {{-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.booked-plans.*') ? 'active' : '' }}"
                                 href="{{ route('admin.booked-plans.index') }}">
                                 <i class="fas fa-tasks me-2"></i>
                                 Book Plans
                             </a>
-                        </li> --}}
-                        <li class="nav-item">
+                        </li> --}} -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}"
                                 href="{{ route('admin.subscriptions.index') }}">
                                 <i class="fas fa-envelope me-2"></i>
                                 Subscribers
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.contact-us.*') ? 'active' : '' }}"
                                 href="{{ route('admin.contact-us.index') }}">
@@ -129,27 +129,27 @@
                                 @endif
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"
                                 href="{{ route('admin.categories.index') }}">
                                 <i class="fas fa-th-large me-2"></i>
                                 Categories
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.job-categories.*') ? 'active' : '' }}"
                                 href="{{ route('admin.job-categories.index') }}">
                                 <i class="fas fa-list me-2"></i>
                                 Job Categories
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> -->
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}"
                                 href="{{ route('admin.analytics') }}">
                                 <i class="fas fa-chart-bar me-2"></i>
                                 Reports & Analytics
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
 
                     <hr class="my-3" style="border-color: #495057;">

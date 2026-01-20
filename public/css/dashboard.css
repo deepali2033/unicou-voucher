@@ -31,12 +31,12 @@ body {
 }
 .koa-badge-green,
 .koa-badge-green:hover {
-    background-color: #3ca200;
+    background-color: #23aae2;
     color: #fff;
 }
 .koa-badge-yellow,
 .koa-badge-yellow:hover {
-    background-color: #f2d701;
+    background-color: #38799f61;
     color: #000;
 }
 .koa-badge-red,
@@ -51,7 +51,7 @@ body {
 }
 .koa-badge-light-green,
 .koa-badge-light-green:hover {
-    background-color: #e8f5d3;
+    background-color: #23aae240;
     color: #000;
 }
 .koa-badge-purple,
@@ -79,7 +79,7 @@ body {
 .koa-badge-yellow-outline:hover {
     background-color: #f4f6f0;
     color: #000;
-    border: 1px solid #f2d701;
+    border: 1px solid #38799f61;
 }
 .koa-badge-red-outline,
 .koa-badge-red-outline:hover {
@@ -138,10 +138,8 @@ body {
 .koa-sidebar-wrapper .sidebar {
     width: 250px;
     min-height: 100vh;
-    /* background: #E8F5D3; */
-    background-color: transparent;
-    /* background-image: linear-gradient(142deg, #E8F5D3 0%, #F2D701  60%); */
-    background-image: linear-gradient(142deg, #e8f5d3 10%, #f2d701 100%);
+    background: #23aae259;
+    /* background-color: transparent; */
     transition: transform 0.3s ease-in-out;
     position: fixed;
     top: 0;
@@ -158,7 +156,7 @@ body {
 }
 .koa-sidebar-wrapper .sidebar .nav-link:hover,
 .koa-sidebar-wrapper .sidebar .nav-link.active {
-    color: #3ca200;
+    color: #23AAE2;
     background-color: #fff;
     border-radius: 12px;
 }
@@ -185,7 +183,7 @@ body {
 }
 
 .card-stats {
-    background-color: #e8f5d3;
+    background-color: #e9f9fb;
     border: 0px;
     /* clip-path: polygon(0 20px, 100% 0, 100% 100%, 0 100%); */
     border-radius: 32px;
@@ -321,7 +319,7 @@ body {
     );
 }
 .dash-card-bg {
-    background: #3ca200;
+    background: #1895c959;
     border-radius: 32px;
     padding: 30px;
 }
@@ -351,7 +349,7 @@ body {
 }
 .koa-tb-card .card-header,
 .koa-card-header {
-    background-color: #e8f5d3;
+    background-color: #b2e1f5;
     border-bottom: 1px solid #d0d0d0;
     padding: 1rem 1.25rem;
     margin-bottom: 0;
@@ -462,4 +460,9 @@ body {
     #close-sidebar {
         align-self: start !important;
     }
+}
+
+/* dasbord icon color  */
+.icon.icon-shape i {
+    color: #354873;
 }
