@@ -39,7 +39,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             <div class="type-selector-wrapper mb-4 text-center">
                 @if(!$accountLocked)
                 <div class="d-flex flex-wrap justify-content-center gap-2">
-                    @foreach(['manager', 'reseller_agent', 'support_team', 'student', 'admin'] as $type)
+                    @foreach(['manager', 'reseller_agent', 'support_team', 'student'] as $type)
                     <button type="button" class="btn-type {{ $defaultType === $type ? 'active' : '' }}"
                         onclick="setActive('{{ $type }}')" id="btn-{{ $type }}">
                         {{ ucfirst(str_replace('_', ' ', explode('_', $type)[0])) }}
@@ -109,7 +109,10 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
 <style>
-    .iti { width: 100%; }
+    .iti {
+        width: 100%;
+    }
+
     .btn-type {
         background: #fff;
         border: 1px solid #ddd;
@@ -121,6 +124,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         transition: all 0.3s;
         cursor: pointer;
     }
+
     .btn-type.active {
         background: #23AAE2;
         color: #fff;
@@ -161,7 +165,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             }).then((result) => {
                 document.getElementById('regifeetaken').value = result.isConfirmed ? 'yes' : 'no';
                 const btn = document.getElementById('submitBtns');
-                if(btn) {
+                if (btn) {
                     btn.disabled = true;
                     btn.textContent = 'Processing...';
                 }
