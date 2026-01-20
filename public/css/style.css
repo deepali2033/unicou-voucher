@@ -256,3 +256,16 @@ form#loginForm a.link:hover {
     width: 100%;
   }
 }
+
+
+.flex-wrap.justify-content-center.gap-2 {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+button.btn-type {
+    width: calc(25% - 6px);
+    display: flex;
+    padding: 9px 12px;
+    justify-content: center;
+}

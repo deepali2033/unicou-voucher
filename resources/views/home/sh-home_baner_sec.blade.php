@@ -38,9 +38,10 @@
 
         <!-- Right Video -->
         <div class="hero-media">
-            <video autoplay muted loop playsinline>
+            <!-- <video autoplay muted loop playsinline>
                 <source src="https://tfpadvisory.bkhomesolutionindore.com/wp-content/uploads/2026/01/02_book.mp4" type="video/mp4">
-            </video>
+            </video> -->
+            <img src="{{asset ('/images/hero_Banner_img (1).png')}}" alt="Hero Image">
         </div>
 
     </div>

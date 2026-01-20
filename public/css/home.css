@@ -140,6 +140,38 @@ section.cls_comman_cls {
   transition: 0.3s;
 }
 
+.hero-media {
+    position: relative;
+    /* display: inline-block; */
+}
+
+.hero-media img {
+    max-width: 100%;
+    height: auto;
+    animation: floatBounce 3s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* Smooth floating bounce */
+@keyframes floatBounce {
+    0% {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(-12px);
+    }
+    50% {
+        transform: translateY(0);
+    }
+    75% {
+        transform: translateY(8px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+
 /* Responsive */
 @media (max-width: 600px) {
   .hamburger {
@@ -309,6 +341,14 @@ section.cls_comman_cls {
         justify-content: center;
     }
 }
+section.hero-section.cls_comman_cls {
+    background-image: url(https://tfpadvisory.bkhomesolutionindore.com/wp-content/uploads/2026/01/bgLeftTop.png);
+    --background-overlay: '';
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+} 
+
 
 
 /* eduction_cards section start */
