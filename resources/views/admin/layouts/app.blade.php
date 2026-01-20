@@ -47,10 +47,59 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.revenue.index') ? 'active' : '' }}"
+                                href="{{ route('admin.revenue.index') }}">
+                                <i class="fas fa-wallet me-2"></i>
+                                Revenue Balances
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.stock.alerts') ? 'active' : '' }}"
+                                href="{{ route('admin.stock.alerts') }}">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Low Stock Alert
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.vouchers.control') ? 'active' : '' }}"
+                                href="{{ route('admin.vouchers.control') }}">
+                                <i class="fas fa-pause-circle me-2"></i>
+                                Voucher Control
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
                                 href="{{ route('admin.users.index') }}">
                                 <i class="fas fa-users me-2"></i>
-                                Users Management
+                                User Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.disputes.index') ? 'active' : '' }}"
+                                href="{{ route('admin.disputes.index') }}">
+                                <i class="fas fa-gavel me-2"></i>
+                                Disputes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.credits.add') ? 'active' : '' }}"
+                                href="{{ route('admin.credits.add') }}">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Add Credit
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.reports.index') ? 'active' : '' }}"
+                                href="{{ route('admin.reports.index') }}">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.contact-us.*') ? 'active' : '' }}"
+                                href="{{ route('admin.contact-us.index') }}">
+                                <i class="fas fa-phone me-2"></i>
+                                Contact-Us
                             </a>
                         </li>
                         <!-- <li class="nav-item">
@@ -109,13 +158,13 @@
                                 Subscribers
                             </a>
                         </li> -->
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.contact-us.*') ? 'active' : '' }}"
                                 href="{{ route('admin.contact-us.index') }}">
                                 <i class="fas fa-phone me-2"></i>
                                 Contact-Us
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}"
                                 href="{{ route('admin.notifications.index') }}">

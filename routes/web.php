@@ -453,6 +453,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class);
     Route::resource('job-categories', App\Http\Controllers\Admin\JobCategoryController::class);
 
+    // New Voucher System UI Routes
+    Route::get('revenue', function() { return view('admin.revenue.index'); })->name('revenue.index');
+    Route::get('stock-alerts', function() { return view('admin.stock.alerts'); })->name('stock.alerts');
+    Route::get('voucher-control', function() { return view('admin.vouchers.control'); })->name('vouchers.control');
+    Route::get('disputes', function() { return view('admin.disputes.index'); })->name('disputes.index');
+    Route::get('add-credit', function() { return view('admin.credits.add'); })->name('credits.add');
+    Route::get('reports', function() { return view('admin.reports.index'); })->name('reports.index');
+
     // Blogs Management
     Route::resource('blogs', App\Http\Controllers\Admin\BlogController::class);
 

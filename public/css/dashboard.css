@@ -138,7 +138,7 @@ body {
 .koa-sidebar-wrapper .sidebar {
     width: 250px;
     min-height: 100vh;
-    background: #23aae259;
+    background: #129ad31f;
     /* background-color: transparent; */
     transition: transform 0.3s ease-in-out;
     position: fixed;
@@ -349,7 +349,7 @@ body {
 }
 .koa-tb-card .card-header,
 .koa-card-header {
-    background-color: #b2e1f5;
+    background-color: #e9f9fb;
     border-bottom: 1px solid #d0d0d0;
     padding: 1rem 1.25rem;
     margin-bottom: 0;
@@ -465,4 +465,14 @@ body {
 /* dasbord icon color  */
 .icon.icon-shape i {
     color: #354873;
+}
+
+.card.card-stats .col-3.text-center {
+    width: 100%;
+    display: flex;
+}
+
+card.card-stats h5.card-title.mb-0.text-black.text-muted {
+    display: flex;
+    white-space: nowrap;
 }

@@ -1,226 +1,96 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Admin Dashboard')
-@section('page-title', 'Admin Dashboard')
+@section('page-title', 'Overall Business Analysis')
 
 @section('content')
-    <div class="dash-card-bg">
-        <div class="row">
-            <!-- Stats Cards -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-r text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-broom"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Total Services</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['total_services'] }}</span>
-                            </div>
+<div class="dash-card-bg">
+    <div class="row">
+        <!-- Stats Cards -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-stats card-stats-r text-white">
+                <div class="card-body">
+                    <div class="row pb-3">
+                        <div class="icon icon-shape dash-icon-bg">
+                            <i class="fas fa-dollar-sign"></i>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-r text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
+                    <div class="row align-items-center">
+                        <div class="col-9">
+                            <h5 class="card-title mb-0 text-black text-muted">Total Sales</h5>
                         </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Active Services</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['active_services'] }}</span>
-                            </div>
+                        <div class="col-3 text-center">
+                            <span class="h2 text-black mb-0 fs-3 font-weight-bold">$24,500</span>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-l text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Featured Services</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['featured_services'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-l text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Inactive Services</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['inactive_services'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Jobs Statistics Row -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-r text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-briefcase"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Total Jobs</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['total_jobs'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-r text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Active Jobs</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['active_jobs'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-l text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Featured Jobs</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['featured_jobs'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card card-stats card-stats-l text-white">
-                    <div class="card-body">
-                        <div class="row pb-3">
-                            <div class="icon icon-shape dash-icon-bg">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                        </div>
-                        <div class="row align-items-center">
-                            <div class="col-9">
-                                <h5 class="card-title mb-0 text-black text-muted ">Inactive Jobs</h5>
-                            </div>
-                            <div class="col-3 text-center">
-                                <span class="h2 text-black mb-0 fs-3 font-weight-bold">{{ $stats['inactive_jobs'] }}</span>
-                            </div>
-                        </div>
+                    <div class="mt-2 text-success small">
+                        <i class="fas fa-arrow-up"></i> 12% Since last month
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Quick Actions</h3>
-                </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-stats card-stats-r text-white">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <div class="d-grid">
-                                <a href="{{ route('admin.services.create') }}" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-plus me-2"></i>
-                                    Add New Service
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="d-grid">
-                                <a href="{{ route('admin.services.index') }}" class="btn btn-outline-primary btn-lg">
-                                    <i class="fas fa-list me-2"></i>
-                                    Manage Services
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="d-grid">
-                                <a href="{{ route('admin.jobs.create') }}" class="btn btn-success btn-lg">
-                                    <i class="fas fa-plus me-2"></i>
-                                    Add New Job
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="d-grid">
-                                <a href="{{ route('admin.jobs.index') }}" class="btn btn-outline-success btn-lg">
-                                    <i class="fas fa-briefcase me-2"></i>
-                                    Manage Jobs
-                                </a>
-                            </div>
+                    <div class="row pb-3">
+                        <div class="icon icon-shape dash-icon-bg">
+                            <i class="fas fa-chart-line"></i>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="d-grid">
-                                <a href="{{ route('services.index') }}" target="_blank"
-                                    class="btn btn-outline-secondary btn-lg">
-                                    <i class="fas fa-external-link-alt me-2"></i>
-                                    View Services Page
-                                </a>
-                            </div>
+                    <div class="row align-items-center">
+                        <div class="col-9">
+                            <h5 class="card-title mb-0 text-black text-muted">Total Revenue</h5>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="d-grid">
-                                <a href="{{ route('jobs.index') }}" target="_blank" class="btn btn-outline-info btn-lg">
-                                    <i class="fas fa-external-link-alt me-2"></i>
-                                    View Jobs Page
-                                </a>
-                            </div>
+                        <div class="col-3 text-center">
+                            <span class="h2 text-black mb-0 fs-3 font-weight-bold">$18,200</span>
                         </div>
+                    </div>
+                    <div class="mt-2 text-success small">
+                        <i class="fas fa-arrow-up"></i> 8.5% Since last week
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-stats card-stats-l text-white">
+                <div class="card-body">
+                    <div class="row pb-3">
+                        <div class="icon icon-shape dash-icon-bg">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-9">
+                            <h5 class="card-title mb-0 text-black text-muted">Total Profit</h5>
+                        </div>
+                        <div class="col-3 text-center">
+                            <span class="h2 text-black mb-0 fs-3 font-weight-bold">$6,300</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-danger small">
+                        <i class="fas fa-arrow-down"></i> 3% Since last month
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card card-stats card-stats-l text-white">
+                <div class="card-body">
+                    <div class="row pb-3">
+                        <div class="icon icon-shape dash-icon-bg">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-9">
+                            <h5 class="card-title mb-0 text-black text-muted">Voucher Trends</h5>
+                        </div>
+                        <div class="col-3 text-center">
+                            <span class="h2 text-black mb-0 fs-3 font-weight-bold">1,250</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-success small">
+                        <i class="fas fa-arrow-up"></i> 15% Increase
                     </div>
                 </div>
             </div>
@@ -228,31 +98,95 @@
     </div>
 
     <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Welcome to KOA Services Admin Panel</h3>
+        <!-- Revenue Comparison Chart Mockup -->
+        <div class="col-lg-8 mb-4">
+            <div class="koa-tb-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-black">Revenue Comparison (Up/Down Analysis)</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Monthly
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Daily</a></li>
+                            <li><a class="dropdown-item" href="#">Weekly</a></li>
+                            <li><a class="dropdown-item" href="#">Monthly</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">
-                        Welcome to your admin dashboard! Here you can manage all aspects of your cleaning services business.
-                    </p>
-                    <h5>Getting Started:</h5>
-                    <ul>
-                        <li><strong>Services Management:</strong> Add, edit, and manage your cleaning services</li>
-                        <li><strong>Jobs Management:</strong> Create and manage job listings for recruitment</li>
-                        <li><strong>Dynamic Content:</strong> All content is dynamically displayed on your website</li>
-                        <li><strong>SEO Friendly:</strong> Each service and job has its own SEO settings</li>
-                        <li><strong>Category Management:</strong> Organize jobs by categories for better navigation</li>
-                    </ul>
-
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Tip:</strong> Make sure to set appropriate sort orders for your services and jobs to control
-                        how they appear on your website. Featured items will be highlighted prominently.
+                    <div style="height: 300px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px;">
+                        <!-- Mocking a bar chart with CSS -->
+                        <div class="text-center">
+                            <div class="bg-primary" style="width: 40px; height: 150px; border-radius: 5px 5px 0 0;"></div>
+                            <span class="small">Jan</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-primary" style="width: 40px; height: 180px; border-radius: 5px 5px 0 0;"></div>
+                            <span class="small">Feb</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-primary" style="width: 40px; height: 120px; border-radius: 5px 5px 0 0;"></div>
+                            <span class="small">Mar</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-primary" style="width: 40px; height: 210px; border-radius: 5px 5px 0 0;"></div>
+                            <span class="small">Apr</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-primary" style="width: 40px; height: 190px; border-radius: 5px 5px 0 0;"></div>
+                            <span class="small">May</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-primary" style="width: 40px; height: 240px; border-radius: 5px 5px 0 0;"></div>
+                            <span class="small">Jun</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div> -->
+
+        <!-- Performance Overview -->
+        <div class="col-lg-4 mb-4">
+            <div class="koa-tb-card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-black">Performance Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small font-weight-bold">Daily Target</span>
+                            <span class="small">75%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small font-weight-bold">Weekly Target</span>
+                            <span class="small">60%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="small font-weight-bold">Monthly Target</span>
+                            <span class="small">85%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm">View Full Analytics</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
