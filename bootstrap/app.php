@@ -11,14 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Register route middleware aliases
         $middleware->alias([
-            'account_type' => \App\Http\Middleware\EnsureAccountType::class,
+            'account_type' => \App\Http\Middleware\AccountTypeMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
-
-// Load Stripe PHP library manually since it's not properly registered with Composer
-require_once __DIR__ . '/stripe.php';

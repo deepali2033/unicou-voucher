@@ -1,262 +1,59 @@
-# CleanyCo - Professional Cleaning Services Laravel Application
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-This Laravel application is a complete conversion of the WordPress cleaning company website, maintaining the exact same design and UI/UX while leveraging Laravel's powerful framework.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## Features
+## About Laravel
 
-- **Complete WordPress to Laravel Conversion**: Maintains identical design and functionality
-- **Responsive Design**: Mobile-first approach with breakpoints matching the original
-- **SEO Optimized**: Meta tags, structured data, and semantic HTML
-- **Contact Forms**: Functional contact and quote request forms
-- **Service Pages**: Comprehensive service descriptions and pricing
-- **Blog System**: Ready for content management
-- **Multi-location Support**: Service area pages for different cities
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-## Installation
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-### Prerequisites
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-- PHP 8.1 or higher
-- Composer
-- Node.js and NPM
-- MySQL or PostgreSQL database
+## Learning Laravel
 
-### Setup Instructions
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
 
-1. **Clone or navigate to the project directory:**
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-    ```bash
-    cd cleaning-company-laravel
-    ```
+## Laravel Sponsors
 
-2. **Install PHP dependencies:**
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-    ```bash
-    composer install
-    ```
+### Premium Partners
 
-3. **Install Node.js dependencies:**
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
 
-    ```bash
-    npm install
-    ```
+## Contributing
 
-4. **Create environment file:**
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-    ```bash
-    copy .env.example .env
-    ```
+## Code of Conduct
 
-5. **Generate application key:**
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-    ```bash
-    php artisan key:generate
-    ```
+## Security Vulnerabilities
 
-6. **Configure your database in `.env` file:**
-
-    ```env
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=cleaning_company
-    DB_USERNAME=your_username
-    DB_PASSWORD=your_password
-    ```
-
-7. **Run database migrations (optional - for future blog/contact functionality):**
-
-    ```bash
-    php artisan migrate
-    ```
-
-8. **Build assets:**
-
-    ```bash
-    npm run build
-    ```
-
-9. **Start the development server:**
-    ```bash
-    php artisan serve
-    ```
-
-The application will be available at `http://localhost:8000`
-
-## Project Structure
-
-### Controllers
-
-- **HomeController**: Handles home page and static pages
-- **ServiceController**: Manages all service-related pages and service areas
-- **AboutController**: About us, FAQ, privacy policy, terms of service
-- **BlogController**: Blog functionality with categories and tags
-- **ContactController**: Contact form processing
-- **QuoteController**: Quote request form processing
-- **PricingController**: Pricing information display
-- **CareerController**: Job listings and career pages
-
-### Views
-
-- **layouts/app.blade.php**: Main layout template with header, navigation, and footer
-- **home/**: Home page templates
-- **services/**: Service pages templates
-- **contact/**: Contact form template
-- **about/**: About us related pages
-- **blog/**: Blog templates
-- **pricing/**: Pricing page templates
-- **careers/**: Career pages templates
-
-### Assets
-
-- **public/css/**: Stylesheets including Elementor frontend CSS and custom styles
-- **public/js/**: JavaScript files with VAMTAM theme functionality converted to vanilla JS
-- **public/fonts/**: Custom fonts (Parkinsans, Outfit)
-- **public/images/**: Image assets
-
-## Routes
-
-The application includes comprehensive routes for all pages:
-
-- **Home**: `/`
-- **Services**: `/services/*`
-- **Service Areas**: `/service-areas/*`
-- **About**: `/about-us/*`
-- **Blog**: `/blog/*` (with date-based URLs)
-- **Contact**: `/contact-us`
-- **Quote**: `/free-quote`
-- **Pricing**: `/pricing`
-- **Careers**: `/careers/*`
-
-## Design & Styling
-
-### CSS Variables
-
-The application uses CSS custom properties matching the original WordPress theme:
-
-```css
-:root {
-    --e-global-color-vamtam_accent_1: #23aae2; /* Primary yellow */
-    --e-global-color-vamtam_accent_2: #3ca200; /* Primary green */
-    --e-global-color-vamtam_accent_3: #e8f5d3; /* Light green */
-    --e-global-color-vamtam_accent_4: #f4f6f0; /* Light background */
-    --e-global-color-vamtam_accent_5: #ffffff; /* White */
-    --e-global-color-vamtam_accent_6: #000000; /* Black */
-    /* ... */
-}
-```
-
-### Typography
-
-- **Primary Font**: Outfit (300, 400, 500, 600, 700)
-- **Heading Font**: Parkinsans (400, 500)
-- **Responsive typography** with breakpoints at 1024px and 767px
-
-### JavaScript Functionality
-
-- **Smooth scrolling** for anchor links
-- **Sticky header** with scroll direction detection
-- **Mobile menu** toggle functionality
-- **Form validation** and submission handling
-- **Animation on scroll** using Intersection Observer API
-- **Responsive video** resizing
-
-## Customization
-
-### Adding New Pages
-
-1. Create a new controller method
-2. Add the route in `routes/web.php`
-3. Create the corresponding Blade template
-4. Update navigation in `layouts/app.blade.php`
-
-### Styling Changes
-
-- Modify CSS custom properties in `public/css/app.css`
-- Add page-specific styles using `@push('styles')` in templates
-- Use the existing utility classes for consistent spacing
-
-### Content Updates
-
-- Update contact information in `layouts/app.blade.php`
-- Modify service descriptions in controller arrays
-- Update meta tags and SEO information in templates
-
-## SEO Features
-
-- **Meta tags**: Title, description, keywords for each page
-- **Open Graph tags**: Social media sharing optimization
-- **Structured data**: JSON-LD schema for local business
-- **Semantic HTML**: Proper heading hierarchy and landmarks
-- **Mobile-friendly**: Responsive design with proper viewport settings
-
-## Performance Optimizations
-
-- **CSS minification**: Elementor frontend CSS is minified
-- **Image optimization**: Placeholder for responsive images
-- **Lazy loading**: Ready for implementation
-- **Caching**: Laravel's built-in caching ready to configure
-
-## Testing
-
-### Manual Testing Checklist
-
-1. **Navigation**: Test all menu links and mobile menu
-2. **Forms**: Submit contact and quote forms with validation
-3. **Responsive Design**: Test on desktop, tablet, and mobile
-4. **Cross-browser**: Test in Chrome, Firefox, Safari, Edge
-5. **Performance**: Check page load times and animations
-
-### Automated Testing
-
-Run Laravel's built-in tests:
-
-```bash
-php artisan test
-```
-
-## Deployment
-
-### Production Checklist
-
-1. Set `APP_ENV=production` in `.env`
-2. Set `APP_DEBUG=false` in `.env`
-3. Configure proper database credentials
-4. Set up mail configuration for forms
-5. Configure web server (Apache/Nginx)
-6. Set up SSL certificate
-7. Configure caching (`php artisan config:cache`)
-
-### Environment Variables
-
-Key environment variables to configure:
-
-```env
-APP_NAME="CleanyCo"
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://yourdomain.com
-
-MAIL_MAILER=smtp
-MAIL_HOST=your-smtp-host
-MAIL_PORT=587
-MAIL_USERNAME=your-email
-MAIL_PASSWORD=your-password
-MAIL_ENCRYPTION=tls
-```
-
-## Support
-
-For questions or issues with this Laravel conversion:
-
-1. Check the Laravel documentation: https://laravel.com/docs
-2. Review the original WordPress theme structure
-3. Test individual components in isolation
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
 ## License
 
-This project maintains the same licensing as the original WordPress theme while leveraging Laravel's open-source framework.
-
----
-
-**Note**: This Laravel application maintains 100% design fidelity with the original WordPress site while providing a more maintainable and scalable codebase.
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

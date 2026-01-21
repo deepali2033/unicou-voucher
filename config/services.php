@@ -15,11 +15,11 @@ return [
     */
 
     'postmark' => [
-        'token' => env('POSTMARK_TOKEN'),
+        'key' => env('POSTMARK_API_KEY'),
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        'key' => env('RESEND_API_KEY'),
     ],
 
     'ses' => [
@@ -33,12 +33,6 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
-    ],
-
-    'stripe' => [
-        'public' => env('STRIPE_KEY'),
-        'secret' => env('STRIPE_SECRET'),
-        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
 ];
