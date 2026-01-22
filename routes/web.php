@@ -11,12 +11,23 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::get('/test', [AuthController::class, 'test']);
+
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+// Additional Registration Forms
+Route::middleware('auth')->group(function () {
+    Route::get('/register/agent-details', [AuthController::class, 'showAgentForm'])->name('auth.forms.B2BResellerAgent');
+    Route::post('/register/agent-details', [AuthController::class, 'storeAgentDetails'])->name('auth.form.agent.post');
+
+    Route::get('/register/student-details', [AuthController::class, 'showStudentForm'])->name('auth.form.student');
+    Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
+});
 // Route::get('/index', [Agentcontroller::class, 'getLocationData']);
 
 // Placeholder Admin Routes to prevent Layout Errors
@@ -26,7 +37,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::get('/vouchers', function () {
         return "Voucher Control";
     })->name('vouchers.control');
-    
+
     Route::get('/users', [AdminController::class, 'users'])->name('users.index');
     Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');

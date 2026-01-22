@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'shuftipro' => [
+        'client_id' => env('SHUFTI_CLIENT_ID'),
+        'secret_key' => env('SHUFTI_SECRET_KEY'),
+    ],
+
 ];

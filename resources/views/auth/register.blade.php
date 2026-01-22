@@ -55,20 +55,17 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 @endif
             </div>
 
-            <form id="registerForm" method="POST" action="{{ route('auth.register') }}">
+            <form id="registerForm" method="POST" action="{{ route('register.post') }}">
                 @csrf
                 <input type="hidden" name="account_type" id="accountType" value="{{ $defaultType }}">
                 <input type="hidden" id="regifeetaken" name="regifeetaken" value="">
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-6 field">
-                        <label for="firstName">First Name</label>
+                        <label for="firstName">Full Name</label>
                         <input name="first_name" type="text" id="firstName" placeholder="First Name" required>
                     </div>
-                    <div class="col-md-6 field">
-                        <label for="lastName">Last Name</label>
-                        <input name="last_name" type="text" id="lastName" placeholder="Last Name" required>
-                    </div>
+
                 </div>
 
                 <div class="field mb-3">
@@ -151,6 +148,20 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 
             document.getElementById('full_phone').value = iti.getNumber();
             document.getElementById('country_code').value = iti.getSelectedCountryData().iso2.toUpperCase();
+
+            const accountType = document.getElementById('accountType').value;
+
+            // Skip Fee Swal for Freelancers
+            if (accountType === 'freelancer') {
+                document.getElementById('regifeetaken').value = 'no';
+                const btn = document.getElementById('submitBtns');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Processing...';
+                }
+                document.getElementById('realSubmitBtn').click();
+                return;
+            }
 
             Swal.fire({
                 title: "Registration Fee",

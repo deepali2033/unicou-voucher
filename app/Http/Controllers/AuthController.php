@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\AgentDetail;
+use App\Models\StudentDetail;
+use App\Helpers\LocationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -10,55 +13,6 @@ use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
-
-    private function storeLocationInSession(Request $request)
-    {
-        try {
-            $ip = $request->ip();
-            // If local, use a dummy IP for testing (e.g., India) or just let it fall back
-            if ($ip == '127.0.0.1' || $ip == '::1') {
-                $ip = ''; // Let ipapi.co detect the server/public IP if possible, or fail
-            }
-
-            $response = Http::timeout(5)->get("https://ipapi.co/{$ip}/json/");
-            if ($response->successful()) {
-                $data = $response->json();
-
-                if (isset($data['error'])) {
-                    throw new \Exception($data['reason'] ?? 'IP API Error');
-                }
-
-                $countryCode = $data['country_code'] ?? 'US';
-                $flagUrl = "https://flagcdn.com/w40/" . strtolower($countryCode) . ".png";
-
-                session([
-                    'user_country_code' => $countryCode,
-                    'user_country_name' => $data['country_name'] ?? 'United States',
-                    'user_timezone'     => $data['timezone'] ?? 'UTC',
-                    'user_currency'     => $data['currency'] ?? 'USD',
-                    'user_city'         => $data['city'] ?? 'Unknown',
-                    'user_flag'         => $flagUrl,
-                ]);
-
-                // Map symbols
-                $symbols = ['PKR' => 'Rs.', 'INR' => '₹', 'BDT' => '৳', 'USD' => '$', 'AE' => 'DH'];
-                if (isset($symbols[$data['currency'] ?? ''])) {
-                    session(['user_currency_symbol' => $symbols[$data['currency']]]);
-                }
-
-                session()->forget('api_error');
-            }
-        } catch (\Exception $e) {
-            session(['api_error' => 'Location detection failed. Defaulting to US.']);
-            session([
-                'user_country_code' => 'US',
-                'user_country_name' => 'United States',
-                'user_timezone'     => 'UTC',
-                'user_currency'     => 'USD',
-                'user_flag'         => 'https://flagcdn.com/w40/us.png',
-            ]);
-        }
-    }
 
     /**
      * Show login form
@@ -71,8 +25,11 @@ class AuthController extends Controller
     /**
      * Show registration form
      */
-    public function showRegister()
+    public function showRegister($type = null)
     {
+        if ($type) {
+            request()->merge(['type' => $type]);
+        }
         return view('auth.register');
     }
 
@@ -83,52 +40,32 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'account_type' => ['required', 'in:user,recruiter,freelancer,manager,reseller_agent,support_team,student,admin'],
-            'first_name'   => ['nullable', 'string', 'max:255'],
-            'last_name'    => ['nullable', 'string', 'max:255'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'full_phone'   => ['required', 'string', 'max:20'],
+            'first_name'   => ['required', 'string', 'max:255'],
+            'phone'        => ['required', 'string', 'max:20'],
+            'country_code' => ['required', 'string', 'max:5'],
             'email'        => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password'     => ['required', 'confirmed', 'min:8'],
         ]);
 
         /*
         |--------------------------------------------------------------------------
-        | COUNTRY DETECTION (by phone prefix)
-        |--------------------------------------------------------------------------
-        */
-        $countryCode = '+91';
-        $countryIso  = 'IN';
-
-        if (str_starts_with($validated['full_phone'], '+1')) {
-            $countryCode = '+1';
-            $countryIso  = 'US';
-        } elseif (str_starts_with($validated['full_phone'], '+971')) {
-            $countryCode = '+971';
-            $countryIso  = 'AE';
-        } elseif (str_starts_with($validated['full_phone'], '+91')) {
-            $countryCode = '+91';
-            $countryIso  = 'IN';
-        }
-
-        /*
-        |--------------------------------------------------------------------------
         | Create User
         |--------------------------------------------------------------------------
+        | We generate the user_id based on account_type and country_iso
         */
         $user = User::create([
-            'first_name'   => $validated['first_name'] ?? null,
-            'last_name'    => $validated['last_name'] ?? null,
-            'company_name' => $validated['company_name'] ?? null,
-            'phone'        => $validated['full_phone'],
-            'country_code' => $countryCode,
-            'country_iso'  => $countryIso,
+            'user_id'      => User::generateNextUserId($validated['account_type'], $validated['country_code']),
+            'name'         => $validated['first_name'],
+            'first_name'   => $validated['first_name'],
+            'phone'        => $validated['phone'],
+            'country_iso'  => $validated['country_code'],
             'account_type' => $validated['account_type'],
             'email'        => $validated['email'],
             'password'     => Hash::make($validated['password']),
         ]);
 
         Auth::login($user);
-        $this->storeLocationInSession($request);
+        LocationHelper::storeLocationInSession($request);
 
         return $this->redirectByRole($user);
     }
@@ -154,9 +91,13 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        $this->storeLocationInSession($request);
+        LocationHelper::storeLocationInSession($request);
 
-
+        // Auto-verify email (testing only)
+        if (!auth()->user()->hasVerifiedEmail()) {
+            auth()->user()->email_verified_at = now();
+            auth()->user()->save();
+        }
 
         return $this->redirectByRole(auth()->user());
     }
@@ -174,13 +115,232 @@ class AuthController extends Controller
     }
 
     /**
+     * Show Agent details form
+     */
+    public function showAgentForm()
+    {
+        return view('auth.forms.B2BResellerAgent');
+    }
+
+    /**
+     * Store Agent details
+     */
+    public function storeAgentDetails(Request $request)
+    {
+        $validated = $request->validate([
+            'agentType'           => 'required|string',
+            'business_name'       => 'required|string|max:255',
+            'business_type'       => 'required|string',
+            'registration_number' => 'required|string',
+            'business_contact'    => 'required|string',
+            'business_email'      => 'required|email',
+            'address'             => 'required|string',
+            'city'                => 'required|string',
+            'state'               => 'required|string',
+            'country'             => 'required|string',
+            'post_code'           => 'required|string',
+            'website'             => 'nullable|url',
+            'social_media'        => 'nullable|url',
+            'representative_name' => 'required|string',
+            'dob'                 => 'required|date',
+            'id_type'             => 'required|string',
+            'id_number'           => 'required|string',
+            'designation'         => 'required|string',
+            'whatsapp_number'     => 'required|string',
+            'bank_name'           => 'required|string',
+            'bank_country'        => 'required|string',
+            'account_number'      => 'required|string',
+            'registration_doc'    => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_doc'              => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'business_logo'       => 'nullable|image|max:2048',
+        ]);
+
+        $data = $validated;
+        $data['user_id'] = Auth::id();
+        $data['agent_type'] = $validated['agentType'];
+        unset($data['agentType']);
+
+        // Handle File Uploads
+        if ($request->hasFile('registration_doc')) {
+            $data['registration_doc'] = $request->file('registration_doc')->store('agent_docs', 'public');
+        }
+        if ($request->hasFile('id_doc')) {
+            $data['id_doc'] = $request->file('id_doc')->store('agent_docs', 'public');
+        }
+        if ($request->hasFile('business_logo')) {
+            $data['business_logo'] = $request->file('business_logo')->store('agent_logos', 'public');
+        }
+
+        // Shufti Pro Verification
+        $shuftiResponse = $this->verifyWithShufti(
+            Auth::user()->email,
+            Auth::user()->country_iso,
+            $validated['representative_name'],
+            $validated['dob'],
+            $validated['id_number'],
+            $data['id_doc']
+        );
+
+        // Store Shufti reference/status if needed
+        $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
+
+        AgentDetail::updateOrCreate(
+            ['user_id' => Auth::id()],
+            $data
+        );
+
+        return redirect()->route('agent.dashboard')->with('shufti_response', $shuftiResponse);
+    }
+
+    /**
+     * Store Student details
+     */
+    public function storeStudentDetails(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name'           => 'required|string|max:255',
+            'dob'                 => 'required|date',
+            'id_type'             => 'required|string',
+            'id_number'           => 'required|string',
+            'primary_contact'     => 'required|string',
+            'email'               => 'required|email',
+            'whatsapp_number'     => 'required|string',
+            'address'             => 'required|string',
+            'city'                => 'required|string',
+            'state'               => 'required|string',
+            'country'             => 'required|string',
+            'post_code'           => 'required|string',
+            'id_doc'              => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'exam_purpose'        => 'required|string',
+            'highest_education'   => 'required|string',
+            'passing_year'        => 'required|numeric',
+            'preferred_countries' => 'nullable|array',
+            'bank_name'           => 'required|string',
+            'bank_country'        => 'required|string',
+            'account_number'      => 'required|string',
+            'id_doc_final'        => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $data = $validated;
+        $data['user_id'] = Auth::id();
+
+        if (isset($data['preferred_countries'])) {
+            $data['preferred_countries'] = json_encode($data['preferred_countries']);
+        }
+
+        // Handle File Uploads
+        if ($request->hasFile('id_doc')) {
+            $data['id_doc'] = $request->file('id_doc')->store('student_docs', 'public');
+        }
+        if ($request->hasFile('id_doc_final')) {
+            // Overwrite or store as final
+            $data['id_doc_final'] = $request->file('id_doc_final')->store('student_docs', 'public');
+        }
+
+        // Shufti Pro Verification
+        $shuftiResponse = $this->verifyWithShufti(
+            Auth::user()->email,
+            Auth::user()->country_iso,
+            $validated['full_name'],
+            $validated['dob'],
+            $validated['id_number'],
+            $data['id_doc']
+        );
+
+        $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
+
+        StudentDetail::updateOrCreate(
+            ['user_id' => Auth::id()],
+            $data
+        );
+
+        return redirect()->route('student.dashboard')->with('shufti_response', $shuftiResponse);
+    }
+
+    /**
+     * Private helper for Shufti Pro Verification
+     */
+    private function verifyWithShufti($email, $country, $name, $dob, $idNumber, $idDocPath)
+    {
+        try {
+            $filePath = storage_path('app/public/' . $idDocPath);
+            if (!file_exists($filePath)) {
+                return ['error' => 'ID document not found'];
+            }
+
+            $idDocBase64 = base64_encode(file_get_contents($filePath));
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($filePath);
+
+            $response = Http::withBasicAuth(
+                config('services.shuftipro.client_id'),
+                config('services.shuftipro.secret_key')
+            )->post('https://api.shuftipro.com/', [
+                'reference'         => 'UC_' . Auth::id() . '_' . time(),
+                'country'           => $country,
+                'email'             => $email,
+                'verification_mode' => 'any',
+                'document'          => [
+                    'name'            => ['full_name' => $name],
+                    'dob'             => $dob,
+                    'document_number' => $idNumber,
+                    'proof'           => 'data:' . $mimeType . ';base64,' . $idDocBase64,
+                    'supported_types' => ['id_card', 'passport', 'driving_license'],
+                ],
+            ]);
+
+            return $response->json();
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    public function test()
+    {
+        $response = Http::withBasicAuth(
+
+            config('services.shuftipro.client_id'),
+            config('services.shuftipro.secret_key')
+        )->post('https://api.shuftipro.com/', [
+            'reference' => 'test_' . uniqid(),
+            'country'   => 'IN',
+            'email'     => 'test@example.com',
+            'language'  => 'EN',
+            'document'  => [
+                'proof' => 'id_card'
+            ],
+        ]);
+
+        return response()->json($response->json());
+        // ya debugging ke liye:
+        // dd($response->json());
+    }
+
+    /**
      * Role-based redirect
      */
     private function redirectByRole(User $user)
     {
+
+
+        if ($user->account_type === 'reseller_agent') {
+
+
+            // if (!$user->agentDetail) {
+
+            //     return redirect()->route('auth.forms.B2BResellerAgent');
+            // }
+            return redirect()->route('agent.dashboard');
+        }
+
+        if ($user->account_type === 'student') {
+            // if (!$user->studentDetail) {
+            //     return redirect()->route('auth.form.student');
+            // }
+            return redirect()->route('student.dashboard');
+        }
+
         return match ($user->account_type) {
-            'reseller_agent' => redirect()->route('agent.dashboard'),
-            'student'        => redirect()->route('student.dashboard'),
             'admin'          => redirect()->route('admin.dashboard'),
             default          => redirect('/'),
         };

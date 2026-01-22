@@ -78,6 +78,90 @@
                 </div>
             </div>
 
+            @if($user->account_type === 'reseller_agent' && $user->agentDetail)
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Agent Business Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Business Name</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->agentDetail->business_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Business Type</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->agentDetail->business_type }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Registration Number</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->agentDetail->registration_number }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Contact / Email</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->agentDetail->business_contact }} / {{ $user->agentDetail->business_email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Address</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->agentDetail->address }}, {{ $user->agentDetail->city }}, {{ $user->agentDetail->state }}, {{ $user->agentDetail->country }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Representative</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->agentDetail->representative_name }} ({{ $user->agentDetail->designation }})</div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3">Documents</h6>
+                    <div class="d-flex gap-2">
+                        @if($user->agentDetail->registration_doc)
+                            <a href="{{ asset('storage/' . $user->agentDetail->registration_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">Business Reg Doc</a>
+                        @endif
+                        @if($user->agentDetail->id_doc)
+                            <a href="{{ asset('storage/' . $user->agentDetail->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">Representative ID</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($user->account_type === 'student' && $user->studentDetail)
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Student Admission Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Full Name</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->studentDetail->full_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">DOB / ID</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->studentDetail->dob }} ({{ $user->studentDetail->id_type }}: {{ $user->studentDetail->id_number }})</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Contact / WhatsApp</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->studentDetail->primary_contact }} / {{ $user->studentDetail->whatsapp_number }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Education</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->studentDetail->highest_education }} ({{ $user->studentDetail->passing_year }})</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Preferred Countries</div>
+                        <div class="col-sm-8 fw-bold">
+                            @php
+                                $countries = json_decode($user->studentDetail->preferred_countries, true);
+                            @endphp
+                            {{ is_array($countries) ? implode(', ', $countries) : $user->studentDetail->preferred_countries }}
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3">Documents</h6>
+                    @if($user->studentDetail->id_doc)
+                        <a href="{{ asset('storage/' . $user->studentDetail->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">ID Document</a>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold text-danger">Danger Zone</h5>

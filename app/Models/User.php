@@ -306,6 +306,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $prefix . $newNumber;
     }
 
+    public function agentDetail()
+    {
+        return $this->hasOne(AgentDetail::class);
+    }
+
+    public function studentDetail()
+    {
+        return $this->hasOne(StudentDetail::class);
+    }
+
     /**
      * Get the plans booked by this user.
      *

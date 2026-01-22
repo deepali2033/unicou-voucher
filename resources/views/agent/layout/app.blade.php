@@ -140,10 +140,10 @@
                         </div>
                         @endif
 
-                        <!-- <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
+                        <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
                             <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 30px; border-radius: 2px; border: 1px solid #eee;">
                             <span class="d-none d-md-inline text-muted small fw-bold">{{ strtoupper($countryCode) }}</span>
-                        </div> -->
+                        </div>
 
 
                         <div class="user-dropdown d-flex align-items-center gap-2">
