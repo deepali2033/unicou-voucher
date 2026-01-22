@@ -126,9 +126,11 @@
                             <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
                         </div>
 
-                        <div class="country-flag">
-                            <img src="https://flagcdn.com/w40/pk.png" width="25" alt="Pakistan Flag" style="border-radius: 2px;">
+
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="https://flagcdn.com/w40/{{ strtolower(session('user_country_code')) }}.png">
                         </div>
+
 
                         <div class="user-dropdown d-flex align-items-center gap-2">
                             <img src="{{ asset('images/user.png') }}" class="user-avatar rounded-circle" width="40" height="40">

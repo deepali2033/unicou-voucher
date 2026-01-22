@@ -9,9 +9,12 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <p class="mb-1 opacity-75">Available Store Credit</p>
-                        <h2 class="mb-0 fw-bold">PKR 0</h2>
+                        <h2 class="mb-0 fw-bold">{{ session('user_currency', 'PKR') }} 0</h2>
                     </div>
-                    <button class="btn btn-light px-4 py-2" style="border-radius: 10px; color: #764ba2; font-weight: 600;">Deposit</button>
+                    <a href="{{route('agent.deposit.store.credit')}}" class="btn btn-light px-4 py-2"
+                        style="border-radius: 10px; color: #764ba2; font-weight: 600;">
+                        Deposit
+                    </a>
                 </div>
             </div>
         </div>
@@ -58,7 +61,7 @@
     <div class="row">
         <div class="col-12">
             <h5 class="fw-bold">Your Progress ( Q1 )</h5>
-            <p class="text-muted">Date Today : {{ now()->format('l d F Y') }}</p>
+            <p class="text-muted">Date Today : {{ $currentTime }}</p>
         </div>
     </div>
 </div>
