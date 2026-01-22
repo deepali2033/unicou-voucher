@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\agent\Agentcontroller;
 use App\Http\Controllers\student\StudentController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home.home');
 })->name('home');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -16,16 +17,19 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
-Route::get('/getLocationData', [Agentcontroller::class, 'getLocationData']);
+// Route::get('/index', [Agentcontroller::class, 'getLocationData']);
 
 // Placeholder Admin Routes to prevent Layout Errors
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'])->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
     Route::get('/vouchers', function () {
         return "Voucher Control";
     })->name('vouchers.control');
-    Route::get('/users', function () {
-        return "User Management";
-    })->name('users.index');
+    
+    Route::get('/users', [AdminController::class, 'users'])->name('users.index');
+    Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
     Route::get('/disputes', function () {
         return "Disputes";
     })->name('disputes.index');

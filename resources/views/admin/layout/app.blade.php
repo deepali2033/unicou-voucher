@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Agent Dashboard - UniCou</title>
+    <title>Admin Dashboard - UniCou</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -36,48 +36,23 @@
 
                     <ul class="nav flex-column gap-2">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('agent.dashboard') ? 'active' : '' }}" href="{{ route('agent.dashboard') }}">
+                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
                                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('agent/vouchers*') ? 'active' : '' }}" href="{{ route('agent.vouchers') }}">
-                                <i class="fas fa-ticket-alt me-2"></i> Vouchers
+                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                <i class="fas fa-users me-2"></i> User Management
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->is('agent/bank-link*') ? 'active' : '' }}" href="{{ route('agent.banks') }}">
-                                <i class="fas fa-university me-2"></i> Linked Banks
+                            <a class="nav-link {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}" href="{{ route('admin.vouchers.control') }}">
+                                <i class="fas fa-ticket-alt me-2"></i> Vouchers Control
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('agent.orders.*') ? 'active' : '' }}" href="{{ route('agent.orders.history') }}">
-                                <i class="fas fa-shopping-cart me-2"></i> My Orders
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-chart-pie me-2"></i> Quarterly Points
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-calendar-alt me-2"></i> Yearly Points
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-users me-2"></i> Referral Points
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-history me-2"></i> Store Credit History
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-headset me-2"></i> Customer Support Center
+                            <a class="nav-link {{ request()->routeIs('admin.disputes.*') ? 'active' : '' }}" href="{{ route('admin.disputes.index') }}">
+                                <i class="fas fa-gavel me-2"></i> Disputes
                             </a>
                         </li>
                     </ul>
@@ -118,39 +93,15 @@
 
                 <header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
                     <div class="header-left">
-                        <!-- Space for page title or breadcrumbs if needed -->
+                        <h4 class="mb-0">Admin Panel</h4>
                     </div>
 
                     <div class="header-right d-flex align-items-center gap-3">
-                        <div class="notification-bell">
-                            <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
-                        </div>
-
-                        @php
-                        $countryCode = session('user_country_code', 'US');
-                        $countryName = session('user_country_name', 'United States');
-                        $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
-
-
-                        @endphp
-
-                        @if(session('api_error'))
-                        <div class="alert alert-warning p-1 px-2 m-0 small" style="font-size: 0.7rem;">
-                            <i class="fas fa-exclamation-triangle"></i> {{ session('api_error') }}
-                        </div>
-                        @endif
-
-                        <!-- <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
-                            <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 30px; border-radius: 2px; border: 1px solid #eee;">
-                            <span class="d-none d-md-inline text-muted small fw-bold">{{ strtoupper($countryCode) }}</span>
-                        </div> -->
-
-
                         <div class="user-dropdown d-flex align-items-center gap-2">
                             <img src="{{ asset('images/user.png') }}" class="user-avatar rounded-circle" width="40" height="40">
                             <div class="user-info d-flex flex-column">
                                 <span class="user-name fw-bold" style="font-size: 0.9rem; line-height: 1;">{{ Auth::user()->name }}</span>
-                                <small class="user-role">{{ Auth::user()->user_id }}</small>
+                                <small class="user-role">Administrator</small>
                             </div>
 
                             <div class="dropdown">
@@ -170,9 +121,14 @@
                     </div>
                 </header>
 
-                @yield('content')
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
 
-            </main>
+                @yield('content')
 
             </main>
         </div>

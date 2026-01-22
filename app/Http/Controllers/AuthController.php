@@ -15,43 +15,65 @@ class AuthController extends Controller
     {
         try {
             $ip = $request->ip();
+            // If local, use a dummy IP for testing (e.g., India) or just let it fall back
             if ($ip == '127.0.0.1' || $ip == '::1') {
-                $ip = '103.255.4.42'; // Pakistan IP for local testing
+                $ip = ''; // Let ipapi.co detect the server/public IP if possible, or fail
             }
 
-            // Using ipapi.co for all-in-one detection
-            $response = Http::get("https://ipapi.co/{$ip}/json/");
-            dd($response);
+            $response = Http::timeout(5)->get("https://ipapi.co/{$ip}/json/");
             if ($response->successful()) {
                 $data = $response->json();
 
-                // session([
-                //     'user_country_code'   => $data['country_code'] ?? 'PK',
-                //     'user_timezone'       => $data['timezone'] ?? 'Asia/Karachi',
-                //     'user_currency'       => $data['currency'] ?? 'PKR',
-                //     'user_currency_symbol' => $data['currency'] ?? 'PKR',
-                //     'user_flag_url'       => "https://flagcdn.com/w320/" . strtolower($data['country_code'] ?? 'pk') . ".png",
-                // ]);
+                if (isset($data['error'])) {
+                    throw new \Exception($data['reason'] ?? 'IP API Error');
+                }
+
+                $countryCode = $data['country_code'] ?? 'US';
+                $flagUrl = "https://flagcdn.com/w40/" . strtolower($countryCode) . ".png";
+
+                session([
+                    'user_country_code' => $countryCode,
+                    'user_country_name' => $data['country_name'] ?? 'United States',
+                    'user_timezone'     => $data['timezone'] ?? 'UTC',
+                    'user_currency'     => $data['currency'] ?? 'USD',
+                    'user_city'         => $data['city'] ?? 'Unknown',
+                    'user_flag'         => $flagUrl,
+                ]);
 
                 // Map symbols
-                $symbols = ['PKR' => 'Rs.', 'INR' => '₹', 'BDT' => '৳', 'USD' => '$', 'AED' => 'DH'];
-                if (isset($symbols[session('user_currency')])) {
-                    session(['user_currency_symbol' => $symbols[session('user_currency')]]);
+                $symbols = ['PKR' => 'Rs.', 'INR' => '₹', 'BDT' => '৳', 'USD' => '$', 'AE' => 'DH'];
+                if (isset($symbols[$data['currency'] ?? ''])) {
+                    session(['user_currency_symbol' => $symbols[$data['currency']]]);
                 }
+
+                session()->forget('api_error');
             }
         } catch (\Exception $e) {
+            session(['api_error' => 'Location detection failed. Defaulting to US.']);
+            session([
+                'user_country_code' => 'US',
+                'user_country_name' => 'United States',
+                'user_timezone'     => 'UTC',
+                'user_currency'     => 'USD',
+                'user_flag'         => 'https://flagcdn.com/w40/us.png',
+            ]);
         }
+    }
 
-        // Fallback
-        // if (!session()->has('user_country_code')) {
-        //     session([
-        //         'user_country_code'   => 'PK',
-        //         'user_timezone'       => 'Asia/Karachi',
-        //         'user_currency'       => 'PKR',
-        //         'user_currency_symbol' => 'Rs.',
-        //         'user_flag_url'       => 'https://flagcdn.com/w320/pk.png',
-        //     ]);
-        // }
+    /**
+     * Show login form
+     */
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    /**
+     * Show registration form
+     */
+    public function showRegister()
+    {
+        return view('auth.register');
     }
 
     /**
@@ -134,11 +156,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $this->storeLocationInSession($request);
 
-        // Auto-verify email (testing only)
-        if (!auth()->user()->hasVerifiedEmail()) {
-            auth()->user()->email_verified_at = now();
-            auth()->user()->save();
-        }
+
 
         return $this->redirectByRole(auth()->user());
     }

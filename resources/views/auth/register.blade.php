@@ -1,107 +1,183 @@
 @extends('layouts.auth')
 
-@section('title', 'Register')
+@section('title', 'Register - UniCou')
 
 @section('content')
-<div class="auth-wrapper">
-    <!-- LEFT IMAGE -->
-    <div class="auth-image">
-        <img src="https://media.istockphoto.com/id/2205696704/photo/online-registration-form-identity-verification-personal-information-verification-concept.jpg?s=612x612&w=0&k=20&c=2X_45rxke9VrEez-D7JPchhSQwM_Od2jR_vyS1O5MTY=" alt="Register Illustration">
+@php
+$requestedType = request()->get('type');
+$lockRequested = filter_var(request()->get('locked'), FILTER_VALIDATE_BOOLEAN);
+$allowedTypes = ['manager', 'reseller_agent', 'support_team', 'student'];
+
+if ($requestedType === 'freelancer' && $lockRequested) {
+$allowedTypes[] = 'freelancer';
+}
+$defaultType = in_array($requestedType, $allowedTypes, true) ? $requestedType : 'student';
+$accountLocked = $lockRequested && $defaultType === $requestedType;
+@endphp
+
+<section class="register_page_sec">
+    <div class="auth-wrapper">
+        <div class="auth-image">
+            <img src="https://media.istockphoto.com/id/2205696704/photo/online-registration-form-identity-verification-personal-information-verification-concept.jpg?s=612x612&w=0&k=20&c=2X_45rxke9VrEez-D7JPchhSQwM_Od2jR_vyS1O5MTY=" alt="Register Illustration">
+        </div>
+        <div class="auth-form">
+            <div class="text-center mb-4">
+                <h2 class="title" id="formTitle">Create Account</h2>
+                <p class="subtitle">Join UniCou and start managing your vouchers</p>
+            </div>
+
+            @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <div class="type-selector-wrapper mb-4 text-center">
+                @if(!$accountLocked)
+                <div class="d-flex flex-wrap justify-content-center gap-2">
+                    <button type="button" class="btn-type {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
+                        onclick="setActive('reseller_agent')" id="btn-reseller_agent">
+                        Agent
+                    </button>
+                    <button type="button" class="btn-type {{ $defaultType === 'student' ? 'active' : '' }}"
+                        onclick="setActive('student')" id="btn-student">
+                        Student
+                    </button>
+                </div>
+                @else
+                <div class="text-center p-2 bg-light rounded border">
+                    <strong>Registering as {{ ucfirst(str_replace('_', ' ', $defaultType)) }}</strong>
+                </div>
+                @endif
+            </div>
+
+            <form id="registerForm" method="POST" action="{{ route('auth.register') }}">
+                @csrf
+                <input type="hidden" name="account_type" id="accountType" value="{{ $defaultType }}">
+                <input type="hidden" id="regifeetaken" name="regifeetaken" value="">
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6 field">
+                        <label for="firstName">First Name</label>
+                        <input name="first_name" type="text" id="firstName" placeholder="First Name" required>
+                    </div>
+                    <div class="col-md-6 field">
+                        <label for="lastName">Last Name</label>
+                        <input name="last_name" type="text" id="lastName" placeholder="Last Name" required>
+                    </div>
+                </div>
+
+                <div class="field mb-3">
+                    <label for="email">Email Address</label>
+                    <input name="email" type="email" id="email" placeholder="Email" required>
+                </div>
+
+                <div class="field mb-3">
+                    <label for="phone_input">Phone Number</label>
+                    <input type="tel" id="phone_input" name="phone_dummy" required style="width: 100%;">
+                    <input type="hidden" name="phone" id="full_phone">
+                    <input type="hidden" name="country_code" id="country_code">
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6 field">
+                        <label for="password">Password</label>
+                        <input name="password" type="password" id="password" placeholder="Password" required>
+                    </div>
+                    <div class="col-md-6 field">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input name="password_confirmation" type="password" id="confirmPassword" placeholder="Confirm" required>
+                    </div>
+                </div>
+
+                <div class="field mb-3">
+                    <div class="captcha-wrapper p-3 border rounded bg-light d-flex align-items-center">
+                        <input type="checkbox" id="robot_check" name="robot_check" required style="width: 20px; height: 20px; margin-right: 10px;">
+                        <label for="robot_check" class="mb-0">I am not a robot</label>
+                        <div class="ms-auto">
+                            <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" width="30">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-primary w-100" id="submitBtns">
+                    Register Now
+                </button>
+                <button hidden type="submit" id="realSubmitBtn"></button>
+
+                <div class="bottom-text mt-4">
+                    Already have an account? <a href="{{ route('login') }}">Login here</a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <!-- RIGHT FORM -->
-    <div class="auth-form">
-        <h2 class="title">Register</h2>
-        <p class="subtitle">Create your account</p>
-
-        <form action="{{ route('register.post') }}" method="POST" id="registerForm">
-            @csrf
-            
-            <div class="field">
-                <label>Full Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" placeholder="Enter full name" required>
-                @error('name')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="field">
-                <label>Email Address</label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="Enter email" required>
-                @error('email')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="field">
-                <label>Select Role</label>
-                <select name="account_type" required style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                    <option value="" disabled selected>Select your role</option>
-                    <option value="reseller_agent" {{ old('account_type') == 'reseller_agent' ? 'selected' : '' }}>Agent</option>
-                    <option value="student" {{ old('account_type') == 'student' ? 'selected' : '' }}>Student</option>
-                </select>
-                @error('account_type')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="field">
-                <label>Phone Number</label>
-                <input type="tel" id="phone_input" name="phone_dummy" value="{{ old('phone_dummy') }}" placeholder="Enter phone number" required style="width: 100%;">
-                <input type="hidden" name="phone" id="full_phone">
-                <input type="hidden" name="country_code" id="country_code">
-                <input type="hidden" name="country_iso" id="country_iso">
-                @error('phone')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="field">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Enter password" required>
-                @error('password')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="field">
-                <label>Confirm Password</label>
-                <input type="password" name="confirm_password" placeholder="Confirm password" required>
-            </div>
-
-            <button type="submit" id="submit-btn" class="btn-primary">Register</button>
-
-            <p class="bottom-text">
-                Already have an account?
-                <a href="{{ route('login') }}">Login</a>
-            </p>
-        </form>
-    </div>
-</div>
-@endsection
-
-@push('scripts')
-<script>
-    const phoneInputField = document.querySelector("#phone_input");
-    const phoneInput = window.intlTelInput(phoneInputField, {
-        preferredCountries: ["in", "us", "gb", "pk", "bd", "ae"],
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-    });
-
-    const form = document.querySelector("#registerForm");
-    form.addEventListener("submit", function(e) {
-        const fullPhone = phoneInput.getNumber();
-        const countryData = phoneInput.getSelectedCountryData();
-        document.querySelector("#full_phone").value = fullPhone;
-        document.querySelector("#country_code").value = "+" + countryData.dialCode;
-        document.querySelector("#country_iso").value = countryData.iso2.toUpperCase();
-    });
-</script>
-@endpush
+</section>
 
 @push('styles')
-<style>
-    .iti { width: 100%; }
-    .iti__flag-container { z-index: 10; }
-</style>
+<link rel="stylesheet" href="{{ asset('css/style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+
 @endpush
+
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    let iti;
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.querySelector("#phone_input");
+        iti = window.intlTelInput(input, {
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            separateDialCode: true,
+            initialCountry: "auto",
+            geoIpLookup: function(success, failure) {
+                fetch("https://ipapi.co/json").then(res => res.json()).then(data => success(data.country_code)).catch(() => success("in"));
+            }
+        });
+
+        document.getElementById('submitBtns').addEventListener('click', function() {
+            if (!document.getElementById('robot_check').checked) {
+                Swal.fire({
+                    title: "Verification Required",
+                    text: "Please check the 'I am not a robot' box.",
+                    icon: "warning"
+                });
+                return;
+            }
+
+            document.getElementById('full_phone').value = iti.getNumber();
+            document.getElementById('country_code').value = iti.getSelectedCountryData().iso2.toUpperCase();
+
+            Swal.fire({
+                title: "Registration Fee",
+                text: "You must pay a €25 registration fee to become a verified user.",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Pay Now!",
+                cancelButtonText: "Pay Later!",
+                confirmButtonColor: '#23AAE2',
+                reverseButtons: true
+            }).then((result) => {
+                document.getElementById('regifeetaken').value = result.isConfirmed ? 'yes' : 'no';
+                const btn = document.getElementById('submitBtns');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Processing...';
+                }
+                document.getElementById('realSubmitBtn').click();
+            });
+        });
+    });
+
+    function setActive(type) {
+        document.getElementById('accountType').value = type;
+        document.querySelectorAll('.btn-type').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + type).classList.add('active');
+    }
+</script>
+@endpush
+@endsection

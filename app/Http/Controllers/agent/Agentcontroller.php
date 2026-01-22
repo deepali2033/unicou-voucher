@@ -15,35 +15,79 @@ class Agentcontroller extends Controller
 
 
 
-    private function getLocationData()
+    public function getLocationData()
     {
-        // 1️⃣ API call
-        $response = Http::get('https://ipapi.co/json/');
-        $data = $response->json();
+        // Allow forcing a refresh via query param ?refresh_location=1
+        if (request()->has('refresh_location')) {
+            session()->forget('user_country_code');
+        }
 
-        // 2️⃣ Session SET
-        session([
-            'user_country_code' => $data['country_code'] ?? 'IN',
-            'user_country_name' => $data['country_name'] ?? 'India',
-            'user_timezone'     => $data['timezone'] ?? 'Asia/Kolkata',
-            'user_currency'     => $data['currency'] ?? 'INR',
-        ]);
-        dd($response);
-        // 3️⃣ Debug output (confirm karne ke liye)
-        return response()->json([
-            'message' => 'Session set successfully',
-            'session_data' => [
-                'country_code' => session('user_country_code'),
-                'country_name' => session('user_country_name'),
-                'timezone'     => session('user_timezone'),
-                'currency'     => session('user_currency'),
-            ]
-        ]);
+        if (session()->has('user_country_code')) {
+            return [
+                'countryCode' => session('user_country_code'),
+                'timezone'    => session('user_timezone'),
+                'currency'    => session('user_currency'),
+                'flag'        => session('user_flag'),
+            ];
+        }
+
+        try {
+            $response = Http::timeout(5)->get('https://ipapi.co/json/');
+            $data = $response->json();
+
+            if (isset($data['error'])) {
+                throw new \Exception($data['reason'] ?? 'IP API Error');
+            }
+
+            $countryCode = $data['country_code'] ?? 'US';
+            $flagUrl = "https://flagcdn.com/w40/" . strtolower($countryCode) . ".png";
+
+            session([
+                'user_country_code' => $countryCode,
+                'user_country_name' => $data['country_name'] ?? 'United States',
+                'user_timezone'     => $data['timezone'] ?? 'UTC',
+                'user_currency'     => $data['currency'] ?? 'USD',
+                'user_city'         => $data['city'] ?? 'Unknown',
+                'user_flag'         => $flagUrl,
+            ]);
+
+            session()->forget('api_error');
+
+            return [
+                'countryCode' => $countryCode,
+                'timezone'    => $data['timezone'] ?? 'UTC',
+                'currency'    => $data['currency'] ?? 'USD',
+                'flag'        => $flagUrl,
+            ];
+        } catch (\Exception $e) {
+            session(['api_error' => 'Location API failed. Defaulting to US.']);
+
+            $defaults = [
+                'countryCode' => 'US',
+                'timezone'    => 'UTC',
+                'currency'    => 'USD',
+                'flag'        => 'https://flagcdn.com/w40/us.png',
+            ];
+
+            session([
+                'user_country_code' => $defaults['countryCode'],
+                'user_country_name' => 'United States',
+                'user_timezone'     => $defaults['timezone'],
+                'user_currency'     => $defaults['currency'],
+                'user_flag'         => $defaults['flag'],
+            ]);
+
+            return $defaults;
+        }
     }
 
 
 
-
+    // public function index()
+    // {
+    //     $response = Http::get('https://ipapi.co/json/');
+    //     dd($response->json());
+    // }
     public function dashboard()
     {
         $location = $this->getLocationData();
@@ -68,7 +112,7 @@ class Agentcontroller extends Controller
         $this->getLocationData();
         $banks = BankAccountModel::where('user_id', Auth::id())->get();
 
-        return view('agent.banks', compact('banks'));
+        return view('agent.bank_link', compact('banks'));
     }
 
     public function deposit()
