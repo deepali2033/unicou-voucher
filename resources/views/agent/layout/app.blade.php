@@ -116,59 +116,7 @@
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-9 px-md-4 main-content">
 
-                <header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
-                    <div class="header-left">
-                        <!-- Space for page title or breadcrumbs if needed -->
-                    </div>
-
-                    <div class="header-right d-flex align-items-center gap-3">
-                        <div class="notification-bell">
-                            <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
-                        </div>
-
-                        @php
-                        $countryCode = session('user_country_code', 'US');
-                        $countryName = session('user_country_name', 'United States');
-                        $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
-
-
-                        @endphp
-
-                        @if(session('api_error'))
-                        <div class="alert alert-warning p-1 px-2 m-0 small" style="font-size: 0.7rem;">
-                            <i class="fas fa-exclamation-triangle"></i> {{ session('api_error') }}
-                        </div>
-                        @endif
-
-                        <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
-                            <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 30px; border-radius: 2px; border: 1px solid #eee;">
-                            <span class="d-none d-md-inline text-muted small fw-bold">{{ strtoupper($countryCode) }}</span>
-                        </div>
-
-
-                        <div class="user-dropdown d-flex align-items-center gap-2">
-                            <img src="{{ asset('images/user.png') }}" class="user-avatar rounded-circle" width="40" height="40">
-                            <div class="user-info d-flex flex-column">
-                                <span class="user-name fw-bold" style="font-size: 0.9rem; line-height: 1;">{{ Auth::user()->name }}</span>
-                                <small class="user-role">{{ Auth::user()->user_id }}</small>
-                            </div>
-
-                            <div class="dropdown">
-                                <a href="#" class="text-decoration-none text-dark" data-bs-toggle="dropdown">
-                                    <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #999;"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                    <a class="dropdown-item" href="#">Manage Account</a>
-                                    <div class="dropdown-divider"></div>
-                                    <form method="POST" action="{{ route('auth.logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">Logout</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                @include('layouts.header')
 
                 @yield('content')
 
