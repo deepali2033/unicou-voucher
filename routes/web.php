@@ -6,7 +6,7 @@ use App\Http\Controllers\agent\Agentcontroller;
 use App\Http\Controllers\student\StudentController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home.home');
 })->name('home');
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
