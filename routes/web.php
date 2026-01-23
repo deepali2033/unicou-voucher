@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\agent\Agentcontroller;
 use App\Http\Controllers\student\StudentController;
+use App\Http\Controllers\manager\ManagerController;
 
 Route::get('/', function () {
     return view('home.home');
@@ -90,6 +91,20 @@ Route::prefix('agent')->name('agent.')->middleware(['auth', 'account_type:resell
     Route::get('/deposit-store-credit', [Agentcontroller::class, 'deposit'])->name('deposit.store.credit');
     Route::get('/bank-link', [Agentcontroller::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [Agentcontroller::class, 'storeBank'])->name('bank.store');
+});
+
+// Manager Routes
+Route::prefix('manager')->name('manager.')->middleware(['auth', 'account_type:manager'])->group(function () {
+    Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/audit', [ManagerController::class, 'auditTransactions'])->name('audit');
+    Route::get('/users', [ManagerController::class, 'manageUsers'])->name('users');
+    Route::get('/users/{user}', [ManagerController::class, 'approveDetails'])->name('users.show');
+    Route::post('/users/{user}/approve', [ManagerController::class, 'approveUser'])->name('users.approve');
+    Route::post('/users/{user}/add-credit', [ManagerController::class, 'addCredit'])->name('users.add_credit');
+    Route::get('/vouchers/stock', [ManagerController::class, 'voucherStock'])->name('vouchers.stock');
+    Route::get('/disputes', [ManagerController::class, 'disputes'])->name('disputes');
+    Route::get('/system/stop', [ManagerController::class, 'stopSystem'])->name('system.stop');
+    Route::get('/reports', [ManagerController::class, 'reports'])->name('reports');
 });
 
 // Student Routes

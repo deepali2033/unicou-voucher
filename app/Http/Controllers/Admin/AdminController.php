@@ -116,6 +116,11 @@ class AdminController extends Controller
         return redirect()->route('admin.approvals.index')->with('success', 'User approved successfully and notification email sent.');
     }
 
+    public function vouchersControl()
+    {
+        return view('admin.voucher.voucher-control');
+    }
+
     public function notifications()
     {
         // Placeholder notifications

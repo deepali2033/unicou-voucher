@@ -370,6 +370,10 @@ class AuthController extends Controller
             return redirect()->route('student.dashboard');
         }
 
+        if ($user->account_type === 'manager') {
+            return redirect()->route('manager.dashboard');
+        }
+
         return match ($user->account_type) {
             'admin'          => redirect()->route('admin.dashboard'),
             default          => redirect('/'),
