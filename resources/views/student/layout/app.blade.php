@@ -129,6 +129,7 @@
             overlay.classList.remove('overlay-active');
         });
     </script>
+    @stack('scripts')
 </body>
 
 </html>

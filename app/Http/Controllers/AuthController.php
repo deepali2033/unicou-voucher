@@ -137,7 +137,21 @@ class AuthController extends Controller
      */
     public function showAgentForm()
     {
+        // if (Auth::user()->agentDetail) {
+        //     return redirect()->route('agent.dashboard');
+        // }
         return view('auth.forms.B2BResellerAgent');
+    }
+
+    /**
+     * Show Student details form
+     */
+    public function showStudentForm()
+    {
+        if (Auth::user()->studentDetail) {
+            return redirect()->route('student.dashboard');
+        }
+        return view('auth.forms.student-admission-form');
     }
 
     /**
@@ -145,6 +159,7 @@ class AuthController extends Controller
      */
     public function storeAgentDetails(Request $request)
     {
+
         $validated = $request->validate([
             'agentType'           => 'required|string',
             'business_name'       => 'required|string|max:255',
@@ -342,10 +357,7 @@ class AuthController extends Controller
 
 
         if ($user->account_type === 'reseller_agent') {
-
-
             // if (!$user->agentDetail) {
-
             //     return redirect()->route('auth.forms.B2BResellerAgent');
             // }
             return redirect()->route('agent.dashboard');

@@ -25,34 +25,36 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-success border-4">
+            <a href="{{ route('admin.approvals.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100">
+                    <div class="card-body">
+                        <div class="text-muted small mb-1">Pending Approvals</div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="fw-bold mb-0">{{ $stats['pending_approvals'] }}</h3>
+                            <span class="ms-auto text-warning small fw-bold"><i class="fas fa-clock me-1"></i>Action Required</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Active Vouchers</div>
+                    <div class="text-muted small mb-1">Active Agents</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">1,245</h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>8%</span>
+                        <h3 class="fw-bold mb-0">{{ $stats['agents'] }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-user-tie me-1"></i>B2B</span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-warning border-4">
+            <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Vouchers Used</div>
+                    <div class="text-muted small mb-1">Active Students</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">856</h3>
-                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-minus me-1"></i>2%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-danger border-4">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Expired Vouchers</div>
-                    <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">42</h3>
-                        <span class="ms-auto text-danger small fw-bold"><i class="fas fa-arrow-up me-1"></i>5%</span>
+                        <h3 class="fw-bold mb-0">{{ $stats['students'] }}</h3>
+                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-user-graduate me-1"></i>B2C</span>
                     </div>
                 </div>
             </div>

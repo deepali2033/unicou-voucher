@@ -38,6 +38,7 @@ class AgentDetail extends Model
         'registration_doc',
         'id_doc',
         'business_logo',
+        'shufti_reference',
     ];
 
     public function user()

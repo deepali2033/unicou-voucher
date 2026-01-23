@@ -4,9 +4,19 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0 fw-bold">User Details</h4>
-        <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
-        </a>
+        <div class="d-flex gap-2">
+            @if($user->profile_verification_status === 'pending')
+                <form action="{{ route('admin.approvals.approve', $user->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Approve this user?')">
+                        <i class="fas fa-check me-2"></i> Approve User
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+            </a>
+        </div>
     </div>
 
     <div class="row">
@@ -29,7 +39,13 @@
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center py-3">
                         <span class="text-muted">Status</span>
-                        <span class="badge bg-success">Active</span>
+                        @if($user->profile_verification_status === 'verified')
+                            <span class="badge bg-success">Verified</span>
+                        @elseif($user->profile_verification_status === 'pending')
+                            <span class="badge bg-warning text-dark">Pending Approval</span>
+                        @else
+                            <span class="badge bg-secondary">Unknown</span>
+                        @endif
                     </li>
                 </ul>
             </div>

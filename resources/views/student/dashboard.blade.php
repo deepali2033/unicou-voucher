@@ -43,4 +43,38 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    @if(session('shufti_response'))
+        @php $response = session('shufti_response'); @endphp
+        @if(isset($response['event']) && $response['event'] == 'verification.accepted')
+            Swal.fire({
+                title: 'Congratulations!',
+                text: 'Your identity has been successfully verified. Your application is now pending admin approval. You will receive an email once it is approved.',
+                icon: 'success',
+                confirmButtonColor: '#23AAE2'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('home') }}";
+                }
+            });
+        @elseif(isset($response['error']))
+            Swal.fire({
+                title: 'Verification Error',
+                text: '{{ $response["error"] }}',
+                icon: 'error',
+                confirmButtonColor: '#d33'
+            });
+        @else
+            Swal.fire({
+                title: 'Registration Submitted',
+                text: 'Your details have been sent for verification. Please wait for admin approval.',
+                icon: 'info',
+                confirmButtonColor: '#23AAE2'
+            });
+        @endif
+    @endif
+</script>
+@endpush
 @endsection
