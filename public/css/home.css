@@ -221,24 +221,11 @@
 
 
 /* HAMBURGER */
-/* .hamburger {
-  width: 26px;
-  cursor: pointer;
-  position: relative;
-} */
 
 .hamburger{
   width: 30px;
   cursor: pointer;
 }
-
-/* .hamburger span {
-  display: block;
-  height: 3px;
-  background: #1e3a8a;
-  margin: 5px 0;
-  transition: 0.3s;
-} */
 
 .hamburger span{
   display: block;
@@ -298,7 +285,7 @@
 /* LINKS */
 .menu-links {
   list-style: none;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 .menu-links li {
@@ -317,6 +304,24 @@
 .menu-links li a:hover {
   padding-left: 6px;
   color: #2563eb;
+}
+
+.btn-group.login-reg a {
+    gap: 20px;
+    background-color: #22a6e3;
+    padding: 9px 15px;
+    border-radius: 10px;
+    color: #fff;
+    transition: 0.5s;
+}
+
+.btn-group.login-reg {
+    margin-bottom: 20px;
+}
+
+.btn-group.login-reg a:hover {
+    background: #2c3e70;
+    transition: 0.5s;
 }
 
 /* hero section banner start */
@@ -1363,19 +1368,8 @@ ul.ul_cls_learning-platform {
   content: "−";
 }
 
-/* .accordion.active .accordion-header::after {
-  transform: rotate(45deg); 
-} */
-
-.menu-footer {
-    position: relative;
-    width: 100%;
-    height: 30vh;
-}
-
-.btn-group.login-reg {
-    position: absolute;
-    bottom: 0%;
+div#sideMenu .menu-links {
+    margin: 0;
 }
 
 /* ================= MOBILE ================= */

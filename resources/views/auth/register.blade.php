@@ -34,7 +34,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
     }
 
     .role-btn.active {
-        background: #1d4ed8;
+        background: #23aae2;
         /* dark blue */
         color: #fff;
         box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
