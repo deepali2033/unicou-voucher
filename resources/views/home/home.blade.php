@@ -57,22 +57,28 @@
 
         .profile-dropdown-menu {
             position: absolute;
-            top: 100%;
-            right: 0;
+            top: 80px;
+            left: 100%;
             background: #fff;
-            min-width: 200px;
+            /* min-width: 200px; */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border-radius: 12px;
-            padding: 10px 0;
-            margin-top: 10px;
+            padding: 10px 10px;
+            /* margin-top: 10px; */
             display: none;
             z-index: 1000;
             border: 1px solid #eee;
+            transform: translate(-50%, -50%);
         }
 
         .profile-dropdown-menu.show {
-            display: block;
-            animation: fadeInDown 0.3s ease;
+            display: flex;
+            /* animation: fadeInDown 0.3s ease; */
+            gap: 10px;
+        }
+
+        div#profileDropdownMenu .dropdown-item {
+            white-space: nowrap;
         }
 
         @keyframes fadeInDown {
