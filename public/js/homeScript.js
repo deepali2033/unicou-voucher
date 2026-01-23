@@ -10,6 +10,18 @@ window.addEventListener("load", () => {
 });
 //PAGE LOADER CONTROL end
 
+// sticky header section start
+  const header = document.querySelector('.site-header');
+
+  window.addEventListener('scroll', () => {
+    if(window.scrollY > 50){
+      header.classList.add('sticky');
+    } else {
+      header.classList.remove('sticky');
+    }
+  });
+// sticky header section end
+
 // menu hamburger section start 
 const openMenu = document.getElementById("openMenu");
 const closeMenu = document.getElementById("closeMenu");
