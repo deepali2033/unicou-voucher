@@ -2,83 +2,138 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-primary text-white shadow-sm border-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Main Dashboard</h4>
+        <div class="system-status">
+            <span class="badge bg-success-subtle text-success p-2">
+                <i class="fas fa-circle me-1 small"></i> System Running
+            </span>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 opacity-75">Total Users</h6>
-                    <h2 class="card-title mb-0 fw-bold">{{ $stats['total_users'] }}</h2>
+                    <div class="text-muted small mb-1">Total Users</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ $stats['total_users'] }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-success text-white shadow-sm border-0">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-success border-4">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 opacity-75">Total Agents</h6>
-                    <h2 class="card-title mb-0 fw-bold">{{ $stats['agents'] }}</h2>
+                    <div class="text-muted small mb-1">Active Vouchers</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">1,245</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>8%</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card bg-info text-white shadow-sm border-0">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-warning border-4">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 opacity-75">Total Students</h6>
-                    <h2 class="card-title mb-0 fw-bold">{{ $stats['students'] }}</h2>
+                    <div class="text-muted small mb-1">Vouchers Used</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">856</h3>
+                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-minus me-1"></i>2%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-danger border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Expired Vouchers</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">42</h3>
+                        <span class="ms-auto text-danger small fw-bold"><i class="fas fa-arrow-up me-1"></i>5%</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">User Management</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Country</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($users as $user)
-                        <tr>
-                            <td>{{ $user->user_id }}</td>
-                            <td>{{ $user->first_name }} {{ $user->last_name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>
-                                <span class="badge bg-secondary">{{ $user->account_type }}</span>
-                            </td>
-                            <td>{{ $user->country_iso }}</td>
-                            <td>{{ $user->created_at->format('d M Y') }}</td>
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-outline-primary" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+    <!-- Charts & Alerts -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">Voucher & Revenue Trends</h6>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active">Weekly</button>
+                        <button class="btn btn-outline-secondary">Monthly</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-placeholder bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px; border: 2px dashed #ddd;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-chart-line fa-3x mb-3"></i>
+                            <p>Revenue & Voucher Graph Will Appear Here</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mt-4">
-                {{ $users->links() }}
+        </div>
+        <div class="col-lg-4">
+            <!-- Low Stock Alerts -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold text-danger"><i class="fas fa-exclamation-circle me-1"></i> Low Stock Alerts</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold small">University Voucher (UK)</div>
+                                    <small class="text-muted">Only 5 remaining</small>
+                                </div>
+                                <span class="badge bg-danger">Critical</span>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold small">IELTS Booking Code</div>
+                                    <small class="text-muted">Only 12 remaining</small>
+                                </div>
+                                <span class="badge bg-warning text-dark">Warning</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white text-center py-2">
+                    <a href="{{ route('admin.stock.alerts') }}" class="small text-decoration-none text-primary fw-bold">View All Alerts</a>
+                </div>
+            </div>
+
+            <!-- System Stats -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold">Revenue Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Daily Revenue</span>
+                        <span class="fw-bold small">€1,240.00</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Monthly Revenue</span>
+                        <span class="fw-bold small">€28,450.00</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 60%"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -14,7 +14,37 @@ $allowedTypes[] = 'freelancer';
 $defaultType = in_array($requestedType, $allowedTypes, true) ? $requestedType : 'student';
 $accountLocked = $lockRequested && $defaultType === $requestedType;
 @endphp
+<style>
+    .role-switch {
+        background: #eaf3ff;
+        padding: 6px;
+        border-radius: 50px;
+    }
 
+    .role-btn {
+        border: none;
+        padding: 10px 28px;
+        border-radius: 40px;
+        font-weight: 600;
+        cursor: pointer;
+        background: transparent;
+        color: #1d4ed8;
+        /* blue text */
+        transition: all 0.3s ease;
+    }
+
+    .role-btn.active {
+        background: #1d4ed8;
+        /* dark blue */
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+    }
+
+    .role-btn:hover:not(.active) {
+        background: #dbeafe;
+        /* light blue hover */
+    }
+</style>
 <section class="register_page_sec">
     <div class="auth-wrapper">
         <div class="auth-image">
@@ -38,16 +68,25 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 
             <div class="type-selector-wrapper mb-4 text-center">
                 @if(!$accountLocked)
-                <div class="d-flex flex-wrap justify-content-center gap-2">
-                    <button type="button" class="btn-type {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
-                        onclick="setActive('reseller_agent')" id="btn-reseller_agent">
+                <div class="d-flex justify-content-center gap-2 role-switch">
+
+                    <button type="button"
+                        class="role-btn {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
+                        onclick="setActive('reseller_agent')"
+                        id="btn-reseller_agent">
                         Agent
                     </button>
-                    <button type="button" class="btn-type {{ $defaultType === 'student' ? 'active' : '' }}"
-                        onclick="setActive('student')" id="btn-student">
+
+                    <button type="button"
+                        class="role-btn {{ $defaultType === 'student' ? 'active' : '' }}"
+                        onclick="setActive('student')"
+                        id="btn-student">
                         Student
                     </button>
+
+                    <input type="hidden" name="account_type" id="account_type" value="{{ $defaultType }}">
                 </div>
+
                 @else
                 <div class="text-center p-2 bg-light rounded border">
                     <strong>Registering as {{ ucfirst(str_replace('_', ' ', $defaultType)) }}</strong>
@@ -93,11 +132,12 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 
                 <div class="field mb-3">
                     <div class="captcha-wrapper p-3 border rounded bg-light d-flex align-items-center">
-                        <input type="checkbox" id="robot_check" name="robot_check" required style="width: 20px; height: 20px; margin-right: 10px;">
-                        <label for="robot_check" class="mb-0">I am not a robot</label>
-                        <div class="ms-auto">
+
+                        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE') }}"></div>
+
+                        <!-- <div class="ms-auto">
                             <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" width="30">
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -121,6 +161,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 @endpush
 
 @push('scripts')
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -137,10 +178,10 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         });
 
         document.getElementById('submitBtns').addEventListener('click', function() {
-            if (!document.getElementById('robot_check').checked) {
+            if (grecaptcha.getResponse() === "") {
                 Swal.fire({
                     title: "Verification Required",
-                    text: "Please check the 'I am not a robot' box.",
+                    text: "Please complete the reCAPTCHA.",
                     icon: "warning"
                 });
                 return;
@@ -190,5 +231,17 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         document.getElementById('btn-' + type).classList.add('active');
     }
 </script>
+
+<script>
+    function setActive(type) {
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        document.getElementById('btn-' + type).classList.add('active');
+        document.getElementById('account_type').value = type;
+    }
+</script>
+
 @endpush
 @endsection

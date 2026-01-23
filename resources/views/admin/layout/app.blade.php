@@ -33,29 +33,66 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-
                     <ul class="nav flex-column gap-2">
+
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                            <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                                href="{{ route('admin.dashboard') }}">
                                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                            <a class="nav-link {{ request()->routeIs('admin.revenue.*') ? 'active' : '' }}"
+                                href="{{ route('admin.revenue.index') }}">
+                                <i class="fas fa-wallet me-2"></i> Revenue & Balances
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.stock.*') ? 'active' : '' }}"
+                                href="{{ route('admin.stock.alerts') }}">
+                                <i class="fas fa-exclamation-triangle me-2"></i> Stock Alerts
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+                                href="{{ route('admin.users.management') }}">
                                 <i class="fas fa-users me-2"></i> User Management
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}" href="{{ route('admin.vouchers.control') }}">
+                            <a class="nav-link {{ request()->routeIs('admin.approvals.*') ? 'active' : '' }}"
+                                href="{{ route('admin.approvals.index') }}">
+                                <i class="fas fa-user-check me-2"></i> Approval Requests
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}"
+                                href="{{ route('admin.vouchers.control') }}">
                                 <i class="fas fa-ticket-alt me-2"></i> Vouchers Control
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.disputes.*') ? 'active' : '' }}" href="{{ route('admin.disputes.index') }}">
+                            <a class="nav-link {{ request()->routeIs('admin.system.*') ? 'active' : '' }}"
+                                href="{{ route('admin.system.control') }}">
+                                <i class="fas fa-cogs me-2"></i> System Control
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.disputes.*') ? 'active' : '' }}"
+                                href="{{ route('admin.disputes.index') }}">
                                 <i class="fas fa-gavel me-2"></i> Disputes
                             </a>
                         </li>
+
                     </ul>
+
 
                     <hr class="my-3" style="border-color: #495057;">
 
@@ -64,6 +101,13 @@
                             <a class="nav-link" href="{{ url('/') }}" target="_blank">
                                 <i class="fas fa-external-link-alt me-2"></i>
                                 View Website
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}" 
+                                href="{{ route('admin.notifications.index') }}">
+                                <i class="fas fa-bell me-2"></i>
+                                Notifications
                             </a>
                         </li>
                         <li class="nav-item">
@@ -109,7 +153,7 @@
                                     <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #999;"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                    <a class="dropdown-item" href="#">Manage Account</a>
+                                    <a class="dropdown-item" href="{{ route('admin.account.manage') }}">Manage Account</a>
                                     <div class="dropdown-divider"></div>
                                     <form method="POST" action="{{ route('auth.logout') }}">
                                         @csrf
@@ -122,10 +166,10 @@
                 </header>
 
                 @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
                 @endif
 
                 @yield('content')

@@ -36,8 +36,10 @@ class AuthController extends Controller
     /**
      * Handle registration
      */
+
     public function register(Request $request)
     {
+        // 🔹 Step 1: Validate form + captcha
         $validated = $request->validate([
             'account_type' => ['required', 'in:user,recruiter,freelancer,manager,reseller_agent,support_team,student,admin'],
             'first_name'   => ['required', 'string', 'max:255'],
@@ -45,16 +47,31 @@ class AuthController extends Controller
             'country_code' => ['required', 'string', 'max:5'],
             'email'        => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password'     => ['required', 'confirmed', 'min:8'],
+            'g-recaptcha-response' => ['required'],
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create User
-        |--------------------------------------------------------------------------
-        | We generate the user_id based on account_type and country_iso
-        */
+        // 🔹 Step 2: Verify captcha with Google
+        $captchaResponse = Http::asForm()->post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            [
+                'secret'   => env('RECAPTCHA_SECRET'),
+                'response' => $request->input('g-recaptcha-response'),
+                'remoteip' => $request->ip(),
+            ]
+        );
+
+        if (! $captchaResponse->json('success')) {
+            return back()
+                ->withErrors(['captcha' => 'Captcha verification failed'])
+                ->withInput();
+        }
+
+        // 🔹 Step 3: Create user
         $user = User::create([
-            'user_id'      => User::generateNextUserId($validated['account_type'], $validated['country_code']),
+            'user_id'      => User::generateNextUserId(
+                $validated['account_type'],
+                $validated['country_code']
+            ),
             'name'         => $validated['first_name'],
             'first_name'   => $validated['first_name'],
             'phone'        => $validated['phone'],
@@ -64,6 +81,7 @@ class AuthController extends Controller
             'password'     => Hash::make($validated['password']),
         ]);
 
+        // 🔹 Step 4: Login & redirect
         Auth::login($user);
         LocationHelper::storeLocationInSession($request);
 

@@ -162,6 +162,36 @@
             </div>
             @endif
 
+            @if($user->account_type !== 'student')
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.users.password.update', $user->id) }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted">New Password</label>
+                                <input type="password" name="password" class="form-control" required minlength="8">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted">Confirm Password</label>
+                                <input type="password" name="password_confirmation" class="form-control" required minlength="8">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">Update</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @else
+            <div class="alert alert-info border-0 shadow-sm">
+                <i class="fas fa-info-circle me-2"></i> Password change is disabled for student accounts.
+            </div>
+            @endif
+
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold text-danger">Danger Zone</h5>

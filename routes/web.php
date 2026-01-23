@@ -34,12 +34,26 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+    Route::get('/revenue', [AdminController::class, 'revenue'])->name('revenue.index');
+    Route::get('/stock-alerts', [AdminController::class, 'stockAlerts'])->name('stock.alerts');
+    Route::get('/system-control', [AdminController::class, 'systemControl'])->name('system.control');
+    Route::post('/system-control/toggle', [AdminController::class, 'toggleSystem'])->name('system.toggle');
+    
+    Route::get('/approvals', [AdminController::class, 'approvals'])->name('approvals.index');
+    Route::post('/approvals/{user}/approve', [AdminController::class, 'approveUser'])->name('approvals.approve');
+
+    Route::get('/notifications', [AdminController::class, 'notifications'])->name('notifications.index');
+
+    Route::get('/account', [AdminController::class, 'manageAccount'])->name('account.manage');
+    Route::post('/account/update', [AdminController::class, 'updateAccount'])->name('account.update');
+
     Route::get('/vouchers', function () {
         return "Voucher Control";
     })->name('vouchers.control');
+    Route::get('/users', [AdminController::class, 'usersManagemt'])->name('users.management');
 
-    Route::get('/users', [AdminController::class, 'users'])->name('users.index');
     Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
+    Route::post('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.password.update');
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
     Route::get('/disputes', function () {
         return "Disputes";
