@@ -74,9 +74,13 @@
         @if(isset($response['event']) && $response['event'] == 'verification.accepted')
             Swal.fire({
                 title: 'Congratulations!',
-                text: 'Your identity has been successfully verified via ShuftiPro. Your account is now pending final admin approval.',
+                text: 'Your identity has been successfully verified. Your application is now pending admin approval. You will receive an email once it is approved.',
                 icon: 'success',
                 confirmButtonColor: '#23AAE2'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('home') }}";
+                }
             });
         @elseif(isset($response['error']))
             Swal.fire({

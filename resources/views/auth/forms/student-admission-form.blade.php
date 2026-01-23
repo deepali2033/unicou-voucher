@@ -290,7 +290,7 @@
   document.getElementById('satForm').addEventListener('submit', function() {
     const btn = this.querySelector('.sat-btn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> PROCESSING SYNC...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> VERIFYING DOCUMENTS... PLEASE WAIT';
   });
 
   function fillStudentDemoData() {

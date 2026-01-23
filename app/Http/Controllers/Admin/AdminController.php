@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Mail\UserApproved;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -15,6 +17,7 @@ class AdminController extends Controller
             'total_users' => User::count(),
             'agents' => User::where('account_type', 'reseller_agent')->count(),
             'students' => User::where('account_type', 'student')->count(),
+            'pending_approvals' => User::where('profile_verification_status', 'pending')->count(),
         ];
 
         return view('admin.dashboard', compact('users', 'stats'));
@@ -102,7 +105,15 @@ class AdminController extends Controller
             'verified_at' => now(),
             'verified_by' => auth()->id()
         ]);
-        return back()->with('success', 'User approved successfully.');
+
+        // Send Approval Email
+        try {
+            Mail::to($user->email)->send(new UserApproved($user));
+        } catch (\Exception $e) {
+            // Log error or handle silently if mail server is not configured
+        }
+
+        return redirect()->route('admin.approvals.index')->with('success', 'User approved successfully and notification email sent.');
     }
 
     public function notifications()
