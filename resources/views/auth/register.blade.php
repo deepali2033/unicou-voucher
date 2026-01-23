@@ -83,8 +83,6 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                         id="btn-student">
                         Student
                     </button>
-
-                    <input type="hidden" name="account_type" id="account_type" value="{{ $defaultType }}">
                 </div>
 
                 @else
@@ -190,56 +188,25 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             document.getElementById('full_phone').value = iti.getNumber();
             document.getElementById('country_code').value = iti.getSelectedCountryData().iso2.toUpperCase();
 
-            const accountType = document.getElementById('accountType').value;
-
-            // Skip Fee Swal for Freelancers
-            if (accountType === 'freelancer') {
-                document.getElementById('regifeetaken').value = 'no';
-                const btn = document.getElementById('submitBtns');
-                if (btn) {
-                    btn.disabled = true;
-                    btn.textContent = 'Processing...';
-                }
-                document.getElementById('realSubmitBtn').click();
-                return;
+            document.getElementById('regifeetaken').value = 'no';
+            const btn = document.getElementById('submitBtns');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
             }
-
-            Swal.fire({
-                title: "Registration Fee",
-                text: "You must pay a €25 registration fee to become a verified user.",
-                icon: "info",
-                showCancelButton: true,
-                confirmButtonText: "Pay Now!",
-                cancelButtonText: "Pay Later!",
-                confirmButtonColor: '#23AAE2',
-                reverseButtons: true
-            }).then((result) => {
-                document.getElementById('regifeetaken').value = result.isConfirmed ? 'yes' : 'no';
-                const btn = document.getElementById('submitBtns');
-                if (btn) {
-                    btn.disabled = true;
-                    btn.textContent = 'Processing...';
-                }
-                document.getElementById('realSubmitBtn').click();
-            });
+            document.getElementById('realSubmitBtn').click();
         });
     });
 
     function setActive(type) {
         document.getElementById('accountType').value = type;
-        document.querySelectorAll('.btn-type').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('btn-' + type).classList.add('active');
-    }
-</script>
-
-<script>
-    function setActive(type) {
         document.querySelectorAll('.role-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-
-        document.getElementById('btn-' + type).classList.add('active');
-        document.getElementById('account_type').value = type;
+        const activeBtn = document.getElementById('btn-' + type);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
     }
 </script>
 

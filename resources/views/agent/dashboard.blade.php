@@ -65,4 +65,35 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    @if(session('shufti_response'))
+        @php $response = session('shufti_response'); @endphp
+        @if(isset($response['event']) && $response['event'] == 'verification.accepted')
+            Swal.fire({
+                title: 'Congratulations!',
+                text: 'Your identity has been successfully verified via ShuftiPro. Your account is now pending final admin approval.',
+                icon: 'success',
+                confirmButtonColor: '#23AAE2'
+            });
+        @elseif(isset($response['error']))
+            Swal.fire({
+                title: 'Verification Error',
+                text: '{{ $response["error"] }}',
+                icon: 'error',
+                confirmButtonColor: '#d33'
+            });
+        @else
+            Swal.fire({
+                title: 'Registration Submitted',
+                text: 'Your details have been sent for verification. Please wait for admin approval.',
+                icon: 'info',
+                confirmButtonColor: '#23AAE2'
+            });
+        @endif
+    @endif
+</script>
+@endpush
 @endsection

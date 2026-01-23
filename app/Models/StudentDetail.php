@@ -33,6 +33,8 @@ class StudentDetail extends Model
         'bank_country',
         'account_number',
         'id_doc',
+        'id_doc_final',
+        'shufti_reference',
     ];
 
     public function user()
