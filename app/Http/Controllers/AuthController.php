@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -84,11 +85,19 @@ class AuthController extends Controller
             'password'     => Hash::make($validated['password']),
         ]);
 
-        // 🔹 Step 4: Login & redirect
+        // 🔹 Step 4: Send Verification Email
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Exception $e) {
+            // Log error or show message if SMTP fails
+            return redirect()->route('verification.notice')->with('error', 'Could not send verification email. Please check your SMTP settings.');
+        }
+
+        // 🔹 Step 5: Login & redirect to verification notice
         Auth::login($user);
         LocationHelper::storeLocationInSession($request);
 
-        return $this->redirectByRole($user);
+        return redirect()->route('verification.notice');
     }
 
     /**
@@ -114,10 +123,8 @@ class AuthController extends Controller
         $request->session()->regenerate();
         LocationHelper::storeLocationInSession($request);
 
-        // Auto-verify email (testing only)
         if (!auth()->user()->hasVerifiedEmail()) {
-            auth()->user()->email_verified_at = now();
-            auth()->user()->save();
+            return redirect()->route('verification.notice');
         }
 
         return $this->redirectByRole(auth()->user());
@@ -350,6 +357,17 @@ class AuthController extends Controller
         return response()->json($response->json());
         // ya debugging ke liye:
         // dd($response->json());
+    }
+
+    public function resendVerification(Request $request)
+    {
+        try {
+            $request->user()->sendEmailVerificationNotification();
+            return back()->with('message', 'Verification link sent!');
+        } catch (\Exception $e) {
+            \Log::error("Mail Error: " . $e->getMessage());
+            return back()->with('error', 'Mail Error: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -10,8 +10,10 @@ class Order extends Model
         'order_id',
         'user_id',
         'voucher_type',
+        'voucher_id',
         'amount',
         'status',
+        'delivery_details',
         'payment_method',
         'bank_name',
         'client_name',
@@ -25,6 +27,11 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Vouchar::class, 'voucher_id', 'voucher_id');
     }
 
     public function subAgent()

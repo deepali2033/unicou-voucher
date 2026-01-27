@@ -63,20 +63,21 @@
                         </li>
 
                         @endif
-
-                        {{-- KYC & Compliance (Admin, Support) --}}
-                        @if(in_array($role, ['admin','support_team']))
+                        @if(in_array($role, ['admin','manager']))
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{route('admin.kyc.compliance')}}">
                                 <i class="fas fa-id-card me-2"></i> KYC & Compliance
                             </a>
+
                         </li>
+
                         @endif
+
 
                         {{-- Wallet / Store Credit (Admin, Agent, Reseller) --}}
                         @if(in_array($role, ['admin','agent','reseller_agent']))
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{route('admin.wallet.index')}}">
                                 <i class="fas fa-wallet me-2"></i> Wallet / Store Credit
                             </a>
                         </li>
@@ -94,7 +95,7 @@
                         {{-- Voucher Management (Admin, Manager) --}}
                         @if(in_array($role, ['admin','manager']))
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{route('admin.vouchers.control')}}">
                                 <i class="fas fa-ticket-alt me-2"></i> Voucher Management
                             </a>
                         </li>
@@ -103,7 +104,7 @@
                         {{-- Orders & Delivery (Admin, Agent, Support) --}}
                         @if(in_array($role, ['admin','agent','support_team']))
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{route('admin.orders.index')}}">
                                 <i class="fas fa-truck me-2"></i> Orders & Delivery
                             </a>
                         </li>
@@ -112,7 +113,7 @@
                         {{-- Pricing & Discounts (Admin only) --}}
                         @if($role === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{route('admin.pricing.index')}}">
                                 <i class="fas fa-tags me-2"></i> Pricing & Discounts
                             </a>
                         </li>
@@ -121,7 +122,7 @@
                         {{-- Stock & Inventory (Admin, Manager) --}}
                         @if(in_array($role, ['admin','manager','support_team']))
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{route('admin.inventory.index')}}">
                                 <i class="fas fa-boxes me-2"></i> Stock & Inventory
                             </a>
                         </li>
@@ -137,28 +138,27 @@
                         @endif
 
                         {{-- Reports & Analytics (Admin only) --}}
-                        @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
+                        @if($role === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
                                 <i class="fas fa-chart-line me-2"></i> Reports & Analytics
                             </a>
                         </li>
                         @endif
 
                         {{-- System Control (Admin only) --}}
-                        @if(in_array($role, ['admin','manager']))
+                        @if($role === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('admin.system.control') ? 'active' : '' }}" href="{{ route('admin.system.control') }}">
                                 <i class="fas fa-cogs me-2"></i> System Control
                             </a>
                         </li>
                         @endif
 
                         {{-- Audit & Logs (Admin only) --}}
-                        @if(in_array($role, ['admin','manager']))
-
+                        @if($role === 'admin')
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link {{ request()->routeIs('admin.audit.*') ? 'active' : '' }}" href="{{ route('admin.audit.index') }}">
                                 <i class="fas fa-clipboard-list me-2"></i> Audit & Logs
                             </a>
                         </li>

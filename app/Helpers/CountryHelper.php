@@ -14,9 +14,17 @@ class CountryHelper
                 'id_label' => 'CNIC',
                 'id_placeholder' => '12345-1234567-1',
                 'banks' => [
-                    'Summit Bank', 'JS Bank', 'EasyPaisa', 'UPaisa', 'Askari Bank', 
-                    'Habib Metro Bank', 'Meezan Bank', 'Bank Islami', 
-                    'Bank AL Habib Ltd.', 'Zindigi', 'JazzCash'
+                    'Summit Bank',
+                    'JS Bank',
+                    'EasyPaisa',
+                    'UPaisa',
+                    'Askari Bank',
+                    'Habib Metro Bank',
+                    'Meezan Bank',
+                    'Bank Islami',
+                    'Bank AL Habib Ltd.',
+                    'Zindigi',
+                    'JazzCash'
                 ]
             ],
             'IN' => [
@@ -26,8 +34,13 @@ class CountryHelper
                 'id_label' => 'Aadhar/PAN',
                 'id_placeholder' => 'Enter Aadhar or PAN Number',
                 'banks' => [
-                    'State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 
-                    'Punjab National Bank', 'Bank of Baroda', 'Paytm Payments Bank'
+                    'State Bank of India',
+                    'HDFC Bank',
+                    'ICICI Bank',
+                    'Axis Bank',
+                    'Punjab National Bank',
+                    'Bank of Baroda',
+                    'Paytm Payments Bank'
                 ]
             ],
             'BD' => [
@@ -37,8 +50,12 @@ class CountryHelper
                 'id_label' => 'NID',
                 'id_placeholder' => 'Enter National ID',
                 'banks' => [
-                    'Sonali Bank', 'Dutch-Bangla Bank', 'bKash', 'Nagad', 
-                    'BRAC Bank', 'Islami Bank'
+                    'Sonali Bank',
+                    'Dutch-Bangla Bank',
+                    'bKash',
+                    'Nagad',
+                    'BRAC Bank',
+                    'Islami Bank'
                 ]
             ],
             'AE' => [

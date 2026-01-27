@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Vouchar;
+use App\Models\Order;
+use App\Models\WalletLedger;
+use App\Models\PricingRule;
+use App\Models\VoucherInventory;
+use App\Models\SystemSetting;
+use App\Models\AuditLog;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Mail\UserApproved;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
+use Stevebauman\Location\Facades\Location;
 
 class AdminController extends Controller
 {
@@ -67,21 +76,15 @@ class AdminController extends Controller
 
     public function stockAlerts()
     {
-        $alerts = [
-            ['type' => 'University Voucher', 'remaining' => 5, 'threshold' => 10],
-            ['type' => 'Language Course', 'remaining' => 2, 'threshold' => 5],
-        ];
+        $vouchers = Vouchar::where('stock', '<', 10)->get();
+        $alerts = $vouchers->map(function($v) {
+            return [
+                'type' => $v->name,
+                'remaining' => $v->stock,
+                'threshold' => 10
+            ];
+        });
         return view('admin.stock.alerts', compact('alerts'));
-    }
-
-    public function systemControl()
-    {
-        $status = 'running'; // or 'stopped'
-        $logs = [
-            ['action' => 'Stopped', 'reason' => 'Server Maintenance', 'date' => now()->subDays(2)],
-            ['action' => 'Resumed', 'reason' => 'Maintenance Complete', 'date' => now()->subDays(2)->addHours(2)],
-        ];
-        return view('admin.system.control', compact('status', 'logs'));
     }
 
     public function toggleSystem(Request $request)
@@ -89,13 +92,39 @@ class AdminController extends Controller
         return back()->with('success', 'System status updated successfully.');
     }
 
-    public function approvals()
+    public function approvals(Request $request)
     {
-        $pendingUsers = User::where('profile_verification_status', 'pending')
-            ->with(['agentDetail', 'studentDetail'])
-            ->latest()
-            ->get();
-        return view('admin.approvals.index', compact('pendingUsers'));
+        $query = User::where('account_type', '!=', 'admin')
+            ->with(['agentDetail', 'studentDetail']);
+
+        if ($request->has('status') && $request->status != '') {
+            $query->where('profile_verification_status', $request->status);
+        } else {
+            $query->where('profile_verification_status', 'pending');
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%$search%")
+                    ->orWhere('last_name', 'like', "%$search%")
+                    ->orWhere('user_id', 'like', "%$search%");
+            });
+        }
+
+        $pendingUsers = $query->latest()->get();
+        return view('admin.kyc-compliance.index', compact('pendingUsers'));
+    }
+
+    public function rejectUser(User $user)
+    {
+        $user->update([
+            'profile_verification_status' => 'rejected',
+            'verified_at' => now(),
+            'verified_by' => auth()->id()
+        ]);
+
+        return redirect()->route('admin.approvals.index')->with('success', 'User KYC rejected successfully.');
     }
 
     public function approveUser(User $user)
@@ -118,8 +147,240 @@ class AdminController extends Controller
 
     public function vouchersControl()
     {
-        return view('admin.voucher.voucher-control');
+
+        $vouchers = Vouchar::latest()->get();
+
+        // dd('hello');
+        return view('admin.voucher.voucher-control', compact('vouchers'));
     }
+
+
+    public function storeVoucher(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'quarterly_points' => 'nullable|integer|min:0',
+            'yearly_points' => 'nullable|integer|min:0',
+            'logo' => 'nullable|string',
+            'description' => 'nullable|string',
+        ]);
+
+        Vouchar::create([
+            'voucher_id' => 'VCH-' . strtoupper(Str::random(6)),
+            'name' => $request->name,
+            'category' => $request->category,
+            'price' => $request->price,
+            'original_price' => $request->original_price,
+            'stock' => $request->stock,
+            'quarterly_points' => $request->quarterly_points ?? 0,
+            'yearly_points' => $request->yearly_points ?? 0,
+            'logo' => $request->logo,
+            'description' => $request->description,
+            'status' => 'active',
+        ]);
+
+        return back()->with('success', 'Voucher added successfully.');
+    }
+
+
+    public function updateVoucher(Request $request, $id)
+    {
+        Vouchar::where('id', $id)->update([
+            'name' => $request->name,
+            'category' => $request->category,
+            'price' => $request->price,
+            'original_price' => $request->original_price,
+            'stock' => $request->stock,
+            'quarterly_points' => $request->quarterly_points ?? 0,
+            'yearly_points' => $request->yearly_points ?? 0,
+            'status' => $request->status,
+        ]);
+
+        return back()->with('success', 'Voucher updated successfully.');
+    }
+
+    public function deleteVoucher($id)
+    {
+        Vouchar::where('id', $id)->delete();
+        return back()->with('success', 'Voucher deleted successfully.');
+    }
+
+    public function exportVouchers()
+    {
+        $vouchers = Vouchar::all();
+        $filename = "vouchers_" . date('Ymd') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        fputcsv($handle, ['Voucher ID', 'Name', 'Category', 'Price', 'Stock', 'Status']);
+
+        foreach ($vouchers as $v) {
+            fputcsv($handle, [$v->voucher_id, $v->name, $v->category, $v->price, $v->stock, $v->status]);
+        }
+
+        fclose($handle);
+        exit;
+    }
+
+    public function importVouchers(Request $request)
+    {
+        $request->validate(['csv_file' => 'required|mimes:csv,txt']);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        fgetcsv($handle); // Skip header
+
+        while (($data = fgetcsv($handle)) !== FALSE) {
+            Vouchar::updateOrInsert(
+                ['voucher_id' => $data[0]],
+                [
+                    'name' => $data[1],
+                    'category' => $data[2],
+                    'price' => $data[3],
+                    'stock' => $data[4],
+                    'status' => $data[5] ?? 'active',
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
+        fclose($handle);
+        return back()->with('success', 'Vouchers imported successfully.');
+    }
+    public function walletManagement(Request $request)
+    {
+        $users = User::where('account_type', '!=', 'admin')->get();
+        $ledger = WalletLedger::latest()->limit(20)->get();
+        
+        return view('admin.wallet.index', compact('users', 'ledger'));
+    }
+
+    // Orders & Delivery
+    public function ordersIndex()
+    {
+        $orders = Order::with(['user', 'voucher'])->latest()->get();
+        return view('admin.orders.index', compact('orders'));
+    }
+
+    public function deliverOrder(Request $request, $id)
+    {
+        Order::where('id', $id)->update([
+            'status' => 'delivered',
+            'delivery_details' => $request->codes
+        ]);
+        return back()->with('success', 'Order delivered successfully.');
+    }
+
+    public function cancelOrder($id)
+    {
+        Order::where('id', $id)->update(['status' => 'cancelled']);
+        return back()->with('success', 'Order cancelled.');
+    }
+
+    // Pricing & Discounts
+    public function pricingIndex()
+    {
+        $vouchers = Vouchar::all();
+        $rules = PricingRule::all();
+        return view('admin.pricing.index', compact('vouchers', 'rules'));
+    }
+
+    public function updatePricing(Request $request)
+    {
+        PricingRule::updateOrInsert(
+            ['voucher_id' => $request->voucher_id, 'country_code' => $request->country_code],
+            ['base_price' => $request->base_price, 'discount_price' => $request->discount_price]
+        );
+        return back()->with('success', 'Pricing updated.');
+    }
+
+    // Stock & Inventory
+    public function inventoryIndex()
+    {
+        $vouchers = Vouchar::all();
+        $inventory = VoucherInventory::select('voucher_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'), \Illuminate\Support\Facades\DB::raw('sum(is_used) as used'))
+            ->groupBy('voucher_id')
+            ->get();
+        return view('admin.inventory.index', compact('vouchers', 'inventory'));
+    }
+
+    public function uploadStock(Request $request)
+    {
+        $codes = explode("\n", str_replace("\r", "", $request->codes));
+        foreach ($codes as $code) {
+            if (trim($code)) {
+                VoucherInventory::insertOrIgnore([
+                    'voucher_id' => $request->voucher_id,
+                    'voucher_code' => trim($code),
+                    'created_at' => now()
+                ]);
+            }
+        }
+        return back()->with('success', 'Stock uploaded.');
+    }
+
+    public function creditWallet(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string'
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $newBalance = $user->wallet_balance + $request->amount;
+
+        $user->update(['wallet_balance' => $newBalance]);
+
+        WalletLedger::create([
+            'user_id' => $user->id,
+            'type' => 'credit',
+            'amount' => $request->amount,
+            'description' => $request->note ?? 'Manual Credit',
+        ]);
+
+        return back()->with('success', 'Wallet credited successfully.');
+    }
+
+    public function debitWallet(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string'
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        
+        if ($user->wallet_balance < $request->amount) {
+            return back()->with('error', 'Insufficient wallet balance.');
+        }
+
+        $newBalance = $user->wallet_balance - $request->amount;
+
+        $user->update(['wallet_balance' => $newBalance]);
+
+        WalletLedger::create([
+            'user_id' => $user->id,
+            'type' => 'debit',
+            'amount' => $request->amount,
+            'description' => $request->note ?? 'Manual Debit',
+        ]);
+
+        return back()->with('success', 'Wallet debited successfully.');
+    }
+
+    public function kycCompliance(Request $request)
+    {
+        return $this->approvals($request);
+    }
+
 
     public function notifications()
     {
@@ -295,5 +556,52 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Password updated successfully.');
+    }
+
+    public function auditLogsIndex()
+    {
+        $logs = AuditLog::with('user')->latest()->paginate(20);
+        return view('admin.audit.index', compact('logs'));
+    }
+
+    public function systemControlIndex()
+    {
+        $settings = SystemSetting::all()->pluck('settings_value', 'settings_key');
+        $logs = AuditLog::where('action', 'like', 'System %')->latest()->limit(10)->get();
+        return view('admin.system.control', compact('settings', 'logs'));
+    }
+
+    public function updateSystemControl(Request $request)
+    {
+        foreach ($request->settings as $key => $value) {
+            SystemSetting::updateOrCreate(
+                ['settings_key' => $key],
+                ['settings_value' => $value]
+            );
+        }
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'System Update',
+            'description' => 'System settings updated',
+            'ip_address' => $request->ip()
+        ]);
+
+        return back()->with('success', 'System settings updated.');
+    }
+
+    public function reportsIndex()
+    {
+        $stats = [
+            'total_sales' => Order::where('status', 'delivered')->sum('amount') ?? 0,
+            'total_orders' => Order::count(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'total_vouchers' => Vouchar::count(),
+            'total_users' => User::count(),
+        ];
+
+        $recent_orders = Order::with(['user', 'voucher'])->latest()->limit(5)->get();
+
+        return view('admin.reports.index', compact('stats', 'recent_orders'));
     }
 }

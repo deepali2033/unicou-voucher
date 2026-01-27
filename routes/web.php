@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\agent\Agentcontroller;
 use App\Http\Controllers\student\StudentController;
 use App\Http\Controllers\manager\ManagerController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('home.home');
@@ -20,6 +22,31 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+// Email Verification Routes
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/login')->with('success', 'Email verified successfully. Please login.');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
+
+Route::get('/test-mail', function() {
+    try {
+        \Illuminate\Support\Facades\Mail::raw('SMTP is working!', function($message) {
+            $message->to(auth()->user()->email)->subject('Test Mail');
+        });
+        return "Mail sent successfully to " . auth()->user()->email;
+    } catch (\Exception $e) {
+        return "Mail failed: " . $e->getMessage();
+    }
+})->middleware('auth');
 
 // Additional Registration Forms
 Route::middleware('auth')->group(function () {
@@ -37,20 +64,47 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
 
     Route::get('/revenue', [AdminController::class, 'revenue'])->name('revenue.index');
     Route::get('/stock-alerts', [AdminController::class, 'stockAlerts'])->name('stock.alerts');
-    Route::get('/system-control', [AdminController::class, 'systemControl'])->name('system.control');
     Route::post('/system-control/toggle', [AdminController::class, 'toggleSystem'])->name('system.toggle');
-    
+
     Route::get('/approvals', [AdminController::class, 'approvals'])->name('approvals.index');
     Route::post('/approvals/{user}/approve', [AdminController::class, 'approveUser'])->name('approvals.approve');
+    Route::post('/approvals/{user}/reject', [AdminController::class, 'rejectUser'])->name('approvals.reject');
 
     Route::get('/notifications', [AdminController::class, 'notifications'])->name('notifications.index');
 
     Route::get('/account', [AdminController::class, 'manageAccount'])->name('account.manage');
     Route::post('/account/update', [AdminController::class, 'updateAccount'])->name('account.update');
 
-    Route::get('/vouchers', function () {
-        return "Voucher Control";
-    })->name('vouchers.control');
+    Route::get('/kyc-compliance', [AdminController::class, 'kycCompliance'])->name('kyc.compliance');
+
+    Route::get('/wallet', [AdminController::class, 'walletManagement'])->name('wallet.index');
+    Route::post('/wallet/credit', [AdminController::class, 'creditWallet'])->name('wallet.credit');
+    Route::post('/wallet/debit', [AdminController::class, 'debitWallet'])->name('wallet.debit');
+
+    Route::get('/vouchers', [AdminController::class, 'vouchersControl'])->name('vouchers.control');
+
+    // New Sections
+    Route::get('/orders', [AdminController::class, 'ordersIndex'])->name('orders.index');
+    Route::post('/orders/{id}/deliver', [AdminController::class, 'deliverOrder'])->name('orders.deliver');
+    Route::post('/orders/{id}/cancel', [AdminController::class, 'cancelOrder'])->name('orders.cancel');
+
+    Route::get('/pricing', [AdminController::class, 'pricingIndex'])->name('pricing.index');
+    Route::post('/pricing/update', [AdminController::class, 'updatePricing'])->name('pricing.update');
+
+    Route::get('/inventory', [AdminController::class, 'inventoryIndex'])->name('inventory.index');
+    Route::post('/inventory/upload', [AdminController::class, 'uploadStock'])->name('inventory.upload');
+
+    // New Sections
+    Route::get('/reports', [AdminController::class, 'reportsIndex'])->name('reports.index');
+    Route::get('/system-control', [AdminController::class, 'systemControlIndex'])->name('system.control');
+    Route::post('/system-control/update', [AdminController::class, 'updateSystemControl'])->name('system.control.update');
+    Route::get('/audit-logs', [AdminController::class, 'auditLogsIndex'])->name('audit.index');
+
+    Route::post('/vouchers/store', [AdminController::class, 'storeVoucher'])->name('vouchers.store');
+    Route::post('/vouchers/{id}/update', [AdminController::class, 'updateVoucher'])->name('vouchers.update');
+    Route::delete('/vouchers/{id}/delete', [AdminController::class, 'deleteVoucher'])->name('vouchers.destroy');
+    Route::get('/vouchers/export', [AdminController::class, 'exportVouchers'])->name('vouchers.export');
+    Route::post('/vouchers/import', [AdminController::class, 'importVouchers'])->name('vouchers.import');
     Route::get('/users', [AdminController::class, 'usersManagemt'])->name('users.management');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
@@ -69,9 +123,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::get('/credits', function () {
         return "Add Credit";
     })->name('credits.add');
-    Route::get('/reports', function () {
-        return "Reports";
-    })->name('reports.index');
+
     Route::get('/contact-us', function () {
         return "Contact-Us";
     })->name('contact-us.index');

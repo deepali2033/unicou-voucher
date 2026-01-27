@@ -13,6 +13,7 @@ use Illuminate\View\View;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Vouchar;
 
 class Agentcontroller extends Controller
 {
@@ -83,7 +84,8 @@ class Agentcontroller extends Controller
     public function vouchers()
     {
         LocationHelper::storeLocationInSession();
-        return view('agent.vouchers');
+        $vouchers = Vouchar::where('status', 'active')->get();
+        return view('agent.vouchers', compact('vouchers'));
     }
 
     public function banks()
