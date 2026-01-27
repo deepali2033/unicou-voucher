@@ -1,101 +1,173 @@
-<aside style="width: 250px; background: #2c3e50; color: white; padding: 20px; height: calc(100vh - 60px); overflow-y: auto; position: fixed; left: 0; top: 60px;">
-    <nav>
-        <div style="margin-bottom: 30px;">
-            <h4 style="color: #ecf0f1; margin: 0 0 15px 0; font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Main Menu</h4>
+<!-- Sidebar -->
+<nav id="sidebar" class="col-md-3 col-lg-3 sidebar sidebar-hidden">
+    <div class="position-sticky pt-3">
+        <div class="text-center mb-4 d-flex justify-content-between align-items-center px-3">
+            <a class="text-start" href="/">
+                <img src="/images/company_logo.png" class="dashboard-logo" alt=""> </a>
+            <button id="close-sidebar" class="btn btn-link text-dark d-lg-none">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        @php
+        $role = auth()->user()->account_type ?? null;
+        @endphp
 
-            @if(Auth::user()->role === 'admin')
-            <a href="/admin/dashboard" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s; background: rgba(255, 255, 255, 0.1);">
-                📊 Dashboard
-            </a>
-            <a href="{{ route('profile.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                👤 My Profile
-            </a>
-            <a href="{{ route('notifications.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                🔔 Notifications
-            </a>
+        <ul class="nav flex-column gap-2">
 
-            <div style="margin-top: 20px;">
-                <h4 style="color: #ecf0f1; margin: 0 0 15px 0; font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Voucher Management</h4>
-                <a href="{{ route('admin.vouchers.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    🎟️ All Vouchers
-                </a>
-                <a href="{{ route('admin.vouchers.create') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s; background: rgba(40, 167, 69, 0.3); border-left: 3px solid #28a745;">
-                    ➕ Create Voucher
-                </a>
-                <a href="{{ route('admin.coupons.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    🏷️ Coupons
-                </a>
-                <a href="{{ route('admin.redemptions.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    ✅ Redemptions
-                </a>
-                <a href="{{ route('admin.bonuses.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    🎁 Bonuses
-                </a>
-                <a href="{{ route('admin.referral-campaigns.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    🌟 Referral Campaigns
-                </a>
-                <a href="{{ route('admin.referrals.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    🔗 Referrals
-                </a>
-            </div>
+            {{-- Dashboard (sab ke liye) --}}
+            @if($role)
 
-            <div style="margin-top: 20px;">
-                <h4 style="color: #ecf0f1; margin: 0 0 15px 0; font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Revenue Management</h4>
-                <a href="{{ route('admin.revenue.overview') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    📊 Overview
-                </a>
-                <a href="{{ route('admin.revenue.balance') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    💰 Balance
-                </a>
-                <a href="{{ route('admin.revenue.sales') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    📈 Sales
-                </a>
-                <a href="{{ route('admin.revenue.credit') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    💳 Credit
-                </a>
-                <a href="{{ route('admin.revenue.refunds') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    💸 Refunds
-                </a>
-                <a href="{{ route('admin.revenue.financial') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    📑 Financial
-                </a>
-            </div>
+            <li class="nav-item">
 
-            <div style="margin-top: 20px;">
-                <h4 style="color: #ecf0f1; margin: 0 0 15px 0; font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">Management</h4>
-                <a href="{{ route('admin.users.index') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    👥 Users
+                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                    href="{{ route('admin.dashboard') }}">
+                    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                 </a>
-                <a href="/admin/refunds" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    💰 Refunds
-                </a>
-                <a href="/admin/reports" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    📊 Reports
-                </a>
-            </div>
-
-            <div style="margin-top: 20px;">
-                <h4 style="color: #ecf0f1; margin: 0 0 15px 0; font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;">System</h4>
-                <a href="/admin/settings" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                    ⚙️ Settings
-                </a>
-            </div>
-            @elseif(Auth::user()->account_type === 'reseller_agent')
-            <a href="{{ route('agent.dashboard') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s; background: rgba(255, 255, 255, 0.1);">
-                📊 Dashboard
-            </a>
-            <a href="#" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                👤 My Profile
-            </a>
-            <a href="#" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s;">
-                🔔 Notifications
-            </a>
-            @elseif(Auth::user()->account_type === 'student')
-            <a href="{{ route('student.dashboard') }}" style="display: block; padding: 12px 15px; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 8px; transition: background 0.3s; background: rgba(255, 255, 255, 0.1);">
-                📊 Dashboard
-            </a>
+            </li>
             @endif
 
-        </div>
-    </nav>
-</aside>
+            {{-- User Management (Admin, Manager) --}}
+            @if(in_array($role, ['admin','manager']))
+            <li class="nav-item">
+
+                <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+                    href="{{ route('admin.users.management') }}">
+                    <i class="fas fa-users me-2"></i> User Management
+                </a>
+            </li>
+
+            @endif
+
+            {{-- KYC & Compliance (Admin, Support) --}}
+            @if(in_array($role, ['admin','support_team']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-id-card me-2"></i> KYC & Compliance
+                </a>
+            </li>
+            @endif
+
+            {{-- Wallet / Store Credit (Admin, Agent, Reseller) --}}
+            @if(in_array($role, ['admin','agent','reseller_agent']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-wallet me-2"></i> Wallet / Store Credit
+                </a>
+            </li>
+            @endif
+
+            {{-- Payments & Banking (Admin only) --}}
+            @if($role === 'admin')
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-university me-2"></i> Payments & Banking
+                </a>
+            </li>
+            @endif
+
+            {{-- Voucher Management (Admin, Manager) --}}
+            @if(in_array($role, ['admin','manager']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-ticket-alt me-2"></i> Voucher Management
+                </a>
+            </li>
+            @endif
+
+            {{-- Orders & Delivery (Admin, Agent, Support) --}}
+            @if(in_array($role, ['admin','agent','support_team']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-truck me-2"></i> Orders & Delivery
+                </a>
+            </li>
+            @endif
+
+            {{-- Pricing & Discounts (Admin only) --}}
+            @if($role === 'admin')
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-tags me-2"></i> Pricing & Discounts
+                </a>
+            </li>
+            @endif
+
+            {{-- Stock & Inventory (Admin, Manager) --}}
+            @if(in_array($role, ['admin','manager','support_team']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-boxes me-2"></i> Stock & Inventory
+                </a>
+            </li>
+            @endif
+
+            {{-- Disputes & Refunds (Admin, Support) --}}
+            @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-gavel me-2"></i> Disputes & Refunds
+                </a>
+            </li>
+            @endif
+
+            {{-- Reports & Analytics (Admin only) --}}
+            @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-chart-line me-2"></i> Reports & Analytics
+                </a>
+            </li>
+            @endif
+
+            {{-- System Control (Admin only) --}}
+            @if(in_array($role, ['admin','manager']))
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-cogs me-2"></i> System Control
+                </a>
+            </li>
+            @endif
+
+            {{-- Audit & Logs (Admin only) --}}
+            @if(in_array($role, ['admin','manager']))
+
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-clipboard-list me-2"></i> Audit & Logs
+                </a>
+            </li>
+            @endif
+
+        </ul>
+
+
+
+        <hr class="my-3" style="border-color: #495057;">
+
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url('/') }}" target="_blank">
+                    <i class="fas fa-external-link-alt me-2"></i>
+                    View Website
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}"
+                    href="{{ route('admin.notifications.index') }}">
+                    <i class="fas fa-bell me-2"></i>
+                    Notifications
+                </a>
+            </li>
+            <li class="nav-item">
+                <form method="POST" action="{{ route('auth.logout') }}" style="margin:0;">
+                    @csrf
+                    <button type="submit" class="nav-link"
+                        style="background:none;border:none;width:100%;text-align:left;cursor:pointer;padding:0.5rem 1rem;">
+                        <i class="fas fa-external-link-alt me-2"></i>
+                        Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>

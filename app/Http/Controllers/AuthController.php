@@ -41,7 +41,10 @@ class AuthController extends Controller
     {
         // 🔹 Step 1: Validate form + captcha
         $validated = $request->validate([
-            'account_type' => ['required', 'in:user,recruiter,freelancer,manager,reseller_agent,support_team,student,admin'],
+            'account_type' => [
+                'required',
+                'in:agent,manager,reseller_agent,support_team,student,admin'
+            ],
             'first_name'   => ['required', 'string', 'max:255'],
             'phone'        => ['required', 'string', 'max:20'],
             'country_code' => ['required', 'string', 'max:5'],

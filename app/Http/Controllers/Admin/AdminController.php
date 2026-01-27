@@ -156,6 +156,124 @@ class AdminController extends Controller
         return view('admin.users.show', compact('user'));
     }
 
+    public function createUser()
+    {
+        return view('admin.users.create');
+    }
+
+    public function storeUser(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user = User::create([
+            'user_id' => User::generateNextUserId($request->account_type),
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'email' => $request->email,
+            'password' => \Hash::make($request->password),
+            'account_type' => $request->account_type,
+            'phone' => $request->phone,
+            'profile_verification_status' => 'verified', // Admin created users are verified by default
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.users.management')->with('success', 'User created successfully.');
+    }
+
+    public function editUser(User $user)
+    {
+        return view('admin.users.edit', compact('user'));
+    }
+
+    public function updateUser(Request $request, User $user)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
+            'phone' => 'nullable|string|max:20',
+            'status' => 'required|in:pending,verified,suspended',
+        ]);
+
+        $user->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'email' => $request->email,
+            'account_type' => $request->account_type,
+            'phone' => $request->phone,
+            'profile_verification_status' => $request->status,
+        ]);
+
+        return redirect()->route('admin.users.management')->with('success', 'User updated successfully.');
+    }
+
+    public function suspendUser(User $user)
+    {
+
+        $newStatus = $user->profile_verification_status === 'suspended' ? 'verified' : 'suspended';
+        $user->update(['profile_verification_status' => $newStatus]);
+
+
+        $message = $newStatus === 'suspended' ? 'User suspended successfully.' : 'User unsuspended successfully.';
+        return back()->with('success', $message);
+    }
+
+    public function downloadPDF(Request $request)
+    {
+        // Simple CSV export as a fallback for PDF
+        $query = User::where('account_type', '!=', 'admin');
+
+        if ($request->has('role') && $request->role != 'all') {
+            $query->where('account_type', $request->role);
+        }
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->get();
+        $filename = "users_" . date('Y-m-d_H-i-s') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        fputcsv($handle, ['User ID', 'Name', 'Email', 'Role', 'Phone', 'Status', 'Created At']);
+
+        foreach ($users as $user) {
+            fputcsv($handle, [
+                $user->user_id,
+                $user->first_name . ' ' . $user->last_name,
+                $user->email,
+                $user->account_type,
+                $user->phone,
+                $user->profile_verification_status,
+                $user->created_at
+            ]);
+        }
+
+        fclose($handle);
+        exit;
+    }
+
     public function deleteUser(User $user)
     {
         $user->delete();

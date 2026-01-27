@@ -52,6 +52,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
         return "Voucher Control";
     })->name('vouchers.control');
     Route::get('/users', [AdminController::class, 'usersManagemt'])->name('users.management');
+    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+    Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+    // Using put for update
+    Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
+    Route::get('/users/download-pdf', [AdminController::class, 'downloadPDF'])->name('users.pdf');
 
     Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
     Route::post('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.password.update');
