@@ -504,3 +504,8 @@ form.row.g-3.align-items-center.cls_kyc_filter {
     align-items: unset !important;
 }
 /* admin dasbord css end */
+
+input.form-control:focus {
+    outline: none;
+    box-shadow: none;
+}
