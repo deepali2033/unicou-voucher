@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0"><i class="fas fa-shield-alt me-2 text-primary"></i> KYC & Compliance Management</h4>
+        <h4 class="fw-bold mb-0"><i class="fas fa-shield-alt me-2 text-primary"></i> KYC & Compliance</h4>
         <div class="d-flex gap-2">
             <span class="badge bg-warning text-dark px-3 py-2">Pending: {{ $pendingUsers->count() }}</span>
             <span class="badge bg-success px-3 py-2">Verified: {{ \App\Models\User::where('profile_verification_status', 'verified')->count() }}</span>
@@ -11,9 +11,9 @@
     </div>
 
     <!-- Filters -->
-    <div class="card shadow-sm border-0 mb-4">
+    <!-- <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <form action="{{ route('admin.approvals.index') }}" method="GET" class="row g-3 align-items-center">
+            <form action="{{ route('admin.approvals.index') }}" method="GET" class="row g-3 align-items-center cls_kyc_filter">
                 <div class="col-md-3">
                     <label class="form-label small fw-bold">Risk Level</label>
                     <select name="risk_level" class="form-select form-select-sm">
@@ -45,7 +45,62 @@
                 </div>
             </form>
         </div>
+    </div> -->
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <form action="{{ route('admin.users.management') }}" method="GET" class="row g-3 align-items-center">
+                        <div class="col-md-7">
+                            <div class="btn-group flex-wrap cls_us_manage" role="group">
+                                <a href="{{ route('admin.users.management', ['role' => 'all', 'search' => request('search')]) }}" 
+                                   class="btn btn-outline-primary {{ request('role', 'all') == 'all' ? 'active' : '' }}">All</a>
+                                <a href="{{ route('admin.users.management', ['role' => 'manager', 'search' => request('search')]) }}" 
+                                   class="btn btn-outline-primary {{ request('role') == 'manager' ? 'active' : '' }}">Manager</a>
+                                <a href="{{ route('admin.users.management', ['role' => 'reseller_agent', 'search' => request('search')]) }}" 
+                                   class="btn btn-outline-primary {{ request('role') == 'reseller_agent' ? 'active' : '' }}">Reseller Agent</a>
+                                <a href="{{ route('admin.users.management', ['role' => 'support_team', 'search' => request('search')]) }}" 
+                                   class="btn btn-outline-primary {{ request('role') == 'support_team' ? 'active' : '' }}">Support Team</a>
+                                <a href="{{ route('admin.users.management', ['role' => 'student', 'search' => request('search')]) }}" 
+                                   class="btn btn-outline-primary {{ request('role') == 'student' ? 'active' : '' }}">Student</a>
+                                <a href="{{ route('admin.users.management', ['role' => 'agent', 'search' => request('search')]) }}" 
+                                   class="btn btn-outline-primary {{ request('role') == 'agent' ? 'active' : '' }}">Agent</a>
+                            </div>
+                        </div>
+                        <input type="hidden" name="role" value="{{ request('role', 'all') }}">
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end d-flex gap-2 cls_us_mng_btns">
+                            <a href="{{ route('admin.users.pdf', ['role' => request('role'), 'search' => request('search')]) }}" class="btn btn-danger flex-fill">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </a>
+                            <a href="{{ route('admin.users.create') }}" class="btn btn-success flex-fill">
+                                <i class="fas fa-plus"></i> Add
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+
+
+
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
@@ -131,7 +186,7 @@
                             </td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="dropdown">
+                                    <button type="button" class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                         Actions
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">

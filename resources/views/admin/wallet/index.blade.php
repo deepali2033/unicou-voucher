@@ -26,12 +26,12 @@
         </div>
         <div class="col-md-8">
             <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 15px;">
-                <div class="d-flex flex-wrap gap-3 justify-content-center align-items-center h-100">
+                <div class="d-flex flex-wrap gap-3 justify-content-center align-items-center h-100 cls_wallet_btns">
                     <button class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#creditModal">
-                        <i class="fas fa-plus-circle me-2"></i> Credit Wallet (Manual)
+                        <i class="fas fa-plus-circle me-2"></i> Credit Wallet
                     </button>
                     <button class="btn btn-danger px-4" data-bs-toggle="modal" data-bs-target="#debitModal">
-                        <i class="fas fa-minus-circle me-2"></i> Debit Wallet (Manual)
+                        <i class="fas fa-minus-circle me-2"></i> Debit Wallet
                     </button>
                     <button class="btn btn-outline-primary px-4">
                         <i class="fas fa-plug me-2"></i> Auto Credit (Webhook)

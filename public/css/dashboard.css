@@ -476,3 +476,31 @@ card.card-stats h5.card-title.mb-0.text-black.text-muted {
     display: flex;
     white-space: nowrap;
 }
+
+@media (max-width: 600px) {
+
+img.mobile-logo {
+    width: 100%;
+    max-width: 150px;
+}
+
+.mobile-header.text-end.d-lg-none {
+    display: flex;
+    justify-content: space-between;
+}
+}
+/* admin dasbord css start */
+.btn-group.flex-wrap.cls_us_manage a {
+    font-size: 13px;
+}
+
+.col-md-2.text-end.d-flex.gap-2.cls_us_mng_btns a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+form.row.g-3.align-items-center.cls_kyc_filter {
+    align-items: unset !important;
+}
+/* admin dasbord css end */

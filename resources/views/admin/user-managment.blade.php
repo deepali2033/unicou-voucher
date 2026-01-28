@@ -9,7 +9,7 @@
                 <div class="card-body">
                     <form action="{{ route('admin.users.management') }}" method="GET" class="row g-3 align-items-center">
                         <div class="col-md-7">
-                            <div class="btn-group flex-wrap" role="group">
+                            <div class="btn-group flex-wrap cls_us_manage" role="group">
                                 <a href="{{ route('admin.users.management', ['role' => 'all', 'search' => request('search')]) }}" 
                                    class="btn btn-outline-primary {{ request('role', 'all') == 'all' ? 'active' : '' }}">All</a>
                                 <a href="{{ route('admin.users.management', ['role' => 'manager', 'search' => request('search')]) }}" 
@@ -33,7 +33,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-2 text-end d-flex gap-2">
+                        <div class="col-md-2 text-end d-flex gap-2 cls_us_mng_btns">
                             <a href="{{ route('admin.users.pdf', ['role' => request('role'), 'search' => request('search')]) }}" class="btn btn-danger flex-fill">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </a>
@@ -80,7 +80,10 @@
                                          class="rounded-circle me-3" width="40" height="40" alt="User" style="object-fit: cover; border: 1px solid #eee;">
                                     <div>
                                         <div class="fw-bold text-dark">{{ $user->first_name }} {{ $user->last_name }}</div>
-                                        <div class="text-muted small">{{ $user->user_id }} | {{ $user->email }}</div>
+                                        <div class="text-muted small">
+                                            <div class="user_id">{{ $user->user_id }} </div>
+                                            <div class="user_id_email" >{{ $user->email }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </td>
