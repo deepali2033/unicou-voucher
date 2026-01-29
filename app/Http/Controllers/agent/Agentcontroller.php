@@ -20,14 +20,14 @@ class Agentcontroller extends Controller
 
     public function dashboard()
     {
-        LocationHelper::storeLocationInSession();
+        // 
         $currentTime = now()->timezone(session('user_timezone', 'UTC'))->format('l d F Y, h:i A');
         return view('agent.dashboard', compact('currentTime'));
     }
 
     public function orderHistory(Request $request)
     {
-        LocationHelper::storeLocationInSession();
+        
         
         $query = Order::where('user_id', Auth::id());
 
@@ -83,14 +83,14 @@ class Agentcontroller extends Controller
 
     public function vouchers()
     {
-        LocationHelper::storeLocationInSession();
+        
         $vouchers = Vouchar::where('status', 'active')->get();
         return view('agent.vouchers', compact('vouchers'));
     }
 
     public function banks()
     {
-        LocationHelper::storeLocationInSession();
+        
         $banks = BankAccountModel::where('user_id', Auth::id())->get();
 
         return view('agent.bank_link', compact('banks'));
@@ -98,7 +98,7 @@ class Agentcontroller extends Controller
 
     public function deposit()
     {
-        LocationHelper::storeLocationInSession();
+        
         $countryData = CountryHelper::getCountryData(session('user_country_code', 'US'));
         $banks = BankAccountModel::where('user_id', Auth::id())->get();
 
@@ -107,7 +107,7 @@ class Agentcontroller extends Controller
 
     public function bankLink()
     {
-        LocationHelper::storeLocationInSession();
+        
         $countryData = CountryHelper::getCountryData(session('user_country_code', 'US'));
         $banks =   $banks = BankAccountModel::where('user_id', Auth::id())->get();
         return view('agent.bank_link', compact('countryData', 'banks'));

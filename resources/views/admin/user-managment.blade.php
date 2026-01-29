@@ -14,12 +14,12 @@
                                     class="btn btn-outline-primary {{ request('role', 'all') == 'all' ? 'active' : '' }}">All</a>
                                 <a href="{{ route('admin.users.management', ['role' => 'manager', 'search' => request('search')]) }}"
                                     class="btn btn-outline-primary {{ request('role') == 'manager' ? 'active' : '' }}">Manager</a>
-                                <a href="{{ route('admin.users.management', ['role' => 'reseller_agent', 'search' => request('search')]) }}"
-                                    class="btn btn-outline-primary {{ request('role') == 'reseller_agent' ? 'active' : '' }}">Reseller Agent</a>
                                 <a href="{{ route('admin.users.management', ['role' => 'support_team', 'search' => request('search')]) }}"
                                     class="btn btn-outline-primary {{ request('role') == 'support_team' ? 'active' : '' }}">Support Team</a>
                                 <a href="{{ route('admin.users.management', ['role' => 'student', 'search' => request('search')]) }}"
                                     class="btn btn-outline-primary {{ request('role') == 'student' ? 'active' : '' }}">Student</a>
+                                <a href="{{ route('admin.users.management', ['role' => 'reseller_agent', 'search' => request('search')]) }}"
+                                    class="btn btn-outline-primary {{ request('role') == 'reseller_agent' ? 'active' : '' }}">Reseller Agent</a>
                                 <a href="{{ route('admin.users.management', ['role' => 'agent', 'search' => request('search')]) }}"
                                     class="btn btn-outline-primary {{ request('role') == 'agent' ? 'active' : '' }}">Agent</a>
                             </div>

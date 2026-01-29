@@ -38,10 +38,26 @@
         </div>
         @endif
 
+<div class="wizard-steps mb-4">
+    <div class="wizard-step active" data-step="1">
+        <span>✓</span>
+        <small>TYPE</small>
+    </div>
+    <div class="wizard-step" data-step="2"><span>2</span><small>BUSINESS</small></div>
+    <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
+    <div class="wizard-step" data-step="4"><span>4</span><small>ONLINE</small></div>
+    <div class="wizard-step" data-step="5"><span>5</span><small>ID</small></div>
+    <div class="wizard-step" data-step="6"><span>6</span><small>BANK</small></div>
+    <div class="wizard-step" data-step="7"><span>7</span><small>UPLOAD</small></div>
+</div>
+
+
+
+
         <form id="satForm" method="POST" action="{{ route('auth.form.agent.post') }}" enctype="multipart/form-data">
             @csrf
             <!-- ================= AGENT TYPE ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="1">
                 <h4><span>01</span> Agent Type</h4>
 
                 <div class="sat-grid-2">
@@ -62,10 +78,15 @@
                         </div>
                     </label>
                 </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
             </section>
 
             <!-- ================= BUSINESS INFO ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="2">
                 <h4><span>02</span> Business Information</h4>
 
                 <div class="sat-grid-2">
@@ -100,10 +121,15 @@
                         <input type="email" name="business_email" placeholder="official@business.com" required>
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
             </section>
 
             <!-- ================= BUSINESS ADDRESS ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="3">
                 <h4><span>03</span> Business Address</h4>
 
                 <div class="sat-grid-2">
@@ -132,10 +158,15 @@
                         <input type="text" name="post_code" placeholder="Postal / ZIP code" required>
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
             </section>
 
             <!-- ================= ONLINE PRESENCE ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="4">
                 <h4><span>04</span> Online Presence</h4>
 
                 <div class="sat-grid-2">
@@ -149,10 +180,16 @@
                         <input type="url" name="social_media" placeholder="https://facebook.com / linkedin.com">
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
+
             </section>
 
             <!-- ================= REPRESENTATIVE ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="5">
                 <h4><span>05</span> Business Representative</h4>
 
                 <div class="sat-grid-2">
@@ -197,10 +234,16 @@
                         <input type="tel" name="whatsapp_number" placeholder="+CountryCode WhatsApp number" required>
                     </div>
                 </div>
+
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
             </section>
 
             <!-- ================= BANK DETAILS ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="6">
                 <h4><span>06</span> Bank Account Details</h4>
 
                 <div class="sat-grid-2">
@@ -219,10 +262,15 @@
                         <input type="text" name="account_number" placeholder="IBAN / Account number" required>
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
             </section>
 
             <!-- ================= UPLOADS ================= -->
-            <section class="sat-section">
+            <section class="sat-section form-step" data-step="7">
                 <h4><span>07</span> Upload Documents</h4>
                 <div class="alert alert-warning mb-3" style="font-size: 0.85rem;">
                     <i class="fas fa-exclamation-circle me-1"></i> <strong>Important:</strong> Your name, address, and date of birth in this form <b>MUST EXACTLY MATCH</b> the details on your uploaded ID documents. Discrepancies will lead to automatic rejection by ShuftiPro.
@@ -244,17 +292,23 @@
                         <input type="file" name="business_logo">
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
+
             </section>
 
             <!-- ================= CONSENTS ================= -->
-            <div class="sat-consent">
+            <div class="sat-consent form-step" data-step="8">
                 <input type="checkbox" required id="consent_policy">
                 <p>
                     I agree to the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Non-Refundable & Undisclosed Voucher Policy</a>.
                 </p>
             </div>
 
-            <div class="sat-consent">
+            <div class="sat-consent form-step" data-step="9">
                 <input type="checkbox" required id="consent_terms">
                 <p>
                     I accept the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and confirm all submitted information is correct.
@@ -359,5 +413,62 @@
         document.getElementById('consent_terms').checked = true;
     }
 </script>
+
+
+<script>
+let currentStep = parseInt(localStorage.getItem('agentStep')) || 1;
+
+const steps = document.querySelectorAll('.form-step');
+const indicators = document.querySelectorAll('.wizard-step');
+
+function showStep(step) {
+
+    // hide all form steps
+    steps.forEach(s => s.classList.remove('active'));
+
+    // reset stepper
+    indicators.forEach(i => {
+        i.classList.remove('active');
+        i.querySelector('span').innerText = i.dataset.step;
+    });
+
+    // show current form
+    document.querySelector(`.form-step[data-step="${step}"]`)?.classList.add('active');
+
+    // activate current step
+    const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
+    if (activeStep) {
+        activeStep.classList.add('active');
+        activeStep.querySelector('span').innerText = "✓";
+    }
+
+    localStorage.setItem('agentStep', step);
+}
+
+// init
+showStep(currentStep);
+
+// NEXT
+document.querySelectorAll('.next-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (currentStep < indicators.length) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    });
+});
+
+// BACK
+document.querySelectorAll('.prev-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+});
+</script>
+
+
 @endpush
 @endsection

@@ -119,7 +119,7 @@
                         @csrf
                         <input type="hidden" name="reason" value="Emergency System Halt">
                         <button type="submit" class="btn btn-outline-danger fw-bold py-3">
-                            <i class="fas fa-power-off me-2"></i> HALT ALL TRANSACTIONS
+                            <i class="fas fa-power-off me-2"></i> HOLD ALL TRANSACTIONS
                         </button>
                     </form>
 
