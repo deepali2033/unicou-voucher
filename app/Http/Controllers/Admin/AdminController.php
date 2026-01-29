@@ -6,9 +6,8 @@ use App\Models\Vouchar;
 use App\Models\Order;
 use App\Models\WalletLedger;
 use App\Models\PricingRule;
-use App\Models\VoucherInventory;
+use App\Models\InventoryVoucher;
 use App\Models\SystemSetting;
-use App\Models\AuditLog;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -188,13 +187,46 @@ class AdminController extends Controller
         return redirect()->route('admin.approvals.index')->with('success', 'User approved successfully and notification email sent.');
     }
 
-    public function vouchersControl()
+    public function vouchersControl(Request $request)
     {
+        $query = Vouchar::query();
 
-        $vouchers = Vouchar::latest()->get();
+        // Filters
+        if ($request->has('category') && $request->category != 'all') {
+            $query->where('category', $request->category);
+        }
 
-        // dd('hello');
-        return view('admin.voucher.voucher-control', compact('vouchers'));
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('voucher_id', 'like', "%$search%");
+            });
+        }
+
+        $vouchers = $query->latest()->get();
+
+        $stats = [
+            'total_vouchers' => Vouchar::count(),
+            'total_stock' => Vouchar::sum('stock'),
+            'total_valuation' => Vouchar::sum(\Illuminate\Support\Facades\DB::raw('price * stock')),
+            'active_brands' => Vouchar::distinct('category')->count('category'),
+        ];
+
+        $categories = Vouchar::distinct('category')->pluck('category');
+
+        return view('admin.voucher.voucher-control', compact('vouchers', 'stats', 'categories'));
+    }
+
+    public function createVoucher()
+    {
+        return view('admin.voucher.create');
+    }
+
+    public function editVoucher($id)
+    {
+        $voucher = Vouchar::findOrFail($id);
+        return view('admin.voucher.edit', compact('voucher'));
     }
 
 
@@ -206,7 +238,7 @@ class AdminController extends Controller
             'price' => 'required|numeric|min:0',
             'original_price' => 'nullable|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'quarterly_points' => 'nullable|integer|min:0',
+
             'yearly_points' => 'nullable|integer|min:0',
             'logo' => 'nullable|string',
             'description' => 'nullable|string',
@@ -219,7 +251,7 @@ class AdminController extends Controller
             'price' => $request->price,
             'original_price' => $request->original_price,
             'stock' => $request->stock,
-            'quarterly_points' => $request->quarterly_points ?? 0,
+
             'yearly_points' => $request->yearly_points ?? 0,
             'logo' => $request->logo,
             'description' => $request->description,
@@ -238,7 +270,7 @@ class AdminController extends Controller
             'price' => $request->price,
             'original_price' => $request->original_price,
             'stock' => $request->stock,
-            'quarterly_points' => $request->quarterly_points ?? 0,
+
             'yearly_points' => $request->yearly_points ?? 0,
             'status' => $request->status,
         ]);
@@ -388,13 +420,267 @@ class AdminController extends Controller
     }
 
     // Stock & Inventory
-    public function inventoryIndex()
+    public function inventoryIndex(Request $request)
     {
-        $vouchers = Vouchar::all();
-        $inventory = VoucherInventory::select('voucher_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'), \Illuminate\Support\Facades\DB::raw('sum(is_used) as used'))
-            ->groupBy('voucher_id')
-            ->get();
-        return view('admin.inventory.index', compact('vouchers', 'inventory'));
+        $query = InventoryVoucher::query();
+
+        // Filters
+        if ($request->has('countries') && !empty($request->countries)) {
+            $query->whereIn('country_region', $request->countries);
+        }
+
+        if ($request->has('types') && !empty($request->types)) {
+            $query->whereIn('voucher_type', $request->types);
+        }
+
+        if ($request->has('status') && !empty($request->status)) {
+            $query->whereIn('status', $request->status);
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'latest');
+        if ($sort == 'latest') {
+            $query->latest();
+        } elseif ($sort == 'oldest') {
+            $query->oldest();
+        }
+
+        $vouchers = $query->paginate(12)->withQueryString();
+
+        $stats = [
+            'total_stock' => InventoryVoucher::sum('quantity'),
+            'total_valuation' => InventoryVoucher::sum('purchase_value'),
+            'active_brands' => InventoryVoucher::distinct('brand_name')->count('brand_name'),
+        ];
+
+        // Unique countries for filters
+        $countries = InventoryVoucher::distinct('country_region')->pluck('country_region');
+
+        if ($request->ajax()) {
+            return view('admin.inventory.partials.voucher-list', compact('vouchers'))->render();
+        }
+
+        return view('admin.inventory.index', compact('vouchers', 'stats', 'countries'));
+    }
+
+    public function exportInventory(Request $request)
+    {
+        $vouchers = InventoryVoucher::all();
+        $filename = "inventory_" . date('Ymd') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        fputcsv($handle, [
+            'Sr. No.',
+            'SKU ID',
+            'DateTime',
+            'Brand Name',
+            'Country/Region',
+            'Currency',
+            'Voucher Variant',
+            'Voucher Type',
+            'Purchase Invoice No.',
+            'Purchase Date',
+            'Quantity',
+            'Purchase Value',
+            'Purchase Value Per Unit',
+            'Taxes',
+            'Local currency',
+            'Bank',
+            'Currency Conversion @',
+            'Referral Points to Reseller',
+            'Agent Referral Points Per Unit',
+            'Agent Bonus Points Per Unit',
+            'Agent Sale Price',
+            'Student Referral Points Per Unit',
+            'Student Bonus Points Per Unit',
+            'Student Sale Price'
+        ]);
+
+        foreach ($vouchers as $index => $v) {
+            fputcsv($handle, [
+                $index + 1,
+                $v->sku_id,
+                $v->created_at->format('Y-m-d H:i:s'),
+                $v->brand_name,
+                $v->country_region,
+                $v->currency,
+                $v->voucher_variant,
+                $v->voucher_type,
+                $v->purchase_invoice_no,
+                $v->purchase_date ? $v->purchase_date->format('Y-m-d') : '',
+                $v->quantity,
+                $v->purchase_value,
+                $v->purchase_value_per_unit,
+                $v->taxes,
+                $v->local_currency,
+                $v->bank,
+                $v->currency_conversion_rate,
+                $v->referral_points_reseller,
+                $v->agent_referral_points_per_unit,
+                $v->agent_bonus_points_per_unit,
+                $v->agent_sale_price,
+                $v->student_referral_points_per_unit,
+                $v->student_bonus_points_per_unit,
+                $v->student_sale_price
+            ]);
+        }
+
+        fclose($handle);
+        exit;
+    }
+
+    public function importInventory(Request $request)
+    {
+        $request->validate(['csv_file' => 'required|mimes:csv,txt']);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file->getRealPath(), 'r');
+        fgetcsv($handle); // Skip header
+
+        while (($data = fgetcsv($handle)) !== FALSE) {
+            // Mapping CSV columns to database fields
+            // Assuming the CSV follows the export format (ignoring Sr. No. and DateTime for import/update)
+            InventoryVoucher::updateOrCreate(
+                ['sku_id' => $data[1]], // SKU ID is column 1
+                [
+                    'brand_name' => $data[3],
+                    'country_region' => $data[4],
+                    'currency' => $data[5],
+                    'voucher_variant' => $data[6],
+                    'voucher_type' => $data[7],
+                    'purchase_invoice_no' => $data[8],
+                    'purchase_date' => !empty($data[9]) ? $data[9] : null,
+                    'quantity' => $data[10],
+                    'purchase_value' => $data[11],
+                    'purchase_value_per_unit' => $data[12],
+                    'taxes' => $data[13],
+                    'local_currency' => $data[14],
+                    'bank' => $data[15],
+                    'currency_conversion_rate' => $data[16],
+                    'referral_points_reseller' => $data[17],
+                    'agent_referral_points_per_unit' => $data[18],
+                    'agent_bonus_points_per_unit' => $data[19],
+                    'agent_sale_price' => $data[20],
+                    'student_referral_points_per_unit' => $data[21],
+                    'student_bonus_points_per_unit' => $data[22],
+                    'student_sale_price' => $data[23],
+                    'status' => 'IN STOCK', // Default status for imported items
+                ]
+            );
+        }
+
+        fclose($handle);
+        return back()->with('success', 'Inventory imported successfully.');
+    }
+
+    public function createInventory()
+    {
+        return view('admin.inventory.create');
+    }
+
+    public function storeInventory(Request $request)
+    {
+        $data = $request->validate([
+            'sku_id' => 'required|string|unique:inventory_vouchers,sku_id',
+            'brand_name' => 'required|string',
+            'country_region' => 'required|string',
+            'currency' => 'required|string',
+            'voucher_variant' => 'nullable|string',
+            'voucher_type' => 'nullable|string',
+            'purchase_invoice_no' => 'nullable|string',
+            'purchase_date' => 'nullable|date',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'quantity' => 'required|integer|min:1',
+            'purchase_value' => 'required|numeric|min:0',
+            'purchase_value_per_unit' => 'required|numeric|min:0',
+            'taxes' => 'nullable|numeric|min:0',
+            'local_currency' => 'nullable|string',
+            'bank' => 'nullable|string',
+            'currency_conversion_rate' => 'nullable|numeric|min:0',
+            'referral_points_reseller' => 'nullable|integer|min:0',
+            'agent_referral_points_per_unit' => 'nullable|integer|min:0',
+            'agent_bonus_points_per_unit' => 'nullable|integer|min:0',
+            'agent_sale_price' => 'required|numeric|min:0',
+            'student_referral_points_per_unit' => 'nullable|integer|min:0',
+            'student_bonus_points_per_unit' => 'nullable|integer|min:0',
+            'student_sale_price' => 'required|numeric|min:0',
+
+
+            'upload_vouchers' => 'nullable|string',
+            'status' => 'required|string'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $imageName = time() . '.' . $request->logo->extension();
+            $request->logo->move(public_path('uploads/logos'), $imageName);
+            $data['logo'] = '/uploads/logos/' . $imageName;
+        }
+
+        InventoryVoucher::create($data);
+
+        return redirect()->route('admin.inventory.index')->with('success', 'Voucher added successfully.');
+    }
+
+    public function editInventory($id)
+    {
+        $voucher = InventoryVoucher::findOrFail($id);
+        return view('admin.inventory.edit', compact('voucher'));
+    }
+
+    public function updateInventory(Request $request, $id)
+    {
+        $voucher = InventoryVoucher::findOrFail($id);
+
+        $data = $request->validate([
+            'sku_id' => 'required|string|unique:inventory_vouchers,sku_id,' . $id,
+            'brand_name' => 'required|string',
+            'country_region' => 'required|string',
+            'currency' => 'required|string',
+            'voucher_variant' => 'nullable|string',
+            'voucher_type' => 'nullable|string',
+            'purchase_invoice_no' => 'nullable|string',
+            'purchase_date' => 'nullable|date',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'quantity' => 'required|integer|min:1',
+            'purchase_value' => 'required|numeric|min:0',
+            'purchase_value_per_unit' => 'required|numeric|min:0',
+            'taxes' => 'nullable|numeric|min:0',
+            'local_currency' => 'nullable|string',
+            'bank' => 'nullable|string',
+            'currency_conversion_rate' => 'nullable|numeric|min:0',
+            'referral_points_reseller' => 'nullable|integer|min:0',
+            'agent_referral_points_per_unit' => 'nullable|integer|min:0',
+            'agent_bonus_points_per_unit' => 'nullable|integer|min:0',
+            'agent_sale_price' => 'required|numeric|min:0',
+            'student_referral_points_per_unit' => 'nullable|integer|min:0',
+            'student_bonus_points_per_unit' => 'nullable|integer|min:0',
+            'student_sale_price' => 'required|numeric|min:0',
+
+
+
+            'upload_vouchers' => 'nullable|string',
+            'status' => 'required|string'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $imageName = time() . '.' . $request->logo->extension();
+            $request->logo->move(public_path('uploads/logos'), $imageName);
+            $data['logo'] = '/uploads/logos/' . $imageName;
+        }
+
+        $voucher->update($data);
+
+        return redirect()->route('admin.inventory.index')->with('success', 'Voucher updated successfully.');
+    }
+
+    public function destroyInventory($id)
+    {
+        $voucher = InventoryVoucher::findOrFail($id);
+        $voucher->delete();
+        return response()->json(['success' => 'Voucher deleted successfully.']);
     }
 
     public function uploadStock(Request $request)

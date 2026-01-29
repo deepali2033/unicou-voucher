@@ -83,6 +83,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::post('/wallet/debit', [AdminController::class, 'debitWallet'])->name('wallet.debit');
 
     Route::get('/vouchers', [AdminController::class, 'vouchersControl'])->name('vouchers.control');
+    Route::get('/vouchers/create', [AdminController::class, 'createVoucher'])->name('vouchers.create');
+    Route::get('/vouchers/{id}/edit', [AdminController::class, 'editVoucher'])->name('vouchers.edit');
 
     // New Sections
     Route::get('/orders', [AdminController::class, 'ordersIndex'])->name('orders.index');
@@ -94,6 +96,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::post('/pricing/update', [AdminController::class, 'updatePricing'])->name('pricing.update');
 
     Route::get('/inventory', [AdminController::class, 'inventoryIndex'])->name('inventory.index');
+    Route::get('/inventory/create', [AdminController::class, 'createInventory'])->name('inventory.create');
+    Route::post('/inventory/store', [AdminController::class, 'storeInventory'])->name('inventory.store');
+    Route::get('/inventory/{id}/edit', [AdminController::class, 'editInventory'])->name('inventory.edit');
+    Route::post('/inventory/{id}/update', [AdminController::class, 'updateInventory'])->name('inventory.update');
+    Route::delete('/inventory/{id}/delete', [AdminController::class, 'destroyInventory'])->name('inventory.destroy');
+    Route::get('/inventory/export', [AdminController::class, 'exportInventory'])->name('inventory.export');
+    Route::post('/inventory/import', [AdminController::class, 'importInventory'])->name('inventory.import');
     Route::post('/inventory/upload', [AdminController::class, 'uploadStock'])->name('inventory.upload');
 
     // New Sections
