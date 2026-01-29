@@ -11,7 +11,7 @@
                         <p class="text-muted small fw-bold mb-1 text-uppercase">Total System Balance</p>
                         <h2 class="fw-bold mb-0">${{ number_format($stats['total_balance'], 2) }}</h2>
                     </div>
-                    <div class="bg-primary-subtle p-3 rounded-circle">
+                    <div class="d-flex bg-primary-subtle p-3 rounded-circle">
                         <i class="fas fa-wallet text-primary"></i>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
                         <p class="text-muted small fw-bold mb-1 text-uppercase">Total Credits</p>
                         <h2 class="fw-bold mb-0">${{ number_format($stats['total_credits'], 2) }}</h2>
                     </div>
-                    <div class="bg-success-subtle p-3 rounded-circle">
+                    <div class="d-flex bg-success-subtle p-3 rounded-circle">
                         <i class="fas fa-arrow-up text-success"></i>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
                         <p class="text-muted small fw-bold mb-1 text-uppercase">Total Debits</p>
                         <h2 class="fw-bold mb-0">${{ number_format($stats['total_debits'], 2) }}</h2>
                     </div>
-                    <div class="bg-danger-subtle p-3 rounded-circle">
+                    <div class="d-flex bg-danger-subtle p-3 rounded-circle">
                         <i class="fas fa-arrow-down text-danger"></i>
                     </div>
                 </div>

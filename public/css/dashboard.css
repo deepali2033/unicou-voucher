@@ -513,3 +513,7 @@ form.row.g-3.align-items-center.cls_kyc_filter {
     gap: 8px;
     justify-content: end;
 }
+
+.cls_user_edit{
+    width: 100%;
+}
