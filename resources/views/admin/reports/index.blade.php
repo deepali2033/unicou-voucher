@@ -1,5 +1,4 @@
-@extends('admin.layout.app')
-
+@extends('layouts.master')
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4">
@@ -76,12 +75,12 @@
                                     <td>${{ number_format($order->total_amount, 2) }}</td>
                                     <td>
                                         @php
-                                            $badgeClass = match($order->status) {
-                                                'delivered' => 'bg-success',
-                                                'pending' => 'bg-warning text-dark',
-                                                'cancelled' => 'bg-danger',
-                                                default => 'bg-secondary'
-                                            };
+                                        $badgeClass = match($order->status) {
+                                        'delivered' => 'bg-success',
+                                        'pending' => 'bg-warning text-dark',
+                                        'cancelled' => 'bg-danger',
+                                        default => 'bg-secondary'
+                                        };
                                         @endphp
                                         <span class="badge {{ $badgeClass }}">{{ ucfirst($order->status) }}</span>
                                     </td>
@@ -122,7 +121,7 @@
                             <span class="badge bg-success">Operational</span>
                         </li>
                     </ul>
-                    
+
                     <div class="mt-4">
                         <h6 class="fw-bold mb-3">Quick Actions</h6>
                         <div class="d-grid gap-2">

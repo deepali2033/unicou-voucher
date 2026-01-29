@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
@@ -18,10 +18,10 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
-            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     @endif
 
     <div class="row">
@@ -33,25 +33,25 @@
                         <!-- Logo Section (Left) -->
                         <div class="col-5 text-center border-end" style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
                             @if($voucher->logo)
-                                <img src="{{ asset('images/logos/' . $voucher->logo) }}" alt="{{ $voucher->name }}" style="max-width: 100%; max-height: 70px; object-fit: contain;">
+                            <img src="{{ asset('images/logos/' . $voucher->logo) }}" alt="{{ $voucher->name }}" style="max-width: 100%; max-height: 70px; object-fit: contain;">
                             @else
-                                <div class="text-muted small">
-                                    <i class="fas fa-image fa-3x opacity-25"></i><br>
-                                    No Logo
-                                </div>
+                            <div class="text-muted small">
+                                <i class="fas fa-image fa-3x opacity-25"></i><br>
+                                No Logo
+                            </div>
                             @endif
                         </div>
-                        
+
                         <!-- Details Section (Right) -->
                         <div class="col-7 ps-3">
                             <h6 class="fw-bold mb-2 text-dark" style="font-size: 0.85rem; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
                                 {{ $voucher->name }}
                             </h6>
-                            
+
                             <div class="mb-2">
                                 <span class="fw-bold text-dark" style="font-size: 1rem;">PKR {{ number_format($voucher->price) }}</span>
                                 @if($voucher->original_price)
-                                    <span class="text-danger text-decoration-line-through ms-1" style="font-size: 0.75rem;">PKR {{ number_format($voucher->original_price) }}</span>
+                                <span class="text-danger text-decoration-line-through ms-1" style="font-size: 0.75rem;">PKR {{ number_format($voucher->original_price) }}</span>
                                 @endif
                             </div>
 
@@ -233,8 +233,16 @@
 </div>
 
 <style>
-    .bg-info-subtle { background-color: #e0f7fa; }
-    .bg-success-subtle { background-color: #e8f5e9; }
-    .bg-danger-subtle { background-color: #ffebee; }
+    .bg-info-subtle {
+        background-color: #e0f7fa;
+    }
+
+    .bg-success-subtle {
+        background-color: #e8f5e9;
+    }
+
+    .bg-danger-subtle {
+        background-color: #ffebee;
+    }
 </style>
 @endsection

@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('admin.layout.app')
 
 @section('content')
 <div class="container-fluid">
@@ -14,15 +14,7 @@
             </form>
             @endif
 
-            <form action="{{ route('admin.users.suspend', $user->id) }}" method="POST">
-                @csrf
-                <button type="submit" class="btn {{ $user->profile_verification_status === 'suspended' ? 'btn-outline-success' : 'btn-outline-warning' }}">
-                    <i class="fas {{ $user->profile_verification_status === 'suspended' ? 'fa-play' : 'fa-pause' }} me-2"></i>
-                    {{ $user->profile_verification_status === 'suspended' ? 'Unsuspend' : 'Suspend' }}
-                </button>
-            </form>
-
-            <a href="{{ route('admin.users.management') }}" class="btn btn-secondary">
+            <a href="{{ url()->previous() }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i> Back
             </a>
         </div>
@@ -93,6 +85,73 @@
                 </div>
             </div>
 
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">KYC Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @if($user->aadhar_card)
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 text-center">
+                                <i class="fas fa-address-card fa-2x mb-2 text-primary"></i>
+                                <div class="small fw-bold mb-2">Aadhar Card</div>
+                                <a href="{{ asset('storage/' . $user->aadhar_card) }}" target="_blank" class="btn btn-sm btn-outline-primary">View Document</a>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($user->pan_card)
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 text-center">
+                                <i class="fas fa-credit-card fa-2x mb-2 text-primary"></i>
+                                <div class="small fw-bold mb-2">PAN Card</div>
+                                <a href="{{ asset('storage/' . $user->pan_card) }}" target="_blank" class="btn btn-sm btn-outline-primary">View Document</a>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($user->account_type === 'reseller_agent' && $user->agentDetail)
+                        @if($user->agentDetail->registration_doc)
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 text-center">
+                                <i class="fas fa-file-invoice fa-2x mb-2 text-info"></i>
+                                <div class="small fw-bold mb-2">Business Registration</div>
+                                <a href="{{ asset('storage/' . $user->agentDetail->registration_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
+                            </div>
+                        </div>
+                        @endif
+                        @if($user->agentDetail->id_doc)
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 text-center">
+                                <i class="fas fa-id-card fa-2x mb-2 text-info"></i>
+                                <div class="small fw-bold mb-2">Identity Document</div>
+                                <a href="{{ asset('storage/' . $user->agentDetail->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
+                            </div>
+                        </div>
+                        @endif
+                        @elseif($user->account_type === 'student' && $user->studentDetail)
+                        @if($user->studentDetail->id_doc)
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 text-center">
+                                <i class="fas fa-id-card fa-2x mb-2 text-info"></i>
+                                <div class="small fw-bold mb-2">Student ID</div>
+                                <a href="{{ asset('storage/' . $user->studentDetail->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
+                            </div>
+                        </div>
+                        @endif
+                        @endif
+
+                        @if(!$user->aadhar_card && !$user->pan_card && !($user->agentDetail && $user->agentDetail->registration_doc) && !($user->agentDetail && $user->agentDetail->id_doc) && !($user->studentDetail && $user->studentDetail->id_doc))
+                        <div class="col-12 text-center py-4 text-muted">
+                            <i class="fas fa-info-circle mb-2"></i>
+                            <p>No KYC documents uploaded yet.</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             @if($user->account_type === 'reseller_agent' && $user->agentDetail)
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
@@ -103,44 +162,6 @@
                 </div>
             </div>
             @endif
-
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold">Security</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.users.password.update', $user->id) }}" method="POST">
-                        @csrf
-                        <div class="row g-3">
-                            <div class="col-md-5">
-                                <label class="form-label small text-muted">Reset Password</label>
-                                <input type="password" name="password" class="form-control form-control-sm" placeholder="New password" required>
-                            </div>
-                            <div class="col-md-5">
-                                <label class="form-label small text-muted">Confirm</label>
-                                <input type="password" name="password_confirmation" class="form-control form-control-sm" placeholder="Confirm" required>
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary btn-sm w-100">Update</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold text-danger">Delete User</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">Deleting this user will permanently remove all associated data.</p>
-                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Delete permanently?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm">Delete Account</button>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
@@ -31,10 +31,10 @@
                         <tr>
                             <td>
                                 @if($log->user)
-                                    <div class="fw-bold">{{ $log->user->name }}</div>
-                                    <div class="small text-muted">{{ $log->user->email }}</div>
+                                <div class="fw-bold">{{ $log->user->name }}</div>
+                                <div class="small text-muted">{{ $log->user->email }}</div>
                                 @else
-                                    <span class="text-muted">System / Unknown</span>
+                                <span class="text-muted">System / Unknown</span>
                                 @endif
                             </td>
                             <td>
