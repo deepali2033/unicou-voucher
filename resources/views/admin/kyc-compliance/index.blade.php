@@ -1,89 +1,53 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold mb-0"><i class="fas fa-shield-alt me-2 text-primary"></i> KYC & Compliance</h4>
         <div class="d-flex gap-2">
-            <span class="badge bg-warning text-dark px-3 py-2">Pending: {{ $pendingUsers->count() }}</span>
+            <span class="badge bg-warning text-dark px-3 py-2">Pending: {{ \App\Models\User::where('profile_verification_status', 'pending')->count() }}</span>
             <span class="badge bg-success px-3 py-2">Verified: {{ \App\Models\User::where('profile_verification_status', 'verified')->count() }}</span>
         </div>
     </div>
-
-    <!-- Filters -->
-    <!-- <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <form action="{{ route('admin.approvals.index') }}" method="GET" class="row g-3 align-items-center cls_kyc_filter">
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Risk Level</label>
-                    <select name="risk_level" class="form-select form-select-sm">
-                        <option value="">All Risk Levels</option>
-                        <option value="low">Low Risk</option>
-                        <option value="medium">Medium Risk</option>
-                        <option value="high">High Risk</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Verification Status</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="pending">Pending Approval</option>
-                        <option value="verified">Verified</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small fw-bold">Search User</label>
-                    <div class="input-group input-group-sm">
-                        <input type="text" name="search" class="form-control" placeholder="Search by name or ID...">
-                        <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                    </div>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="button" class="btn btn-outline-secondary btn-sm w-100">
-                        <i class="fas fa-filter me-1"></i> More Filters
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div> -->
 
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <form action="{{ route('admin.users.management') }}" method="GET" class="row g-3 align-items-center">
+                    <form action="{{ route('admin.approvals.index') }}" method="GET" class="row g-3 align-items-center">
                         <div class="col-md-7">
                             <div class="btn-group flex-wrap cls_us_manage" role="group">
-                                <a href="{{ route('admin.users.management', ['role' => 'all', 'search' => request('search')]) }}" 
-                                   class="btn btn-outline-primary {{ request('role', 'all') == 'all' ? 'active' : '' }}">All</a>
-                                <a href="{{ route('admin.users.management', ['role' => 'manager', 'search' => request('search')]) }}" 
-                                   class="btn btn-outline-primary {{ request('role') == 'manager' ? 'active' : '' }}">Manager</a>
-                                <a href="{{ route('admin.users.management', ['role' => 'reseller_agent', 'search' => request('search')]) }}" 
-                                   class="btn btn-outline-primary {{ request('role') == 'reseller_agent' ? 'active' : '' }}">Reseller Agent</a>
-                                <a href="{{ route('admin.users.management', ['role' => 'support_team', 'search' => request('search')]) }}" 
-                                   class="btn btn-outline-primary {{ request('role') == 'support_team' ? 'active' : '' }}">Support Team</a>
-                                <a href="{{ route('admin.users.management', ['role' => 'student', 'search' => request('search')]) }}" 
-                                   class="btn btn-outline-primary {{ request('role') == 'student' ? 'active' : '' }}">Student</a>
-                                <a href="{{ route('admin.users.management', ['role' => 'agent', 'search' => request('search')]) }}" 
-                                   class="btn btn-outline-primary {{ request('role') == 'agent' ? 'active' : '' }}">Agent</a>
+                                <a href="{{ route('admin.approvals.index', ['role' => 'all', 'search' => request('search'), 'status' => request('status')]) }}"
+                                    class="btn btn-outline-primary {{ request('role', 'all') == 'all' ? 'active' : '' }}">All Roles</a>
+                                <a href="{{ route('admin.approvals.index', ['role' => 'manager', 'search' => request('search'), 'status' => request('status')]) }}"
+                                    class="btn btn-outline-primary {{ request('role') == 'manager' ? 'active' : '' }}">Manager</a>
+                                <a href="{{ route('admin.approvals.index', ['role' => 'reseller_agent', 'search' => request('search'), 'status' => request('status')]) }}"
+                                    class="btn btn-outline-primary {{ request('role') == 'reseller_agent' ? 'active' : '' }}">Reseller Agent</a>
+                                <a href="{{ route('admin.approvals.index', ['role' => 'support_team', 'search' => request('search'), 'status' => request('status')]) }}"
+                                    class="btn btn-outline-primary {{ request('role') == 'support_team' ? 'active' : '' }}">Support Team</a>
+                                <a href="{{ route('admin.approvals.index', ['role' => 'student', 'search' => request('search'), 'status' => request('status')]) }}"
+                                    class="btn btn-outline-primary {{ request('role') == 'student' ? 'active' : '' }}">Student</a>
+                                <a href="{{ route('admin.approvals.index', ['role' => 'agent', 'search' => request('search'), 'status' => request('status')]) }}"
+                                    class="btn btn-outline-primary {{ request('role') == 'agent' ? 'active' : '' }}">Agent</a>
                             </div>
                         </div>
                         <input type="hidden" name="role" value="{{ request('role', 'all') }}">
                         <div class="col-md-3">
                             <div class="input-group">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name..." value="{{ request('search') }}">
+                                <input type="text" name="search" class="form-control" placeholder="Search by name or ID..." value="{{ request('search') }}">
                                 <button class="btn btn-primary" type="submit">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-2 text-end d-flex gap-2 cls_us_mng_btns">
-                            <a href="{{ route('admin.users.pdf', ['role' => request('role'), 'search' => request('search')]) }}" class="btn btn-danger flex-fill">
-                                <i class="fas fa-file-pdf"></i> PDF
-                            </a>
-                            <a href="{{ route('admin.users.create') }}" class="btn btn-success flex-fill">
-                                <i class="fas fa-plus"></i> Add
-                            </a>
+                        <div class="col-md-2 text-end">
+                            <select name="status" class="form-select" onchange="this.form.submit()">
+                                <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="verified" {{ request('status') == 'verified' ? 'selected' : '' }}>Verified</option>
+                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspended</option>
+                            </select>
                         </div>
                     </form>
                 </div>
@@ -91,141 +55,9 @@
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-
-
-
-
-
     <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">User Details</th>
-                            <th>Role</th>
-                            <th>KYC Documents</th>
-                            <th>Compliance Flags</th>
-                            <th>Status</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pendingUsers as $user)
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                                        {{ substr($user->first_name, 0, 1) }}{{ substr($user->last_name, 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $user->first_name }} {{ $user->last_name }}</div>
-                                        <div class="text-muted small">{{ $user->user_id }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark border px-2">{{ ucfirst(str_replace('_', ' ', $user->account_type)) }}</span>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    @if($user->account_type === 'reseller_agent' && $user->agentDetail)
-                                    @if($user->agentDetail->registration_doc)
-                                    <a href="{{ asset('storage/' . $user->agentDetail->registration_doc) }}" target="_blank" class="btn btn-xs btn-outline-info" title="Business Registration">
-                                        <i class="fas fa-file-invoice"></i> Reg
-                                    </a>
-                                    @endif
-                                    @if($user->agentDetail->id_doc)
-                                    <a href="{{ asset('storage/' . $user->agentDetail->id_doc) }}" target="_blank" class="btn btn-xs btn-outline-info" title="Identity Document">
-                                        <i class="fas fa-id-card"></i> ID
-                                    </a>
-                                    @endif
-                                    @elseif($user->account_type === 'student' && $user->studentDetail)
-                                    @if($user->studentDetail->id_doc)
-                                    <a href="{{ asset('storage/' . $user->studentDetail->id_doc) }}" target="_blank" class="btn btn-xs btn-outline-info" title="Student ID">
-                                        <i class="fas fa-id-card"></i> ID
-                                    </a>
-                                    @endif
-                                    @endif
-
-                                    @if($user->aadhar_card)
-                                    <a href="{{ asset('storage/' . $user->aadhar_card) }}" target="_blank" class="btn btn-xs btn-outline-primary" title="Aadhar Card">
-                                        <i class="fas fa-address-card"></i> Aadhar
-                                    </a>
-                                    @endif
-                                    @if($user->pan_card)
-                                    <a href="{{ asset('storage/' . $user->pan_card) }}" target="_blank" class="btn btn-xs btn-outline-primary" title="PAN Card">
-                                        <i class="fas fa-credit-card"></i> PAN
-                                    </a>
-                                    @endif
-
-                                    @if(!$user->agentDetail && !$user->studentDetail && !$user->aadhar_card && !$user->pan_card)
-                                    <span class="text-muted small">No Docs</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">Identity Verified</span>
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.7rem;">Email Verified</span>
-                                    @if($user->account_type === 'reseller_agent')
-                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.7rem;">Business Review</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning-subtle text-warning px-3 py-2">
-                                    <i class="fas fa-clock me-1"></i> Pending
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        Actions
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                        <li>
-                                            <form action="{{ route('admin.approvals.approve', $user->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item text-success"><i class="fas fa-check-circle me-2"></i> Approve KYC</button>
-                                            </form>
-                                        </li>
-                                        <li>
-                                            <form action="{{ route('admin.approvals.reject', $user->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Reject this KYC application?')">
-                                                    <i class="fas fa-times-circle me-2"></i> Reject KYC
-                                                </button>
-                                            </form>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.users.show', $user->id) }}"><i class="fas fa-eye me-2 text-info"></i> View Full Profile</a></li>
-                                        <li><a class="dropdown-item text-warning" href="#"><i class="fas fa-flag me-2"></i> Flag Compliance</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-clipboard-check fa-3x mb-3"></i>
-                                    <p>No KYC applications waiting for review.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+        <div class="card-body p-0" id="table-container">
+            @include('admin.partials.kyc-table')
         </div>
     </div>
 </div>
@@ -251,5 +83,88 @@
     .bg-info-subtle {
         background-color: #cff4fc;
     }
+
+    .status-select {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+        width: auto;
+        display: inline-block;
+    }
 </style>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        function updateTable(url) {
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    $('#table-container').html(data);
+                    // Update URL without reload
+                    window.history.pushState({}, '', url);
+
+                    // Update hidden role input if it exists in the URL
+                    const urlParams = new URLSearchParams(url.split('?')[1]);
+                    if (urlParams.has('role')) {
+                        $('input[name="role"]').val(urlParams.get('role'));
+                    }
+                }
+            });
+        }
+
+        // Handle Pagination
+        $(document).on('click', '.ajax-pagination a', function(e) {
+            e.preventDefault();
+            updateTable($(this).attr('href'));
+        });
+
+        // Handle Filters & Search
+        $('form').on('submit', function(e) {
+            e.preventDefault();
+            let url = $(this).attr('action') + '?' + $(this).serialize();
+            updateTable(url);
+        });
+
+        $('.btn-group a').on('click', function(e) {
+            e.preventDefault();
+            $('.btn-group a').removeClass('active');
+            $(this).addClass('active');
+            updateTable($(this).attr('href'));
+        });
+
+        // Handle AJAX Status Change
+        $(document).on('change', '.status-update-dropdown', function() {
+            let status = $(this).val();
+            let url = $(this).data('action');
+            let userId = $(this).data('user-id');
+
+            if (!confirm('Are you sure you want to change status to ' + status + '?')) {
+                // Revert dropdown if cancelled
+                updateTable(window.location.href);
+                return;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    status: status
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.success);
+                        // No need to refresh the whole table if we just changed one status, 
+                        // but it helps keep flags and counts in sync
+                        updateTable(window.location.href);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Something went wrong. Please try again.');
+                }
+            });
+        });
+    });
+</script>
+@endpush
 @endsection

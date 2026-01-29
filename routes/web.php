@@ -37,9 +37,9 @@ Route::post('/email/verification-notification', [AuthController::class, 'resendV
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
 
-Route::get('/test-mail', function() {
+Route::get('/test-mail', function () {
     try {
-        \Illuminate\Support\Facades\Mail::raw('SMTP is working!', function($message) {
+        \Illuminate\Support\Facades\Mail::raw('SMTP is working!', function ($message) {
             $message->to(auth()->user()->email)->subject('Test Mail');
         });
         return "Mail sent successfully to " . auth()->user()->email;
@@ -67,6 +67,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::post('/system-control/toggle', [AdminController::class, 'toggleSystem'])->name('system.toggle');
 
     Route::get('/approvals', [AdminController::class, 'approvals'])->name('approvals.index');
+    Route::post('/approvals/{user}/status', [AdminController::class, 'updateUserStatus'])->name('approvals.update-status');
     Route::post('/approvals/{user}/approve', [AdminController::class, 'approveUser'])->name('approvals.approve');
     Route::post('/approvals/{user}/reject', [AdminController::class, 'rejectUser'])->name('approvals.reject');
 
@@ -76,6 +77,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::post('/account/update', [AdminController::class, 'updateAccount'])->name('account.update');
 
     Route::get('/kyc-compliance', [AdminController::class, 'kycCompliance'])->name('kyc.compliance');
+    Route::get('/kyc-compliance/{user}', [AdminController::class, 'viewKyc'])->name('kyc.show');
 
     Route::get('/wallet', [AdminController::class, 'walletManagement'])->name('wallet.index');
     Route::post('/wallet/credit', [AdminController::class, 'creditWallet'])->name('wallet.credit');
@@ -85,6 +87,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
 
     // New Sections
     Route::get('/orders', [AdminController::class, 'ordersIndex'])->name('orders.index');
+    Route::get('/orders/export', [AdminController::class, 'exportOrders'])->name('orders.export');
     Route::post('/orders/{id}/deliver', [AdminController::class, 'deliverOrder'])->name('orders.deliver');
     Route::post('/orders/{id}/cancel', [AdminController::class, 'cancelOrder'])->name('orders.cancel');
 
@@ -113,6 +116,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
     Route::get('/users/download-pdf', [AdminController::class, 'downloadPDF'])->name('users.pdf');
+
+    Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])
+        ->name('users.toggle');
 
     Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
     Route::post('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.password.update');
@@ -164,6 +170,23 @@ Route::prefix('manager')->name('manager.')->middleware(['auth', 'account_type:ma
     Route::get('/disputes', [ManagerController::class, 'disputes'])->name('disputes');
     Route::get('/system/stop', [ManagerController::class, 'stopSystem'])->name('system.stop');
     Route::get('/reports', [ManagerController::class, 'reports'])->name('reports');
+
+
+    Route::get('/users', [AdminController::class, 'usersManagemt'])->name('users.management');
+    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
+    Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
+    Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+    // Using put for update
+    Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
+    Route::get('/users/download-pdf', [AdminController::class, 'downloadPDF'])->name('users.pdf');
+
+    Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])
+        ->name('users.toggle');
+
+    Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
+    Route::post('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.password.update');
+    // Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
 });
 
 // Student Routes

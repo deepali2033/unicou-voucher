@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
@@ -36,13 +36,13 @@
                             </td>
                             <td>
                                 @if($user->account_type === 'reseller_agent' && $user->agentDetail)
-                                    <div class="small"><strong>Business:</strong> {{ $user->agentDetail->business_name }}</div>
-                                    <div class="small text-muted">Type: {{ $user->agentDetail->business_type }}</div>
+                                <div class="small"><strong>Business:</strong> {{ $user->agentDetail->business_name }}</div>
+                                <div class="small text-muted">Type: {{ $user->agentDetail->business_type }}</div>
                                 @elseif($user->account_type === 'student' && $user->studentDetail)
-                                    <div class="small"><strong>Student:</strong> {{ $user->studentDetail->full_name }}</div>
-                                    <div class="small text-muted">Education: {{ $user->studentDetail->highest_education }}</div>
+                                <div class="small"><strong>Student:</strong> {{ $user->studentDetail->full_name }}</div>
+                                <div class="small text-muted">Education: {{ $user->studentDetail->highest_education }}</div>
                                 @else
-                                    <span class="text-muted small">No details provided</span>
+                                <span class="text-muted small">No details provided</span>
                                 @endif
                             </td>
                             <td class="text-end">

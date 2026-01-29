@@ -107,7 +107,7 @@
             @endif
 
             {{-- Disputes & Refunds (Admin, Support) --}}
-            @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
+            @if(in_array($role, ['agent', 'manager', 'reseller_agent', 'support_team', 'student', 'admin']))
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="fas fa-gavel me-2"></i> Disputes & Refunds
@@ -116,7 +116,7 @@
             @endif
 
             {{-- Reports & Analytics (Admin only) --}}
-            @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
+            @if(in_array($role, ['agent', 'manager', 'reseller_agent', 'support_team', 'student', 'admin']))
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="fas fa-chart-line me-2"></i> Reports & Analytics

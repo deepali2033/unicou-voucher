@@ -3,61 +3,95 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Http;
+use App\Models\Bank;
 
 class LocationHelper
 {
-    public static function storeLocationInSession($request = null)
+    /* ===============================
+       1. Detect Country via IP
+    ================================ */
+    public static function geo()
     {
-        if (session()->has('user_country_code') && !request()->has('refresh_location')) {
-            return;
+        if (session()->has('geo')) {
+            return session('geo');
         }
+
+        $ip = request()->ip();
+
+        // Local testing ke liye:
+        // $ip = '8.8.8.8';
 
         try {
-            $ip = $request ? $request->ip() : request()->ip();
-            
-            // Local IP check
-            if ($ip == '127.0.0.1' || $ip == '::1') {
-                $ip = ''; // Let ipapi.co detect public IP
-            }
-
-            $response = Http::timeout(5)->get("https://ipapi.co/{$ip}/json/");
-            if ($response->successful()) {
-                $data = $response->json();
-
-                if (isset($data['error'])) {
-                    throw new \Exception($data['reason'] ?? 'IP API Error');
-                }
-
-                $countryCode = $data['country_code'] ?? 'US';
-                $flagUrl = "https://flagcdn.com/w40/" . strtolower($countryCode) . ".png";
-
-                session([
-                    'user_country_code' => $countryCode,
-                    'user_country_name' => $data['country_name'] ?? 'United States',
-                    'user_timezone'     => $data['timezone'] ?? 'UTC',
-                    'user_currency'     => $data['currency'] ?? 'USD',
-                    'user_city'         => $data['city'] ?? 'Unknown',
-                    'user_flag'         => $flagUrl,
-                ]);
-
-                // Map symbols
-                $symbols = ['PKR' => 'Rs.', 'INR' => '₹', 'BDT' => '৳', 'USD' => '$', 'AE' => 'DH'];
-                if (isset($symbols[$data['currency'] ?? ''])) {
-                    session(['user_currency_symbol' => $symbols[$data['currency']]]);
-                }
-
-                session()->forget('api_error');
-            }
+            $response = Http::timeout(3)->get("https://ipapi.co/{$ip}/json/");
+            $data = $response->json();
+            dd($response);
         } catch (\Exception $e) {
-            session(['api_error' => 'Location detection failed. Defaulting to US.']);
-            session([
-                'user_country_code' => 'US',
-                'user_country_name' => 'United States',
-                'user_timezone'     => 'UTC',
-                'user_currency'     => 'USD',
-                'user_flag'         => 'https://flagcdn.com/w40/us.png',
-                'user_currency_symbol' => '$',
-            ]);
+            $data = [];
         }
+
+        $geo = [
+            'country_code' => $data['country'] ?? 'IN',
+            'country_name' => $data['country_name'] ?? 'India',
+            'currency'     => $data['currency'] ?? 'INR',
+            'flag'         => strtolower($data['country'] ?? 'in'),
+        ];
+
+        session(['geo' => $geo]);
+
+        return $geo;
+    }
+
+    /* ===============================
+       2. Currency Code
+    ================================ */
+    public static function currency()
+    {
+        return self::geo()['currency'];
+    }
+
+    /* ===============================
+       3. Flag URL
+    ================================ */
+    public static function flag()
+    {
+        $code = self::geo()['flag'];
+        return "https://flagcdn.com/w40/{$code}.png";
+    }
+
+    /* ===============================
+       4. Price Convert
+    ================================ */
+    public static function price($amount)
+    {
+        $rates = [
+            'INR' => 1,
+            'USD' => 0.012,
+            'AED' => 0.044,
+            'EUR' => 0.011,
+        ];
+
+        $currency = self::currency();
+        $rate = $rates[$currency] ?? 1;
+
+        return round($amount * $rate, 2);
+    }
+
+    /* ===============================
+       5. Country-wise Banks
+    ================================ */
+    public static function banks()
+    {
+        $country = self::geo()['country_code'];
+        return Bank::where('country_code', $country)->get();
+    }
+
+    /* ===============================
+       6. Bank Validation Rules
+    ================================ */
+    public static function bankRules()
+    {
+        return self::geo()['country_code'] === 'IN'
+            ? ['ifsc_code' => 'required']
+            : ['swift_code' => 'required'];
     }
 }

@@ -15,6 +15,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap" rel="stylesheet">
+    <!-- Toastr CSS -->
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        #toast-container>.toast {
+            opacity: 1 !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -129,7 +138,7 @@
                         @endif
 
                         {{-- Disputes & Refunds (Admin, Support) --}}
-                        @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
+                        @if(in_array($role, ['agent', 'manager', 'reseller_agent', 'support_team', 'student', 'admin']))
                         <li class="nav-item">
                             <a class="nav-link" href="#">
                                 <i class="fas fa-gavel me-2"></i> Disputes & Refunds
@@ -211,23 +220,40 @@
 
                 @include('layouts.header')
 
-                @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                @endif
-
                 @yield('content')
 
             </main>
         </div>
     </div>
-
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <!-- Custom JS -->
     <script>
+        // Toastr Configuration
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "3000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+
         const sidebar = document.getElementById('sidebar');
         const openSidebarBtn = document.getElementById('open-sidebar');
         const closeSidebarBtn = document.getElementById('close-sidebar');
@@ -250,6 +276,7 @@
             overlay.classList.remove('overlay-active');
         });
     </script>
+    @stack('scripts')
 </body>
 
 </html>

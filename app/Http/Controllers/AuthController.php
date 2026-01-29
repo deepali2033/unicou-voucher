@@ -95,7 +95,7 @@ class AuthController extends Controller
 
         // 🔹 Step 5: Login & redirect to verification notice
         Auth::login($user);
-        LocationHelper::storeLocationInSession($request);
+
 
         return redirect()->route('verification.notice');
     }
@@ -120,8 +120,16 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Invalid credentials']);
         }
 
+        // 🔴 IMPORTANT: Freeze check
+        if (auth()->user()->is_active == 0) {
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'Your account is temporarily frozen by admin. Please contact support.'
+            ]);
+        }
+
         $request->session()->regenerate();
-        LocationHelper::storeLocationInSession($request);
 
         if (!auth()->user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
@@ -399,5 +407,21 @@ class AuthController extends Controller
             'admin'          => redirect()->route('admin.dashboard'),
             default          => redirect('/'),
         };
+    }
+    public function toggleUserStatus($id)
+    {
+        $user = User::findOrFail($id);
+
+        $user->is_active = !$user->is_active;
+
+        if ($user->is_active == 0) {
+            $user->frozen_at = now();
+        } else {
+            $user->frozen_at = null;
+        }
+
+        $user->save();
+
+        return back()->with('success', 'User status updated successfully');
     }
 }

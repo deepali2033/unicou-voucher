@@ -505,8 +505,11 @@ form.row.g-3.align-items-center.cls_kyc_filter {
     align-items: unset !important;
 }
 /* admin dasbord css end */
-
-input.form-control:focus {
-    outline: none;
-    box-shadow: none;
+.action-btns a {
+    display: inline-block !important;
+    width: max-content;
+}
+.action-btns {
+    gap: 8px;
+    justify-content: end;
 }

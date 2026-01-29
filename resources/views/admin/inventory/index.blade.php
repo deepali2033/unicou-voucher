@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
@@ -50,11 +50,11 @@
                             </thead>
                             <tbody>
                                 @forelse($inventory as $item)
-                                @php 
-                                    $available = $item->total - $item->used;
-                                    $statusClass = $available < 10 ? 'bg-danger' : ($available < 50 ? 'bg-warning' : 'bg-success');
-                                @endphp
-                                <tr>
+                                @php
+                                $available = $item->total - $item->used;
+                                $statusClass = $available < 10 ? 'bg-danger' : ($available < 50 ? 'bg-warning' : 'bg-success' );
+                                    @endphp
+                                    <tr>
                                     <td class="ps-4 fw-bold">
                                         @php $v = $vouchers->firstWhere('voucher_id', $item->voucher_id); @endphp
                                         {{ $v ? $v->name : $item->voucher_id }}
@@ -67,12 +67,12 @@
                                             {{ $available < 10 ? 'LOW STOCK' : 'IN STOCK' }}
                                         </span>
                                     </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-5">No inventory data available.</td>
-                                </tr>
-                                @endforelse
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5">No inventory data available.</td>
+                                    </tr>
+                                    @endforelse
                             </tbody>
                         </table>
                     </div>

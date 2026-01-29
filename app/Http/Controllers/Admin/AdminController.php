@@ -55,6 +55,10 @@ class AdminController extends Controller
 
         $users = $query->latest()->paginate(10)->withQueryString();
 
+        if ($request->ajax()) {
+            return view('admin.partials.users-table', compact('users'))->render();
+        }
+
         return view('admin.user-managment', compact('users'));
     }
 
@@ -77,7 +81,7 @@ class AdminController extends Controller
     public function stockAlerts()
     {
         $vouchers = Vouchar::where('stock', '<', 10)->get();
-        $alerts = $vouchers->map(function($v) {
+        $alerts = $vouchers->map(function ($v) {
             return [
                 'type' => $v->name,
                 'remaining' => $v->stock,
@@ -97,10 +101,12 @@ class AdminController extends Controller
         $query = User::where('account_type', '!=', 'admin')
             ->with(['agentDetail', 'studentDetail']);
 
-        if ($request->has('status') && $request->status != '') {
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
             $query->where('profile_verification_status', $request->status);
-        } else {
-            $query->where('profile_verification_status', 'pending');
+        }
+
+        if ($request->has('role') && $request->role != 'all' && $request->role != '') {
+            $query->where('account_type', $request->role);
         }
 
         if ($request->has('search') && $request->search != '') {
@@ -108,12 +114,41 @@ class AdminController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%$search%")
                     ->orWhere('last_name', 'like', "%$search%")
-                    ->orWhere('user_id', 'like', "%$search%");
+                    ->orWhere('user_id', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%");
             });
         }
 
-        $pendingUsers = $query->latest()->get();
+        $pendingUsers = $query->latest()->paginate(10)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('admin.partials.kyc-table', compact('pendingUsers'))->render();
+        }
+
         return view('admin.kyc-compliance.index', compact('pendingUsers'));
+    }
+
+    public function updateUserStatus(Request $request, User $user)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,verified,rejected,suspended'
+        ]);
+
+        $user->update([
+            'profile_verification_status' => $request->status,
+            'verified_at' => in_array($request->status, ['verified', 'rejected']) ? now() : $user->verified_at,
+            'verified_by' => in_array($request->status, ['verified', 'rejected']) ? auth()->id() : $user->verified_by,
+        ]);
+
+        if ($request->status === 'verified') {
+            try {
+                Mail::to($user->email)->send(new UserApproved($user));
+            } catch (\Exception $e) {
+                // Handle mail error
+            }
+        }
+
+        return response()->json(['success' => 'User status updated to ' . ucfirst($request->status)]);
     }
 
     public function rejectUser(User $user)
@@ -123,6 +158,10 @@ class AdminController extends Controller
             'verified_at' => now(),
             'verified_by' => auth()->id()
         ]);
+
+        if (request()->ajax()) {
+            return response()->json(['success' => 'User KYC rejected successfully.']);
+        }
 
         return redirect()->route('admin.approvals.index')->with('success', 'User KYC rejected successfully.');
     }
@@ -140,6 +179,10 @@ class AdminController extends Controller
             Mail::to($user->email)->send(new UserApproved($user));
         } catch (\Exception $e) {
             // Log error or handle silently if mail server is not configured
+        }
+
+        if (request()->ajax()) {
+            return response()->json(['success' => 'User approved successfully and notification email sent.']);
         }
 
         return redirect()->route('admin.approvals.index')->with('success', 'User approved successfully and notification email sent.');
@@ -256,16 +299,60 @@ class AdminController extends Controller
     public function walletManagement(Request $request)
     {
         $users = User::where('account_type', '!=', 'admin')->get();
-        $ledger = WalletLedger::latest()->limit(20)->get();
-        
-        return view('admin.wallet.index', compact('users', 'ledger'));
+        $ledger = WalletLedger::with('user')->latest()->limit(20)->get();
+
+        $stats = [
+            'total_balance' => User::where('account_type', '!=', 'admin')->sum('wallet_balance'),
+            'total_credits' => WalletLedger::where('type', 'credit')->sum('amount'),
+            'total_debits' => WalletLedger::where('type', 'debit')->sum('amount'),
+        ];
+
+        if ($request->ajax() && $request->has('tab')) {
+            $tab = $request->tab;
+            if ($tab == 'users') {
+                return view('admin.wallet.partials.users-table', compact('users'))->render();
+            } elseif ($tab == 'ledger') {
+                return view('admin.wallet.partials.ledger-table', compact('ledger'))->render();
+            } elseif ($tab == 'webhooks') {
+                return view('admin.wallet.partials.webhooks-table')->render();
+            }
+        }
+
+        return view('admin.wallet.index', compact('users', 'ledger', 'stats'));
     }
 
     // Orders & Delivery
     public function ordersIndex()
     {
-        $orders = Order::with(['user', 'voucher'])->latest()->get();
+        $orders = Order::with(['user', 'voucher'])->latest()->paginate(10);
         return view('admin.orders.index', compact('orders'));
+    }
+
+    public function exportOrders()
+    {
+        $orders = Order::with(['user', 'voucher'])->get();
+        $filename = "orders_" . date('Ymd') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        fputcsv($handle, ['Order ID', 'Date', 'Customer', 'Email', 'Voucher', 'Amount', 'Status']);
+
+        foreach ($orders as $o) {
+            fputcsv($handle, [
+                $o->order_id,
+                $o->created_at->format('Y-m-d'),
+                $o->user->name ?? 'N/A',
+                $o->user->email ?? 'N/A',
+                $o->voucher->name ?? $o->voucher_type,
+                $o->amount,
+                $o->status
+            ]);
+        }
+
+        fclose($handle);
+        exit;
     }
 
     public function deliverOrder(Request $request, $id)
@@ -345,6 +432,10 @@ class AdminController extends Controller
             'description' => $request->note ?? 'Manual Credit',
         ]);
 
+        if ($request->ajax()) {
+            return response()->json(['success' => 'Wallet credited successfully.']);
+        }
+
         return back()->with('success', 'Wallet credited successfully.');
     }
 
@@ -357,8 +448,11 @@ class AdminController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        
+
         if ($user->wallet_balance < $request->amount) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Insufficient wallet balance.'], 422);
+            }
             return back()->with('error', 'Insufficient wallet balance.');
         }
 
@@ -372,6 +466,10 @@ class AdminController extends Controller
             'amount' => $request->amount,
             'description' => $request->note ?? 'Manual Debit',
         ]);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => 'Wallet debited successfully.']);
+        }
 
         return back()->with('success', 'Wallet debited successfully.');
     }
@@ -415,6 +513,12 @@ class AdminController extends Controller
     public function viewUser(User $user)
     {
         return view('admin.users.show', compact('user'));
+    }
+
+    public function viewKyc(User $user)
+    {
+        $user->load(['agentDetail', 'studentDetail']);
+        return view('admin.kyc-compliance.show', compact('user'));
     }
 
     public function createUser()
@@ -487,6 +591,11 @@ class AdminController extends Controller
 
 
         $message = $newStatus === 'suspended' ? 'User suspended successfully.' : 'User unsuspended successfully.';
+
+        if (request()->ajax()) {
+            return response()->json(['success' => $message]);
+        }
+
         return back()->with('success', $message);
     }
 
@@ -538,6 +647,11 @@ class AdminController extends Controller
     public function deleteUser(User $user)
     {
         $user->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => 'User deleted successfully']);
+        }
+
         return redirect()->route('admin.users.management')->with('success', 'User deleted successfully');
     }
 
@@ -603,5 +717,28 @@ class AdminController extends Controller
         $recent_orders = Order::with(['user', 'voucher'])->latest()->limit(5)->get();
 
         return view('admin.reports.index', compact('stats', 'recent_orders'));
+    }
+    public function toggleUserStatus($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Admin apna account freeze na kare
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You cannot freeze your own account'
+            ], 403);
+        }
+
+        // Toggle status
+        $user->is_active = $user->is_active ? 0 : 1;
+        $user->save();
+
+        return response()->json([
+            'status'  => $user->is_active ? 'active' : 'frozen',
+            'message' => $user->is_active
+                ? 'User account unfrozen successfully'
+                : 'User account frozen successfully'
+        ]);
     }
 }

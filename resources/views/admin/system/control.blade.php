@@ -1,4 +1,4 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
@@ -114,7 +114,7 @@
                 <div class="card-body py-4">
                     <h5 class="fw-bold text-danger mb-3">Emergency Actions</h5>
                     <p class="small text-muted mb-4">These actions have immediate global impact. Use with caution.</p>
-                    
+
                     <form action="{{ route('admin.system.toggle') }}" method="POST" class="d-grid gap-3">
                         @csrf
                         <input type="hidden" name="reason" value="Emergency System Halt">
@@ -122,9 +122,9 @@
                             <i class="fas fa-power-off me-2"></i> HALT ALL TRANSACTIONS
                         </button>
                     </form>
-                    
+
                     <hr class="my-4">
-                    
+
                     <div class="d-grid gap-3">
                         <button class="btn btn-light border btn-sm text-start py-3 px-3">
                             <i class="fas fa-broom me-2 text-warning"></i> Clear System Cache

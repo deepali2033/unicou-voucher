@@ -1,5 +1,4 @@
-@extends('admin.layout.app')
-
+@extends('layouts.master')
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -36,9 +35,9 @@
                             <td>
                                 @if($alert['remaining'] <= $alert['threshold'])
                                     <span class="text-danger small fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> Low Stock</span>
-                                @else
+                                    @else
                                     <span class="text-success small fw-bold">Good</span>
-                                @endif
+                                    @endif
                             </td>
                             <td>
                                 <div class="form-check form-switch">

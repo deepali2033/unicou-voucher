@@ -16,6 +16,7 @@
         @endif
     </div>
 
+
     <div class="header-right d-flex align-items-center gap-3">
         @if(session('api_error'))
         <div class="alert alert-warning p-1 px-2 m-0 small" style="font-size: 0.7rem;">

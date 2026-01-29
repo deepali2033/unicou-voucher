@@ -1,203 +1,256 @@
-@extends('admin.layout.app')
+@extends('layouts.master')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 20px;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small fw-bold mb-1 text-uppercase">Total System Balance</p>
+                        <h2 class="fw-bold mb-0">${{ number_format($stats['total_balance'], 2) }}</h2>
+                    </div>
+                    <div class="bg-primary-subtle p-3 rounded-circle">
+                        <i class="fas fa-wallet text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 20px; border-left: 4px solid #198754;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small fw-bold mb-1 text-uppercase">Total Credits</p>
+                        <h2 class="fw-bold mb-0">${{ number_format($stats['total_credits'], 2) }}</h2>
+                    </div>
+                    <div class="bg-success-subtle p-3 rounded-circle">
+                        <i class="fas fa-arrow-up text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 20px; border-left: 4px solid #dc3545;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted small fw-bold mb-1 text-uppercase">Total Debits</p>
+                        <h2 class="fw-bold mb-0">${{ number_format($stats['total_debits'], 2) }}</h2>
+                    </div>
+                    <div class="bg-danger-subtle p-3 rounded-circle">
+                        <i class="fas fa-arrow-down text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis Banner -->
     <div class="row mb-4">
         <div class="col-12">
-            <h4 class="fw-bold">Wallet / Store Credit Management</h4>
-            <p class="text-muted">Manage user balances, manual adjustments, and view transaction history.</p>
+            <div class="alert border-0 shadow-sm p-4 d-flex align-items-center" style="border-radius: 15px; background-color: #f0f7ff; color: #0052cc;">
+                <div class="bg-white rounded-circle p-2 me-3 shadow-sm">
+                    <i class="fas fa-magic text-primary"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-1">AI Ledger Analysis</h6>
+                    <p class="mb-0 small">The wallet activity recorded a net {{ $stats['total_credits'] > $stats['total_debits'] ? 'positive' : 'negative' }} cash flow of ${{ number_format(abs($stats['total_credits'] - $stats['total_debits']), 2) }} across all analyzed user accounts recently.</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="alert alert-success border-0 shadow-sm mb-4">{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-    <div class="alert alert-danger border-0 shadow-sm mb-4">{{ session('error') }}</div>
-    @endif
-
-    <!-- Quick Stats & Actions -->
+    <!-- Tabs Navigation -->
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 15px;">
-                <h6 class="text-muted mb-2">Total System Balance</h6>
-                <h2 class="fw-bold mb-0 text-primary">PKR {{ number_format($users->sum('wallet_balance')) }}</h2>
-            </div>
-        </div>
-        <div class="col-md-8">
-            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 15px;">
-                <div class="d-flex flex-wrap gap-3 justify-content-center align-items-center h-100 cls_wallet_btns">
-                    <button class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#creditModal">
-                        <i class="fas fa-plus-circle me-2"></i> Credit Wallet
-                    </button>
-                    <button class="btn btn-danger px-4" data-bs-toggle="modal" data-bs-target="#debitModal">
-                        <i class="fas fa-minus-circle me-2"></i> Debit Wallet
-                    </button>
-                    <button class="btn btn-outline-primary px-4">
-                        <i class="fas fa-plug me-2"></i> Auto Credit (Webhook)
-                    </button>
-                </div>
-            </div>
+        <div class="col-12">
+            <ul class="nav nav-tabs border-0 gap-4" id="walletTabs">
+                <li class="nav-item">
+                    <a class="nav-link active fw-bold border-0 px-0 pb-2" data-bs-toggle="tab" href="#users" data-tab="users" style="color: #666; border-bottom: 3px solid transparent !important;">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-bold border-0 px-0 pb-2" data-bs-toggle="tab" href="#ledger" data-tab="ledger" style="color: #666; border-bottom: 3px solid transparent !important;">Ledger</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-bold border-0 px-0 pb-2" data-bs-toggle="tab" href="#webhooks" data-tab="webhooks" style="color: #666; border-bottom: 3px solid transparent !important;">Webhooks</a>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <!-- Ledger & User Table -->
     <div class="row">
-        <div class="col-lg-12">
-            <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold mb-0">Recent Wallet Ledger</h5>
+        <!-- Left Column: Tab Content -->
+        <div class="col-lg-8">
+            <div class="tab-content" id="table-container">
+                <div class="tab-pane fade show active" id="users">
+                    @include('admin.wallet.partials.users-table')
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4">Date</th>
-                                    <th>User</th>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($ledger as $entry)
-                                <tr>
-                                    <td class="ps-4 small text-muted">{{ \Carbon\Carbon::parse($entry->created_at)->format('d M Y, h:i A') }}</td>
-                                    <td>
-                                        @php $ledgerUser = $users->firstWhere('id', $entry->user_id); @endphp
-                                        <div class="fw-bold">{{ $ledgerUser ? $ledgerUser->name : 'Unknown' }}</div>
-                                        <div class="small text-muted">{{ $ledgerUser ? $ledgerUser->user_id : 'ID N/A' }}</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge {{ $entry->type == 'credit' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3">
-                                            {{ strtoupper($entry->type) }}
-                                        </span>
-                                    </td>
-                                    <td class="fw-bold {{ $entry->type == 'credit' ? 'text-success' : 'text-danger' }}">
-                                        {{ $entry->type == 'credit' ? '+' : '-' }} PKR {{ number_format($entry->amount) }}
-                                    </td>
-                                    <td class="small">{{ $entry->description }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted">No recent ledger entries found.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                <div class="tab-pane fade" id="ledger">
+                    @include('admin.wallet.partials.ledger-table')
+                </div>
+                <div class="tab-pane fade" id="webhooks">
+                    <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: 15px;">
+                        <i class="fas fa-plug fa-3x text-muted mb-3"></i>
+                        <h5>Webhook Integration</h5>
+                        <p class="text-muted">Auto-credit and API logs will appear here.</p>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- 
+
+        <!-- Right Column: Manual Adjustment -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold mb-0">User Balances</h5>
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 20px;">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-circle p-2 me-3" style="background-color: #f0f4ff; color: #4c6ef5; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Manual Adjustment</h5>
                 </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        @foreach($users->take(10) as $user)
-                        <div class="list-group-item border-0 px-4 py-3 d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-bold small">{{ $user->name }}</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">{{ $user->user_id }}</div>
-                            </div>
-                            <div class="fw-bold text-dark">PKR {{ number_format($user->wallet_balance) }}</div>
+
+                <form id="adjustmentForm" action="{{ route('admin.wallet.credit') }}" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Select User</label>
+                        <select name="user_id" id="user-select" class="form-select border-0 bg-light p-3" style="border-radius: 10px;" required>
+                            <option value="">Choose a user...</option>
+                            @foreach($users as $user)
+                            <option value="{{ $user->id }}" data-balance="{{ number_format($user->wallet_balance, 2) }}">
+                                {{ $user->name }} (${{ number_format($user->wallet_balance, 2) }})
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Amount ($)</label>
+                        <input type="number" step="0.01" name="amount" class="form-control border-0 bg-light p-3" placeholder="0.00" style="border-radius: 10px;" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Internal Note (Optional)</label>
+                        <textarea name="note" class="form-control border-0 bg-light p-3" rows="3" placeholder="Reason for adjustment..." style="border-radius: 10px;"></textarea>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-success w-100 py-3 fw-bold submit-btn" data-type="credit" style="border-radius: 10px; background-color: #6fc2a6; border: none;">
+                                Credit (+)
+                            </button>
                         </div>
-                        @endforeach
+                        <div class="col-6">
+                            <button type="button" class="btn btn-danger w-100 py-3 fw-bold submit-btn" data-type="debit" style="border-radius: 10px; background-color: #ef9a9a; border: none;">
+                                Debit (-)
+                            </button>
+                        </div>
                     </div>
-                    <div class="p-3 text-center border-top">
-                        <a href="{{ route('admin.users.management') }}" class="btn btn-sm btn-link text-primary text-decoration-none">View All Users</a>
-                    </div>
-                </div>
+                </form>
             </div>
-        </div> -->
-    </div>
-</div>
-
-<!-- Credit Modal -->
-<div class="modal fade" id="creditModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="{{ route('admin.wallet.credit') }}" method="POST">
-            @csrf
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Manual Wallet Credit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Select User</label>
-                        <select name="user_id" class="form-select" required>
-                            @foreach($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->user_id }} - Balance: {{ number_format($user->wallet_balance) }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Amount (PKR)</label>
-                        <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Note/Reason</label>
-                        <textarea name="note" class="form-control" rows="2" placeholder="e.g. Refund, Bonus, etc."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success px-4">Credit Wallet</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Debit Modal -->
-<div class="modal fade" id="debitModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form action="{{ route('admin.wallet.debit') }}" method="POST">
-            @csrf
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Manual Wallet Debit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Select User</label>
-                        <select name="user_id" class="form-select" required>
-                            @foreach($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->user_id }} - Balance: {{ number_format($user->wallet_balance) }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Amount (PKR)</label>
-                        <input type="number" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Note/Reason</label>
-                        <textarea name="note" class="form-control" rows="2" placeholder="e.g. Penalty, Adjustment, etc."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger px-4">Debit Wallet</button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 <style>
+    .nav-tabs .nav-link.active {
+        color: #4c6ef5 !important;
+        border-bottom: 3px solid #4c6ef5 !important;
+        background: transparent !important;
+    }
+
+    .bg-primary-subtle {
+        background-color: #e7f1ff;
+    }
+
     .bg-success-subtle {
-        background-color: #e8f5e9;
+        background-color: #e6f6f1;
     }
 
     .bg-danger-subtle {
-        background-color: #ffebee;
+        background-color: #fbe9e9;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        box-shadow: none;
+        background-color: #f1f3f5;
     }
 </style>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Tab switching with AJAX (optional, but implemented for completeness)
+        $('#walletTabs a').on('click', function(e) {
+            e.preventDefault();
+            let tab = $(this).data('tab');
+            let target = $(this).attr('href');
+
+            $.ajax({
+                url: "{{ route('admin.wallet.index') }}",
+                data: {
+                    tab: tab
+                },
+                success: function(data) {
+                    $(target).html(data);
+                }
+            });
+        });
+
+        // Adjust Balance button in table
+        $(document).on('click', '.adjust-balance-btn', function() {
+            let userId = $(this).data('user-id');
+            $('#user-select').val(userId).trigger('change');
+            $('html, body').animate({
+                scrollTop: $("#adjustmentForm").offset().top - 100
+            }, 500);
+        });
+
+        // Manual Adjustment Form submission
+        $('.submit-btn').on('click', function() {
+            let type = $(this).data('type');
+            let form = $('#adjustmentForm');
+            let url = type === 'credit' ? "{{ route('admin.wallet.credit') }}" : "{{ route('admin.wallet.debit') }}";
+
+            if (!form[0].checkValidity()) {
+                form[0].reportValidity();
+                return;
+            }
+
+            let formData = form.serialize();
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.success);
+                        // Refresh current active tab
+                        let activeTab = $('#walletTabs a.active').data('tab');
+                        refreshData(activeTab);
+                        form[0].reset();
+                    }
+                },
+                error: function(xhr) {
+                    let errorMsg = xhr.responseJSON?.error || 'Something went wrong.';
+                    toastr.error(errorMsg);
+                }
+            });
+        });
+
+        function refreshData(tab) {
+            $.ajax({
+                url: "{{ route('admin.wallet.index') }}",
+                data: {
+                    tab: tab
+                },
+                success: function(data) {
+                    $('#' + tab).html(data);
+                    // Also update stats if we had an endpoint for that, but for now we can just reload the page or partial stats
+                    // To keep it simple, we refresh the table content.
+                }
+            });
+        }
+    });
+</script>
+@endpush
 @endsection
