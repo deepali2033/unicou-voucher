@@ -84,16 +84,16 @@
                             <i class="fas fa-edit text-info"></i>
                         </a>
 
-                        <form action="{{ route('admin.users.destroy', $user->id) }}"
-                            method="POST"
-                            class="ajax-action d-inline"
-                            onsubmit="return confirm('Delete this user permanently?')">
+                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="ajax-action">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-light" title="Delete">
                                 <i class="fas fa-trash text-danger"></i>
                             </button>
                         </form>
+
+
+
                     </div>
                 </td>
             </tr>

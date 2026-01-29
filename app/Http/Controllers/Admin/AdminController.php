@@ -657,9 +657,7 @@ class AdminController extends Controller
 
     public function updatePassword(Request $request, User $user)
     {
-        if ($user->account_type === 'student') {
-            return back()->with('error', 'Cannot change password for students.');
-        }
+
 
         $request->validate([
             'password' => 'required|string|min:8|confirmed',

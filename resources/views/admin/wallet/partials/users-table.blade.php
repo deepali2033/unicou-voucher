@@ -37,16 +37,16 @@
                         </td>
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-2">
-                                <button class="btn btn-sm btn-light text-primary fw-bold px-3 adjust-balance-btn" 
-                                        data-user-id="{{ $user->id }}" 
-                                        data-user-name="{{ $user->name }}" 
-                                        data-user-balance="{{ number_format($user->wallet_balance, 2) }}"
-                                        style="border-radius: 8px; background-color: #f0f4ff; border: none;">
+                                <button class="btn btn-sm btn-light text-primary fw-bold px-3 adjust-balance-btn"
+                                    data-user-id="{{ $user->id }}"
+                                    data-user-name="{{ $user->name }}"
+                                    data-user-balance="{{ number_format($user->wallet_balance, 2) }}"
+                                    style="border-radius: 8px; background-color: #f0f4ff; border: none;">
                                     Adjust
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger border-0" title="Deactivate Wallet">
+                                <!-- <button class="btn btn-sm btn-outline-danger border-0" title="Deactivate Wallet">
                                     <i class="fas fa-power-off"></i>
-                                </button>
+                                </button> -->
                             </div>
                         </td>
                     </tr>

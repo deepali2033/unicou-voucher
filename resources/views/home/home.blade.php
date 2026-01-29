@@ -170,7 +170,7 @@
         <div class="menu-header">
             <span class="close-btn" id="closeMenu">&times;</span>
         </div>
- @auth
+        @auth
         @php
         $connectRoute = match(auth()->user()->account_type) {
         'admin' => route('admin.dashboard'),
@@ -179,53 +179,57 @@
         default => route('home'),
         };
         @endphp
-       
+
 
         @endauth
-<div class="menu-footer">
-    <div class="btn-group login-reg">
-       
-        @auth
-        {{-- Logged in user dropdown --}}
-        <div class="user-profile-dropdown">
-            <div class="user-info-wrapper" id="userDropdownTrigger">
-                <div class="user-avatar">
-                    <img src="{{ auth()->user()->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : asset('images/user.png') }}" alt="User">
-                </div>
-                <div class="user-details">
-                    <div class="user-name">{{ auth()->user()->first_name ?? auth()->user()->name }} <i class="fas fa-chevron-down ms-1" style="font-size: 0.7rem; color: #999;"></i></div>
-                    <div class="user-id">{{ auth()->user()->user_id }}</div>
-                    <div class="user-type badge bg-primary-subtle text-primary" style="font-size: 0.6rem; padding: 2px 6px;">{{ ucfirst(str_replace('_', ' ', auth()->user()->account_type)) }}</div>
-                </div>
-            </div>
+        <div class="menu-footer">
+            <div class="btn-group login-reg">
 
-            <div class="profile-dropdown-menu" id="profileDropdownMenu">
-                <a href="{{ $connectRoute }}" class="dropdown-item">
-                    <i class="fas fa-user-cog me-2"></i> Fill Form
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="{{ route('auth.logout') }}" class="dropdown-item text-danger"
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="fas fa-sign-out-alt me-2"></i> Logout
-                </a>
+                @auth
+                {{-- Logged in user dropdown --}}
+                <div class="user-profile-dropdown">
+                    <div class="user-info-wrapper" id="userDropdownTrigger">
+                        <div class="user-avatar">
+                            <img src="{{ auth()->user()->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : asset('images/user.png') }}" alt="User">
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">{{ auth()->user()->first_name ?? auth()->user()->name }} <i class="fas fa-chevron-down ms-1" style="font-size: 0.7rem; color: #999;"></i></div>
+                            <div class="user-id">{{ auth()->user()->user_id }}</div>
+                            <div class="user-type badge bg-primary-subtle text-primary" style="font-size: 0.6rem; padding: 2px 6px;">{{ ucfirst(str_replace('_', ' ', auth()->user()->account_type)) }}</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-dropdown-menu" id="profileDropdownMenu">
+
+
+                        @unless(auth()->user()->account_type === 'admin')
+                        <a href="{{ $connectRoute }}" class="dropdown-item">
+                            <i class="fas fa-user-cog me-2"></i> Fill Form
+                        </a>
+                        @endunless
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ route('auth.logout') }}" class="dropdown-item text-danger"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+
+
+
+
+                <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+                @endauth
+                @guest
+                {{-- Guest --}}
+                <a href="{{ route('login') }}" class="btn_login">Login</a>
+                <a href="{{ route('register') }}" class="btn_regis">Registration</a>
+                @endguest
+
             </div>
         </div>
-
-
-
-
-        <form id="logout-form" action="{{ route('auth.logout') }}" method="POST" class="d-none">
-            @csrf
-        </form>
-        @endauth
-         @guest
-        {{-- Guest --}}
-        <a href="{{ route('login') }}" class="btn_login">Login</a>
-        <a href="{{ route('register') }}" class="btn_regis">Registration</a>
-        @endguest
-
-    </div>
-</div>
 
         <ul class="menu-links">
             <li><a href="#">ABOUT</a></li>

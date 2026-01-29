@@ -7,7 +7,7 @@
         <div class="col-md-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <form action="{{ route('admin.users.management') }}" method="GET" class="row g-3 align-items-center">
+                    <form id="filter-form" action="{{ route('admin.users.management') }}" method="GET" class="row g-3 align-items-center">
                         <div class="col-md-7">
                             <div class="btn-group flex-wrap cls_us_manage" role="group">
                                 <a href="{{ route('admin.users.management', ['role' => 'all', 'search' => request('search')]) }}"
@@ -79,7 +79,7 @@
         });
 
         // Handle Filters & Search
-        $('form').on('submit', function(e) {
+        $('#filter-form').on('submit', function(e) {
             e.preventDefault();
             let url = $(this).attr('action') + '?' + $(this).serialize();
             updateTable(url);

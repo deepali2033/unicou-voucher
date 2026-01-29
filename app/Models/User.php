@@ -50,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'verified_by',
         'profile_updated_at',
         'pending_profile_data',
+        'wallet_balance',
     ];
 
     /**

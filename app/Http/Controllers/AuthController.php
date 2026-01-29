@@ -20,9 +20,6 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        if (Auth::check()) {
-            return $this->redirectByRole(Auth::user());
-        }
         return view('auth.login');
     }
 
@@ -31,9 +28,6 @@ class AuthController extends Controller
      */
     public function showRegister($type = null)
     {
-        if (Auth::check()) {
-            return $this->redirectByRole(Auth::user());
-        }
         if ($type) {
             request()->merge(['type' => $type]);
         }
@@ -414,7 +408,7 @@ class AuthController extends Controller
             default          => redirect('/'),
         };
     }
-    public function toggleUserStatus($id)
+
     {
         $user = User::findOrFail($id);
 
