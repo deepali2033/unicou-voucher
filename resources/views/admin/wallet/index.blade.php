@@ -46,7 +46,7 @@
     </div>
 
     <!-- AI Analysis Banner -->
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-12">
             <div class="alert border-0 shadow-sm p-4 d-flex align-items-center" style="border-radius: 15px; background-color: #f0f7ff; color: #0052cc;">
                 <div class="bg-white rounded-circle p-2 me-3 shadow-sm">
@@ -58,7 +58,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Tabs Navigation -->
     <div class="row mb-4">

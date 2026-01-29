@@ -29,7 +29,7 @@
                             <th class="py-3">Customer</th>
                             <th class="py-3">Amount</th>
                             <th class="py-3">Status</th>
-                            <th class="text-end pe-4 py-3">Actions</th>
+                            <!-- <th class="text-end pe-4 py-3">Actions</th> -->
                         </tr>
                     </thead>
                     <tbody>

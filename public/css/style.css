@@ -318,6 +318,7 @@ body{
   align-items:center;
   justify-content:center;
   padding:20px;
+  width: 100%;
 }
 
 .sat-card{
@@ -515,6 +516,136 @@ label.sat-consent.Preferred-Country_checkbox {
     display: flex;
     align-items: center;
 }
+
+/* ===== Card & Header ===== */
+.sat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+.sat-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.sat-header p {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* ===== Wizard Stepper (ACTIVE ONE) ===== */
+.wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 20px 10px;
+    margin-bottom: 30px;
+}
+
+.wizard-steps::before {
+    content: "";
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 0;
+}
+
+.wizard-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.wizard-step span {
+    width: 36px;
+    height: 36px;
+    background: #dee2e6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 600;
+    color: #495057;
+}
+
+.wizard-step small {
+    display: block;
+    font-size: 11px;
+    margin-top: 6px;
+    color: #adb5bd;
+}
+
+.wizard-step.active span {
+    background: #2563eb;
+    color: #fff;
+}
+
+.wizard-step.active small {
+    color: #2563eb;
+}
+
+/* ===== Form Fields ===== */
+.sat-field label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #6c757d;
+}
+
+.sat-field input,
+.sat-field select {
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    border: 1px solid #e5e7eb;
+}
+
+.sat-field input:focus,
+.sat-field select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+    background: #2563eb;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.btn-light {
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+/* ===== Step Visibility ===== */
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+}
+button.btn.btn-light.prev-btn {
+    display: flex;
+    white-space: nowrap;
+    align-items: center;
+    padding: 0px 20px;
+}
+
+button.btn.btn-primary.next-btn {
+    width: max-content;
+}
+
+
 /* B2B Reseller Agent form end */
 
 .captcha-wrapper.p-3.border.rounded.bg-light.d-flex.align-items-center {
