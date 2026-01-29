@@ -409,6 +409,7 @@ class AuthController extends Controller
         };
     }
 
+    public function toggleUserStatus($id)
     {
         $user = User::findOrFail($id);
 
