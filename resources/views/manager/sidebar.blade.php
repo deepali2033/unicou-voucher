@@ -102,7 +102,7 @@
               @endif
 
               {{-- Disputes & Refunds (Admin, Support) --}}
-              @if(in_array($role, ['agent', 'manager', 'reseller_agent', 'support_team', 'student', 'admin']))
+              @if(in_array($role, ['agent,manager,reseller_agent,support_team,student,admin']))
               <li class="nav-item">
                   <a class="nav-link" href="#">
                       <i class="fas fa-gavel me-2"></i> Disputes & Refunds
@@ -158,13 +158,12 @@
                   </a>
               </li>
               <li class="nav-item">
-                  <form method="POST" action="{{ route('auth.logout') }}" style="margin:0;">
+                  <a class="nav-link" href="{{ route('auth.logout') }}" 
+                     onclick="event.preventDefault(); document.getElementById('logout-form-manager').submit();">
+                      <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </a>
+                  <form id="logout-form-manager" action="{{ route('auth.logout') }}" method="POST" class="d-none">
                       @csrf
-                      <button type="submit" class="nav-link"
-                          style="background:none;border:none;width:100%;text-align:left;cursor:pointer;padding:0.5rem 1rem;">
-                          <i class="fas fa-external-link-alt me-2"></i>
-                          Logout
-                      </button>
                   </form>
               </li>
           </ul>

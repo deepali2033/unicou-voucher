@@ -69,9 +69,12 @@
                     @endif
                     <div class="dropdown-divider"></div>
                     @endif
-                    <form method="POST" action="{{ route('auth.logout') }}">
+                    <a class="dropdown-item" href="{{ route('auth.logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();">
+                        Logout
+                    </a>
+                    <form id="logout-form-header" action="{{ route('auth.logout') }}" method="POST" class="d-none">
                         @csrf
-                        <button type="submit" class="dropdown-item">Logout</button>
                     </form>
                 </div>
             </div>

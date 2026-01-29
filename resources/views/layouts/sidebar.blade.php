@@ -8,17 +8,15 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
+
         @php
         $role = auth()->user()->account_type ?? null;
         @endphp
 
         <ul class="nav flex-column gap-2">
-
             {{-- Dashboard (sab ke liye) --}}
             @if($role)
-
             <li class="nav-item">
-
                 <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                     href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-tachometer-alt me-2"></i> Dashboard
@@ -29,13 +27,11 @@
             {{-- User Management (Admin, Manager) --}}
             @if(in_array($role, ['admin','manager']))
             <li class="nav-item">
-
                 <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
                     href="{{ route('admin.users.management') }}">
                     <i class="fas fa-users me-2"></i> User Management
                 </a>
             </li>
-
             @endif
 
             {{-- KYC & Compliance (Admin, Support) --}}
@@ -70,7 +66,7 @@
             {{-- Voucher Management (Admin, Manager) --}}
             @if(in_array($role, ['admin','manager']))
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{route('admin.vouchers.control')}}">
                     <i class="fas fa-ticket-alt me-2"></i> Voucher Management
                 </a>
             </li>
@@ -106,7 +102,7 @@
             </li>
             @endif
 
-            {{-- Disputes & Refunds (Admin, Support) --}}
+            {{-- Disputes & Refunds --}}
             @if(in_array($role, ['agent', 'manager', 'reseller_agent', 'support_team', 'student', 'admin']))
             <li class="nav-item">
                 <a class="nav-link" href="#">
@@ -115,37 +111,33 @@
             </li>
             @endif
 
-            {{-- Reports & Analytics (Admin only) --}}
-            @if(in_array($role, ['agent', 'manager', 'reseller_agent', 'support_team', 'student', 'admin']))
+            {{-- Reports & Analytics --}}
+            @if(in_array($role, ['admin','manager']))
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.index') }}">
                     <i class="fas fa-chart-line me-2"></i> Reports & Analytics
                 </a>
             </li>
             @endif
 
             {{-- System Control (Admin only) --}}
-            @if(in_array($role, ['admin','manager']))
+            @if($role === 'admin')
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->routeIs('admin.system.control') ? 'active' : '' }}" href="{{ route('admin.system.control') }}">
                     <i class="fas fa-cogs me-2"></i> System Control
                 </a>
             </li>
             @endif
 
             {{-- Audit & Logs (Admin only) --}}
-            @if(in_array($role, ['admin','manager']))
-
+            @if($role === 'admin')
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link {{ request()->routeIs('admin.audit.*') ? 'active' : '' }}" href="{{ route('admin.audit.index') }}">
                     <i class="fas fa-clipboard-list me-2"></i> Audit & Logs
                 </a>
             </li>
             @endif
-
         </ul>
-
-
 
         <hr class="my-3" style="border-color: #495057;">
 
@@ -164,13 +156,12 @@
                 </a>
             </li>
             <li class="nav-item">
-                <form method="POST" action="{{ route('auth.logout') }}" style="margin:0;">
+                <a class="nav-link" href="{{ route('auth.logout') }}" 
+                   onclick="event.preventDefault(); document.getElementById('logout-form-layout').submit();">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+                <form id="logout-form-layout" action="{{ route('auth.logout') }}" method="POST" class="d-none">
                     @csrf
-                    <button type="submit" class="nav-link"
-                        style="background:none;border:none;width:100%;text-align:left;cursor:pointer;padding:0.5rem 1rem;">
-                        <i class="fas fa-external-link-alt me-2"></i>
-                        Logout
-                    </button>
                 </form>
             </li>
         </ul>
