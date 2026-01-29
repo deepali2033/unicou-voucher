@@ -34,8 +34,17 @@
             @php
             $role = auth()->user()->account_type ?? null;
             @endphp
-            @if(in_array($role, ['admin', 'manager', 'agent', 'reseller_agent', 'support_team', 'student']))
-            @include('admin.sidebar')
+
+            @if($role === 'admin')
+                @include('admin.sidebar')
+            @elseif($role === 'manager')
+                @include('manager.sidebar')
+            @elseif($role === 'reseller_agent')
+                @include('agent.sidebar')
+            @elseif($role === 'student')
+                @include('student.sidebar')
+            @else
+                @include('layouts.sidebar')
             @endif
             <!-- Sidebar -->
 
