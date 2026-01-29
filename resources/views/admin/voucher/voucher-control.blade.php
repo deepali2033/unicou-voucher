@@ -56,7 +56,7 @@
                             </div>
 
                             <div class="d-flex gap-1">
-                                <button class="btn btn-sm text-white fw-bold px-2 py-2 flex-fill" style="background: #d63384; border-radius: 10px; font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#editVoucherModal{{ $voucher->id }}">
+                                <button class="btn btn-sm text-white fw-bold px-2 py-2 flex-fill" style="background: #0d6efd; border-radius: 10px; font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#editVoucherModal{{ $voucher->id }}">
                                     <i class="fas fa-edit me-1"></i> Edit
                                 </button>
                                 <form action="{{ route('admin.vouchers.destroy', $voucher->id) }}" method="POST" class="flex-fill d-grid">

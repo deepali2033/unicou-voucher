@@ -152,7 +152,8 @@ body {
 }
 .koa-sidebar-wrapper .sidebar .nav-link {
     color: #000000;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.5rem;
+    white-space: nowrap;
 }
 .koa-sidebar-wrapper .sidebar .nav-link:hover,
 .koa-sidebar-wrapper .sidebar .nav-link.active {
@@ -511,4 +512,8 @@ form.row.g-3.align-items-center.cls_kyc_filter {
 .action-btns {
     gap: 8px;
     justify-content: end;
+}
+
+.cls_user_edit{
+    width: 100%;
 }
