@@ -138,10 +138,14 @@
         width: max-content;
     }
 </style>
-
+@section('header_left')
+<a class="text-start" href="/">
+    <img src="{{ asset('images/company_logo.png') }}" style="max-height: 40px;" alt="UniCou Logo">
+</a>
+@endsection
 
 @section('content')
-
+@include('layouts.header')
 
 <div class="sat-view-container">
 

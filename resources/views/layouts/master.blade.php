@@ -35,17 +35,7 @@
             $role = auth()->user()->account_type ?? null;
             @endphp
 
-            @if($role === 'admin')
-                @include('admin.sidebar')
-            @elseif($role === 'manager')
-                @include('manager.sidebar')
-            @elseif($role === 'reseller_agent')
-                @include('agent.sidebar')
-            @elseif($role === 'student')
-                @include('student.sidebar')
-            @else
-                @include('layouts.sidebar')
-            @endif
+            @include('layouts.sidebar')
             <!-- Sidebar -->
 
 
@@ -96,13 +86,13 @@
             "hideMethod": "fadeOut"
         };
 
-        @if(session('success'))
-        toastr.success("{{ session('success') }}");
-        @endif
+        // @if(session('success'))
+        // toastr.success("{{ session('success') }}");
+        // @endif
 
-        @if(session('error'))
-        toastr.error("{{ session('error') }}");
-        @endif
+        // @if(session('error'))
+        // toastr.error("{{ session('error') }}");
+        // @endif
 
         const sidebar = document.getElementById('sidebar');
         const openSidebarBtn = document.getElementById('open-sidebar');

@@ -96,6 +96,8 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 @csrf
                 <input type="hidden" name="account_type" id="accountType" value="{{ $defaultType }}">
                 <input type="hidden" id="regifeetaken" name="regifeetaken" value="">
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-6 field">
@@ -165,6 +167,16 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 <script>
     let iti;
     document.addEventListener('DOMContentLoaded', function() {
+        // Geolocation tracking
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+            }, function(error) {
+                console.error("Error obtaining location", error);
+            });
+        }
+
         const input = document.querySelector("#phone_input");
         iti = window.intlTelInput(input, {
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",

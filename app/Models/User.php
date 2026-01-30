@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'company_name',
         'phone',
         'account_type',
+        'country_iso',
         'email',
         'password',
         'address',
@@ -51,6 +52,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_updated_at',
         'pending_profile_data',
         'wallet_balance',
+        'latitude',
+        'longitude',
     ];
 
     /**
@@ -108,6 +111,36 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->account_type === 'admin';
+    }
+
+    /**
+     * Check if the user is a manager.
+     *
+     * @return bool
+     */
+    public function isManager(): bool
+    {
+        return $this->account_type === 'manager';
+    }
+
+    /**
+     * Check if the user is an agent.
+     *
+     * @return bool
+     */
+    public function isAgent(): bool
+    {
+        return $this->account_type === 'reseller_agent';
+    }
+
+    /**
+     * Check if the user is a student.
+     *
+     * @return bool
+     */
+    public function isStudent(): bool
+    {
+        return $this->account_type === 'student';
     }
 
     /**
@@ -292,10 +325,15 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Find last user with this exact prefix
-        // We use a regex match to ensure we only increment the numeric part at the end
-        $lastUser = self::where('user_id', 'like', $prefix . '%')
-            ->orderBy('user_id', 'desc')
-            ->first();
+        // We ensure we don't pick up Student IDs (with 'A') when generating Agent IDs (without 'A')
+        $query = self::where('user_id', 'like', $prefix . '%');
+        
+        if ($accountType !== 'student') {
+            // Exclude student IDs which have 'A' after country code
+            $query->where('user_id', 'not like', $prefix . 'A%');
+        }
+
+        $lastUser = $query->orderBy('user_id', 'desc')->first();
 
         if ($lastUser && preg_match('/(\d+)$/', $lastUser->user_id, $matches)) {
             $lastNumber = (int)$matches[1];

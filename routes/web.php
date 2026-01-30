@@ -1,13 +1,22 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\agent\Agentcontroller;
-use App\Http\Controllers\student\StudentController;
-use App\Http\Controllers\manager\ManagerController;
+use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\UserController;
+use App\Http\Controllers\Dashboard\VoucherController;
+use App\Http\Controllers\Dashboard\InventoryController;
+use App\Http\Controllers\Dashboard\OrderController;
+use App\Http\Controllers\Dashboard\WalletController;
+use App\Http\Controllers\Dashboard\ComplianceController;
+use App\Http\Controllers\Dashboard\SystemController;
+use App\Http\Controllers\Dashboard\ReportController;
+use App\Http\Controllers\Dashboard\SettingsController;
+use App\Http\Controllers\Dashboard\AgentController;
+use App\Http\Controllers\Dashboard\StudentController;
+use App\Http\Controllers\Dashboard\ManagerController;
+use App\Http\Controllers\Dashboard\PricingController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('home.home');
@@ -29,23 +38,21 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
-    return redirect('/login')->with('success', 'Email verified successfully. Please login.');
+
+    $user = auth()->user();
+    if ($user->account_type === 'student' && !$user->studentDetail) {
+        return redirect()->route('auth.form.student')->with('success', 'Email verified. Please complete your profile.');
+    }
+    if ($user->account_type === 'reseller_agent' && !$user->agentDetail) {
+        return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Email verified. Please complete your profile.');
+    }
+
+    return redirect()->route('dashboard')->with('success', 'Email verified successfully.');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
-
-Route::get('/test-mail', function () {
-    try {
-        \Illuminate\Support\Facades\Mail::raw('SMTP is working!', function ($message) {
-            $message->to(auth()->user()->email)->subject('Test Mail');
-        });
-        return "Mail sent successfully to " . auth()->user()->email;
-    } catch (\Exception $e) {
-        return "Mail failed: " . $e->getMessage();
-    }
-})->middleware('auth');
 
 // Additional Registration Forms
 Route::middleware('auth')->group(function () {
@@ -55,95 +62,99 @@ Route::middleware('auth')->group(function () {
     Route::get('/register/student-details', [AuthController::class, 'showStudentForm'])->name('auth.form.student');
     Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
 });
-// Route::get('/index', [Agentcontroller::class, 'getLocationData']);
 
-// Placeholder Admin Routes to prevent Layout Errors
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'])->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+// Dashboard Routes (Unified Prefix)
+Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
-    Route::get('/revenue', [AdminController::class, 'revenue'])->name('revenue.index');
-    Route::get('/stock-alerts', [AdminController::class, 'stockAlerts'])->name('stock.alerts');
-    Route::post('/system-control/toggle', [AdminController::class, 'toggleSystem'])->name('system.toggle');
+    Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
+    Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications.index');
+    Route::get('/stock-alerts', [DashboardController::class, 'stockAlerts'])->name('stock.alerts');
+    Route::get('/account', [DashboardController::class, 'manageAccount'])->name('account.manage');
+    Route::post('/account/update', [DashboardController::class, 'updateAccount'])->name('account.update');
 
-    Route::get('/approvals', [AdminController::class, 'approvals'])->name('approvals.index');
-    Route::post('/approvals/{user}/status', [AdminController::class, 'updateUserStatus'])->name('approvals.update-status');
-    Route::post('/approvals/{user}/approve', [AdminController::class, 'approveUser'])->name('approvals.approve');
-    Route::post('/approvals/{user}/reject', [AdminController::class, 'rejectUser'])->name('approvals.reject');
+    Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+    Route::post('/pricing/store', [PricingController::class, 'store'])->name('pricing.store');
+    Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
 
-    Route::get('/notifications', [AdminController::class, 'notifications'])->name('notifications.index');
+    // User Management
+    Route::get('/users', [UserController::class, 'index'])->name('users.management');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle');
+    Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
+    Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
+    Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
 
-    Route::get('/account', [AdminController::class, 'manageAccount'])->name('account.manage');
-    Route::post('/account/update', [AdminController::class, 'updateAccount'])->name('account.update');
+    // Voucher Management
+    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.control');
+    Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
+    Route::post('/vouchers/store', [VoucherController::class, 'store'])->name('vouchers.store');
+    Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
+    Route::post('/vouchers/{id}/update', [VoucherController::class, 'update'])->name('vouchers.update');
+    Route::delete('/vouchers/{id}/delete', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
+    Route::get('/vouchers-export', [VoucherController::class, 'export'])->name('vouchers.export');
+    Route::post('/vouchers-import', [VoucherController::class, 'import'])->name('vouchers.import');
 
-    Route::get('/kyc-compliance', [AdminController::class, 'kycCompliance'])->name('kyc.compliance');
-    Route::get('/kyc-compliance/{user}', [AdminController::class, 'viewKyc'])->name('kyc.show');
+    // Inventory Management
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('/inventory/store', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
+    Route::post('/inventory/{id}/update', [InventoryController::class, 'update'])->name('inventory.update');
+    Route::delete('/inventory/{id}/delete', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    Route::get('/inventory-export', [InventoryController::class, 'export'])->name('inventory.export');
+    Route::post('/inventory-import', [InventoryController::class, 'import'])->name('inventory.import');
+    Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 
-    Route::get('/wallet', [AdminController::class, 'walletManagement'])->name('wallet.index');
-    Route::post('/wallet/credit', [AdminController::class, 'creditWallet'])->name('wallet.credit');
-    Route::post('/wallet/debit', [AdminController::class, 'debitWallet'])->name('wallet.debit');
+    // Order Management
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders-export', [OrderController::class, 'export'])->name('orders.export');
+    Route::post('/orders/{id}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
+    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
-    Route::get('/vouchers', [AdminController::class, 'vouchersControl'])->name('vouchers.control');
-    Route::get('/vouchers/create', [AdminController::class, 'createVoucher'])->name('vouchers.create');
-    Route::get('/vouchers/{id}/edit', [AdminController::class, 'editVoucher'])->name('vouchers.edit');
+    // Wallet Management
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/credit', [WalletController::class, 'credit'])->name('wallet.credit');
+    Route::post('/wallet/debit', [WalletController::class, 'debit'])->name('wallet.debit');
 
-    // New Sections
-    Route::get('/orders', [AdminController::class, 'ordersIndex'])->name('orders.index');
-    Route::get('/orders/export', [AdminController::class, 'exportOrders'])->name('orders.export');
-    Route::post('/orders/{id}/deliver', [AdminController::class, 'deliverOrder'])->name('orders.deliver');
-    Route::post('/orders/{id}/cancel', [AdminController::class, 'cancelOrder'])->name('orders.cancel');
+    // Compliance & KYC
+    Route::get('/kyc-compliance', [ComplianceController::class, 'index'])->name('kyc.compliance');
+    Route::get('/kyc-compliance/{user}', [ComplianceController::class, 'show'])->name('kyc.show');
+    Route::post('/approvals/{user}/status', [ComplianceController::class, 'updateStatus'])->name('approvals.update-status');
+    Route::post('/approvals/{user}/approve', [ComplianceController::class, 'approve'])->name('approvals.approve');
+    Route::post('/approvals/{user}/reject', [ComplianceController::class, 'reject'])->name('approvals.reject');
 
-    Route::get('/pricing', [AdminController::class, 'pricingIndex'])->name('pricing.index');
-    Route::post('/pricing/update', [AdminController::class, 'updatePricing'])->name('pricing.update');
+    // System Control
+    Route::get('/system-control', [SystemController::class, 'controlIndex'])->name('system.control');
+    Route::post('/system-control/update', [SystemController::class, 'updateControl'])->name('system.control.update');
+    Route::post('/system-control/toggle', [SystemController::class, 'toggleSystem'])->name('system.toggle');
+    Route::get('/audit-logs', [SystemController::class, 'auditLogs'])->name('audit.index');
 
-    Route::get('/inventory', [AdminController::class, 'inventoryIndex'])->name('inventory.index');
-    Route::get('/inventory/create', [AdminController::class, 'createInventory'])->name('inventory.create');
-    Route::post('/inventory/store', [AdminController::class, 'storeInventory'])->name('inventory.store');
-    Route::get('/inventory/{id}/edit', [AdminController::class, 'editInventory'])->name('inventory.edit');
-    Route::post('/inventory/{id}/update', [AdminController::class, 'updateInventory'])->name('inventory.update');
-    Route::delete('/inventory/{id}/delete', [AdminController::class, 'destroyInventory'])->name('inventory.destroy');
-    Route::get('/inventory/export', [AdminController::class, 'exportInventory'])->name('inventory.export');
-    Route::post('/inventory/import', [AdminController::class, 'importInventory'])->name('inventory.import');
-    Route::post('/inventory/upload', [AdminController::class, 'uploadStock'])->name('inventory.upload');
+    // Reports & Revenue
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/revenue', [ReportController::class, 'revenue'])->name('revenue.index');
 
-    // New Sections
-    Route::get('/reports', [AdminController::class, 'reportsIndex'])->name('reports.index');
-    Route::get('/system-control', [AdminController::class, 'systemControlIndex'])->name('system.control');
-    Route::post('/system-control/update', [AdminController::class, 'updateSystemControl'])->name('system.control.update');
-    Route::get('/audit-logs', [AdminController::class, 'auditLogsIndex'])->name('audit.index');
+    // Settings
+    Route::get('/settings/risk-levels', [SettingsController::class, 'riskLevels'])->name('settings.risk-levels');
+    Route::get('/settings/risk-levels/export', [SettingsController::class, 'exportRiskLevelsCsv'])->name('settings.risk-levels.export');
+    Route::post('/settings/update-risk-level', [SettingsController::class, 'updateRiskLevel'])->name('settings.update-risk-level');
+    Route::delete('/settings/risk-level/{id}', [SettingsController::class, 'deleteRiskLevel'])->name('settings.risk-level.delete');
 
-    Route::post('/vouchers/store', [AdminController::class, 'storeVoucher'])->name('vouchers.store');
-    Route::post('/vouchers/{id}/update', [AdminController::class, 'updateVoucher'])->name('vouchers.update');
-    Route::delete('/vouchers/{id}/delete', [AdminController::class, 'deleteVoucher'])->name('vouchers.destroy');
-    Route::get('/vouchers/export', [AdminController::class, 'exportVouchers'])->name('vouchers.export');
-    Route::post('/vouchers/import', [AdminController::class, 'importVouchers'])->name('vouchers.import');
-    Route::get('/users', [AdminController::class, 'usersManagemt'])->name('users.management');
-    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
-    Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
-    Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
-    // Using put for update
-    Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
-    Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
-    Route::get('/users/download-pdf', [AdminController::class, 'downloadPDF'])->name('users.pdf');
+    // Other placeholder routes
 
-    Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])
-        ->name('users.toggle');
-
-    Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
-    Route::post('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.password.update');
-    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
     Route::get('/disputes', function () {
         return "Disputes";
     })->name('disputes.index');
     Route::get('/credits', function () {
         return "Add Credit";
     })->name('credits.add');
-
     Route::get('/contact-us', function () {
         return "Contact-Us";
     })->name('contact-us.index');
-    Route::get('/notifications', function () {
-        return "Notifications";
-    })->name('notifications.index');
     Route::get('/categories', function () {
         return "Categories";
     })->name('categories.index');
@@ -153,51 +164,34 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'account_type:admin'
     Route::get('/analytics', function () {
         return "Analytics";
     })->name('analytics');
-});
+    Route::get('/orders/history', [AgentController::class, 'orderHistory'])->name('orders.history');
+    // Agent Specific
+    Route::prefix('agent')->name('agent.')->middleware(['account_type:reseller_agent'])->group(function () {
+        Route::get('/', [AgentController::class, 'dashboard'])->name('dashboard');
+        Route::get('/vouchers', [AgentController::class, 'vouchers'])->name('vouchers');
+        Route::get('/banks', [AgentController::class, 'banks'])->name('banks');
 
-// Agent Routes
-Route::prefix('agent')->name('agent.')->middleware(['auth', 'account_type:reseller_agent'])->group(function () {
-    Route::get('/dashboard', [Agentcontroller::class, 'dashboard'])->name('dashboard');
-    Route::get('/vouchers', [Agentcontroller::class, 'vouchers'])->name('vouchers');
-    Route::get('/banks', [Agentcontroller::class, 'banks'])->name('banks');
-    Route::get('/orders/history', [Agentcontroller::class, 'orderHistory'])->name('orders.history');
-    Route::get('/deposit-store-credit', [Agentcontroller::class, 'deposit'])->name('deposit.store.credit');
-    Route::get('/bank-link', [Agentcontroller::class, 'bankLink'])->name('bank.link');
-    Route::post('/bank-link', [Agentcontroller::class, 'storeBank'])->name('bank.store');
-});
+        Route::get('/deposit-store-credit', [AgentController::class, 'deposit'])->name('deposit.store.credit');
+        Route::get('/bank-link', [AgentController::class, 'bankLink'])->name('bank.link');
+        Route::post('/bank-link', [AgentController::class, 'storeBank'])->name('bank.store');
+    });
 
-// Manager Routes
-Route::prefix('manager')->name('manager.')->middleware(['auth', 'account_type:manager'])->group(function () {
-    Route::get('/dashboard', [ManagerController::class, 'dashboard'])->name('dashboard');
-    Route::get('/audit', [ManagerController::class, 'auditTransactions'])->name('audit');
-    Route::get('/users', [ManagerController::class, 'manageUsers'])->name('users');
-    Route::get('/users/{user}', [ManagerController::class, 'approveDetails'])->name('users.show');
-    Route::post('/users/{user}/approve', [ManagerController::class, 'approveUser'])->name('users.approve');
-    Route::post('/users/{user}/add-credit', [ManagerController::class, 'addCredit'])->name('users.add_credit');
-    Route::get('/vouchers/stock', [ManagerController::class, 'voucherStock'])->name('vouchers.stock');
-    Route::get('/disputes', [ManagerController::class, 'disputes'])->name('disputes');
-    Route::get('/system/stop', [ManagerController::class, 'stopSystem'])->name('system.stop');
-    Route::get('/reports', [ManagerController::class, 'reports'])->name('reports');
+    // Manager Specific
+    Route::prefix('manager')->name('manager.')->middleware(['account_type:manager'])->group(function () {
+        Route::get('/', [ManagerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/audit', [ManagerController::class, 'auditTransactions'])->name('audit');
+        Route::get('/users', [ManagerController::class, 'manageUsers'])->name('users');
+        Route::get('/users/{user}', [ManagerController::class, 'approveDetails'])->name('users.show');
+        Route::post('/users/{user}/approve', [ManagerController::class, 'approveUser'])->name('users.approve');
+        Route::post('/users/{user}/add-credit', [ManagerController::class, 'addCredit'])->name('users.add_credit');
+        Route::get('/vouchers/stock', [ManagerController::class, 'voucherStock'])->name('vouchers.stock');
+        Route::get('/disputes', [ManagerController::class, 'disputes'])->name('disputes');
+        Route::get('/system/stop', [ManagerController::class, 'stopSystem'])->name('system.stop');
+        Route::get('/reports', [ManagerController::class, 'reports'])->name('reports');
+    });
 
-
-    Route::get('/users', [AdminController::class, 'usersManagemt'])->name('users.management');
-    Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
-    Route::post('/users/store', [AdminController::class, 'storeUser'])->name('users.store');
-    Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
-    // Using put for update
-    Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
-    Route::post('/users/{user}/suspend', [AdminController::class, 'suspendUser'])->name('users.suspend');
-    Route::get('/users/download-pdf', [AdminController::class, 'downloadPDF'])->name('users.pdf');
-
-    Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])
-        ->name('users.toggle');
-
-    Route::get('/users/{user}', [AdminController::class, 'viewUser'])->name('users.show');
-    Route::post('/users/{user}/password', [AdminController::class, 'updatePassword'])->name('users.password.update');
-    // Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.destroy');
-});
-
-// Student Routes
-Route::prefix('student')->name('student.')->middleware(['auth', 'account_type:student'])->group(function () {
-    Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
+    // Student Specific
+    Route::prefix('student')->name('student.')->middleware(['account_type:student'])->group(function () {
+        Route::get('/', [StudentController::class, 'dashboard'])->name('dashboard');
+    });
 });
