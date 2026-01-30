@@ -29,6 +29,14 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
+    $user = auth()->user();
+    
+    if ($user->account_type === 'reseller_agent') {
+        return redirect()->route('auth.forms.B2BResellerAgent');
+    } elseif ($user->account_type === 'student') {
+        return redirect()->route('auth.form.student');
+    }
+    
     return redirect('/login')->with('success', 'Email verified successfully. Please login.');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 

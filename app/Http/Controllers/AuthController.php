@@ -383,19 +383,17 @@ class AuthController extends Controller
      */
     private function redirectByRole(User $user)
     {
-
-
         if ($user->account_type === 'reseller_agent') {
-            // if (!$user->agentDetail) {
-            //     return redirect()->route('auth.forms.B2BResellerAgent');
-            // }
+            if (!$user->agentDetail) {
+                return redirect()->route('auth.forms.B2BResellerAgent');
+            }
             return redirect()->route('agent.dashboard');
         }
 
         if ($user->account_type === 'student') {
-            // if (!$user->studentDetail) {
-            //     return redirect()->route('auth.form.student');
-            // }
+            if (!$user->studentDetail) {
+                return redirect()->route('auth.form.student');
+            }
             return redirect()->route('student.dashboard');
         }
 

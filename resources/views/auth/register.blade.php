@@ -3,6 +3,8 @@
 @section('title', 'Register - UniCou')
 
 @section('content')
+
+
 @php
 $requestedType = request()->get('type');
 $lockRequested = filter_var(request()->get('locked'), FILTER_VALIDATE_BOOLEAN);
@@ -14,153 +16,140 @@ $allowedTypes[] = 'freelancer';
 $defaultType = in_array($requestedType, $allowedTypes, true) ? $requestedType : 'student';
 $accountLocked = $lockRequested && $defaultType === $requestedType;
 @endphp
-<style>
-    .role-switch {
-        background: #eaf3ff;
-        padding: 6px;
-        border-radius: 50px;
-    }
 
-    .role-btn {
-        border: none;
-        padding: 10px 28px;
-        border-radius: 40px;
-        font-weight: 600;
-        cursor: pointer;
-        background: transparent;
-        color: #1d4ed8;
-        /* blue text */
-        transition: all 0.3s ease;
-    }
-
-    .role-btn.active {
-        background: #23aae2;
-        /* dark blue */
-        color: #fff;
-        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
-    }
-
-    .role-btn:hover:not(.active) {
-        background: #dbeafe;
-        /* light blue hover */
-    }
-</style>
-<section class="register_page_sec">
-    <div class="auth-wrapper">
-        <div class="auth-image">
-            <img src="https://media.istockphoto.com/id/2205696704/photo/online-registration-form-identity-verification-personal-information-verification-concept.jpg?s=612x612&w=0&k=20&c=2X_45rxke9VrEez-D7JPchhSQwM_Od2jR_vyS1O5MTY=" alt="Register Illustration">
+<div class="sat-view-container">
+    <div class="sat-card" style="max-width: 650px;">
+        <div class="sat-header">
+            <h2 id="formTitle">Create Account</h2>
+            <p>Join UniCou and start managing your vouchers.</p>
         </div>
-        <div class="auth-form">
-            <div class="text-center mb-4">
-                <h2 class="title" id="formTitle">Create Account</h2>
-                <p class="subtitle">Join UniCou and start managing your vouchers</p>
-            </div>
 
-            @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        @if ($errors->any())
+        <div class="alert alert-danger mx-4 mt-3 mb-0">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        <div class="type-selector-wrapper mt-4 mb-4 text-center">
+            @if(!$accountLocked)
+            <div class="d-inline-flex gap-2 role-switch p-2 bg-light rounded-pill">
+                <button type="button"
+                    class="role-btn {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
+                    onclick="setActive('reseller_agent')"
+                    id="btn-reseller_agent">
+                    Agent
+                </button>
+
+                <button type="button"
+                    class="role-btn {{ $defaultType === 'student' ? 'active' : '' }}"
+                    onclick="setActive('student')"
+                    id="btn-student">
+                    Student
+                </button>
+            </div>
+            @else
+            <div class="text-center p-2 bg-light rounded border">
+                <strong>Registering as {{ ucfirst(str_replace('_', ' ', $defaultType)) }}</strong>
             </div>
             @endif
+        </div>
 
-            <div class="type-selector-wrapper mb-4 text-center">
-                @if(!$accountLocked)
-                <div class="d-flex justify-content-center gap-2 role-switch">
+        <form id="registerForm" method="POST" action="{{ route('register.post') }}">
+            @csrf
+            <input type="hidden" name="account_type" id="accountType" value="{{ $defaultType }}">
+            <input type="hidden" id="regifeetaken" name="regifeetaken" value="no">
 
-                    <button type="button"
-                        class="role-btn {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
-                        onclick="setActive('reseller_agent')"
-                        id="btn-reseller_agent">
-                        Agent
-                    </button>
-
-                    <button type="button"
-                        class="role-btn {{ $defaultType === 'student' ? 'active' : '' }}"
-                        onclick="setActive('student')"
-                        id="btn-student">
-                        Student
-                    </button>
+            <div class="sat-grid-2">
+                <div class="sat-field">
+                    <label for="firstName">Full Name *</label>
+                    <input name="first_name" type="text" id="firstName" placeholder="Full Name" required>
                 </div>
 
-                @else
-                <div class="text-center p-2 bg-light rounded border">
-                    <strong>Registering as {{ ucfirst(str_replace('_', ' ', $defaultType)) }}</strong>
+                <div class="sat-field">
+                    <label for="email">Email Address *</label>
+                    <input name="email" type="email" id="email" placeholder="Email Address" required>
                 </div>
-                @endif
-            </div>
 
-            <form id="registerForm" method="POST" action="{{ route('register.post') }}">
-                @csrf
-                <input type="hidden" name="account_type" id="accountType" value="{{ $defaultType }}">
-                <input type="hidden" id="regifeetaken" name="regifeetaken" value="">
-
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6 field">
-                        <label for="firstName">Full Name</label>
-                        <input name="first_name" type="text" id="firstName" placeholder="First Name" required>
+                <div class="sat-field sat-full">
+                    <label for="phone_input">Phone Number *</label>
+                    <div class="iti-wrapper">
+                        <input type="tel" id="phone_input" name="phone_dummy" required style="width: 100%;">
                     </div>
-
-                </div>
-
-                <div class="field mb-3">
-                    <label for="email">Email Address</label>
-                    <input name="email" type="email" id="email" placeholder="Email" required>
-                </div>
-
-                <div class="field mb-3">
-                    <label for="phone_input">Phone Number</label>
-                    <input type="tel" id="phone_input" name="phone_dummy" required style="width: 100%;">
                     <input type="hidden" name="phone" id="full_phone">
                     <input type="hidden" name="country_code" id="country_code">
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6 field">
-                        <label for="password">Password</label>
-                        <input name="password" type="password" id="password" placeholder="Password" required>
-                    </div>
-                    <div class="col-md-6 field">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <input name="password_confirmation" type="password" id="confirmPassword" placeholder="Confirm" required>
-                    </div>
+                <div class="sat-field">
+                    <label for="password">Password *</label>
+                    <input name="password" type="password" id="password" placeholder="Min. 8 characters" required>
                 </div>
 
-                <div class="field mb-3">
-                    <div class="captcha-wrapper p-3 border rounded bg-light d-flex align-items-center">
-
-                        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE') }}"></div>
-
-                        <!-- <div class="ms-auto">
-                            <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" width="30">
-                        </div> -->
-                    </div>
+                <div class="sat-field">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input name="password_confirmation" type="password" id="confirmPassword" placeholder="Repeat password" required>
                 </div>
+            </div>
 
-                <button type="button" class="btn-primary w-100" id="submitBtns">
-                    Register Now
-                </button>
-                <button hidden type="submit" id="realSubmitBtn"></button>
-
-                <div class="bottom-text mt-4">
-                    Already have an account? <a href="{{ route('login') }}">Login here</a>
+            <div class="sat-field mt-4 mb-4">
+                <div class="captcha-container d-flex justify-content-center">
+                    <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE') }}"></div>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <button type="button" class="sat-btn" id="submitBtns">
+                REGISTER NOW →
+            </button>
+            <button hidden type="submit" id="realSubmitBtn"></button>
+
+            <div class="text-center mt-4">
+                <p style="font-size: 14px; color: #64748b;">
+                    Already have an account?
+                    <a href="{{ route('login') }}" class="text-primary fw-bold" style="text-decoration: none;">Login here</a>
+                </p>
+            </div>
+        </form>
     </div>
-</section>
+</div>
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/style.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+<style>
+    .role-switch {
+        background: #f1f5f9;
+        padding: 4px;
+        border-radius: 50px;
+        display: inline-flex;
+    }
 
+    .role-btn {
+        border: none;
+        padding: 8px 24px;
+        border-radius: 40px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: transparent;
+        color: #64748b;
+        transition: all 0.2s ease;
+    }
+
+    .role-btn.active {
+        background: #23AAE2;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(35, 170, 226, 0.3);
+    }
+
+    .iti-wrapper .iti {
+        width: 100%;
+    }
+</style>
 @endpush
 
 @push('scripts')
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     let iti;
@@ -176,7 +165,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         });
 
         document.getElementById('submitBtns').addEventListener('click', function() {
-            if (grecaptcha.getResponse() === "") {
+            if (typeof grecaptcha !== 'undefined' && grecaptcha.getResponse() === "") {
                 Swal.fire({
                     title: "Verification Required",
                     text: "Please complete the reCAPTCHA.",
@@ -188,7 +177,6 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             document.getElementById('full_phone').value = iti.getNumber();
             document.getElementById('country_code').value = iti.getSelectedCountryData().iso2.toUpperCase();
 
-            document.getElementById('regifeetaken').value = 'no';
             const btn = document.getElementById('submitBtns');
             if (btn) {
                 btn.disabled = true;
@@ -209,6 +197,5 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         }
     }
 </script>
-
 @endpush
 @endsection

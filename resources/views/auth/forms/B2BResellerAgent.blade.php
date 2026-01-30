@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-@include('layouts.header')
+<!-- @include('layouts.header') -->
 
 <div class="sat-view-container">
 
@@ -38,18 +38,18 @@
         </div>
         @endif
 
-<div class="wizard-steps mb-4">
-    <div class="wizard-step active" data-step="1">
-        <span>✓</span>
-        <small>TYPE</small>
-    </div>
-    <div class="wizard-step" data-step="2"><span>2</span><small>BUSINESS</small></div>
-    <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
-    <div class="wizard-step" data-step="4"><span>4</span><small>ONLINE</small></div>
-    <div class="wizard-step" data-step="5"><span>5</span><small>ID</small></div>
-    <div class="wizard-step" data-step="6"><span>6</span><small>BANK</small></div>
-    <div class="wizard-step" data-step="7"><span>7</span><small>UPLOAD</small></div>
-</div>
+        <div class="wizard-steps mb-4">
+            <div class="wizard-step active" data-step="1">
+                <span>✓</span>
+                <small>TYPE</small>
+            </div>
+            <div class="wizard-step" data-step="2"><span>2</span><small>BUSINESS</small></div>
+            <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
+            <div class="wizard-step" data-step="4"><span>4</span><small>ONLINE</small></div>
+            <div class="wizard-step" data-step="5"><span>5</span><small>ID</small></div>
+            <div class="wizard-step" data-step="6"><span>6</span><small>BANK</small></div>
+            <div class="wizard-step" data-step="7"><span>7</span><small>UPLOAD</small></div>
+        </div>
 
 
 
@@ -416,57 +416,57 @@
 
 
 <script>
-let currentStep = parseInt(localStorage.getItem('agentStep')) || 1;
+    let currentStep = parseInt(localStorage.getItem('agentStep')) || 1;
 
-const steps = document.querySelectorAll('.form-step');
-const indicators = document.querySelectorAll('.wizard-step');
+    const steps = document.querySelectorAll('.form-step');
+    const indicators = document.querySelectorAll('.wizard-step');
 
-function showStep(step) {
+    function showStep(step) {
 
-    // hide all form steps
-    steps.forEach(s => s.classList.remove('active'));
+        // hide all form steps
+        steps.forEach(s => s.classList.remove('active'));
 
-    // reset stepper
-    indicators.forEach(i => {
-        i.classList.remove('active');
-        i.querySelector('span').innerText = i.dataset.step;
-    });
+        // reset stepper
+        indicators.forEach(i => {
+            i.classList.remove('active');
+            i.querySelector('span').innerText = i.dataset.step;
+        });
 
-    // show current form
-    document.querySelector(`.form-step[data-step="${step}"]`)?.classList.add('active');
+        // show current form
+        document.querySelector(`.form-step[data-step="${step}"]`)?.classList.add('active');
 
-    // activate current step
-    const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
-    if (activeStep) {
-        activeStep.classList.add('active');
-        activeStep.querySelector('span').innerText = "✓";
+        // activate current step
+        const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
+        if (activeStep) {
+            activeStep.classList.add('active');
+            activeStep.querySelector('span').innerText = "✓";
+        }
+
+        localStorage.setItem('agentStep', step);
     }
 
-    localStorage.setItem('agentStep', step);
-}
+    // init
+    showStep(currentStep);
 
-// init
-showStep(currentStep);
-
-// NEXT
-document.querySelectorAll('.next-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (currentStep < indicators.length) {
-            currentStep++;
-            showStep(currentStep);
-        }
+    // NEXT
+    document.querySelectorAll('.next-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (currentStep < indicators.length) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
     });
-});
 
-// BACK
-document.querySelectorAll('.prev-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        if (currentStep > 1) {
-            currentStep--;
-            showStep(currentStep);
-        }
+    // BACK
+    document.querySelectorAll('.prev-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
     });
-});
 </script>
 
 

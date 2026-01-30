@@ -1,4 +1,4 @@
-<header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
+<!-- <header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
     <div class="header-left">
         @yield('header_left')
         @if(!View::hasSection('header_left'))
@@ -70,7 +70,7 @@
                     <div class="dropdown-divider"></div>
                     @endif
                     <a class="dropdown-item" href="{{ route('auth.logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();">
+                        onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();">
                         Logout
                     </a>
                     <form id="logout-form-header" action="{{ route('auth.logout') }}" method="POST" class="d-none">
@@ -80,4 +80,4 @@
             </div>
         </div>
     </div>
-</header>
+</header> -->
