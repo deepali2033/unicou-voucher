@@ -56,12 +56,20 @@
             @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('vouchers.control') }}">
+                <a class="nav-link" href="{{ route('vouchers') }}">
                     <i class="fas fa-ticket-alt me-2"></i> Voucher Management
                 </a>
             </li>
             @endif
 
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('vouchers') }}">
+                    <i class="fas fa-ticket-alt me-2"></i> Voucher
+                </a>
+            </li>
+            @endif
             @if(in_array(auth()->user()->account_type, ['reseller_agent', 'student']))
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('agent.vouchers') }}">

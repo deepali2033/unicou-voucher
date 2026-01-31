@@ -90,7 +90,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
 
     // Voucher Management
-    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers.control');
+    Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers');
+    Route::get('/vouchers/order/{id}', [VoucherController::class, 'showOrder'])->name('vouchers.order');
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
     Route::post('/vouchers/store', [VoucherController::class, 'store'])->name('vouchers.store');
     Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');

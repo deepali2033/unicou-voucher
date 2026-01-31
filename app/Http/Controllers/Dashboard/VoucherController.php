@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Vouchar;
+use App\Models\VoucherPriceRule;
+use App\Models\InventoryVoucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -12,32 +13,55 @@ class VoucherController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Vouchar::query();
+        $query = VoucherPriceRule::with('inventoryVoucher');
 
-        if ($request->has('category') && $request->category != 'all') {
-            $query->where('category', $request->category);
+        // Filter by Voucher Name (Brand Name)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('inventoryVoucher', function ($q) use ($search) {
+                $q->where('brand_name', 'like', "%$search%");
+            });
         }
 
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhere('voucher_id', 'like', "%$search%");
-            });
+        // Filter by Date
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        // Filter by Price Range
+        if ($request->filled('min_price')) {
+            $query->where('sale_price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('sale_price', '<=', $request->max_price);
         }
 
         $vouchers = $query->latest()->get();
 
         $stats = [
-            'total_vouchers' => Vouchar::count(),
-            'total_stock' => Vouchar::sum('stock'),
-            'total_valuation' => Vouchar::sum(DB::raw('price * stock')),
-            'active_brands' => Vouchar::distinct('category')->count('category'),
+            'total_vouchers' => InventoryVoucher::count(),
+            'total_stock' => InventoryVoucher::sum('quantity'),
+            'total_valuation' => InventoryVoucher::sum(DB::raw('agent_sale_price * quantity')),
+            'active_brands' => InventoryVoucher::distinct('brand_name')->count('brand_name'),
         ];
 
-        $categories = Vouchar::distinct('category')->pluck('category');
+        return view('dashboard.voucher.index', compact('vouchers', 'stats'));
+    }
 
-        return view('dashboard.voucher.voucher-control', compact('vouchers', 'stats', 'categories'));
+    public function showOrder($id)
+    {
+        $rule = VoucherPriceRule::with('inventoryVoucher')->findOrFail($id);
+
+        $user = auth()->user();
+
+        // Mock data for points and store credit (you may want to fetch these from actual user models)
+        $userPoints = [
+            'quarterly' => 0,
+            'yearly' => 0,
+            'store_credit' => 0,
+        ];
+
+        return view('dashboard.voucher.order-now', compact('rule', 'userPoints'));
     }
 
     public function create()

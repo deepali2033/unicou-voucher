@@ -143,6 +143,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->account_type === 'student';
     }
 
+    public function isResellerAgent(): bool
+    {
+        return $this->account_type === 'reseller_agent';
+    }
+
     /**
      * Check if the user is a regular user.
      *
@@ -327,7 +332,7 @@ class User extends Authenticatable implements MustVerifyEmail
         // Find last user with this exact prefix
         // We ensure we don't pick up Student IDs (with 'A') when generating Agent IDs (without 'A')
         $query = self::where('user_id', 'like', $prefix . '%');
-        
+
         if ($accountType !== 'student') {
             // Exclude student IDs which have 'A' after country code
             $query->where('user_id', 'not like', $prefix . 'A%');
