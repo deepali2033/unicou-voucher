@@ -14,6 +14,7 @@ use App\Http\Controllers\Dashboard\SystemController;
 use App\Http\Controllers\Dashboard\ReportController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\AgentController;
+use App\Http\Controllers\Dashboard\BonusController;
 use App\Http\Controllers\Dashboard\StudentController;
 use App\Http\Controllers\Dashboard\ManagerController;
 use App\Http\Controllers\Dashboard\PricingController;
@@ -153,6 +154,9 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     //Referral Points
     Route::get('/referral', [ReferralController::class, 'referral'])->name('referral');
+
+    //Bonus Points
+    Route::get('/bonus-point', [BonusController::class, 'bonus'])->name('bonus');
 
     // Other placeholder routes
     Route::get('/disputes', function () {

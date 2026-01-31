@@ -126,12 +126,12 @@
                 </a>
             </li>
 
+            -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-calendar-alt me-2"></i> Yearly Points
+                <a class="nav-link" href="{{route('bonus')}}">
+                    <i class="fas fa-calendar-alt me-2"></i> Bonus Point
                 </a>
-            </li> -->
-
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{route('referral')}}">
                     <i class="fas fa-users me-2"></i> Referral Points
