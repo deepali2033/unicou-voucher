@@ -3,10 +3,7 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="sat-view-container">
 
-  @include('layouts.header')
-</div>
 <div class="sat-card">
 
   <div class="sat-header d-flex justify-content-between align-items-center">
@@ -22,6 +19,23 @@
     </button>
   </div>
 
+
+<div class="wizard-steps mb-4">
+  <div class="wizard-step active" data-step="1"><span>✓</span><small>PERSONAL</small></div>
+  <div class="wizard-step" data-step="2"><span>2</span><small>CONTACT</small></div>
+  <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
+  <div class="wizard-step" data-step="4"><span>4</span><small>UPLOAD</small></div>
+  <div class="wizard-step" data-step="5"><span>5</span><small>PURPOSE</small></div>
+  <div class="wizard-step" data-step="6"><span>6</span><small>EDUCATION</small></div>
+  <div class="wizard-step" data-step="7"><span>7</span><small>COUNTRIES</small></div>
+  <div class="wizard-step" data-step="8"><span>8</span><small>BANK</small></div>
+  <div class="wizard-step" data-step="9"><span>9</span><small>VERIFY</small></div>
+</div>
+
+
+
+
+
   @if ($errors->any())
   <div class="alert alert-danger mx-4 mt-3 mb-0">
     <ul class="mb-0">
@@ -35,7 +49,7 @@
   <form id="satForm" method="POST" action="{{ route('auth.form.student.post') }}" enctype="multipart/form-data">
     @csrf
     <!-- ================= PERSONAL ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="1">
       <h4><span>01</span> Personal Information</h4>
 
       <div class="sat-grid-2">
@@ -64,10 +78,15 @@
           <input type="text" name="id_number" placeholder="e.g. CNIC / Passport Number" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= CONTACT ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="2">
       <h4><span>02</span> Contact Information</h4>
 
       <div class="sat-grid-2">
@@ -86,10 +105,15 @@
           <input type="tel" name="whatsapp_number" placeholder="+92 3XX XXX XXXX" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= ADDRESS ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="3">
       <h4><span>03</span> Address Details</h4>
 
       <div class="sat-grid-2">
@@ -118,10 +142,15 @@
           <input type="text" name="post_code" placeholder="e.g. 54000" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= DOCUMENT UPLOAD ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="4">
       <h4><span>04</span> Upload Documents</h4>
 
       <div class="alert alert-warning mb-3" style="font-size: 0.85rem;">
@@ -134,10 +163,15 @@
           <input type="file" name="id_doc" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= EXAM PURPOSE ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="5">
       <h4><span>05</span> English Exam Purpose</h4>
 
       <div class="sat-grid-2">
@@ -150,10 +184,15 @@
           </select>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= EDUCATION ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="6">
       <h4><span>06</span> Education Details</h4>
 
       <div class="sat-grid-2">
@@ -167,10 +206,15 @@
           <input type="number" name="passing_year" placeholder="e.g. 2022" min="1990" max="2035" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= COUNTRIES ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="7">
       <h4><span>07</span> Preferred Countries</h4>
 
       <div class="sat-grid-2 Preferred-Country">
@@ -179,10 +223,15 @@
         <label class="sat-consent Preferred-Country_checkbox"><input type="checkbox" name="preferred_countries[]" value="Canada"> Canada</label>
         <label class="sat-consent Preferred-Country_checkbox"><input type="checkbox" name="preferred_countries[]" value="Australia"> Australia</label>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= BANK ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="8">
       <h4><span>08</span> Bank Account Details</h4>
 
       <div class="sat-grid-2">
@@ -201,10 +250,16 @@
           <input type="text" name="account_number" placeholder="e.g. PK36SCBL0000001123456702" required>
         </div>
       </div>
+
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= FINAL UPLOAD ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="9">
       <h4><span>09</span> Final Verification Upload</h4>
 
       <div class="sat-grid-2">
@@ -212,6 +267,11 @@
           <label>Re-Upload ID Document *</label>
           <input type="file" name="id_doc_final" required>
         </div>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
       </div>
     </section>
 
@@ -320,5 +380,51 @@
     document.getElementById('consent_terms').checked = true;
   }
 </script>
+
+
+<script>
+let currentStep = parseInt(localStorage.getItem('studentStep')) || 1;
+
+const steps = document.querySelectorAll('.form-step');
+const indicators = document.querySelectorAll('.wizard-step');
+
+function showStep(step) {
+  steps.forEach(s => s.classList.remove('active'));
+
+  indicators.forEach(i => {
+    i.classList.remove('active');
+    i.querySelector('span').innerText = i.dataset.step;
+  });
+
+  document.querySelector(`.form-step[data-step="${step}"]`)?.classList.add('active');
+
+  const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
+  if (activeStep) {
+    activeStep.classList.add('active');
+    activeStep.querySelector('span').innerText = "✓";
+  }
+
+  localStorage.setItem('studentStep', step);
+}
+
+showStep(currentStep);
+
+document.querySelectorAll('.next-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentStep++;
+    showStep(currentStep);
+  });
+});
+
+document.querySelectorAll('.prev-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (currentStep > 1) {
+      currentStep--;
+      showStep(currentStep);
+    }
+  });
+});
+</script>
+
 @endpush
 @endsection
