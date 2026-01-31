@@ -2,7 +2,7 @@
 @section('content')
 <div class="container-fluid">
 
-    <div class="container-fluid">
+    <div class="container-fluid mb-4">
 
         {{-- Offcanvas Filter --}}
         <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
@@ -74,7 +74,7 @@
                         <div class="company-info mb-2">
                             <div class="brand-logo-mini">
                                 @if($voucher->logo)
-                                <img src="{{ asset('storage/'.$voucher->logo) }}" alt="{{ $voucher->brand_name }}">
+                                <img src="/images/flipkartLogo.png" alt="{{ $voucher->brand_name }}">
                                 @else
                                 <i class="fas fa-ticket-alt text-primary"></i>
                                 @endif
@@ -86,7 +86,7 @@
                         </div>
 
                         <div class="voucher-title-section">
-                            <h2 class="gift-text">Gift</h2>
+                            <!-- <h2 class="gift-text">Gift</h2> -->
                             <h1 class="voucher-text">Voucher</h1>
                         </div>
 
@@ -301,7 +301,7 @@
         .currency-symbol {
             font-size: 1.2rem;
             font-weight: 700;
-            margin-top: 5px;
+            /* margin-top: 5px; */
         }
 
         .price-amount {
@@ -337,6 +337,16 @@
         .disabled-action {
             color: rgba(255, 255, 255, 0.5);
             font-size: 1.2rem;
+        }
+
+        .price-display span {
+            font-size: 22px;
+        }
+
+        .voucher-footer-info.d-flex.justify-content-between.align-items-center {
+            display: grid !important;
+            margin-top: 20px;
+            gap: 10px;
         }
 
         @media (max-width: 576px) {
