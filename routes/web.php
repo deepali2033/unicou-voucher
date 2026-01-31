@@ -17,6 +17,7 @@ use App\Http\Controllers\Dashboard\AgentController;
 use App\Http\Controllers\Dashboard\StudentController;
 use App\Http\Controllers\Dashboard\ManagerController;
 use App\Http\Controllers\Dashboard\PricingController;
+use App\Http\Controllers\Dashboard\ReferralController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', function () {
@@ -149,8 +150,11 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     // BANK
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
-    // Other placeholder routes
 
+    //Referral Points
+    Route::get('/referral', [ReferralController::class, 'referral'])->name('referral');
+
+    // Other placeholder routes
     Route::get('/disputes', function () {
         return "Disputes";
     })->name('disputes.index');
@@ -170,6 +174,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
         return "Analytics";
     })->name('analytics');
     Route::get('/orders/history', [AgentController::class, 'orderHistory'])->name('orders.history');
+
     // Agent Specific
     Route::prefix('agent')->name('agent.')->middleware(['account_type:reseller_agent'])->group(function () {
         Route::get('/', [AgentController::class, 'dashboard'])->name('dashboard');
@@ -180,6 +185,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
         Route::get('/bank-link', [AgentController::class, 'bankLink'])->name('bank.link');
         Route::post('/bank-link', [AgentController::class, 'storeBank'])->name('bank.store');
     });
+
 
     // Manager Specific
     Route::prefix('manager')->name('manager.')->middleware(['account_type:manager'])->group(function () {

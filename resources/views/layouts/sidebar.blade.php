@@ -53,6 +53,7 @@
             </li>
             @endif
 
+
             @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
             <!-- Voucher Management -->
             <li class="nav-item">
@@ -117,9 +118,9 @@
             </li>
             @endif
 
-            @if(auth()->user()->account_type === 'reseller_agent')
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Agent Points -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="fas fa-chart-pie me-2"></i> Quarterly Points
                 </a>
@@ -129,10 +130,10 @@
                 <a class="nav-link" href="#">
                     <i class="fas fa-calendar-alt me-2"></i> Yearly Points
                 </a>
-            </li>
+            </li> -->
 
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{route('referral')}}">
                     <i class="fas fa-users me-2"></i> Referral Points
                 </a>
             </li>
