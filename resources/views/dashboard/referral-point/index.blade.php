@@ -17,11 +17,7 @@
                     <label class="form-label fw-bold">Voucher Name</label>
                     <select name="voucher_id" class="form-select select2-filter">
                         <option value="">All Vouchers</option>
-                        @foreach($vouchers as $v)
-                        <option value="{{ $v->id }}" {{ request('voucher_id') == $v->id ? 'selected' : '' }}>
-                            {{ $v->brand_name }} ({{ $v->sku_id }})
-                        </option>
-                        @endforeach
+                       
                     </select>
                 </div>
 
@@ -45,9 +41,6 @@
                 <small class="text-muted">Set specific prices and discounts for vouchers by country.</small>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn btn-primary btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#setPriceModal">
-                    <i class="fas fa-plus me-1"></i> Set Price Rule
-                </button>
                 <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
@@ -61,20 +54,20 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="px-4 py-3 border-0">SERIAL NO.</th>
-                            <th class="py-3 border-0">ORDER ID</th>
-                            <th class="py-3 border-0">NAME</th>
-                            <th class="py-3 border-0">Discount</th>
-                            <th class="py-3 border-0">VOUCHER NAME</th>
-                            <th class="px-4 py-3 border-0 text-end">ACTUAL PRICE</th>
-                            <th class="px-4 py-3 border-0 text-end">DISCOUNT</th>
-                            <th class="px-4 py-3 border-0 text-end">AFTER DISCOUNT</th>
-                            <th class="px-4 py-3 border-0 text-center">DATE</th>
-                            <th class="px-4 py-3 border-0 text-center">TIME</th>
-                            <th class="px-4 py-3 border-0 text-center">POINTS</th>
-                            <th class="px-4 py-3 border-0 text-center">AVAILABLE POINTS</th>
-                            <th class="px-4 py-3 border-0 text-center">EARNING (RS)</th>
-                            <th class="px-4 py-3 border-0 text-center">STATUS</th>
+                            <th class="px-4 py-3 border-0 text-nowrap">SERIAL NO.</th>
+                            <th class="py-3 border-0 text-nowrap">ORDER ID</th>
+                            <th class="py-3 border-0 text-nowrap">NAME</th>
+                            <th class="py-3 border-0 text-nowrap">Discount</th>
+                            <th class="py-3 border-0 text-nowrap">VOUCHER NAME</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">ACTUAL PRICE</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">DISCOUNT</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">AFTER DISCOUNT</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">DATE</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">TIME</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">POINTS</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">AVAILABLE POINTS</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">EARNING (RS)</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">STATUS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,9 +94,7 @@
                         <label class="form-label small fw-bold text-uppercase">Select Voucher</label>
                         <select name="inventory_voucher_id" class="form-select select2-modal" required>
                             <option value="">Choose a voucher...</option>
-                            @foreach($vouchers as $v)
-                            <option value="{{ $v->id }}">{{ $v->brand_name }} ({{ $v->sku_id }})</option>
-                            @endforeach
+                          
                         </select>
                     </div>
 
@@ -111,9 +102,7 @@
                         <label class="form-label small fw-bold text-uppercase">Select Country</label>
                         <select name="country" id="countrySelect" class="form-select select2-modal" required>
                             <option value="">Choose a country...</option>
-                            @foreach($allCountries as $code => $name)
-                            <option value="{{ $code }}" data-name="{{ $name }}">{{ $name }} ({{ $code }})</option>
-                            @endforeach
+                           
                         </select>
                         <input type="hidden" name="country_code" id="countryCodeInput">
                         <input type="hidden" name="country_name" id="countryNameInput">
