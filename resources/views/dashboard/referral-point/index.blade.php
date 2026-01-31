@@ -49,212 +49,111 @@
     </div>
 
 
-</div>
-<div class="row">
-    <!-- Left Column: Order Summary -->
-    <div class="col-lg-10">
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <p class="text-muted small text-uppercase fw-bold mb-1">ORDER SUMMARY</p>
-                <h4 class="fw-bold mb-4">Review & Pay For Your Voucher</h4>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold">Referral Points History</h5>
+                <small class="text-muted">Credit shows redeemable referrals. Debit shows redeemed referrals.</small>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                    <i class="fas fa-file-csv me-1"></i> CSV
+                </a>
+                <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                    <i class="fas fa-filter me-1"></i> Filter
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3 border-0 text-nowrap">SERIAL NO.</th>
+                            <th class="py-3 border-0 text-nowrap">ORDER ID</th>
+                            <th class="py-3 border-0 text-nowrap">NAME</th>
+                            <th class="py-3 border-0 text-nowrap">Discount</th>
+                            <th class="py-3 border-0 text-nowrap">VOUCHER NAME</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">ACTUAL PRICE</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">DISCOUNT</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">AFTER DISCOUNT</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">DATE</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">TIME</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">POINTS</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">AVAILABLE POINTS</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">EARNING (RS)</th>
+                            <th class="px-4 py-3 border-0 text-center text-nowrap">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                <!-- Voucher Details Header -->
-                <div class="d-flex align-items-center justify-content-between mb-4 pb-4 border-bottom">
-                    <div class="d-flex align-items-center">
-                        <div class="brand-logo-container me-3">
-                            @if($rule->inventoryVoucher->logo)
-                            <img src="{{ asset('storage/'.$rule->inventoryVoucher->logo) }}" alt="{{ $rule->inventoryVoucher->brand_name }}" class="img-fluid">
-                            @else
-                            <i class="fas fa-ticket-alt fa-2x text-primary"></i>
-                            @endif
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-0">{{ $rule->inventoryVoucher->brand_name }}</h5>
-                            <p class="text-muted small mb-0">Voucher purchase</p>
-                        </div>
-                    </div>
-                    <div class="quantity-selector d-flex align-items-center bg-light rounded-pill px-2 py-1">
-                        <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="decrease-qty">
-                            <i class="fas fa-minus small text-muted"></i>
-                        </button>
-                        <input type="number" id="voucher-quantity" class="form-control form-control-sm bg-transparent border-0 text-center fw-bold" value="1" min="1" max="{{ $rule->inventoryVoucher->quantity }}" style="width: 50px;">
-                        <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="increase-qty">
-                            <i class="fas fa-plus small text-muted"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Price Details Table -->
-                <div class="price-details-table">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Price</span>
-                        <span class="fw-bold">{{ $rule->inventoryVoucher->currency }} <span id="unit-price">{{ number_format($rule->final_price, 0) }}</span></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Compare at price</span>
-                        <span class="text-muted text-decoration-line-through">{{ $rule->inventoryVoucher->currency }} {{ number_format($rule->sale_price, 0) }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Quantity</span>
-                        <span class="fw-bold" id="display-qty">1</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
-                        <span class="text-muted">Subtotal</span>
-                        <span class="fw-bold">{{ $rule->inventoryVoucher->currency }} <span id="subtotal">{{ number_format($rule->final_price, 0) }}</span></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-2 text-primary">
-                        <span>Quarterly Points Discount</span>
-                        <span>{{ $rule->inventoryVoucher->currency }} <span id="q-discount">0</span></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2 text-primary">
-                        <span>Yearly Points Discount</span>
-                        <span>{{ $rule->inventoryVoucher->currency }} <span id="y-discount">0</span></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2 text-primary">
-                        <span>Total Points Discount</span>
-                        <span>{{ $rule->inventoryVoucher->currency }} <span id="total-discount">0</span></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-4">
-                        <span class="text-muted">Store Credit Applied</span>
-                        <span class="fw-bold text-success">{{ $rule->inventoryVoucher->currency }} <span id="applied-credit">0</span></span>
-                    </div>
-                </div>
-
-                <!-- Point Toggles -->
-                <!-- <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="point-toggle-card rounded-4 p-3 border">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-circle bg-light me-3">
-                                            <i class="fas fa-trophy text-secondary"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0 small fw-bold">Apply Quarterly Points</p>
-                                            <p class="mb-0 tiny-text text-muted">{{ $userPoints['quarterly'] }} points available</p>
-                                        </div>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="toggle-q-points">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="point-toggle-card rounded-4 p-3 border">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-circle bg-light-warning me-3">
-                                            <i class="fas fa-medal text-warning"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0 small fw-bold">Apply Yearly Points</p>
-                                            <p class="mb-0 tiny-text text-muted">{{ $userPoints['yearly'] }} points available</p>
-                                        </div>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="toggle-y-points">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
-                <!-- Total & Actions -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <p class="text-muted small mb-0">Total to pay</p>
-                        <h3 class="fw-bold text-primary mb-0">{{ $rule->inventoryVoucher->currency }} <span id="final-total">{{ number_format($rule->final_price, 0) }}</span></h3>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('vouchers') }}" class="btn btn-light border-0 px-4 rounded-3 fw-bold">Cancel</a>
-                        <button class="btn btn-primary px-5 rounded-3 fw-bold shadow-sm" id="pay-now">Pay Now</button>
-                    </div>
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <!-- Right Column: Progress & Earnings -->
-    <!-- <div class="col-lg-4">
-          
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-body p-4 text-center">
-                    <h6 class="text-start fw-bold mb-4">Your Progress</h6>
-
-                    <div class="progress-ring-container mb-4">
-                        <div class="brand-progress-header d-flex align-items-center justify-content-center mb-3">
-                            <div class="brand-logo-sm me-2">
-                                @if($rule->inventoryVoucher->logo)
-                                <img src="{{ asset('storage/'.$rule->inventoryVoucher->logo) }}" alt="" style="height: 20px;">
-                                @endif
-                            </div>
-                            <span class="fw-bold small">{{ $rule->inventoryVoucher->brand_name }}</span>
-                        </div>
-                        <div class="progress-ring-wrapper position-relative d-inline-block">
-                            <svg width="120" height="120">
-                                <circle class="progress-ring-bg" stroke="#f1f1f1" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" />
-                                <circle class="progress-ring-bar" stroke="#e84c71" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" style="stroke-dasharray: 314.159; stroke-dashoffset: 314.159;" />
-                            </svg>
-                            <div class="progress-text position-absolute top-50 start-50 translate-middle">
-                                <h5 class="mb-0 fw-bold">0/50</h5>
-                                <p class="tiny-text text-muted mb-0">Purchased</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p class="fw-bold mb-1">Your Progress Till Now</p>
-                    <p class="text-muted small mb-4">Buy 50 more vouchers in next 78 days to get 15,000 quarterly points and 5,000 yearly points</p>
-
-                    <div class="on-track-badge d-inline-flex align-items-center bg-light px-3 py-1 rounded-pill mb-2">
-                        <span class="dot bg-primary me-2"></span>
-                        <span class="small text-primary fw-bold">On Track</span>
-                        <span class="small text-muted ms-2">Keep going!</span>
-                    </div>
-                </div>
-            </div>
-
-           
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-4">What you'll earn</h6>
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <div class="earning-item p-2 rounded-3">
-                                <div class="icon-circle bg-light mx-auto mb-2">
-                                    <i class="fas fa-trophy text-secondary"></i>
-                                </div>
-                                <p class="tiny-text fw-bold text-muted text-uppercase mb-1">QUARTERLY POINTS</p>
-                                <h6 class="fw-bold text-dark mb-0"><span id="display-q-points">
-                                        @if(auth()->user()->account_type == 'student')
-                                        {{ $rule->inventoryVoucher->student_referral_points_per_unit }}
-                                        @else
-                                        {{ $rule->inventoryVoucher->agent_referral_points_per_unit }}
-                                        @endif
-                                    </span> RS</h6>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="earning-item p-2 rounded-3">
-                                <div class="icon-circle bg-light-warning mx-auto mb-2">
-                                    <i class="fas fa-medal text-warning"></i>
-                                </div>
-                                <p class="tiny-text fw-bold text-muted text-uppercase mb-1">YEARLY POINTS</p>
-                                <h6 class="fw-bold text-dark mb-0"><span id="display-y-points">
-                                        @if(auth()->user()->account_type == 'student')
-                                        {{ $rule->inventoryVoucher->student_bonus_points_per_unit }}
-                                        @else
-                                        {{ $rule->inventoryVoucher->agent_bonus_points_per_unit }}
-                                        @endif
-                                    </span> RS</h6>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 </div>
+
+<!-- Set Price Modal -->
+<div class="modal fade" id="setPriceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Configure Pricing Rule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="setPriceForm">
+                @csrf
+                <div class="modal-body px-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Select Voucher</label>
+                        <select name="inventory_voucher_id" class="form-select select2-modal" required>
+                            <option value="">Choose a voucher...</option>
+
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Select Country</label>
+                        <select name="country" id="countrySelect" class="form-select select2-modal" required>
+                            <option value="">Choose a country...</option>
+
+                        </select>
+                        <input type="hidden" name="country_code" id="countryCodeInput">
+                        <input type="hidden" name="country_name" id="countryNameInput">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Sale Price ($)</label>
+                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Discount Type</label>
+                        <div class="d-flex gap-4 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="discount_type" id="typeFixed" value="fixed" checked>
+                                <label class="form-check-label" for="typeFixed">Fixed Amount ($)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="discount_type" id="typePercent" value="percentage">
+                                <label class="form-check-label" for="typePercent">Percentage (%)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase" id="discountValueLabel">Discount Amount</label>
+                        <input type="number" step="0.01" name="discount_value" class="form-control" value="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Pricing Rule</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -263,65 +162,92 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const qtyInput = document.getElementById('voucher-quantity');
-        const displayQty = document.getElementById('display-qty');
-        const unitPrice = parseFloat("{{ $rule->final_price }}");
-        const subtotalEl = document.getElementById('subtotal');
-        const finalTotalEl = document.getElementById('final-total');
-        const increaseBtn = document.getElementById('increase-qty');
-        const decreaseBtn = document.getElementById('decrease-qty');
-
-        function updatePrices() {
-            const qty = parseInt(qtyInput.value);
-            const subtotal = qty * unitPrice;
-
-            displayQty.innerText = qty;
-            subtotalEl.innerText = subtotal.toLocaleString();
-
-            // Final total logic (considering points later)
-            let total = subtotal;
-
-            // Add point logic here if needed
-
-            finalTotalEl.innerText = total.toLocaleString();
-        }
-
-        increaseBtn.addEventListener('click', () => {
-            qtyInput.value = parseInt(qtyInput.value) + 1;
-            updatePrices();
+    $(document).ready(function() {
+        $('.select2-modal').select2({
+            dropdownParent: $('#setPriceModal'),
+            width: '100%'
         });
 
-        decreaseBtn.addEventListener('click', () => {
-            if (qtyInput.value > 1) {
-                qtyInput.value = parseInt(qtyInput.value) - 1;
-                updatePrices();
-            }
+        $('.select2-filter').select2({
+            width: '100%'
         });
 
-        qtyInput.addEventListener('change', updatePrices);
+        $('#countrySelect').on('change', function() {
+            const code = $(this).val();
+            const name = $(this).find(':selected').data('name');
+            $('#countryCodeInput').val(code);
+            $('#countryNameInput').val(name);
+        });
 
-        // Initial progress bar update (mock 0/50)
-        const circle = document.querySelector('.progress-ring-bar');
-        const radius = circle.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
-        circle.style.strokeDasharray = `${circumference} ${circumference}`;
-        circle.style.strokeDashoffset = circumference;
+        $('input[name="discount_type"]').on('change', function() {
+            const label = $(this).val() === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)';
+            $('#discountValueLabel').text(label);
+        });
 
-        function setProgress(percent) {
-            const offset = circumference - (percent / 100 * circumference);
-            circle.style.strokeDashoffset = offset;
-        }
+        // Handle Form Submit
+        $('#setPriceForm').on('submit', function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...');
 
-        // Example: set to 0% initially
-        setProgress(0);
+            $.ajax({
+                url: "{{ route('pricing.store') }}",
+                method: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Something went wrong. Please try again.');
+                    btn.prop('disabled', false).html('Save Pricing Rule');
+                }
+            });
+        });
+
+        // Handle Delete
+        $(document).on('click', '.delete-rule', function() {
+            if (!confirm('Are you sure you want to remove this pricing rule?')) return;
+
+            const id = $(this).data('id');
+            const row = $(`#rule-row-${id}`);
+
+            $.ajax({
+                url: "{{ route('pricing.destroy', ':id') }}".replace(':id', id),
+                method: "DELETE",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        row.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                        toastr.success(response.message);
+                    }
+                }
+            });
+        });
     });
 </script>
-@endsection
-!important;
-background-color: #fffafb;
-}
+
+<style>
+    .bg-soft-success {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
 </style>
-
-
+@endpush
 @endsection
