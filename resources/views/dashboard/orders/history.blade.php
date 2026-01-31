@@ -1,233 +1,247 @@
-@extends('agent.layout.app')
+@extends('layouts.master')
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="fw-bold">Order History</h2>
-            <p class="text-muted">Track and manage your recent orders.</p>
+
+    {{-- Offcanvas Filter --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">
+                <i class="fas fa-filter me-2"></i>Filter Pricing Rules
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-    </div>
+        <div class="offcanvas-body">
+            <form id="filter-form" action="{{ route('pricing.index') }}" method="GET">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Voucher Name</label>
+                    <select name="voucher_id" class="form-select select2-filter">
+                        <option value="">All Vouchers</option>
 
-    <!-- Filters Section -->
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
-        <div class="card-body p-4">
-            <h5 class="fw-bold mb-3">Filters & Reports</h5>
-            <form action="{{ route('agent.orders.history') }}" method="GET">
-                <div class="row g-3">
-                    <!-- Date Range -->
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">From Date</label>
-                        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">To Date</label>
-                        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
-                    </div>
-
-                    <!-- Order ID Range -->
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">From Order ID</label>
-                        <input type="text" name="from_order_id" class="form-control" placeholder="e.g. ORD-001" value="{{ request('from_order_id') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">To Order ID</label>
-                        <input type="text" name="to_order_id" class="form-control" placeholder="e.g. ORD-100" value="{{ request('to_order_id') }}">
-                    </div>
-
-                    <!-- Voucher Type -->
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Voucher Type</label>
-                        <select name="voucher_type" class="form-select">
-                            <option value="">All Types</option>
-                            <option value="exam" {{ request('voucher_type') == 'exam' ? 'selected' : '' }}>Exam Voucher</option>
-                            <option value="discount" {{ request('voucher_type') == 'discount' ? 'selected' : '' }}>Discount Coupon</option>
-                        </select>
-                    </div>
-
-                    <!-- Bank Wise -->
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Bank Wise</label>
-                        <input type="text" name="bank" class="form-control" placeholder="Search Bank" value="{{ request('bank') }}">
-                    </div>
-
-                    <!-- Additional Reports for Reseller Agent -->
-                    @if(Auth::user()->account_type == 'reseller_agent')
-                    <div class="col-md-3">
-                        <label class="form-label small fw-bold">Sub Agent</label>
-                        <select name="sub_agent" class="form-select">
-                            <option value="">All Sub Agents</option>
-                            @foreach($subAgents as $sa)
-                            <option value="{{ $sa->id }}" {{ request('sub_agent') == $sa->id ? 'selected' : '' }}>{{ $sa->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @endif
-
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                    </div>
+                    </select>
                 </div>
 
-                <div class="row mt-3 g-2">
-                    <div class="col-auto">
-                        <a href="{{ route('agent.orders.history') }}" class="btn btn-outline-secondary btn-sm">Clear All</a>
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" name="report" value="payments" class="btn btn-info btn-sm text-white">Payments History</button>
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" name="report" value="points" class="btn btn-warning btn-sm">Points Report</button>
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" name="report" value="bonuses" class="btn btn-success btn-sm">Bonuses Report</button>
-                    </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Country Name</label>
+                    <input type="text" name="country_name" class="form-control" placeholder="Search country..." value="{{ request('country_name') }}">
+                </div>
+
+                <div class="d-grid gap-2 pt-3 border-top">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{{ route('pricing.index') }}" class="btn btn-light">Reset All</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Summary Stats (Points/Bonuses) -->
-    <!-- <div class="row mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3" style="border-radius: 12px; border-left: 4px solid #ffc107;">
-                <p class="small text-muted mb-1">Points Earned</p>
-                <h4 class="fw-bold mb-0">{{ number_format($stats['points_earned']) }}</h4>
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Total Users</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0"></h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3" style="border-radius: 12px; border-left: 4px solid #198754;">
-                <p class="small text-muted mb-1">Points Redeemed</p>
-                <h4 class="fw-bold mb-0">{{ number_format($stats['points_redeemed']) }}</h4>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3" style="border-radius: 12px; border-left: 4px solid #0dcaf0;">
-                <p class="small text-muted mb-1">Current Bonus</p>
-                <h4 class="fw-bold mb-0">PKR {{ number_format($stats['current_bonus']) }}</h4>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3 bg-primary text-white" style="border-radius: 12px;">
-                <p class="small mb-1 opacity-75">Next Bonus Alert</p>
-                <p class="small mb-0">
-                    @php
-                        $totalOrders = $orders->total();
-                        $target = 100; // Example target
-                        $remaining = $target - ($totalOrders % $target);
-                    @endphp
-                    Target: {{ $remaining }} orders more
-                </p>
-            </div>
-        </div>
-    </div> -->
+    </div>
 
-    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold">My Order History</h5>
+                <small class="text-muted">Credit shows redeemable referrals. Debit shows redeemed referrals.</small>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                    <i class="fas fa-file-csv me-1"></i> CSV
+                </a>
+                <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                    <i class="fas fa-filter me-1"></i> Filter
+                </button>
+            </div>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="px-4 py-3">Order ID</th>
-                            <th class="py-3">Date</th>
-                            <th class="py-3">Voucher Type</th>
-                            <th class="py-3">Client Detail</th>
-                            <th class="py-3">Amount</th>
-                            <th class="py-3">Status</th>
-                            <th class="px-4 py-3">Action</th>
+                            <th class="px-4 py-3 border-0 text-nowrap">Order id.</th>
+                            <th class="py-3 border-0 text-nowrap">Product</th>
+                            <th class="py-3 border-0 text-nowrap">Date</th>
+                            <th class="py-3 border-0 text-nowrap">Total Bill</th>
+                            <th class="py-3 border-0 text-nowrap">Payable</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">Paid</th>
+                            <th class="px-4 py-3 border-0 text-end text-nowrap">Point Summary</th>
+
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($orders as $order)
-                        <tr>
-                            <td class="px-4 py-3 text-muted">#{{ $order->order_id }}</td>
-                            <td class="py-3">{{ $order->created_at->format('M d, Y') }}</td>
-                            <td class="py-3">{{ $order->voucher_type }}</td>
-                            <td class="py-3">
-                                <div class="small fw-bold">{{ $order->client_name }}</div>
-                                <div class="small text-muted">{{ $order->client_email }}</div>
-                            </td>
-                            <td class="py-3 fw-bold">PKR {{ number_format($order->amount) }}</td>
-                            <td class="py-3">
-                                @if($order->status == 'completed')
-                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">Completed</span>
-                                @elseif($order->status == 'pending')
-                                <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2">Pending</span>
-                                @else
-                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">{{ ucfirst($order->status) }}</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-3">
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#orderModal{{ $order->id }}">Invoice</button>
 
-                                <!-- Invoice Modal -->
-                                <div class="modal fade" id="orderModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header border-0">
-                                                <h5 class="modal-title fw-bold">Order Invoice #{{ $order->order_id }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="mb-3 d-flex justify-content-between">
-                                                    <span class="text-muted">Order Date:</span>
-                                                    <span class="fw-bold">{{ $order->created_at->format('d M Y, h:i A') }}</span>
-                                                </div>
-                                                <hr>
-                                                <div class="mb-3">
-                                                    <h6 class="fw-bold">Client Information</h6>
-                                                    <p class="mb-1">Name: {{ $order->client_name }}</p>
-                                                    <p class="mb-1">Email: {{ $order->client_email }}</p>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <h6 class="fw-bold">Order Summary</h6>
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span>Voucher Type:</span>
-                                                        <span>{{ $order->voucher_type }}</span>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span>Payment Method:</span>
-                                                        <span>{{ $order->payment_method ?? 'N/A' }}</span>
-                                                    </div>
-                                                    @if($order->bank_name)
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span>Bank:</span>
-                                                        <span>{{ $order->bank_name }}</span>
-                                                    </div>
-                                                    @endif
-                                                </div>
-                                                <div class="bg-light p-3 rounded d-flex justify-content-between">
-                                                    <span class="fw-bold">Total Amount:</span>
-                                                    <span class="fw-bold text-primary">PKR {{ number_format($order->amount) }}</span>
-                                                </div>
-                                                <div class="mt-3 small text-muted">
-                                                    Points Earned: {{ $order->points_earned }}
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer border-0">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-primary" onclick="window.print()">Print Invoice</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">No orders found matching your criteria.</td>
-                        </tr>
-                        @endforelse
                     </tbody>
                 </table>
             </div>
-
-            @if($orders->hasPages())
-            <div class="p-4 border-top">
-                {{ $orders->appends(request()->query())->links() }}
-            </div>
-            @endif
         </div>
     </div>
 </div>
+
+<!-- Set Price Modal -->
+<div class="modal fade" id="setPriceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold">Configure Pricing Rule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="setPriceForm">
+                @csrf
+                <div class="modal-body px-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Select Voucher</label>
+                        <select name="inventory_voucher_id" class="form-select select2-modal" required>
+                            <option value="">Choose a voucher...</option>
+
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Select Country</label>
+                        <select name="country" id="countrySelect" class="form-select select2-modal" required>
+                            <option value="">Choose a country...</option>
+
+                        </select>
+                        <input type="hidden" name="country_code" id="countryCodeInput">
+                        <input type="hidden" name="country_name" id="countryNameInput">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Sale Price ($)</label>
+                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Discount Type</label>
+                        <div class="d-flex gap-4 mt-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="discount_type" id="typeFixed" value="fixed" checked>
+                                <label class="form-check-label" for="typeFixed">Fixed Amount ($)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="discount_type" id="typePercent" value="percentage">
+                                <label class="form-check-label" for="typePercent">Percentage (%)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase" id="discountValueLabel">Discount Amount</label>
+                        <input type="number" step="0.01" name="discount_value" class="form-control" value="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Pricing Rule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.select2-modal').select2({
+            dropdownParent: $('#setPriceModal'),
+            width: '100%'
+        });
+
+        $('.select2-filter').select2({
+            width: '100%'
+        });
+
+        $('#countrySelect').on('change', function() {
+            const code = $(this).val();
+            const name = $(this).find(':selected').data('name');
+            $('#countryCodeInput').val(code);
+            $('#countryNameInput').val(name);
+        });
+
+        $('input[name="discount_type"]').on('change', function() {
+            const label = $(this).val() === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)';
+            $('#discountValueLabel').text(label);
+        });
+
+        // Handle Form Submit
+        $('#setPriceForm').on('submit', function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...');
+
+            $.ajax({
+                url: "{{ route('pricing.store') }}",
+                method: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Something went wrong. Please try again.');
+                    btn.prop('disabled', false).html('Save Pricing Rule');
+                }
+            });
+        });
+
+        // Handle Delete
+        $(document).on('click', '.delete-rule', function() {
+            if (!confirm('Are you sure you want to remove this pricing rule?')) return;
+
+            const id = $(this).data('id');
+            const row = $(`#rule-row-${id}`);
+
+            $.ajax({
+                url: "{{ route('pricing.destroy', ':id') }}".replace(':id', id),
+                method: "DELETE",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        row.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                        toastr.success(response.message);
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .bg-soft-success {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+@endpush
 @endsection

@@ -94,7 +94,7 @@
             </li>
             @endif
 
-            @if(in_array(auth()->user()->account_type, ['reseller_agent', 'student']))
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('orders.history') }}">
                     <i class="fas fa-shopping-cart me-2"></i> My Orders
@@ -178,8 +178,8 @@
 
             <!-- Support Center -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('contact-us.index') }}">
-                    <i class="fas fa-headset me-2"></i> Support Center
+                <a class="nav-link" href="{{ route('customer.support') }}">
+                    <i class="fas fa-headset me-2"></i> Customer Support
                 </a>
             </li>
         </ul>

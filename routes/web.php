@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\BankController;
+use App\Http\Controllers\Dashboard\CustomerController;
+
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\VoucherController;
 use App\Http\Controllers\Dashboard\InventoryController;
@@ -119,6 +121,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/orders-export', [OrderController::class, 'export'])->name('orders.export');
     Route::post('/orders/{id}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::get('/orders/history', [OrderController::class, 'orderHistory'])->name('orders.history');
+
 
     // Wallet Management
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
@@ -152,6 +156,11 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
 
+    // Customer Support
+    Route::get('/customer-support', [CustomerController::class, 'supportindex'])->name('customer.support');
+    Route::post('/customer-support', [CustomerController::class, 'storeSupportQuery'])->name('customer.support.store');
+
+
     //Referral Points
     Route::get('/referral', [ReferralController::class, 'referral'])->name('referral');
 
@@ -177,7 +186,6 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/analytics', function () {
         return "Analytics";
     })->name('analytics');
-    Route::get('/orders/history', [AgentController::class, 'orderHistory'])->name('orders.history');
 
     // Agent Specific
     Route::prefix('agent')->name('agent.')->middleware(['account_type:reseller_agent'])->group(function () {

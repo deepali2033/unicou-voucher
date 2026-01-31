@@ -33,4 +33,9 @@ class OrderController extends Controller
         $order->update(['status' => 'cancelled']);
         return back()->with('success', 'Order cancelled.');
     }
+
+    public function orderHistory()
+    {
+        return view('dashboard.orders.history');
+    }
 }
