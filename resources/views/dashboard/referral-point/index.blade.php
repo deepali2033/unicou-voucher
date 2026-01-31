@@ -34,6 +34,21 @@
         </div>
     </div>
 
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="text-muted small mb-1">Total Users</div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="fw-bold mb-0"></h3>
+                            <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
