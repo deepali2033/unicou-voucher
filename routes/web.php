@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\BankController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\VoucherController;
 use App\Http\Controllers\Dashboard\InventoryController;
@@ -145,6 +146,9 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/settings/update-risk-level', [SettingsController::class, 'updateRiskLevel'])->name('settings.update-risk-level');
     Route::delete('/settings/risk-level/{id}', [SettingsController::class, 'deleteRiskLevel'])->name('settings.risk-level.delete');
 
+    // BANK
+    Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
+    Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
     // Other placeholder routes
 
     Route::get('/disputes', function () {

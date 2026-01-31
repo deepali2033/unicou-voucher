@@ -11,7 +11,7 @@
         </div>
 
         <ul class="nav flex-column gap-2">
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
+            @if(in_array(auth()->user()->account_type, ['admin', 'manager','reseller_agent','student']))
             <!-- Dashboard -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('dashboard') }}">
@@ -44,10 +44,10 @@
             </li>
             @endif
 
-            @if(auth()->user()->account_type === 'reseller_agent')
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Linked Banks -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('agent.banks') }}">
+                <a class="nav-link" href="{{ route('bank.link') }}">
                     <i class="fas fa-university me-2"></i> Linked Banks
                 </a>
             </li>
@@ -62,7 +62,7 @@
             </li>
             @endif
 
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent())
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('vouchers') }}">
@@ -70,7 +70,7 @@
                 </a>
             </li>
             @endif
-            @if(in_array(auth()->user()->account_type, ['reseller_agent', 'student']))
+            <!-- @if(in_array(auth()->user()->account_type, ['reseller_agent', 'student']))
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('agent.vouchers') }}">
                     <i class="fas fa-ticket-alt me-2"></i> My Vouchers
@@ -82,7 +82,7 @@
                     <i class="fas fa-plus-circle me-2"></i> Redeem Voucher
                 </a>
             </li>
-            @endif
+            @endif -->
 
             <!-- Orders -->
             @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
