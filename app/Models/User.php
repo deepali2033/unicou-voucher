@@ -54,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'wallet_balance',
         'latitude',
         'longitude',
+        'last_login_at',
     ];
 
     /**
@@ -80,6 +81,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'verified_at' => 'datetime',
             'profile_updated_at' => 'datetime',
             'pending_profile_data' => 'array',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -123,6 +125,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->account_type === 'manager';
     }
 
+    public function isSupport(): bool
+    {
+        return $this->account_type === 'support_team';
+    }
+
     /**
      * Check if the user is an agent.
      *
@@ -130,7 +137,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isAgent(): bool
     {
-        return $this->account_type === 'reseller_agent';
+        return in_array($this->account_type, ['reseller_agent', 'agent']);
     }
 
     /**
@@ -145,7 +152,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isResellerAgent(): bool
     {
-        return $this->account_type === 'reseller_agent';
+        return in_array($this->account_type, ['reseller_agent', 'agent']);
     }
 
     /**
@@ -358,6 +365,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function studentDetail()
     {
         return $this->hasOne(StudentDetail::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id', 'id');
+    }
+
+    public function riskLevel()
+    {
+        return $this->hasOne(CountryRiskLevel::class, 'country_code', 'country_iso');
     }
 
     /**

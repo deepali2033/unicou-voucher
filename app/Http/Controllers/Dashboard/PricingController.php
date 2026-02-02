@@ -39,14 +39,19 @@ class PricingController extends Controller
             'sale_price' => 'required|numeric|min:0',
             'discount_type' => 'required|in:fixed,percentage',
             'discount_value' => 'required|numeric|min:0',
+            'expiry_date' => 'nullable|date',
+            'is_active' => 'nullable|boolean'
         ]);
+
+        $data = $request->all();
+        $data['is_active'] = $request->has('is_active') ? true : false;
 
         VoucherPriceRule::updateOrCreate(
             [
                 'inventory_voucher_id' => $request->inventory_voucher_id,
                 'country_code' => $request->country_code
             ],
-            $request->all()
+            $data
         );
 
         return response()->json(['success' => true, 'message' => 'Price rule saved successfully.']);

@@ -75,7 +75,19 @@
                     </span>
                 </td>
                 <td>
+                    @php
+                    $risk = strtolower($user->countryRisk->risk_level ?? 'lyyyyyyyyow');
+                    @endphp
+
+                    @if($risk === 'high')
+                    <span class="badge bg-danger-subtle text-danger">High</span>
+
+                    @elseif($risk === 'medium')
+                    <span class="badge bg-warning-subtle text-warning">Medium</span>
+
+                    @else
                     <span class="badge bg-info-subtle text-info">Low</span>
+                    @endif
                 </td>
                 <td>
                     <div class="d-flex flex-wrap gap-1">

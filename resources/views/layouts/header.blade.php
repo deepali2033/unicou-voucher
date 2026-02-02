@@ -62,12 +62,9 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                     @if(!View::hasSection('header_left'))
-                    @if(Auth::user()->isAdmin())
+
                     <a class="dropdown-item" href="{{ route('account.manage') }}">Manage Account</a>
-                    @else
-                    <a class="dropdown-item" href="#">Manage Account</a>
-                    @endif
-                    <div class="dropdown-divider"></div>
+
                     @endif
                     <a class="dropdown-item" href="{{ route('auth.logout') }}"
                         onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();">

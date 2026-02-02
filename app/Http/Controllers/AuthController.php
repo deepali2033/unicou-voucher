@@ -40,23 +40,20 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // 🔹 Step 1: Validate form + captcha
+        // 🔹 Step 1: Validate
         $validated = $request->validate([
-            'account_type' => [
-                'required',
-                'in:agent,manager,reseller_agent,support_team,student,admin'
-            ],
+            'account_type' => ['required', 'in:agent,manager,reseller_agent,support_team,student,admin'],
             'first_name'   => ['required', 'string', 'max:255'],
             'phone'        => ['required', 'string', 'max:20'],
             'country_code' => ['required', 'string', 'max:5'],
-            'email'        => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email'        => ['required', 'email', 'max:255', 'unique:users,email'],
             'password'     => ['required', 'confirmed', 'min:8'],
             'g-recaptcha-response' => ['required'],
-            'latitude'     => ['nullable', 'string'],
-            'longitude'    => ['nullable', 'string'],
+            'latitude'     => ['nullable'],
+            'longitude'    => ['nullable'],
         ]);
 
-        // 🔹 Step 2: Verify captcha with Google
+        // 🔹 Step 2: Verify reCAPTCHA
         $captchaResponse = Http::asForm()->post(
             'https://www.google.com/recaptcha/api/siteverify',
             [
@@ -67,42 +64,71 @@ class AuthController extends Controller
         );
 
         if (! $captchaResponse->json('success')) {
-            return back()
-                ->withErrors(['captcha' => 'Captcha verification failed'])
-                ->withInput();
+            return back()->withErrors(['captcha' => 'Captcha verification failed'])->withInput();
         }
 
-        // 🔹 Step 3: Create user
+        // 🔹 Step 3: Detect Country (Priority Based)
+        $countryCode = strtoupper($validated['country_code']); // fallback
+        $countryISO  = $countryCode;
+
+        // 🥇 LAT / LNG → Country (Most Accurate)
+        if ($request->latitude && $request->longitude) {
+            try {
+                $geo = Http::get('https://nominatim.openstreetmap.org/reverse', [
+                    'lat' => $request->latitude,
+                    'lon' => $request->longitude,
+                    'format' => 'json',
+                ]);
+
+                if ($geo->successful()) {
+                    $countryCode = strtoupper($geo['address']['country_code'] ?? $countryCode);
+                    $countryISO  = $countryCode;
+                }
+            } catch (\Exception $e) {
+            }
+        }
+
+        // 🥈 IP → Country (Fallback)
+        if (! $request->latitude && ! $request->longitude) {
+            try {
+                $location = geoip()->getLocation($request->ip());
+                if ($location && $location->iso_code) {
+                    $countryCode = $location->iso_code;
+                    $countryISO  = $location->iso_code;
+                }
+            } catch (\Exception $e) {
+            }
+        }
+
+        // 🔹 Step 4: Create User
         $user = User::create([
-            'user_id'      => User::generateNextUserId(
-                $validated['account_type'],
-                $validated['country_code']
-            ),
+            'user_id'      => User::generateNextUserId($validated['account_type'], $countryCode),
             'name'         => $validated['first_name'],
             'first_name'   => $validated['first_name'],
             'phone'        => $validated['phone'],
-            'country_iso'  => $validated['country_code'],
+            'country_code' => $countryCode,
+            'country_iso'  => $countryISO,
             'account_type' => $validated['account_type'],
             'email'        => $validated['email'],
             'password'     => Hash::make($validated['password']),
-            'latitude'     => $validated['latitude'] ?? null,
-            'longitude'    => $validated['longitude'] ?? null,
+            'latitude'     => $validated['latitude'],
+            'longitude'    => $validated['longitude'],
+            'ip_address'   => $request->ip(),
         ]);
 
-        // 🔹 Step 4: Send Verification Email
+        // 🔹 Step 5: Send Verification Mail
         try {
             $user->sendEmailVerificationNotification();
         } catch (\Exception $e) {
-            // Log error or show message if SMTP fails
-            return redirect()->route('verification.notice')->with('error', 'Could not send verification email. Please check your SMTP settings.');
+            return redirect()->route('verification.notice')
+                ->with('error', 'Could not send verification email.');
         }
 
-        // 🔹 Step 5: Login & redirect to verification notice
         Auth::login($user);
-
 
         return redirect()->route('verification.notice');
     }
+
 
     /**
      * Handle login
@@ -134,6 +160,11 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+
+        // Update last login time
+        auth()->user()->update([
+            'last_login_at' => now()
+        ]);
 
         if (!auth()->user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');

@@ -11,7 +11,9 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('account_type', '!=', 'admin');
+        $query = User::with('riskLevel')
+            ->where('account_type', '!=', 'admin');
+
 
         if ($request->has('role') && $request->role != 'all' && $request->role != '') {
             $query->where('account_type', $request->role);
@@ -237,5 +239,37 @@ class UserController extends Controller
 
         fclose($handle);
         exit;
+    }
+    public function profile()
+    {
+        $user = auth()->user();
+        $user->load(['agentDetail', 'studentDetail']);
+        return view('dashboard.my-profile.index', compact('user'));
+    }
+
+    public function managers()
+    {
+        $users = User::where('account_type', 'manager')->latest()->paginate(10);
+        return view('dashboard.pages.manager', compact('users'));
+    }
+    public function ResellerAgent()
+    {
+        $users = User::where('account_type', 'reseller_agent')->latest()->paginate(10);
+        return view('dashboard.pages.reseller', compact('users'));
+    }
+    public function SupportTeam()
+    {
+        $users = User::where('account_type', 'support_team')->latest()->paginate(10);
+        return view('dashboard.pages.support', compact('users'));
+    }
+    public function RegularAgent()
+    {
+        $users = User::where('account_type', 'agent')->latest()->paginate(10);
+        return view('dashboard.pages.regularAgent', compact('users'));
+    }
+    public function Student()
+    {
+        $users = User::where('account_type', 'student')->latest()->paginate(10);
+        return view('dashboard.pages.student', compact('users'));
     }
 }

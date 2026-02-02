@@ -73,6 +73,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications.index');
+    Route::get('/my-profile', [UserController::class, 'profile'])->name('profile.index');
+
     Route::get('/stock-alerts', [DashboardController::class, 'stockAlerts'])->name('stock.alerts');
     Route::get('/account', [DashboardController::class, 'manageAccount'])->name('account.manage');
     Route::post('/account/update', [DashboardController::class, 'updateAccount'])->name('account.update');
@@ -93,10 +95,15 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
     Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
-
+    Route::get('/mangers', [UserController::class, 'managers'])->name('manager.page');
+    Route::get('/support-team', [UserController::class, 'SupportTeam'])->name('support.team');
+    Route::get('/reseller-agents', [UserController::class, 'ResellerAgent'])->name('reseller.agent');
+    Route::get('/regular-agents', [UserController::class, 'RegularAgent'])->name('regular.agent');
+    Route::get('/student-list', [UserController::class, 'student'])->name('student.page');
     // Voucher Management
     Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers');
     Route::get('/vouchers/order/{id}', [VoucherController::class, 'showOrder'])->name('vouchers.order');
+    Route::post('/vouchers/order/{id}', [VoucherController::class, 'placeOrder'])->name('vouchers.order.post');
     Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
     Route::post('/vouchers/store', [VoucherController::class, 'store'])->name('vouchers.store');
     Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
@@ -117,10 +124,12 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 
     // Order Management
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders-export', [OrderController::class, 'export'])->name('orders.export');
-    Route::post('/orders/{id}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
-    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::middleware(['account_type:admin,manager,support'])->group(function () {
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders-export', [OrderController::class, 'export'])->name('orders.export');
+        Route::post('/orders/{id}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
+        Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    });
     Route::get('/orders/history', [OrderController::class, 'orderHistory'])->name('orders.history');
 
 
@@ -159,7 +168,10 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     // Customer Support
     Route::get('/customer-support', [CustomerController::class, 'supportindex'])->name('customer.support');
     Route::post('/customer-support', [CustomerController::class, 'storeSupportQuery'])->name('customer.support.store');
-
+    Route::get('/customer-query', [CustomerController::class, 'CustomerQuery'])->name('customer.query');
+    Route::get('/support-options/issues/{topicId}', [CustomerController::class, 'getIssuesByTopic'])->name('support.options.issues');
+    Route::post('/support-options', [CustomerController::class, 'storeSupportOption'])->name('support.options.store');
+    Route::delete('/support-options/{id}', [CustomerController::class, 'deleteSupportOption'])->name('support.options.destroy');
 
     //Referral Points
     Route::get('/referral', [ReferralController::class, 'referral'])->name('referral');

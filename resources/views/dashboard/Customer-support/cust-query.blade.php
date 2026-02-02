@@ -19,12 +19,11 @@
                 @csrf
 
                 <div class="mb-4">
-                    <select name="topic" class="form-select form-select-lg border-0 shadow-sm p-3 custom-select" style="border-radius: 10px; background-color: #f8f9fa;" required>
+                    <select name="topic" id="topicSelect" class="form-select form-select-lg border-0 shadow-sm p-3 custom-select" style="border-radius: 10px; background-color: #f8f9fa;" required>
                         <option value="" selected disabled>Select Your Query</option>
-                        <option value="Booking Process">Booking Process</option>
-                        <option value="Payment Issue">Payment Issue</option>
-                        <option value="Technical Support">Technical Support</option>
-                        <option value="Account Access">Account Access</option>
+                        @foreach($topics as $topic)
+                        <option value="{{ $topic->id }}">{{ $topic->name }}</option>
+                        @endforeach
                     </select>
                     @error('topic')
                     <div class="text-danger small mt-1">{{ $message }}</div>
@@ -32,12 +31,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <select name="issue" class="form-select form-select-lg border-0 shadow-sm p-3 custom-select" style="border-radius: 10px; background-color: #f8f9fa;" required>
+                    <select name="issue" id="issueSelect" class="form-select form-select-lg border-0 shadow-sm p-3 custom-select" style="border-radius: 10px; background-color: #f8f9fa;" required disabled>
                         <option value="" selected disabled>Select Subcategory</option>
-                        <option value="No exams found">No exams found</option>
-                        <option value="Voucher not working">Voucher not working</option>
-                        <option value="Location mismatch">Location mismatch</option>
-                        <option value="Other Issue">Other Issue</option>
                     </select>
                     @error('issue')
                     <div class="text-danger small mt-1">{{ $message }}</div>
@@ -66,3 +61,34 @@
 
 
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $('#topicSelect').on('change', function() {
+        const topicId = $(this).val();
+        const issueSelect = $('#issueSelect');
+        
+        issueSelect.prop('disabled', true).html('<option value="" selected disabled>Loading...</option>');
+        
+        if (topicId) {
+            $.ajax({
+                url: "{{ route('support.options.issues', ':id') }}".replace(':id', topicId),
+                method: "GET",
+                success: function(data) {
+                    issueSelect.html('<option value="" selected disabled>Select Subcategory</option>');
+                    data.forEach(function(issue) {
+                        issueSelect.append(`<option value="${issue.id}">${issue.name}</option>`);
+                    });
+                    issueSelect.prop('disabled', false);
+                },
+                error: function() {
+                    toastr.error('Failed to load subcategories');
+                    issueSelect.html('<option value="" selected disabled>Select Subcategory</option>');
+                }
+            });
+        }
+    });
+});
+</script>
+@endpush

@@ -1,34 +1,26 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
 
     {{-- Offcanvas Filter --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">
-                <i class="fas fa-filter me-2"></i>Filter Pricing Rules
+                <i class="fas fa-filter me-2"></i>Filter Referral Points
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="filter-form" action="{{ route('pricing.index') }}" method="GET">
+            <form id="filter-form" action="{{ route('referral') }}" method="GET">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Voucher Name</label>
-                    <select name="voucher_id" class="form-select select2-filter">
-                        <option value="">All Vouchers</option>
-
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Country Name</label>
-                    <input type="text" name="country_name" class="form-control" placeholder="Search country..." value="{{ request('country_name') }}">
+                    <label class="form-label fw-bold">Order ID</label>
+                    <input type="text" name="order_id" class="form-control" placeholder="Search order ID..." value="{{ request('order_id') }}">
                 </div>
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{{ route('pricing.index') }}" class="btn btn-light">Reset All</a>
+                    <a href="{{ route('referral') }}" class="btn btn-light">Reset All</a>
                 </div>
             </form>
         </div>
@@ -38,10 +30,10 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Total Users</div>
+                    <div class="text-muted small mb-1">Total Referral Points</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"></h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                        <h3 class="fw-bold mb-0">{{ number_format($totalPoints) }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-coins me-1"></i>Earned</span>
                     </div>
                 </div>
             </div>
@@ -53,7 +45,7 @@
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-0 fw-bold">Referral Points History</h5>
-                <small class="text-muted">Credit shows redeemable referrals. Debit shows redeemed referrals.</small>
+                <small class="text-muted">Track your referral earnings from voucher purchases.</small>
             </div>
             <div class="d-flex gap-2">
                 <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
@@ -69,184 +61,56 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="px-4 py-3 border-0 text-nowrap">SERIAL NO.</th>
-                            <th class="py-3 border-0 text-nowrap">ORDER ID</th>
-                            <th class="py-3 border-0 text-nowrap">NAME</th>
-                            <th class="py-3 border-0 text-nowrap">Discount</th>
-                            <th class="py-3 border-0 text-nowrap">VOUCHER NAME</th>
-                            <th class="px-4 py-3 border-0 text-end text-nowrap">ACTUAL PRICE</th>
-                            <th class="px-4 py-3 border-0 text-end text-nowrap">DISCOUNT</th>
-                            <th class="px-4 py-3 border-0 text-end text-nowrap">AFTER DISCOUNT</th>
-                            <th class="px-4 py-3 border-0 text-center text-nowrap">DATE</th>
-                            <th class="px-4 py-3 border-0 text-center text-nowrap">TIME</th>
-                            <th class="px-4 py-3 border-0 text-center text-nowrap">POINTS</th>
-                            <th class="px-4 py-3 border-0 text-center text-nowrap">AVAILABLE POINTS</th>
-                            <th class="px-4 py-3 border-0 text-center text-nowrap">EARNING (RS)</th>
-                            <th class="px-4 py-3 border-0 text-center text-nowrap">STATUS</th>
+                            <th class="px-4 py-3 border-0">S.NO</th>
+                            <th class="py-3 border-0">ORDER ID</th>
+                            <th class="py-3 border-0">USER</th>
+                            <th class="py-3 border-0">VOUCHER</th>
+                            <th class="py-3 border-0 text-end">AMOUNT</th>
+                            <th class="py-3 border-0 text-center">DATE</th>
+                            <th class="py-3 border-0 text-center">REFERRAL POINTS</th>
+                            <th class="py-3 border-0 text-center">STATUS</th>
                         </tr>
                     </thead>
                     <tbody>
-
+                        @forelse($referralHistory as $index => $order)
+                        <tr>
+                            <td class="px-4">{{ $referralHistory->firstItem() + $index }}</td>
+                            <td class="fw-bold text-primary">{{ $order->order_id }}</td>
+                            <td>{{ auth()->user()->name }}</td>
+                            <td>{{ $order->voucher_type }}</td>
+                            <td class="text-end fw-bold">RS {{ number_format($order->amount) }}</td>
+                            <td class="text-center small text-muted">
+                                {{ $order->created_at->format('Y-m-d') }}<br>
+                                {{ $order->created_at->format('H:i') }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-soft-success text-success">+{{ $order->referral_points }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">Credited</span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">No referral history found.</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Set Price Modal -->
-<div class="modal fade" id="setPriceModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow" style="border-radius: 20px;">
-            <div class="modal-header border-0 px-4 pt-4">
-                <h5 class="modal-title fw-bold">Configure Pricing Rule</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="setPriceForm">
-                @csrf
-                <div class="modal-body px-4">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Select Voucher</label>
-                        <select name="inventory_voucher_id" class="form-select select2-modal" required>
-                            <option value="">Choose a voucher...</option>
-
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Select Country</label>
-                        <select name="country" id="countrySelect" class="form-select select2-modal" required>
-                            <option value="">Choose a country...</option>
-
-                        </select>
-                        <input type="hidden" name="country_code" id="countryCodeInput">
-                        <input type="hidden" name="country_name" id="countryNameInput">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Sale Price ($)</label>
-                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Discount Type</label>
-                        <div class="d-flex gap-4 mt-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discount_type" id="typeFixed" value="fixed" checked>
-                                <label class="form-check-label" for="typeFixed">Fixed Amount ($)</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discount_type" id="typePercent" value="percentage">
-                                <label class="form-check-label" for="typePercent">Percentage (%)</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase" id="discountValueLabel">Discount Amount</label>
-                        <input type="number" step="0.01" name="discount_value" class="form-control" value="0" required>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Pricing Rule</button>
-                </div>
-            </form>
+        @if($referralHistory->hasPages())
+        <div class="card-footer bg-white border-0 py-3">
+            {{ $referralHistory->links() }}
         </div>
+        @endif
     </div>
 </div>
 
 @push('scripts')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        $('.select2-modal').select2({
-            dropdownParent: $('#setPriceModal'),
-            width: '100%'
-        });
-
-        $('.select2-filter').select2({
-            width: '100%'
-        });
-
-        $('#countrySelect').on('change', function() {
-            const code = $(this).val();
-            const name = $(this).find(':selected').data('name');
-            $('#countryCodeInput').val(code);
-            $('#countryNameInput').val(name);
-        });
-
-        $('input[name="discount_type"]').on('change', function() {
-            const label = $(this).val() === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)';
-            $('#discountValueLabel').text(label);
-        });
-
-        // Handle Form Submit
-        $('#setPriceForm').on('submit', function(e) {
-            e.preventDefault();
-            const btn = $(this).find('button[type="submit"]');
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...');
-
-            $.ajax({
-                url: "{{ route('pricing.store') }}",
-                method: "POST",
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        location.reload();
-                    }
-                },
-                error: function(xhr) {
-                    toastr.error('Something went wrong. Please try again.');
-                    btn.prop('disabled', false).html('Save Pricing Rule');
-                }
-            });
-        });
-
-        // Handle Delete
-        $(document).on('click', '.delete-rule', function() {
-            if (!confirm('Are you sure you want to remove this pricing rule?')) return;
-
-            const id = $(this).data('id');
-            const row = $(`#rule-row-${id}`);
-
-            $.ajax({
-                url: "{{ route('pricing.destroy', ':id') }}".replace(':id', id),
-                method: "DELETE",
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    if (response.success) {
-                        row.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                        toastr.success(response.message);
-                    }
-                }
-            });
-        });
-    });
-</script>
-
 <style>
     .bg-soft-success {
         background-color: rgba(40, 167, 69, 0.1);
-    }
-
-    .select2-container--default .select2-selection--single {
-        height: 38px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 5px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px;
     }
 </style>
 @endpush

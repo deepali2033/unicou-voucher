@@ -8,6 +8,7 @@
                 <thead class="bg-light text-uppercase small fw-bold text-muted">
                     <tr>
                         <th class="ps-4">User</th>
+                        <th>Risk Level</th>
                         <th>Wallet Balance</th>
                         <th>Status</th>
                         <th class="text-end pe-4">Actions</th>
@@ -23,9 +24,23 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold text-dark">{{ $user->name }}</div>
-                                    <div class="text-muted small">{{ $user->user_id }}</div>
+                                    <div class="text-muted small">{{ $user->user_id }} ({{ $user->country_iso }})</div>
                                 </div>
                             </div>
+                        </td>
+                        <td>
+                            @php
+                                $risk = $user->riskLevel;
+                                $badgeClass = 'bg-secondary-subtle text-secondary';
+                                if($risk) {
+                                    if($risk->risk_level == 'Low') $badgeClass = 'bg-success-subtle text-success';
+                                    elseif($risk->risk_level == 'Medium') $badgeClass = 'bg-warning-subtle text-warning';
+                                    elseif($risk->risk_level == 'High') $badgeClass = 'bg-danger-subtle text-danger';
+                                }
+                            @endphp
+                            <span class="badge rounded-pill px-3 py-2 {{ $badgeClass }}" style="font-weight: 500;">
+                                {{ $risk ? $risk->risk_level : 'Not Set' }}
+                            </span>
                         </td>
                         <td class="fw-bold text-dark">
                             ${{ number_format($user->wallet_balance, 2) }}

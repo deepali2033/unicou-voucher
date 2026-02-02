@@ -70,38 +70,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($rules as $rule)
-                        <tr id="rule-row-{{ $rule->id }}">
-                            <td class="px-4 py-3">
-                                <div class="fw-bold text-dark">{{ $rule->inventoryVoucher->brand_name }}</div>
-                                <small class="text-muted">{{ $rule->inventoryVoucher->sku_id }}</small>
-                            </td>
-                            <td class="py-3">
-                                <span class="fi fi-{{ strtolower($rule->country_code) }} me-2"></span>
-                                {{ $rule->country_name }}
-                            </td>
-                            <td class="py-3 fw-bold">${{ number_format($rule->sale_price, 2) }}</td>
-                            <td class="py-3">
-                                @if($rule->discount_value > 0)
-                                    <span class="badge bg-soft-success text-success rounded-pill px-3">
-                                        {{ $rule->discount_type === 'percentage' ? $rule->discount_value.'%' : '$'.number_format($rule->discount_value, 2) }}
-                                    </span>
-                                @else
-                                    <span class="text-muted small">No Discount</span>
-                                @endif
-                            </td>
-                            <td class="py-3 fw-bold text-primary">${{ number_format($rule->final_price, 2) }}</td>
-                            <td class="px-4 py-3 text-end">
-                                <button class="btn btn-sm btn-light rounded-circle delete-rule" data-id="{{ $rule->id }}">
-                                    <i class="fas fa-trash text-danger"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">No pricing rules configured yet.</td>
-                        </tr>
-                        @endforelse
+
                     </tbody>
                 </table>
             </div>
@@ -177,88 +146,96 @@
 
 @push('scripts')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    $('.select2-modal').select2({
-        dropdownParent: $('#setPriceModal'),
-        width: '100%'
-    });
+    $(document).ready(function() {
+        $('.select2-modal').select2({
+            dropdownParent: $('#setPriceModal'),
+            width: '100%'
+        });
 
-    $('.select2-filter').select2({
-        width: '100%'
-    });
+        $('.select2-filter').select2({
+            width: '100%'
+        });
 
-    $('#countrySelect').on('change', function() {
-        const code = $(this).val();
-        const name = $(this).find(':selected').data('name');
-        $('#countryCodeInput').val(code);
-        $('#countryNameInput').val(name);
-    });
+        $('#countrySelect').on('change', function() {
+            const code = $(this).val();
+            const name = $(this).find(':selected').data('name');
+            $('#countryCodeInput').val(code);
+            $('#countryNameInput').val(name);
+        });
 
-    $('input[name="discount_type"]').on('change', function() {
-        const label = $(this).val() === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)';
-        $('#discountValueLabel').text(label);
-    });
+        $('input[name="discount_type"]').on('change', function() {
+            const label = $(this).val() === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)';
+            $('#discountValueLabel').text(label);
+        });
 
-    // Handle Form Submit
-    $('#setPriceForm').on('submit', function(e) {
-        e.preventDefault();
-        const btn = $(this).find('button[type="submit"]');
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...');
+        // Handle Form Submit
+        $('#setPriceForm').on('submit', function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...');
 
-        $.ajax({
-            url: "{{ route('pricing.store') }}",
-            method: "POST",
-            data: $(this).serialize(),
-            success: function(response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    location.reload(); 
+            $.ajax({
+                url: "{{ route('pricing.store') }}",
+                method: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Something went wrong. Please try again.');
+                    btn.prop('disabled', false).html('Save Pricing Rule');
                 }
-            },
-            error: function(xhr) {
-                toastr.error('Something went wrong. Please try again.');
-                btn.prop('disabled', false).html('Save Pricing Rule');
-            }
+            });
+        });
+
+        // Handle Delete
+        $(document).on('click', '.delete-rule', function() {
+            if (!confirm('Are you sure you want to remove this pricing rule?')) return;
+
+            const id = $(this).data('id');
+            const row = $(`#rule-row-${id}`);
+
+            $.ajax({
+                url: "{{ route('pricing.destroy', ':id') }}".replace(':id', id),
+                method: "DELETE",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        row.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                        toastr.success(response.message);
+                    }
+                }
+            });
         });
     });
-
-    // Handle Delete
-    $(document).on('click', '.delete-rule', function() {
-        if(!confirm('Are you sure you want to remove this pricing rule?')) return;
-        
-        const id = $(this).data('id');
-        const row = $(`#rule-row-${id}`);
-
-        $.ajax({
-            url: "{{ route('pricing.destroy', ':id') }}".replace(':id', id),
-            method: "DELETE",
-            data: { _token: "{{ csrf_token() }}" },
-            success: function(response) {
-                if (response.success) {
-                    row.fadeOut(300, function() { $(this).remove(); });
-                    toastr.success(response.message);
-                }
-            }
-        });
-    });
-});
 </script>
 
 <style>
-.bg-soft-success { background-color: rgba(40, 167, 69, 0.1); }
-.select2-container--default .select2-selection--single {
-    height: 38px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 5px;
-}
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 36px;
-}
+    .bg-soft-success {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
 </style>
 @endpush
 @endsection

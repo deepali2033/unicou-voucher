@@ -21,6 +21,7 @@ class BankAccountModel extends Model
         'account_number',
         'ifsc_code',
         'account_type',
+        'balance',
         'is_verified',
     ];
 

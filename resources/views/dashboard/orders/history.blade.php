@@ -1,67 +1,20 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="container-fluid">
-
-    {{-- Offcanvas Filter --}}
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
-        <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">
-                <i class="fas fa-filter me-2"></i>Filter Pricing Rules
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <form id="filter-form" action="{{ route('pricing.index') }}" method="GET">
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Voucher Name</label>
-                    <select name="voucher_id" class="form-select select2-filter">
-                        <option value="">All Vouchers</option>
-
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Country Name</label>
-                    <input type="text" name="country_name" class="form-control" placeholder="Search country..." value="{{ request('country_name') }}">
-                </div>
-
-                <div class="d-grid gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{{ route('pricing.index') }}" class="btn btn-light">Reset All</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-primary border-4">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Total Users</div>
-                    <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"></h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
+<div class="container-fluid py-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-0 fw-bold">My Order History</h5>
-                <small class="text-muted">Credit shows redeemable referrals. Debit shows redeemed referrals.</small>
+                <small class="text-muted">Track your voucher purchases and referral points.</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
-                    <i class="fas fa-file-csv me-1"></i> CSV
-                </a>
-                <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                <button class="btn btn-outline-primary btn-sm" id="filter-btn">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
+                <a href="{{ route('orders.export') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-download me-1"></i> CSV
+                </a>
             </div>
         </div>
         <div class="card-body p-0">
@@ -69,160 +22,156 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="px-4 py-3 border-0 text-nowrap">Order id.</th>
-                            <th class="py-3 border-0 text-nowrap">Product</th>
-                            <th class="py-3 border-0 text-nowrap">Date</th>
-                            <th class="py-3 border-0 text-nowrap">Total Bill</th>
-                            <th class="py-3 border-0 text-nowrap">Payable</th>
-                            <th class="px-4 py-3 border-0 text-end text-nowrap">Paid</th>
-                            <th class="px-4 py-3 border-0 text-end text-nowrap">Point Summary</th>
-
+                            <th class="px-4 py-3 border-0">Order ID</th>
+                            <th class="py-3 border-0">Voucher Type</th>
+                            <th class="py-3 border-0">Bank</th>
+                            <th class="py-3 border-0">Date</th>
+                            <th class="py-3 border-0">Quantity</th>
+                            <th class="py-3 border-0">Total Amount</th>
+                            <th class="py-3 border-0">Points Earned</th>
+                            <th class="py-3 border-0 text-center">Status</th>
+                            <th class="px-4 py-3 border-0 text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-
+                        @forelse($orders as $order)
+                        <tr>
+                            <td class="px-4 fw-bold text-primary">{{ $order->order_id }}</td>
+                            <td>{{ $order->voucher_type }}</td>
+                            <td>
+                                @if($order->bank_name)
+                                    <span class="small text-muted"><i class="fas fa-university me-1"></i>{{ $order->bank_name }}</span>
+                                @else
+                                    <span class="text-muted small">N/A</span>
+                                @endif
+                            </td>
+                            <td>{{ $order->created_at->format('M d, Y') }}</td>
+                            <td>{{ $order->quantity }}</td>
+                            <td class="fw-bold">RS {{ number_format($order->amount, 0) }}</td>
+                            <td>
+                                <span class="badge bg-soft-success text-success">
+                                    <i class="fas fa-coins me-1"></i>{{ $order->referral_points }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if($order->status == 'completed')
+                                <span class="badge bg-success">Completed</span>
+                                @elseif($order->status == 'pending')
+                                <span class="badge bg-warning">Pending</span>
+                                @else
+                                <span class="badge bg-danger">{{ ucfirst($order->status) }}</span>
+                                @endif
+                            </td>
+                            <td class="px-4 text-end">
+                                <button class="btn btn-sm btn-light border view-order-btn"
+                                    data-order="{{ json_encode($order) }}"
+                                    title="View Details">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">No orders found.</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
+        @if($orders->hasPages())
+        <div class="card-footer bg-white border-0">
+            {{ $orders->links() }}
+        </div>
+        @endif
     </div>
 </div>
 
-<!-- Set Price Modal -->
-<div class="modal fade" id="setPriceModal" tabindex="-1" aria-hidden="true">
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 20px;">
             <div class="modal-header border-0 px-4 pt-4">
-                <h5 class="modal-title fw-bold">Configure Pricing Rule</h5>
+                <h5 class="modal-title fw-bold">Order Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="setPriceForm">
-                @csrf
-                <div class="modal-body px-4">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Select Voucher</label>
-                        <select name="inventory_voucher_id" class="form-select select2-modal" required>
-                            <option value="">Choose a voucher...</option>
-
-                        </select>
+            <div class="modal-body px-4 pb-4">
+                <div class="order-info">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Order ID:</span>
+                        <span class="fw-bold" id="m-order-id"></span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Select Country</label>
-                        <select name="country" id="countrySelect" class="form-select select2-modal" required>
-                            <option value="">Choose a country...</option>
-
-                        </select>
-                        <input type="hidden" name="country_code" id="countryCodeInput">
-                        <input type="hidden" name="country_name" id="countryNameInput">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Voucher Type:</span>
+                        <span id="m-voucher-type"></span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Sale Price ($)</label>
-                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" required>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Voucher ID:</span>
+                        <span id="m-sku-id"></span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase">Discount Type</label>
-                        <div class="d-flex gap-4 mt-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discount_type" id="typeFixed" value="fixed" checked>
-                                <label class="form-check-label" for="typeFixed">Fixed Amount ($)</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="discount_type" id="typePercent" value="percentage">
-                                <label class="form-check-label" for="typePercent">Percentage (%)</label>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Quantity:</span>
+                        <span id="m-quantity"></span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase" id="discountValueLabel">Discount Amount</label>
-                        <input type="number" step="0.01" name="discount_value" class="form-control" value="0" required>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Amount:</span>
+                        <span class="fw-bold text-primary" id="m-amount"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Points Earned:</span>
+                        <span class="text-success fw-bold" id="m-points"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Date:</span>
+                        <span id="m-date"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Status:</span>
+                        <span id="m-status"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Paid Via:</span>
+                        <span class="fw-bold" id="m-bank"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2" id="m-bank-details-row">
+                        <span class="text-muted">Bank Details:</span>
+                        <span class="small text-muted" id="m-bank-details"></span>
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                        <span class="text-muted d-block mb-1">Delivery Details:</span>
+                        <div class="bg-light p-3 rounded" id="m-delivery"></div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 px-4 pb-4">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Pricing Rule</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @push('scripts')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <script>
     $(document).ready(function() {
-        $('.select2-modal').select2({
-            dropdownParent: $('#setPriceModal'),
-            width: '100%'
-        });
+        $('.view-order-btn').on('click', function() {
+            const order = $(this).data('order');
 
-        $('.select2-filter').select2({
-            width: '100%'
-        });
+            $('#m-order-id').text(order.order_id);
+            $('#m-voucher-type').text(order.voucher_type);
+            $('#m-sku-id').text(order.voucher_id || 'N/A');
+            $('#m-quantity').text(order.quantity);
+            $('#m-amount').text('RS ' + parseFloat(order.amount).toLocaleString());
+            $('#m-points').text(order.referral_points);
+            $('#m-date').text(new Date(order.created_at).toLocaleDateString());
+            $('#m-status').html('<span class="badge bg-' + (order.status === 'completed' ? 'success' : 'warning') + '">' + order.status.toUpperCase() + '</span>');
+            $('#m-bank').text(order.bank_name || 'N/A');
+            if (order.account_number) {
+                $('#m-bank-details').text(order.account_number + (order.ifsc_code ? ' (' + order.ifsc_code + ')' : ''));
+                $('#m-bank-details-row').show();
+            } else {
+                $('#m-bank-details-row').hide();
+            }
+            $('#m-delivery').text(order.delivery_details || 'Pending delivery...');
 
-        $('#countrySelect').on('change', function() {
-            const code = $(this).val();
-            const name = $(this).find(':selected').data('name');
-            $('#countryCodeInput').val(code);
-            $('#countryNameInput').val(name);
-        });
-
-        $('input[name="discount_type"]').on('change', function() {
-            const label = $(this).val() === 'percentage' ? 'Discount Percentage (%)' : 'Discount Amount ($)';
-            $('#discountValueLabel').text(label);
-        });
-
-        // Handle Form Submit
-        $('#setPriceForm').on('submit', function(e) {
-            e.preventDefault();
-            const btn = $(this).find('button[type="submit"]');
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Saving...');
-
-            $.ajax({
-                url: "{{ route('pricing.store') }}",
-                method: "POST",
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        location.reload();
-                    }
-                },
-                error: function(xhr) {
-                    toastr.error('Something went wrong. Please try again.');
-                    btn.prop('disabled', false).html('Save Pricing Rule');
-                }
-            });
-        });
-
-        // Handle Delete
-        $(document).on('click', '.delete-rule', function() {
-            if (!confirm('Are you sure you want to remove this pricing rule?')) return;
-
-            const id = $(this).data('id');
-            const row = $(`#rule-row-${id}`);
-
-            $.ajax({
-                url: "{{ route('pricing.destroy', ':id') }}".replace(':id', id),
-                method: "DELETE",
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    if (response.success) {
-                        row.fadeOut(300, function() {
-                            $(this).remove();
-                        });
-                        toastr.success(response.message);
-                    }
-                }
-            });
+            $('#orderDetailModal').modal('show');
         });
     });
 </script>
@@ -230,17 +179,6 @@
 <style>
     .bg-soft-success {
         background-color: rgba(40, 167, 69, 0.1);
-    }
-
-    .select2-container--default .select2-selection--single {
-        height: 38px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 5px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px;
     }
 </style>
 @endpush

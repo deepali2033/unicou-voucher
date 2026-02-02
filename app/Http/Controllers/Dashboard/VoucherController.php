@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\Order;
+use App\Models\BankAccountModel;
+
 class VoucherController extends Controller
 {
     public function index(Request $request)
@@ -53,15 +56,91 @@ class VoucherController extends Controller
         $rule = VoucherPriceRule::with('inventoryVoucher')->findOrFail($id);
 
         $user = auth()->user();
+        $banks = BankAccountModel::where('user_id', $user->id)->get();
 
         // Mock data for points and store credit (you may want to fetch these from actual user models)
         $userPoints = [
             'quarterly' => 0,
             'yearly' => 0,
-            'store_credit' => 0,
+            'store_credit' => $user->wallet_balance ?? 0,
         ];
 
-        return view('dashboard.voucher.order-now', compact('rule', 'userPoints'));
+        return view('dashboard.voucher.order-now', compact('rule', 'userPoints', 'banks'));
+    }
+
+    public function placeOrder(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+            'bank_id' => 'required|exists:bank_accounts,id',
+        ]);
+
+        $rule = VoucherPriceRule::with('inventoryVoucher')->findOrFail($id);
+        $voucher = $rule->inventoryVoucher;
+        $user = auth()->user();
+
+        $bank = BankAccountModel::where('id', $request->bank_id)->where('user_id', $user->id)->firstOrFail();
+
+        if ($voucher->quantity < $request->quantity) {
+            return response()->json(['message' => 'Insufficient stock available.'], 400);
+        }
+
+        $totalAmount = $rule->final_price * $request->quantity;
+
+        if ($bank->balance < $totalAmount) {
+            return response()->json(['message' => 'Your bank account does not have enough balance. Please add funds.'], 400);
+        }
+
+        $referralPointsPerUnit = 0;
+        $bonusPointsPerUnit = 0;
+        if ($user->isStudent()) {
+            $referralPointsPerUnit = $voucher->student_referral_points_per_unit;
+            $bonusPointsPerUnit = $voucher->student_bonus_points_per_unit;
+        } elseif ($user->isResellerAgent()) {
+            $referralPointsPerUnit = $voucher->agent_referral_points_per_unit;
+            $bonusPointsPerUnit = $voucher->agent_bonus_points_per_unit;
+        }
+
+        $totalReferralPoints = $referralPointsPerUnit * $request->quantity;
+        $totalBonusPoints = $bonusPointsPerUnit * $request->quantity;
+
+        DB::beginTransaction();
+        try {
+            // Create Order
+            $order = Order::create([
+                'order_id' => 'ORD-' . strtoupper(Str::random(10)),
+                'user_id' => $user->id,
+                'user_role' => $user->account_type,
+                'voucher_type' => $voucher->voucher_type,
+                'voucher_id' => $voucher->sku_id,
+                'quantity' => $request->quantity,
+                'amount' => $totalAmount,
+                'status' => 'completed',
+                'referral_points' => $totalReferralPoints,
+                'bonus_amount' => $totalBonusPoints, // Using bonus_amount to store bonus points
+                'payment_method' => 'bank',
+                'bank_name' => $bank->bank_name,
+                'account_number' => $bank->account_number,
+                'ifsc_code' => $bank->ifsc_code,
+            ]);
+
+            // Deduct Bank Balance
+            $bank->decrement('balance', $totalAmount);
+
+            // Deduct Inventory
+            $voucher->decrement('quantity', $request->quantity);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order placed successfully using ' . $bank->bank_name,
+                'order_id' => $order->order_id
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to place order: ' . $e->getMessage()], 500);
+        }
     }
 
     public function create()

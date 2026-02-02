@@ -35,11 +35,19 @@
             </li> -->
             @endif
 
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager', 'reseller_agent']))
-            <!-- Wallet / Store Credit -->
+            <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager', 'reseller_agent']))
+           
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('wallet.index') }}">
                     <i class="fas fa-wallet me-2"></i> Wallet / Store Credit
+                </a>
+            </li>
+            @endif -->
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            <!-- Wallet / Store Credit -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('profile.index') }}">
+                    <i class="fas fa-wallet me-2"></i> My Profile
                 </a>
             </li>
             @endif
@@ -54,20 +62,60 @@
             @endif
 
 
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
-            <!-- Voucher Management -->
+            <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
+           
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('vouchers') }}">
                     <i class="fas fa-ticket-alt me-2"></i> Voucher Management
                 </a>
             </li>
-            @endif
+            @endif -->
 
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('vouchers') }}">
                     <i class="fas fa-ticket-alt me-2"></i> Voucher
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() )
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('manager.page') }}">
+                    <i class="fas fa-ticket-alt me-2"></i>Manager
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('support.team') }}">
+                    <i class="fas fa-ticket-alt me-2"></i>Support Team
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() ||auth()->user()->isSupport())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('reseller.agent') }}">
+                    <i class="fas fa-ticket-alt me-2"></i>Reseller Agent
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('regular.agent') }}">
+                    <i class="fas fa-ticket-alt me-2"></i> Agent
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('student.page') }}">
+                    <i class="fas fa-ticket-alt me-2"></i> Student
                 </a>
             </li>
             @endif
@@ -175,13 +223,22 @@
                 </a>
             </li>
             @endif
-
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Support Center -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('customer.support') }}">
                     <i class="fas fa-headset me-2"></i> Customer Support
                 </a>
             </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+            <!-- Support Center -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('customer.query') }}">
+                    <i class="fas fa-headset me-2"></i> Customer Query
+                </a>
+            </li>
+            @endif
         </ul>
 
         <hr class="my-3" style="border-color: #495057;">

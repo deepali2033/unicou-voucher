@@ -8,7 +8,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Available Store Credit </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">500</h3>
+                        <h3 class="fw-bold mb-0">{{ number_format($userPoints['store_credit'], 0) }}</h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -113,14 +113,10 @@
                     </div>
 
                     <!-- Price Details Table -->
-                    <div class="price-details-table">
+                    <div class="price-details-table mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Price</span>
                             <span class="fw-bold">{{ $rule->inventoryVoucher->currency }} <span id="unit-price">{{ number_format($rule->final_price, 0) }}</span></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Compare at price</span>
-                            <span class="text-muted text-decoration-line-through">{{ $rule->inventoryVoucher->currency }} {{ number_format($rule->sale_price, 0) }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Quantity</span>
@@ -131,21 +127,22 @@
                             <span class="fw-bold">{{ $rule->inventoryVoucher->currency }} <span id="subtotal">{{ number_format($rule->final_price, 0) }}</span></span>
                         </div>
 
-                        <div class="d-flex justify-content-between mb-2 text-primary">
-                            <span>Quarterly Points Discount</span>
-                            <span>{{ $rule->inventoryVoucher->currency }} <span id="q-discount">0</span></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2 text-primary">
-                            <span>Yearly Points Discount</span>
-                            <span>{{ $rule->inventoryVoucher->currency }} <span id="y-discount">0</span></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2 text-primary">
-                            <span>Total Points Discount</span>
-                            <span>{{ $rule->inventoryVoucher->currency }} <span id="total-discount">0</span></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-4">
-                            <span class="text-muted">Store Credit Applied</span>
-                            <span class="fw-bold text-success">{{ $rule->inventoryVoucher->currency }} <span id="applied-credit">0</span></span>
+                        <!-- Bank Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Select Payment Bank</label>
+                            <select id="bank-selector" class="form-select border-0 bg-light p-3" style="border-radius: 12px;">
+                                <option value="">Choose a linked bank account...</option>
+                                @foreach($banks as $bank)
+                                <option value="{{ $bank->id }}" data-balance="{{ $bank->balance }}">
+                                    {{ $bank->bank_name }} - {{ $bank->account_number }} (Bal: RS {{ number_format($bank->balance, 0) }})
+                                </option>
+                                @endforeach
+                            </select>
+                            @if(count($banks) == 0)
+                            <div class="mt-2">
+                                <small class="text-danger">No bank accounts linked. <a href="{{ route('bank.link') }}">Link a bank now</a></small>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -381,6 +378,66 @@
         });
 
         qtyInput.addEventListener('change', updatePrices);
+
+        const payNowBtn = document.getElementById('pay-now');
+        payNowBtn.addEventListener('click', function() {
+            const qty = qtyInput.value;
+            const bankSelector = document.getElementById('bank-selector');
+            const bankId = bankSelector.value;
+            const selectedOption = bankSelector.options[bankSelector.selectedIndex];
+            const bankBalance = parseFloat(selectedOption.getAttribute('data-balance')) || 0;
+            const subtotal = parseFloat(document.getElementById('subtotal').innerText.replace(/,/g, ''));
+
+            if (!bankId) {
+                toastr.error('Please select a bank account for payment');
+                return;
+            }
+
+            if (bankBalance < subtotal) {
+                toastr.warning('Tumhare account me paise nahi hain. Please add amount to your bank.');
+                // Optionally redirect after a delay
+                setTimeout(() => {
+                    if (confirm('Do you want to link more funds?')) {
+                        window.location.href = "{{ route('bank.link') }}";
+                    }
+                }, 1000);
+                return;
+            }
+
+            payNowBtn.disabled = true;
+            payNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+            fetch("{{ route('vouchers.order.post', $rule->id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        quantity: qty,
+                        bank_id: bankId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        toastr.success('Order placed successfully!');
+                        setTimeout(() => {
+                            window.location.href = "{{ route('orders.history') }}";
+                        }, 1500);
+                    } else {
+                        toastr.error('Error: ' + (data.message || 'Something went wrong'));
+                        payNowBtn.disabled = false;
+                        payNowBtn.innerHTML = 'Pay Now';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('An error occurred while placing the order.');
+                    payNowBtn.disabled = false;
+                    payNowBtn.innerHTML = 'Pay Now';
+                });
+        });
 
         // Initial progress bar update (mock 0/50)
         const circle = document.querySelector('.progress-ring-bar');
