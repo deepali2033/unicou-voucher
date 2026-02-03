@@ -11,7 +11,9 @@
         </div>
 
         <ul class="nav flex-column gap-2">
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager','reseller_agent','student']))
+
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport() || auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+
             <!-- Dashboard -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('dashboard') }}">
