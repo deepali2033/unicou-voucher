@@ -76,7 +76,7 @@
                 </td>
                 <td>
                     @php
-                    $risk = strtolower($user->countryRisk->risk_level ?? 'lyyyyyyyyow');
+                    $risk = strtolower($user->countryRisk->risk_level ?? 'low');
                     @endphp
 
                     @if($risk === 'high')
@@ -111,9 +111,12 @@
                 {{-- Actions (Clean) --}}
                 <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
-                        <a href="{{ route('users.show', $user->id) }}" class="btn btn-sm btn-light" title="Access User Page">
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
+                        <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-light" title="Login as {{ $user->first_name }}">
+                                <i class="fas fa-external-link-alt text-warning"></i>
+                            </button>
+                        </form>
                         <a class="btn btn-sm btn-light"
                             href="{{ route('users.show', $user->id) }}" title="View">
                             <i class="fas fa-eye text-primary"></i>
@@ -124,6 +127,7 @@
                             <i class="fas fa-edit text-info"></i>
                         </a>
 
+                        @if(auth()->user()->account_type !== 'manager')
                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="ajax-action">
                             @csrf
                             @method('DELETE')
@@ -131,6 +135,7 @@
                                 <i class="fas fa-trash text-danger"></i>
                             </button>
                         </form>
+                        @endif
 
 
 

@@ -164,7 +164,7 @@
                     </form>
                 </div>
             </div>
-
+            @if(auth()->user()->account_type !== 'manager')
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold text-danger">Delete User</h5>
@@ -178,6 +178,7 @@
                     </form>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

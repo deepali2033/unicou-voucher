@@ -114,7 +114,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 
                 <div class="field mb-3">
                     <label for="phone_input">Phone Number</label>
-                    <input type="tel" id="phone_input" name="phone_dummy" required style="width: 100%;">
+                    <input type="tel" id="phone_input" name="phone_dummy" class="intl-phone" data-full-field="#full_phone" required style="width: 100%;">
                     <input type="hidden" name="phone" id="full_phone">
                     <input type="hidden" name="country_code" id="country_code">
                 </div>
@@ -162,10 +162,8 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 
 @push('scripts')
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let iti;
     document.addEventListener('DOMContentLoaded', function() {
         // Geolocation tracking
         if (navigator.geolocation) {
@@ -177,16 +175,6 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             });
         }
 
-        const input = document.querySelector("#phone_input");
-        iti = window.intlTelInput(input, {
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-            separateDialCode: true,
-            initialCountry: "auto",
-            geoIpLookup: function(success, failure) {
-                fetch("https://ipapi.co/json").then(res => res.json()).then(data => success(data.country_code)).catch(() => success("in"));
-            }
-        });
-
         document.getElementById('submitBtns').addEventListener('click', function() {
             if (grecaptcha.getResponse() === "") {
                 Swal.fire({
@@ -197,8 +185,12 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 return;
             }
 
-            document.getElementById('full_phone').value = iti.getNumber();
-            document.getElementById('country_code').value = iti.getSelectedCountryData().iso2.toUpperCase();
+            // Get phone from intl-tel-input instance attached by dashboard.js
+            const phoneInput = document.querySelector("#phone_input");
+            if (phoneInput && phoneInput.iti) {
+                document.getElementById('full_phone').value = phoneInput.iti.getNumber();
+                document.getElementById('country_code').value = phoneInput.iti.getSelectedCountryData().iso2.toUpperCase();
+            }
 
             document.getElementById('regifeetaken').value = 'no';
             const btn = document.getElementById('submitBtns');
@@ -221,6 +213,5 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         }
     }
 </script>
-
 @endpush
 @endsection

@@ -94,6 +94,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
+    Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
     Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
     Route::get('/mangers', [UserController::class, 'managers'])->name('manager.page');
     Route::get('/support-team', [UserController::class, 'SupportTeam'])->name('support.team');

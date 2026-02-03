@@ -12,7 +12,13 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::with('riskLevel')
-            ->where('account_type', '!=', 'admin');
+            ->where('id', '!=', auth()->id());
+
+        if (auth()->user()->account_type === 'manager') {
+            $query->whereNotIn('account_type', ['admin', 'manager']);
+        } elseif (auth()->user()->account_type !== 'admin') {
+            $query->where('account_type', '!=', 'admin');
+        }
 
 
         if ($request->has('role') && $request->role != 'all' && $request->role != '') {
@@ -63,7 +69,7 @@ class UserController extends Controller
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            // 'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
@@ -73,8 +79,8 @@ class UserController extends Controller
         User::create([
             'user_id' => User::generateNextUserId($request->account_type),
             'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'name' => $request->first_name . ' ' . $request->last_name,
+            // 'last_name' => $request->last_name,
+            'name' => $request->first_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'account_type' => $request->account_type,
@@ -101,7 +107,7 @@ class UserController extends Controller
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            // 'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
             'phone' => 'nullable|string|max:20',
@@ -110,7 +116,7 @@ class UserController extends Controller
 
         $user->update([
             'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
+            // 'last_name' => $request->last_name,
             'name' => $request->first_name . ' ' . $request->last_name,
             'email' => $request->email,
             'account_type' => $request->account_type,
@@ -123,6 +129,13 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        if (auth()->user()->account_type === 'manager') {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Managers are not allowed to delete users.'], 403);
+            }
+            return redirect()->route('users.management')->with('error', 'Managers are not allowed to delete users.');
+        }
+
         $user->delete();
 
         if (request()->ajax()) {
@@ -183,7 +196,13 @@ class UserController extends Controller
 
     public function downloadPDF(Request $request)
     {
-        $query = User::where('account_type', '!=', 'admin');
+        $query = User::where('id', '!=', auth()->id());
+
+        if (auth()->user()->account_type === 'manager') {
+            $query->whereNotIn('account_type', ['admin', 'manager']);
+        } elseif (auth()->user()->account_type !== 'admin') {
+            $query->where('account_type', '!=', 'admin');
+        }
 
         if ($request->has('role') && $request->role != 'all' && $request->role != '') {
             $query->where('account_type', $request->role);
@@ -270,5 +289,38 @@ class UserController extends Controller
     {
         $users = User::where('account_type', 'student')->latest()->paginate(10);
         return view('dashboard.pages.student', compact('users'));
+    }
+
+    public function impersonate(User $user)
+    {
+        // Only admin/manager can impersonate
+        if (!in_array(auth()->user()->account_type, ['admin', 'manager'])) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        // Store original user ID in session
+        session(['impersonator_id' => auth()->id()]);
+
+        // Login as the user
+        auth()->login($user);
+
+        return redirect()->route('dashboard')->with('success', 'You are now impersonating ' . $user->first_name);
+    }
+
+    public function stopImpersonating()
+    {
+        if (!session()->has('impersonator_id')) {
+            return redirect()->route('dashboard');
+        }
+
+        $adminId = session()->pull('impersonator_id');
+        $admin = User::find($adminId);
+
+        if ($admin) {
+            auth()->login($admin);
+            return redirect()->route('users.management')->with('success', 'Welcome back, ' . $admin->first_name);
+        }
+
+        return redirect()->route('dashboard');
     }
 }

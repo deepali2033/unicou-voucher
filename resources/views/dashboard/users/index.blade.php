@@ -35,7 +35,9 @@
                     <label class="form-label fw-bold">Role</label>
                     <select name="role" class="form-select">
                         <option value="all" {{ request('role') == 'all' ? 'selected' : '' }}>All Roles</option>
-                        <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+                        @if(auth()->user()->account_type === 'admin')
+                            <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+                        @endif
                         <option value="support_team" {{ request('role') == 'support_team' ? 'selected' : '' }}>Support Team</option>
                         <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
                         <option value="reseller_agent" {{ request('role') == 'reseller_agent' ? 'selected' : '' }}>Reseller Agent</option>

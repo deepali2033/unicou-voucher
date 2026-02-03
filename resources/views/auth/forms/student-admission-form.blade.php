@@ -15,22 +15,22 @@
       </p>
     </div>
     <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillStudentDemoData()">
-        <i class="fas fa-magic"></i> Auto Fill
+      <i class="fas fa-magic"></i> Auto Fill
     </button>
   </div>
 
 
-<div class="wizard-steps mb-4">
-  <div class="wizard-step active" data-step="1"><span>✓</span><small>PERSONAL</small></div>
-  <div class="wizard-step" data-step="2"><span>2</span><small>CONTACT</small></div>
-  <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
-  <div class="wizard-step" data-step="4"><span>4</span><small>UPLOAD</small></div>
-  <div class="wizard-step" data-step="5"><span>5</span><small>PURPOSE</small></div>
-  <div class="wizard-step" data-step="6"><span>6</span><small>EDUCATION</small></div>
-  <div class="wizard-step" data-step="7"><span>7</span><small>COUNTRIES</small></div>
-  <div class="wizard-step" data-step="8"><span>8</span><small>BANK</small></div>
-  <div class="wizard-step" data-step="9"><span>9</span><small>VERIFY</small></div>
-</div>
+  <div class="wizard-steps mb-4">
+    <div class="wizard-step active" data-step="1"><span>✓</span><small>PERSONAL</small></div>
+    <div class="wizard-step" data-step="2"><span>2</span><small>CONTACT</small></div>
+    <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
+    <div class="wizard-step" data-step="4"><span>4</span><small>UPLOAD</small></div>
+    <div class="wizard-step" data-step="5"><span>5</span><small>PURPOSE</small></div>
+    <div class="wizard-step" data-step="6"><span>6</span><small>EDUCATION</small></div>
+    <div class="wizard-step" data-step="7"><span>7</span><small>COUNTRIES</small></div>
+    <div class="wizard-step" data-step="8"><span>8</span><small>BANK</small></div>
+    <div class="wizard-step" data-step="9"><span>9</span><small>VERIFY</small></div>
+  </div>
 
 
 
@@ -49,7 +49,7 @@
   <form id="satForm" method="POST" action="{{ route('auth.form.student.post') }}" enctype="multipart/form-data">
     @csrf
     <!-- ================= PERSONAL ================= -->
-    <section class="sat-section form-step" data-step="1">
+    <section class="sat-section form-step active" data-step="1">
       <h4><span>01</span> Personal Information</h4>
 
       <div class="sat-grid-2">
@@ -269,30 +269,29 @@
         </div>
       </div>
 
+      <!-- ================= CONSENT ================= -->
+      <div class="sat-consent">
+        <input type="checkbox" required id="consent_policy">
+        <p>
+          I agree to the Non-Refundable & "Undisclosed" Voucher Policy.
+        </p>
+      </div>
+
+      <div class="sat-consent">
+        <input type="checkbox" required id="consent_terms">
+        <p>
+          I accept the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and confirm all submitted information is correct.
+        </p>
+      </div>
+
       <div class="d-flex justify-content-between mt-4">
         <button type="button" class="btn btn-light prev-btn">← Back</button>
-        <button type="button" class="btn btn-primary next-btn">Continue →</button>
       </div>
+
+      <button type="submit" class="sat-btn mt-4">
+        INITIALIZE REGISTRY SYNC →
+      </button>
     </section>
-
-    <!-- ================= CONSENT ================= -->
-    <div class="sat-consent">
-      <input type="checkbox" required id="consent_policy">
-      <p>
-        I agree to the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Non-Refundable & Undisclosed Voucher Policy</a>.
-      </p>
-    </div>
-
-    <div class="sat-consent">
-      <input type="checkbox" required id="consent_terms">
-      <p>
-        I accept the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and confirm all submitted information is correct.
-      </p>
-    </div>
-
-    <button type="submit" class="sat-btn">
-      INITIALIZE REGISTRY SYNC →
-    </button>
 
   </form>
 
@@ -371,7 +370,7 @@
     form.querySelector('input[name="highest_education"]').value = "Bachelor of Science";
     form.querySelector('input[name="passing_year"]').value = "2022";
     form.querySelectorAll('input[name="preferred_countries[]"]').forEach((cb, idx) => {
-        if(idx < 2) cb.checked = true;
+      if (idx < 2) cb.checked = true;
     });
     form.querySelector('input[name="bank_name"]').value = "Standard Chartered Bank";
     form.querySelector('input[name="bank_country"]').value = "Pakistan";
@@ -383,47 +382,79 @@
 
 
 <script>
-let currentStep = parseInt(localStorage.getItem('studentStep')) || 1;
+  let currentStep = parseInt(localStorage.getItem('studentStep')) || 1;
+  if (currentStep < 1 || currentStep > 9) currentStep = 1;
 
-const steps = document.querySelectorAll('.form-step');
-const indicators = document.querySelectorAll('.wizard-step');
+  const steps = document.querySelectorAll('.form-step');
+  const indicators = document.querySelectorAll('.wizard-step');
 
-function showStep(step) {
-  steps.forEach(s => s.classList.remove('active'));
+  function showStep(step) {
+    if (step < 1 || step > 9) return;
 
-  indicators.forEach(i => {
-    i.classList.remove('active');
-    i.querySelector('span').innerText = i.dataset.step;
-  });
+    steps.forEach(s => s.classList.remove('active'));
 
-  document.querySelector(`.form-step[data-step="${step}"]`)?.classList.add('active');
+    indicators.forEach(i => {
+      i.classList.remove('active');
+      const span = i.querySelector('span');
+      if (span) span.innerText = i.dataset.step;
+    });
 
-  const activeStep = document.querySelector(`.wizard-step[data-step="${step}"]`);
-  if (activeStep) {
-    activeStep.classList.add('active');
-    activeStep.querySelector('span').innerText = "✓";
+    const targetStep = document.querySelector(`.form-step[data-step="${step}"]`);
+    if (targetStep) targetStep.classList.add('active');
+
+    const activeIndicator = document.querySelector(`.wizard-step[data-step="${step}"]`);
+    if (activeIndicator) {
+      activeIndicator.classList.add('active');
+      const span = activeIndicator.querySelector('span');
+      if (span) span.innerText = "✓";
+    }
+
+    localStorage.setItem('studentStep', step);
+    currentStep = step;
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }
 
-  localStorage.setItem('studentStep', step);
-}
+  function validateStep(step) {
+    const currentSection = document.querySelector(`.form-step[data-step="${step}"]`);
+    if (!currentSection) return true;
 
-showStep(currentStep);
+    const inputs = currentSection.querySelectorAll('input[required], select[required]');
+    let valid = true;
+    inputs.forEach(input => {
+      if (!input.value || (input.type === 'checkbox' && !input.checked)) {
+        input.classList.add('is-invalid');
+        valid = false;
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
 
-document.querySelectorAll('.next-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentStep++;
-    showStep(currentStep);
-  });
-});
-
-document.querySelectorAll('.prev-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (currentStep > 1) {
-      currentStep--;
-      showStep(currentStep);
+    if (!valid) {
+      alert('Please fill all required fields before continuing.');
     }
+    return valid;
+  }
+
+  showStep(currentStep);
+
+  document.querySelectorAll('.next-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (validateStep(currentStep)) {
+        showStep(currentStep + 1);
+      }
+    });
   });
-});
+
+  document.querySelectorAll('.prev-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (currentStep > 1) {
+        showStep(currentStep - 1);
+      }
+    });
+  });
 </script>
 
 @endpush

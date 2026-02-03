@@ -19,31 +19,29 @@
                         @csrf
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">First Name</label>
+                                <label class="form-label fw-semibold">Full Name</label>
                                 <input type="text" name="first_name" class="form-control @error('first_name') is-invalid @enderror" value="{{ old('first_name') }}" required>
                                 @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" required>
-                                @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Email Address</label>
                                 <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
                                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Phone Number</label>
-                                <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone') }}">
-                                @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                            <!-- <div class="col-md-6">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" name="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" required>
+                                @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div> -->
                         </div>
 
                         <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone Number</label>
+                                <input type="text" id="phone" name="phone_dummy" class="form-control intl-phone @error('phone') is-invalid @enderror" value="{{ old('phone') }}">
+                                <input type="hidden" name="phone" id="full_phone">
+                                @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Account Type</label>
                                 <select name="account_type" class="form-select @error('account_type') is-invalid @enderror" required>
@@ -57,6 +55,8 @@
                                 @error('account_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
+
+
 
                         <div class="row mb-4">
                             <div class="col-md-6">
