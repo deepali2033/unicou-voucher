@@ -73,6 +73,8 @@ class AuthController extends Controller
         }
 
         // 🔹 Step 3: Create user
+        $geo = LocationHelper::geo();
+        // 🔹 Step 3: Create user
         $user = User::create([
             'user_id'      => User::generateNextUserId(
                 $validated['account_type'],
@@ -81,7 +83,7 @@ class AuthController extends Controller
             'name'         => $validated['first_name'],
             'first_name'   => $validated['first_name'],
             'phone'        => $validated['phone'],
-            'country_iso'  => $validated['country_code'],
+            'country_iso'  => $geo['country_name'] ?? null,
             'account_type' => $validated['account_type'],
             'email'        => $validated['email'],
             'password'     => Hash::make($validated['password']),

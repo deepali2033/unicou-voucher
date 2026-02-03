@@ -24,7 +24,6 @@ class LocationHelper
         try {
             $response = Http::timeout(3)->get("https://ipapi.co/{$ip}/json/");
             $data = $response->json();
-            dd($response);
         } catch (\Exception $e) {
             $data = [];
         }
