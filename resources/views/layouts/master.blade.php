@@ -19,11 +19,14 @@
 
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
     <style>
         #toast-container>.toast {
             opacity: 1 !important;
         }
+        .iti { width: 100%; }
     </style>
+    @stack('styles')
 </head>
 
 <body>
@@ -35,17 +38,7 @@
             $role = auth()->user()->account_type ?? null;
             @endphp
 
-            @if($role === 'admin')
-                @include('admin.sidebar')
-            @elseif($role === 'manager')
-                @include('manager.sidebar')
-            @elseif($role === 'reseller_agent')
-                @include('agent.sidebar')
-            @elseif($role === 'student')
-                @include('student.sidebar')
-            @else
-                @include('layouts.sidebar')
-            @endif
+            @include('layouts.sidebar')
             <!-- Sidebar -->
 
 
@@ -68,9 +61,10 @@
             </main>
         </div>
     </div>
-    <script src="{{ asset('js/dashboard.js') }}"></script>
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Toastr JS -->
@@ -96,13 +90,13 @@
             "hideMethod": "fadeOut"
         };
 
-        @if(session('success'))
-        toastr.success("{{ session('success') }}");
-        @endif
+        // @if(session('success'))
+        // toastr.success("{{ session('success') }}");
+        // @endif
 
-        @if(session('error'))
-        toastr.error("{{ session('error') }}");
-        @endif
+        // @if(session('error'))
+        // toastr.error("{{ session('error') }}");
+        // @endif
 
         const sidebar = document.getElementById('sidebar');
         const openSidebarBtn = document.getElementById('open-sidebar');
@@ -127,6 +121,70 @@
         });
     </script>
     @stack('scripts')
+
+    @push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let iti;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Geolocation tracking
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                }, function(error) {
+                    console.error("Error obtaining location", error);
+                });
+            }
+
+            const input = document.querySelector("#phone_input");
+            iti = window.intlTelInput(input, {
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+                separateDialCode: true,
+                initialCountry: "auto",
+                geoIpLookup: function(success, failure) {
+                    fetch("https://ipapi.co/json").then(res => res.json()).then(data => success(data.country_code)).catch(() => success("in"));
+                }
+            });
+
+            document.getElementById('submitBtns').addEventListener('click', function() {
+                if (grecaptcha.getResponse() === "") {
+                    Swal.fire({
+                        title: "Verification Required",
+                        text: "Please complete the reCAPTCHA.",
+                        icon: "warning"
+                    });
+                    return;
+                }
+
+                document.getElementById('full_phone').value = iti.getNumber();
+                document.getElementById('country_code').value = iti.getSelectedCountryData().iso2.toUpperCase();
+
+                document.getElementById('regifeetaken').value = 'no';
+                const btn = document.getElementById('submitBtns');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Processing...';
+                }
+                document.getElementById('realSubmitBtn').click();
+            });
+        });
+
+        function setActive(type) {
+            document.getElementById('accountType').value = type;
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById('btn-' + type);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+    </script>
+
+    @endpush
 </body>
 
 </html>

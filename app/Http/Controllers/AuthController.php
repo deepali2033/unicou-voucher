@@ -52,6 +52,8 @@ class AuthController extends Controller
             'email'        => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password'     => ['required', 'confirmed', 'min:8'],
             'g-recaptcha-response' => ['required'],
+            'latitude'     => ['nullable', 'string'],
+            'longitude'    => ['nullable', 'string'],
         ]);
 
         // 🔹 Step 2: Verify captcha with Google
@@ -71,6 +73,8 @@ class AuthController extends Controller
         }
 
         // 🔹 Step 3: Create user
+        $geo = LocationHelper::geo();
+        // 🔹 Step 3: Create user
         $user = User::create([
             'user_id'      => User::generateNextUserId(
                 $validated['account_type'],
@@ -79,10 +83,12 @@ class AuthController extends Controller
             'name'         => $validated['first_name'],
             'first_name'   => $validated['first_name'],
             'phone'        => $validated['phone'],
-            'country_iso'  => $validated['country_code'],
+            'country_iso'  => $geo['country_name'] ?? null,
             'account_type' => $validated['account_type'],
             'email'        => $validated['email'],
             'password'     => Hash::make($validated['password']),
+            'latitude'     => $validated['latitude'] ?? null,
+            'longitude'    => $validated['longitude'] ?? null,
         ]);
 
         // 🔹 Step 4: Send Verification Email
@@ -93,8 +99,16 @@ class AuthController extends Controller
             return redirect()->route('verification.notice')->with('error', 'Could not send verification email. Please check your SMTP settings.');
         }
 
-        // 🔹 Step 5: Login & redirect to verification notice
+        // 🔹 Step 5: Login & redirect
         Auth::login($user);
+
+        if ($user->account_type === 'student') {
+            return redirect()->route('auth.form.student')->with('success', 'Registration successful. Please complete your profile.');
+        }
+
+        if ($user->account_type === 'reseller_agent') {
+            return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Registration successful. Please complete your profile.');
+        }
 
 
         return redirect()->route('verification.notice');
@@ -131,6 +145,11 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        // Update last login time
+        auth()->user()->update([
+            'last_login_at' => now()
+        ]);
+
         if (!auth()->user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
@@ -155,9 +174,9 @@ class AuthController extends Controller
      */
     public function showAgentForm()
     {
-        // if (Auth::user()->agentDetail) {
-        //     return redirect()->route('agent.dashboard');
-        // }
+        if (Auth::user()->business_name) {
+            return redirect()->route('dashboard');
+        }
         return view('auth.forms.B2BResellerAgent');
     }
 
@@ -166,8 +185,8 @@ class AuthController extends Controller
      */
     public function showStudentForm()
     {
-        if (Auth::user()->studentDetail) {
-            return redirect()->route('student.dashboard');
+        if (Auth::user()->exam_purpose) {
+            return redirect()->route('dashboard');
         }
         return view('auth.forms.student-admission-form');
     }
@@ -184,7 +203,7 @@ class AuthController extends Controller
             'business_type'       => 'required|string',
             'registration_number' => 'required|string',
             'business_contact'    => 'required|string',
-            'business_email'      => 'required|email',
+            'business_email'      => 'required|email|unique:users,email,' . Auth::id(),
             'address'             => 'required|string',
             'city'                => 'required|string',
             'state'               => 'required|string',
@@ -207,7 +226,7 @@ class AuthController extends Controller
         ]);
 
         $data = $validated;
-        $data['user_id'] = Auth::id();
+        // Do NOT set $data['user_id'] = Auth::id(); because it overwrites the custom user_id string
         $data['agent_type'] = $validated['agentType'];
         unset($data['agentType']);
 
@@ -232,15 +251,17 @@ class AuthController extends Controller
             $data['id_doc']
         );
 
+        if (isset($shuftiResponse['error']) || (isset($shuftiResponse['event']) && $shuftiResponse['event'] === 'verification.declined')) {
+            $errorMsg = $shuftiResponse['error'] ?? ($shuftiResponse['declined_reason'] ?? 'Verification declined by third party.');
+            return back()->withInput()->with('error', 'Verification Issue: ' . $errorMsg);
+        }
+
         // Store Shufti reference/status if needed
         $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
 
-        AgentDetail::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $data
-        );
+        Auth::user()->update($data);
 
-        return redirect()->route('agent.dashboard')->with('shufti_response', $shuftiResponse);
+        return redirect()->route('dashboard')->with('success', 'Profile completed and verified successfully.');
     }
 
     /**
@@ -254,7 +275,7 @@ class AuthController extends Controller
             'id_type'             => 'required|string',
             'id_number'           => 'required|string',
             'primary_contact'     => 'required|string',
-            'email'               => 'required|email',
+            'email'               => 'required|email|unique:users,email,' . Auth::id(),
             'whatsapp_number'     => 'required|string',
             'address'             => 'required|string',
             'city'                => 'required|string',
@@ -273,11 +294,7 @@ class AuthController extends Controller
         ]);
 
         $data = $validated;
-        $data['user_id'] = Auth::id();
-
-        if (isset($data['preferred_countries'])) {
-            $data['preferred_countries'] = json_encode($data['preferred_countries']);
-        }
+        // Do NOT set $data['user_id'] = Auth::id(); because it overwrites the custom user_id string
 
         // Handle File Uploads
         if ($request->hasFile('id_doc')) {
@@ -298,14 +315,16 @@ class AuthController extends Controller
             $data['id_doc']
         );
 
+        if (isset($shuftiResponse['error']) || (isset($shuftiResponse['event']) && $shuftiResponse['event'] === 'verification.declined')) {
+            $errorMsg = $shuftiResponse['error'] ?? ($shuftiResponse['declined_reason'] ?? 'Verification declined by third party.');
+            return back()->withInput()->with('error', 'Verification Issue: ' . $errorMsg);
+        }
+
         $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
 
-        StudentDetail::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $data
-        );
+        Auth::user()->update($data);
 
-        return redirect()->route('student.dashboard')->with('shufti_response', $shuftiResponse);
+        return redirect()->route('dashboard')->with('success', 'Profile completed and verified successfully.');
     }
 
     /**
@@ -313,10 +332,34 @@ class AuthController extends Controller
      */
     private function verifyWithShufti($email, $country, $name, $dob, $idNumber, $idDocPath)
     {
+        // 🔹 Mock Verification for Testing or if credentials are missing
+        if (config('services.shuftipro.mock', true) || !config('services.shuftipro.client_id')) {
+            $user = Auth::user();
+
+            // Auto-approve in mock mode
+            $user->update([
+                'profile_verification_status' => 'verified',
+                'verified_at' => now(),
+            ]);
+
+            try {
+                Mail::to($user->email)->send(new \App\Mail\UserApproved($user));
+            } catch (\Exception $e) {
+                \Log::error("Mail Error during mock auto-approval: " . $e->getMessage());
+            }
+
+            return [
+                'event' => 'verification.accepted',
+                'status' => 'success',
+                'reference' => 'MOCK_' . Auth::id() . '_' . time(),
+                'message' => 'Verification accepted (Mock Mode)'
+            ];
+        }
+
         try {
             $filePath = storage_path('app/public/' . $idDocPath);
             if (!file_exists($filePath)) {
-                return ['error' => 'ID document not found'];
+                return ['status' => 'failed', 'error' => 'ID document not found'];
             }
 
             $idDocBase64 = base64_encode(file_get_contents($filePath));
@@ -340,9 +383,26 @@ class AuthController extends Controller
                 ],
             ]);
 
-            return $response->json();
+            $result = $response->json();
+
+            // Auto-approve logic if verification is accepted
+            if (isset($result['event']) && $result['event'] === 'verification.accepted') {
+                $user = Auth::user();
+                $user->update([
+                    'profile_verification_status' => 'verified',
+                    'verified_at' => now(),
+                ]);
+
+                try {
+                    Mail::to($user->email)->send(new \App\Mail\UserApproved($user));
+                } catch (\Exception $e) {
+                    \Log::error("Mail Error during auto-approval: " . $e->getMessage());
+                }
+            }
+
+            return $result;
         } catch (\Exception $e) {
-            return ['error' => $e->getMessage()];
+            return ['status' => 'failed', 'error' => $e->getMessage()];
         }
     }
 
@@ -383,29 +443,16 @@ class AuthController extends Controller
      */
     private function redirectByRole(User $user)
     {
-        if ($user->account_type === 'reseller_agent') {
-            if (!$user->agentDetail) {
-                return redirect()->route('auth.forms.B2BResellerAgent');
-            }
-            return redirect()->route('agent.dashboard');
+        if ($user->account_type === 'student' && !$user->studentDetail) {
+            return redirect()->route('auth.form.student');
+        }
+        if ($user->account_type === 'reseller_agent' && !$user->agentDetail) {
+            return redirect()->route('auth.forms.B2BResellerAgent');
         }
 
-        if ($user->account_type === 'student') {
-            if (!$user->studentDetail) {
-                return redirect()->route('auth.form.student');
-            }
-            return redirect()->route('student.dashboard');
-        }
-
-        if ($user->account_type === 'manager') {
-            return redirect()->route('manager.dashboard');
-        }
-
-        return match ($user->account_type) {
-            'admin'          => redirect()->route('admin.dashboard'),
-            default          => redirect('/'),
-        };
+        return redirect()->route('dashboard');
     }
+
 
     public function toggleUserStatus($id)
     {

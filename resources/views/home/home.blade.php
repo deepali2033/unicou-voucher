@@ -173,7 +173,7 @@
         @auth
         @php
         $connectRoute = match(auth()->user()->account_type) {
-        'admin' => route('admin.dashboard'),
+        'admin' => route('dashboard'),
         'reseller_agent' => route('auth.forms.B2BResellerAgent'),
         'student' => route('auth.form.student'),
         default => route('home'),

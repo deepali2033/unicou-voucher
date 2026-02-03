@@ -18,6 +18,14 @@
 
 
     <div class="header-right d-flex align-items-center gap-3">
+        @if(session()->has('impersonator_id'))
+        <div class="impersonation-notice me-2">
+            <a href="{{ route('users.stop-impersonating') }}" class="btn btn-danger btn-sm fw-bold">
+                <i class="fas fa-user-shield me-1"></i> Back to Admin
+            </a>
+        </div>
+        @endif
+
         @if(session('api_error'))
         <div class="alert alert-warning p-1 px-2 m-0 small" style="font-size: 0.7rem;">
             <i class="fas fa-exclamation-triangle"></i> {{ session('api_error') }}
@@ -62,12 +70,9 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                     @if(!View::hasSection('header_left'))
-                    @if(Auth::user()->isAdmin())
-                    <a class="dropdown-item" href="{{ route('admin.account.manage') }}">Manage Account</a>
-                    @else
-                    <a class="dropdown-item" href="#">Manage Account</a>
-                    @endif
-                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="{{ route('account.manage') }}">Manage Account</a>
+
                     @endif
                     <a class="dropdown-item" href="{{ route('auth.logout') }}"
                         onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();">

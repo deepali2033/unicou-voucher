@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'company_name',
         'phone',
         'account_type',
+        'country_iso',
         'email',
         'password',
         'address',
@@ -51,6 +52,38 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_updated_at',
         'pending_profile_data',
         'wallet_balance',
+        'latitude',
+        'longitude',
+        'last_login_at',
+        'dob',
+        'id_type',
+        'id_number',
+        'primary_contact',
+        'whatsapp_number',
+        'country',
+        'post_code',
+        'agent_type',
+        'business_name',
+        'business_type',
+        'registration_number',
+        'business_contact',
+        'business_email',
+        'website',
+        'social_media',
+        'representative_name',
+        'designation',
+        'exam_purpose',
+        'highest_education',
+        'passing_year',
+        'preferred_countries',
+        'bank_name',
+        'bank_country',
+        'account_number',
+        'registration_doc',
+        'id_doc',
+        'id_doc_final',
+        'business_logo',
+        'shufti_reference',
     ];
 
     /**
@@ -77,6 +110,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'verified_at' => 'datetime',
             'profile_updated_at' => 'datetime',
             'pending_profile_data' => 'array',
+            'last_login_at' => 'datetime',
+            'preferred_countries' => 'array',
         ];
     }
 
@@ -108,6 +143,46 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->account_type === 'admin';
+    }
+
+    /**
+     * Check if the user is a manager.
+     *
+     * @return bool
+     */
+    public function isManager(): bool
+    {
+        return $this->account_type === 'manager';
+    }
+
+    public function isSupport(): bool
+    {
+        return $this->account_type === 'support_team';
+    }
+
+    /**
+     * Check if the user is an agent.
+     *
+     * @return bool
+     */
+    public function isAgent(): bool
+    {
+        return in_array($this->account_type, ['reseller_agent', 'agent']);
+    }
+
+    /**
+     * Check if the user is a student.
+     *
+     * @return bool
+     */
+    public function isStudent(): bool
+    {
+        return $this->account_type === 'student';
+    }
+
+    public function isResellerAgent(): bool
+    {
+        return in_array($this->account_type, ['reseller_agent', 'agent']);
     }
 
     /**
@@ -285,17 +360,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function generateNextUserId(string $accountType, string $countryCode = 'IN'): string
     {
         $countryCode = strtoupper($countryCode);
-        $prefix = 'UC' . $countryCode;
+        $prefix = 'UN' . $countryCode;
 
         if ($accountType === 'student') {
             $prefix .= 'A';
         }
 
         // Find last user with this exact prefix
-        // We use a regex match to ensure we only increment the numeric part at the end
-        $lastUser = self::where('user_id', 'like', $prefix . '%')
-            ->orderBy('user_id', 'desc')
-            ->first();
+        // We ensure we don't pick up Student IDs (with 'A') when generating Agent IDs (without 'A')
+        $query = self::where('user_id', 'like', $prefix . '%');
+
+        if ($accountType !== 'student') {
+            // Exclude student IDs which have 'A' after country code
+            $query->where('user_id', 'not like', $prefix . 'A%');
+        }
+
+        $lastUser = $query->orderBy('user_id', 'desc')->first();
 
         if ($lastUser && preg_match('/(\d+)$/', $lastUser->user_id, $matches)) {
             $lastNumber = (int)$matches[1];
@@ -315,6 +395,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function studentDetail()
     {
         return $this->hasOne(StudentDetail::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id', 'id');
+    }
+
+    public function riskLevel()
+    {
+        return $this->hasOne(CountryRiskLevel::class, 'country_code', 'country_iso');
     }
 
     /**

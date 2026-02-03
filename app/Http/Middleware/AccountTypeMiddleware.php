@@ -13,9 +13,9 @@ class AccountTypeMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $accountType): Response
+    public function handle(Request $request, Closure $next, ...$accountTypes): Response
     {
-        if (!$request->user() || $request->user()->account_type !== $accountType) {
+        if (!$request->user() || !in_array($request->user()->account_type, $accountTypes)) {
             abort(403, 'Unauthorized action.');
         }
 

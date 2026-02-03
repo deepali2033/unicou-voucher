@@ -32,9 +32,9 @@ class InventoryVoucher extends Model
         'student_referral_points_per_unit',
         'student_bonus_points_per_unit',
         'student_sale_price',
-        'quarterly_points',
 
-        'original_price',
+
+
         'upload_vouchers',
         'status'
     ];
@@ -55,6 +55,6 @@ class InventoryVoucher extends Model
         'student_sale_price' => 'decimal:2',
 
 
-        'original_price' => 'decimal:2',
+
     ];
 }

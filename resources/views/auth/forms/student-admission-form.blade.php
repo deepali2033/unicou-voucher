@@ -3,24 +3,39 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="sat-view-container">
 
-  @include('layouts.header')
-</div>
 <div class="sat-card">
 
   <div class="sat-header d-flex justify-content-between align-items-center">
     <div>
       <h2>STUDENT ADMISSION TERMINAL</h2>
+      <h4 class="text-primary mt-2">USER ID: {{ Auth::user()->user_id }}</h4>
       <p>
         Establish your identity node according to global standards.
         Official processing via <b>connect@unicou.uk</b>
       </p>
     </div>
     <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillStudentDemoData()">
-        <i class="fas fa-magic"></i> Auto Fill
+      <i class="fas fa-magic"></i> Auto Fill
     </button>
   </div>
+
+
+  <div class="wizard-steps mb-4">
+    <div class="wizard-step active" data-step="1"><span>✓</span><small>PERSONAL</small></div>
+    <div class="wizard-step" data-step="2"><span>2</span><small>CONTACT</small></div>
+    <div class="wizard-step" data-step="3"><span>3</span><small>ADDRESS</small></div>
+    <div class="wizard-step" data-step="4"><span>4</span><small>UPLOAD</small></div>
+    <div class="wizard-step" data-step="5"><span>5</span><small>PURPOSE</small></div>
+    <div class="wizard-step" data-step="6"><span>6</span><small>EDUCATION</small></div>
+    <div class="wizard-step" data-step="7"><span>7</span><small>COUNTRIES</small></div>
+    <div class="wizard-step" data-step="8"><span>8</span><small>BANK</small></div>
+    <div class="wizard-step" data-step="9"><span>9</span><small>VERIFY</small></div>
+  </div>
+
+
+
+
 
   @if ($errors->any())
   <div class="alert alert-danger mx-4 mt-3 mb-0">
@@ -35,13 +50,13 @@
   <form id="satForm" method="POST" action="{{ route('auth.form.student.post') }}" enctype="multipart/form-data">
     @csrf
     <!-- ================= PERSONAL ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step active" data-step="1">
       <h4><span>01</span> Personal Information</h4>
 
       <div class="sat-grid-2">
         <div class="sat-field">
           <label>Full Name *</label>
-          <input type="text" name="full_name" placeholder="e.g. Muhammad Ali Khan" required>
+          <input type="text" name="full_name" placeholder="e.g. Muhammad Ali Khan" value="{{ Auth::user()->name }}" required>
         </div>
 
         <div class="sat-field">
@@ -64,21 +79,26 @@
           <input type="text" name="id_number" placeholder="e.g. CNIC / Passport Number" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= CONTACT ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="2">
       <h4><span>02</span> Contact Information</h4>
 
       <div class="sat-grid-2">
         <div class="sat-field">
           <label>Primary Contact No *</label>
-          <input type="tel" name="primary_contact" placeholder="+92 3XX XXX XXXX" required>
+          <input type="tel" name="primary_contact" placeholder="+92 3XX XXX XXXX" value="{{ Auth::user()->phone }}" required>
         </div>
 
         <div class="sat-field">
           <label>Email (Voucher Delivery) *</label>
-          <input type="email" name="email" placeholder="e.g. student@email.com" required>
+          <input type="email" name="email" placeholder="e.g. student@email.com" value="{{ Auth::user()->email }}" required>
         </div>
 
         <div class="sat-field">
@@ -86,10 +106,15 @@
           <input type="tel" name="whatsapp_number" placeholder="+92 3XX XXX XXXX" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= ADDRESS ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="3">
       <h4><span>03</span> Address Details</h4>
 
       <div class="sat-grid-2">
@@ -118,10 +143,15 @@
           <input type="text" name="post_code" placeholder="e.g. 54000" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= DOCUMENT UPLOAD ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="4">
       <h4><span>04</span> Upload Documents</h4>
 
       <div class="alert alert-warning mb-3" style="font-size: 0.85rem;">
@@ -134,10 +164,15 @@
           <input type="file" name="id_doc" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= EXAM PURPOSE ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="5">
       <h4><span>05</span> English Exam Purpose</h4>
 
       <div class="sat-grid-2">
@@ -150,10 +185,15 @@
           </select>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= EDUCATION ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="6">
       <h4><span>06</span> Education Details</h4>
 
       <div class="sat-grid-2">
@@ -167,10 +207,15 @@
           <input type="number" name="passing_year" placeholder="e.g. 2022" min="1990" max="2035" required>
         </div>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= COUNTRIES ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="7">
       <h4><span>07</span> Preferred Countries</h4>
 
       <div class="sat-grid-2 Preferred-Country">
@@ -179,10 +224,15 @@
         <label class="sat-consent Preferred-Country_checkbox"><input type="checkbox" name="preferred_countries[]" value="Canada"> Canada</label>
         <label class="sat-consent Preferred-Country_checkbox"><input type="checkbox" name="preferred_countries[]" value="Australia"> Australia</label>
       </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= BANK ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="8">
       <h4><span>08</span> Bank Account Details</h4>
 
       <div class="sat-grid-2">
@@ -201,10 +251,16 @@
           <input type="text" name="account_number" placeholder="e.g. PK36SCBL0000001123456702" required>
         </div>
       </div>
+
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+        <button type="button" class="btn btn-primary next-btn">Continue →</button>
+      </div>
     </section>
 
     <!-- ================= FINAL UPLOAD ================= -->
-    <section class="sat-section">
+    <section class="sat-section form-step" data-step="9">
       <h4><span>09</span> Final Verification Upload</h4>
 
       <div class="sat-grid-2">
@@ -213,26 +269,30 @@
           <input type="file" name="id_doc_final" required>
         </div>
       </div>
+
+      <!-- ================= CONSENT ================= -->
+      <div class="sat-consent">
+        <input type="checkbox" required id="consent_policy">
+        <p>
+          I agree to the Non-Refundable & "Undisclosed" Voucher Policy.
+        </p>
+      </div>
+
+      <div class="sat-consent">
+        <input type="checkbox" required id="consent_terms">
+        <p>
+          I accept the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and confirm all submitted information is correct.
+        </p>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="btn btn-light prev-btn">← Back</button>
+      </div>
+
+      <button type="submit" class="sat-btn mt-4">
+        INITIALIZE REGISTRY SYNC →
+      </button>
     </section>
-
-    <!-- ================= CONSENT ================= -->
-    <div class="sat-consent">
-      <input type="checkbox" required id="consent_policy">
-      <p>
-        I agree to the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Non-Refundable & Undisclosed Voucher Policy</a>.
-      </p>
-    </div>
-
-    <div class="sat-consent">
-      <input type="checkbox" required id="consent_terms">
-      <p>
-        I accept the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and confirm all submitted information is correct.
-      </p>
-    </div>
-
-    <button type="submit" class="sat-btn">
-      INITIALIZE REGISTRY SYNC →
-    </button>
 
   </form>
 
@@ -311,7 +371,7 @@
     form.querySelector('input[name="highest_education"]').value = "Bachelor of Science";
     form.querySelector('input[name="passing_year"]').value = "2022";
     form.querySelectorAll('input[name="preferred_countries[]"]').forEach((cb, idx) => {
-        if(idx < 2) cb.checked = true;
+      if (idx < 2) cb.checked = true;
     });
     form.querySelector('input[name="bank_name"]').value = "Standard Chartered Bank";
     form.querySelector('input[name="bank_country"]').value = "Pakistan";
@@ -320,5 +380,83 @@
     document.getElementById('consent_terms').checked = true;
   }
 </script>
+
+
+<script>
+  let currentStep = parseInt(localStorage.getItem('studentStep')) || 1;
+  if (currentStep < 1 || currentStep > 9) currentStep = 1;
+
+  const steps = document.querySelectorAll('.form-step');
+  const indicators = document.querySelectorAll('.wizard-step');
+
+  function showStep(step) {
+    if (step < 1 || step > 9) return;
+
+    steps.forEach(s => s.classList.remove('active'));
+
+    indicators.forEach(i => {
+      i.classList.remove('active');
+      const span = i.querySelector('span');
+      if (span) span.innerText = i.dataset.step;
+    });
+
+    const targetStep = document.querySelector(`.form-step[data-step="${step}"]`);
+    if (targetStep) targetStep.classList.add('active');
+
+    const activeIndicator = document.querySelector(`.wizard-step[data-step="${step}"]`);
+    if (activeIndicator) {
+      activeIndicator.classList.add('active');
+      const span = activeIndicator.querySelector('span');
+      if (span) span.innerText = "✓";
+    }
+
+    localStorage.setItem('studentStep', step);
+    currentStep = step;
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  function validateStep(step) {
+    const currentSection = document.querySelector(`.form-step[data-step="${step}"]`);
+    if (!currentSection) return true;
+
+    const inputs = currentSection.querySelectorAll('input[required], select[required]');
+    let valid = true;
+    inputs.forEach(input => {
+      if (!input.value || (input.type === 'checkbox' && !input.checked)) {
+        input.classList.add('is-invalid');
+        valid = false;
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
+
+    if (!valid) {
+      alert('Please fill all required fields before continuing.');
+    }
+    return valid;
+  }
+
+  showStep(currentStep);
+
+  document.querySelectorAll('.next-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (validateStep(currentStep)) {
+        showStep(currentStep + 1);
+      }
+    });
+  });
+
+  document.querySelectorAll('.prev-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (currentStep > 1) {
+        showStep(currentStep - 1);
+      }
+    });
+  });
+</script>
+
 @endpush
 @endsection

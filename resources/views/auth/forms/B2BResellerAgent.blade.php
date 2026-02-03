@@ -1,15 +1,147 @@
 @extends('layouts.auth')
 
 @section('title', 'Login')
+<style>
+    /* ===== Card & Header ===== */
+    .sat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+    }
 
-@section('header_left')
-<a class="text-start" href="/">
-    <img src="{{ asset('images/company_logo.png') }}" style="max-height: 40px;" alt="UniCou Logo">
-</a>
-@endsection
+    .sat-header h2 {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .sat-header p {
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    /* ===== Wizard Stepper (ACTIVE ONE) ===== */
+    .wizard-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        padding: 20px 10px;
+        margin-bottom: 30px;
+    }
+
+    .wizard-steps::before {
+        content: "";
+        position: absolute;
+        top: 32px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e9ecef;
+        z-index: 0;
+    }
+
+    .wizard-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .wizard-step span {
+        width: 36px;
+        height: 36px;
+        background: #dee2e6;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .wizard-step small {
+        display: block;
+        font-size: 11px;
+        margin-top: 6px;
+        color: #adb5bd;
+    }
+
+    .wizard-step.active span {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .wizard-step.active small {
+        color: #2563eb;
+    }
+
+    /* ===== Form Fields ===== */
+    .sat-field label {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #6c757d;
+    }
+
+    .sat-field input,
+    .sat-field select {
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 14px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .sat-field input:focus,
+    .sat-field select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, .15);
+    }
+
+    /* ===== Buttons ===== */
+    .btn-primary {
+        background: #2563eb;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .btn-light {
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    /* ===== Step Visibility ===== */
+    .form-step {
+        display: none;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    button.btn.btn-light.prev-btn {
+        display: flex;
+        white-space: nowrap;
+        align-items: center;
+        padding: 0px 20px;
+    }
+
+    button.btn.btn-primary.next-btn {
+        width: max-content;
+    }
+
+
+    /* B2B Reseller Agent form end */
+
+    .captcha-wrapper.p-3.border.rounded.bg-light.d-flex.align-items-center {
+        width: max-content;
+    }
+</style>
+
 
 @section('content')
-<!-- @include('layouts.header') -->
+
 
 <div class="sat-view-container">
 
@@ -18,6 +150,7 @@
         <div class="sat-header d-flex justify-content-between align-items-center">
             <div>
                 <h2>B2B Reseller Agent</h2>
+                <h4 class="text-primary mt-2">USER ID: {{ Auth::user()->user_id }}</h4>
                 <p>
                     Establish your identity node according to global standards.
                     Official processing via <b>connect@unicou.uk</b>
@@ -113,12 +246,12 @@
 
                     <div class="sat-field">
                         <label>Contact Number *</label>
-                        <input type="tel" name="business_contact" placeholder="+CountryCode Business Contact" required>
+                        <input type="tel" name="business_contact" placeholder="+CountryCode Business Contact" value="{{ Auth::user()->phone }}" required>
                     </div>
 
                     <div class="sat-field">
                         <label>Email (Voucher Delivery) *</label>
-                        <input type="email" name="business_email" placeholder="official@business.com" required>
+                        <input type="email" name="business_email" placeholder="official@business.com" value="{{ Auth::user()->email }}" required>
                     </div>
                 </div>
 
@@ -195,7 +328,7 @@
                 <div class="sat-grid-2">
                     <div class="sat-field">
                         <label>Representative Name *</label>
-                        <input type="text" name="representative_name" placeholder="Full name as per ID" required>
+                        <input type="text" name="representative_name" placeholder="Full name as per ID" value="{{ Auth::user()->name }}" required>
                     </div>
 
                     <div class="sat-field">
