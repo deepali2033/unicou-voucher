@@ -99,8 +99,16 @@ class AuthController extends Controller
             return redirect()->route('verification.notice')->with('error', 'Could not send verification email. Please check your SMTP settings.');
         }
 
-        // 🔹 Step 5: Login & redirect to verification notice
+        // 🔹 Step 5: Login & redirect
         Auth::login($user);
+
+        if ($user->account_type === 'student') {
+            return redirect()->route('auth.form.student')->with('success', 'Registration successful. Please complete your profile.');
+        }
+
+        if ($user->account_type === 'reseller_agent') {
+            return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Registration successful. Please complete your profile.');
+        }
 
 
         return redirect()->route('verification.notice');
@@ -195,7 +203,7 @@ class AuthController extends Controller
             'business_type'       => 'required|string',
             'registration_number' => 'required|string',
             'business_contact'    => 'required|string',
-            'business_email'      => 'required|email',
+            'business_email'      => 'required|email|unique:users,email,' . Auth::id(),
             'address'             => 'required|string',
             'city'                => 'required|string',
             'state'               => 'required|string',
@@ -218,7 +226,7 @@ class AuthController extends Controller
         ]);
 
         $data = $validated;
-        $data['user_id'] = Auth::id();
+        // Do NOT set $data['user_id'] = Auth::id(); because it overwrites the custom user_id string
         $data['agent_type'] = $validated['agentType'];
         unset($data['agentType']);
 
@@ -267,7 +275,7 @@ class AuthController extends Controller
             'id_type'             => 'required|string',
             'id_number'           => 'required|string',
             'primary_contact'     => 'required|string',
-            'email'               => 'required|email',
+            'email'               => 'required|email|unique:users,email,' . Auth::id(),
             'whatsapp_number'     => 'required|string',
             'address'             => 'required|string',
             'city'                => 'required|string',
@@ -286,7 +294,7 @@ class AuthController extends Controller
         ]);
 
         $data = $validated;
-        $data['user_id'] = Auth::id();
+        // Do NOT set $data['user_id'] = Auth::id(); because it overwrites the custom user_id string
 
         // Handle File Uploads
         if ($request->hasFile('id_doc')) {

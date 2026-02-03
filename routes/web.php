@@ -81,6 +81,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
     Route::post('/pricing/store', [PricingController::class, 'store'])->name('pricing.store');
+    Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
 
     // User Management

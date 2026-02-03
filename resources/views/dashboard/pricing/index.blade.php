@@ -66,11 +66,67 @@
                             <th class="py-3 border-0">Base Sale Price</th>
                             <th class="py-3 border-0">Discount</th>
                             <th class="py-3 border-0">Final Price</th>
+                            <th class="py-3 border-0">Expiry Date</th>
+                            <th class="py-3 border-0">Status</th>
                             <th class="px-4 py-3 border-0 text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-
+                        @forelse($rules as $rule)
+                        <tr id="rule-row-{{ $rule->id }}">
+                            <td class="px-4">
+                                <div class="fw-bold">{{ $rule->inventoryVoucher->brand_name ?? 'N/A' }}</div>
+                                <small class="text-muted">{{ $rule->inventoryVoucher->sku_id ?? 'N/A' }}</small>
+                            </td>
+                            <td>
+                                <span class="fi fi-{{ strtolower($rule->country_code) }} me-2"></span>
+                                {{ $rule->country_name }}
+                            </td>
+                            <td>${{ number_format($rule->sale_price, 2) }}</td>
+                            <td>
+                                @if($rule->discount_type === 'percentage')
+                                {{ $rule->discount_value }}% OFF
+                                @else
+                                ${{ number_format($rule->discount_value, 2) }} OFF
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-soft-success text-success fw-bold p-2">
+                                    ${{ number_format($rule->final_price, 2) }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($rule->expiry_date)
+                                    @php
+                                        $isExpired = \Carbon\Carbon::parse($rule->expiry_date)->isPast();
+                                    @endphp
+                                    <span class="{{ $isExpired ? 'text-danger fw-bold' : '' }}">
+                                        {{ \Carbon\Carbon::parse($rule->expiry_date)->format('d M Y') }}
+                                        @if($isExpired) (Expired) @endif
+                                    </span>
+                                @else
+                                    <span class="text-muted">No Expiry</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input toggle-status" type="checkbox" 
+                                        data-id="{{ $rule->id }}" {{ $rule->is_active ? 'checked' : '' }}>
+                                </div>
+                            </td>
+                            <td class="px-4 text-end">
+                                <button class="btn btn-sm btn-light delete-rule" data-id="{{ $rule->id }}">
+                                    <i class="fas fa-trash text-danger"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                No pricing rules found.
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -134,6 +190,19 @@
                         <label class="form-label small fw-bold text-uppercase" id="discountValueLabel">Discount Amount</label>
                         <input type="number" step="0.01" name="discount_value" class="form-control" value="0" required>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-uppercase">Expiry Date</label>
+                            <input type="date" name="expiry_date" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                                <label class="form-check-label fw-bold small text-uppercase" for="isActive">Active Status</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
@@ -191,6 +260,29 @@
                 error: function(xhr) {
                     toastr.error('Something went wrong. Please try again.');
                     btn.prop('disabled', false).html('Save Pricing Rule');
+                }
+            });
+        });
+
+        // Handle Status Toggle
+        $(document).on('change', '.toggle-status', function() {
+            const id = $(this).data('id');
+            const isActive = $(this).prop('checked') ? 1 : 0;
+
+            $.ajax({
+                url: "{{ route('pricing.toggle-status', ':id') }}".replace(':id', id),
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    is_active: isActive
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                    }
+                },
+                error: function() {
+                    toastr.error('Failed to update status.');
                 }
             });
         });

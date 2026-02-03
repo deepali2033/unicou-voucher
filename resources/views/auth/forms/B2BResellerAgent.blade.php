@@ -150,6 +150,7 @@
         <div class="sat-header d-flex justify-content-between align-items-center">
             <div>
                 <h2>B2B Reseller Agent</h2>
+                <h4 class="text-primary mt-2">USER ID: {{ Auth::user()->user_id }}</h4>
                 <p>
                     Establish your identity node according to global standards.
                     Official processing via <b>connect@unicou.uk</b>
@@ -245,12 +246,12 @@
 
                     <div class="sat-field">
                         <label>Contact Number *</label>
-                        <input type="tel" name="business_contact" placeholder="+CountryCode Business Contact" required>
+                        <input type="tel" name="business_contact" placeholder="+CountryCode Business Contact" value="{{ Auth::user()->phone }}" required>
                     </div>
 
                     <div class="sat-field">
                         <label>Email (Voucher Delivery) *</label>
-                        <input type="email" name="business_email" placeholder="official@business.com" required>
+                        <input type="email" name="business_email" placeholder="official@business.com" value="{{ Auth::user()->email }}" required>
                     </div>
                 </div>
 
@@ -327,7 +328,7 @@
                 <div class="sat-grid-2">
                     <div class="sat-field">
                         <label>Representative Name *</label>
-                        <input type="text" name="representative_name" placeholder="Full name as per ID" required>
+                        <input type="text" name="representative_name" placeholder="Full name as per ID" value="{{ Auth::user()->name }}" required>
                     </div>
 
                     <div class="sat-field">

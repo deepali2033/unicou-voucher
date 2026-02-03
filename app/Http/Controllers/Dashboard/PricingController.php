@@ -62,4 +62,12 @@ class PricingController extends Controller
         VoucherPriceRule::findOrFail($id)->delete();
         return response()->json(['success' => true, 'message' => 'Price rule deleted successfully.']);
     }
+
+    public function toggleStatus(Request $request, $id)
+    {
+        $rule = VoucherPriceRule::findOrFail($id);
+        $rule->update(['is_active' => $request->is_active]);
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+    }
 }

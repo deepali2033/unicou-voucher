@@ -9,6 +9,7 @@
   <div class="sat-header d-flex justify-content-between align-items-center">
     <div>
       <h2>STUDENT ADMISSION TERMINAL</h2>
+      <h4 class="text-primary mt-2">USER ID: {{ Auth::user()->user_id }}</h4>
       <p>
         Establish your identity node according to global standards.
         Official processing via <b>connect@unicou.uk</b>
@@ -55,7 +56,7 @@
       <div class="sat-grid-2">
         <div class="sat-field">
           <label>Full Name *</label>
-          <input type="text" name="full_name" placeholder="e.g. Muhammad Ali Khan" required>
+          <input type="text" name="full_name" placeholder="e.g. Muhammad Ali Khan" value="{{ Auth::user()->name }}" required>
         </div>
 
         <div class="sat-field">
@@ -92,12 +93,12 @@
       <div class="sat-grid-2">
         <div class="sat-field">
           <label>Primary Contact No *</label>
-          <input type="tel" name="primary_contact" placeholder="+92 3XX XXX XXXX" required>
+          <input type="tel" name="primary_contact" placeholder="+92 3XX XXX XXXX" value="{{ Auth::user()->phone }}" required>
         </div>
 
         <div class="sat-field">
           <label>Email (Voucher Delivery) *</label>
-          <input type="email" name="email" placeholder="e.g. student@email.com" required>
+          <input type="email" name="email" placeholder="e.g. student@email.com" value="{{ Auth::user()->email }}" required>
         </div>
 
         <div class="sat-field">

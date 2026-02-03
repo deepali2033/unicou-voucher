@@ -174,9 +174,12 @@
                             {{-- Actions (Clean) --}}
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-1">
-                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-sm btn-light" title="Access User Page">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
+                                    <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-light" title="Login as {{ $user->first_name }}">
+                                            <i class="fas fa-external-link-alt text-warning"></i>
+                                        </button>
+                                    </form>
                                     <a class="btn btn-sm btn-light"
                                         href="{{ route('users.show', $user->id) }}" title="View">
                                         <i class="fas fa-eye text-primary"></i>
