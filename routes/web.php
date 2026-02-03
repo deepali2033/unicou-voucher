@@ -45,10 +45,10 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     $request->fulfill();
 
     $user = auth()->user();
-    if ($user->account_type === 'student' && !$user->studentDetail) {
+    if ($user->account_type === 'student' && !$user->exam_purpose) {
         return redirect()->route('auth.form.student')->with('success', 'Email verified. Please complete your profile.');
     }
-    if ($user->account_type === 'reseller_agent' && !$user->agentDetail) {
+    if ($user->account_type === 'reseller_agent' && !$user->business_name) {
         return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Email verified. Please complete your profile.');
     }
 

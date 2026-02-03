@@ -12,8 +12,7 @@ class ComplianceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('account_type', '!=', 'admin')
-            ->with(['agentDetail', 'studentDetail']);
+        $query = User::where('account_type', '!=', 'admin');
 
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {
             $query->where('profile_verification_status', $request->status);
@@ -44,7 +43,6 @@ class ComplianceController extends Controller
 
     public function show(User $user)
     {
-        $user->load(['agentDetail', 'studentDetail']);
         return view('dashboard.kyc-compliance.show', compact('user'));
     }
 

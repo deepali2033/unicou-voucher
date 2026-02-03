@@ -55,6 +55,35 @@ class User extends Authenticatable implements MustVerifyEmail
         'latitude',
         'longitude',
         'last_login_at',
+        'dob',
+        'id_type',
+        'id_number',
+        'primary_contact',
+        'whatsapp_number',
+        'country',
+        'post_code',
+        'agent_type',
+        'business_name',
+        'business_type',
+        'registration_number',
+        'business_contact',
+        'business_email',
+        'website',
+        'social_media',
+        'representative_name',
+        'designation',
+        'exam_purpose',
+        'highest_education',
+        'passing_year',
+        'preferred_countries',
+        'bank_name',
+        'bank_country',
+        'account_number',
+        'registration_doc',
+        'id_doc',
+        'id_doc_final',
+        'business_logo',
+        'shufti_reference',
     ];
 
     /**
@@ -82,6 +111,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'profile_updated_at' => 'datetime',
             'pending_profile_data' => 'array',
             'last_login_at' => 'datetime',
+            'preferred_countries' => 'array',
         ];
     }
 
@@ -330,7 +360,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function generateNextUserId(string $accountType, string $countryCode = 'IN'): string
     {
         $countryCode = strtoupper($countryCode);
-        $prefix = 'UC' . $countryCode;
+        $prefix = 'UN' . $countryCode;
 
         if ($accountType === 'student') {
             $prefix .= 'A';

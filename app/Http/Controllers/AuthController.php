@@ -164,9 +164,9 @@ class AuthController extends Controller
      */
     public function showAgentForm()
     {
-        // if (Auth::user()->agentDetail) {
-        //     return redirect()->route('agent.dashboard');
-        // }
+        if (Auth::user()->business_name) {
+            return redirect()->route('dashboard');
+        }
         return view('auth.forms.B2BResellerAgent');
     }
 
@@ -175,8 +175,8 @@ class AuthController extends Controller
      */
     public function showStudentForm()
     {
-        if (Auth::user()->studentDetail) {
-            return redirect()->route('student.dashboard');
+        if (Auth::user()->exam_purpose) {
+            return redirect()->route('dashboard');
         }
         return view('auth.forms.student-admission-form');
     }
@@ -249,10 +249,7 @@ class AuthController extends Controller
         // Store Shufti reference/status if needed
         $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
 
-        AgentDetail::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $data
-        );
+        Auth::user()->update($data);
 
         return redirect()->route('dashboard')->with('success', 'Profile completed and verified successfully.');
     }
@@ -289,10 +286,6 @@ class AuthController extends Controller
         $data = $validated;
         $data['user_id'] = Auth::id();
 
-        if (isset($data['preferred_countries'])) {
-            $data['preferred_countries'] = json_encode($data['preferred_countries']);
-        }
-
         // Handle File Uploads
         if ($request->hasFile('id_doc')) {
             $data['id_doc'] = $request->file('id_doc')->store('student_docs', 'public');
@@ -319,10 +312,7 @@ class AuthController extends Controller
 
         $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
 
-        StudentDetail::updateOrCreate(
-            ['user_id' => Auth::id()],
-            $data
-        );
+        Auth::user()->update($data);
 
         return redirect()->route('dashboard')->with('success', 'Profile completed and verified successfully.');
     }

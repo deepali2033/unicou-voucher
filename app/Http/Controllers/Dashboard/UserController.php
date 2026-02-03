@@ -243,7 +243,6 @@ class UserController extends Controller
     public function profile()
     {
         $user = auth()->user();
-        $user->load(['agentDetail', 'studentDetail']);
         return view('dashboard.my-profile.index', compact('user'));
     }
 

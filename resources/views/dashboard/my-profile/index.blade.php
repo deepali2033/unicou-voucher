@@ -93,54 +93,52 @@
                         <!-- Details Tab -->
                         <div class="tab-pane fade show active" id="details" role="tabpanel">
                             @if($user->isStudent())
-                                @php $details = $user->studentDetail; @endphp
                                 <div class="row g-4">
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Full Name</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->full_name ?? $user->name }}</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->full_name ?? $user->name }}</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Date of Birth</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->dob ?? 'N/A' }}</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->dob ?? 'N/A' }}</div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="text-muted small mb-1 d-block text-uppercase fw-bold">ID Number ({{ $details->id_type ?? 'ID' }})</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->id_number ?? 'N/A' }}</div>
+                                        <label class="text-muted small mb-1 d-block text-uppercase fw-bold">ID Number ({{ $user->id_type ?? 'ID' }})</label>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->id_number ?? 'N/A' }}</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Highest Education</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->highest_education ?? 'N/A' }} ({{ $details->passing_year ?? '' }})</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->highest_education ?? 'N/A' }} ({{ $user->passing_year ?? '' }})</div>
                                     </div>
                                     <div class="col-md-12">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Address</label>
                                         <div class="p-3 bg-light rounded-3">
-                                            {{ $details->address ?? 'N/A' }}, {{ $details->city ?? '' }}, {{ $details->state ?? '' }}, {{ $details->country ?? '' }}
+                                            {{ $user->address ?? 'N/A' }}, {{ $user->city ?? '' }}, {{ $user->state ?? '' }}, {{ $user->country ?? '' }}
                                         </div>
                                     </div>
                                 </div>
                             @elseif($user->isAgent())
-                                @php $details = $user->agentDetail; @endphp
                                 <div class="row g-4">
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Business Name</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->business_name ?? 'N/A' }}</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->business_name ?? 'N/A' }}</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Registration Number</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->registration_number ?? 'N/A' }}</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->registration_number ?? 'N/A' }}</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Representative</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->representative_name ?? 'N/A' }}</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->representative_name ?? 'N/A' }}</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Website</label>
-                                        <div class="p-3 bg-light rounded-3">{{ $details->website ?? 'N/A' }}</div>
+                                        <div class="p-3 bg-light rounded-3">{{ $user->website ?? 'N/A' }}</div>
                                     </div>
                                     <div class="col-md-12">
                                         <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Address</label>
                                         <div class="p-3 bg-light rounded-3">
-                                            {{ $details->address ?? 'N/A' }}, {{ $details->city ?? '' }}, {{ $details->state ?? '' }}, {{ $details->country ?? '' }}
+                                            {{ $user->address ?? 'N/A' }}, {{ $user->city ?? '' }}, {{ $user->state ?? '' }}, {{ $user->country ?? '' }}
                                         </div>
                                     </div>
                                 </div>
@@ -157,11 +155,11 @@
                             <div class="row g-3">
                                 @php
                                     $docs = [];
-                                    if($user->isStudent() && $user->studentDetail) {
-                                        $docs['Identity Document'] = $user->studentDetail->id_doc;
-                                    } elseif($user->isAgent() && $user->agentDetail) {
-                                        $docs['Business Registration'] = $user->agentDetail->registration_doc;
-                                        $docs['Identity Document'] = $user->agentDetail->id_doc;
+                                    if($user->isStudent()) {
+                                        if($user->id_doc) $docs['Identity Document'] = $user->id_doc;
+                                    } elseif($user->isAgent()) {
+                                        if($user->registration_doc) $docs['Business Registration'] = $user->registration_doc;
+                                        if($user->id_doc) $docs['Identity Document'] = $user->id_doc;
                                     }
                                     
                                     // Additional User Documents

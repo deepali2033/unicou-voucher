@@ -109,7 +109,7 @@
                 </div>
             </div>
 
-            @if($user->account_type === 'reseller_agent' && $user->agentDetail)
+            @if($user->account_type === 'reseller_agent' && $user->business_name)
             <div class="card shadow-sm border-0 mb-4" style="border-radius: 15px;">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold"><i class="fas fa-briefcase me-2 text-primary"></i> Business Verification</h5>
@@ -118,30 +118,30 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <p class="mb-1 text-muted small">Business Name</p>
-                            <p class="fw-bold">{{ $user->agentDetail->business_name }}</p>
+                            <p class="fw-bold">{{ $user->business_name }}</p>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-1 text-muted small">Registration Number</p>
-                            <p class="fw-bold">{{ $user->agentDetail->registration_number }}</p>
+                            <p class="fw-bold">{{ $user->registration_number }}</p>
                         </div>
                         <div class="col-12">
                             <p class="mb-1 text-muted small">Business Address</p>
-                            <p class="fw-bold">{{ $user->agentDetail->address }}, {{ $user->agentDetail->city }}, {{ $user->agentDetail->country }}</p>
+                            <p class="fw-bold">{{ $user->address }}, {{ $user->city }}, {{ $user->country }}</p>
                         </div>
                     </div>
                     <hr>
                     <h6 class="fw-bold mb-3 small text-uppercase text-muted">Verification Documents</h6>
                     <div class="row g-2">
-                        @if($user->agentDetail->registration_doc)
+                        @if($user->registration_doc)
                             <div class="col-md-6">
-                                <a href="{{ asset('storage/' . $user->agentDetail->registration_doc) }}" target="_blank" class="btn btn-light w-100 text-start border shadow-sm">
+                                <a href="{{ asset('storage/' . $user->registration_doc) }}" target="_blank" class="btn btn-light w-100 text-start border shadow-sm">
                                     <i class="fas fa-file-pdf text-danger me-2"></i> Business Registration
                                 </a>
                             </div>
                         @endif
-                        @if($user->agentDetail->id_doc)
+                        @if($user->id_doc)
                             <div class="col-md-6">
-                                <a href="{{ asset('storage/' . $user->agentDetail->id_doc) }}" target="_blank" class="btn btn-light w-100 text-start border shadow-sm">
+                                <a href="{{ asset('storage/' . $user->id_doc) }}" target="_blank" class="btn btn-light w-100 text-start border shadow-sm">
                                     <i class="fas fa-id-card text-primary me-2"></i> Representative ID
                                 </a>
                             </div>
@@ -151,7 +151,7 @@
             </div>
             @endif
 
-            @if($user->account_type === 'student' && $user->studentDetail)
+            @if($user->account_type === 'student' && $user->exam_purpose)
             <div class="card shadow-sm border-0 mb-4" style="border-radius: 15px;">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold"><i class="fas fa-user-graduate me-2 text-primary"></i> Academic Profile</h5>
@@ -160,24 +160,32 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <p class="mb-1 text-muted small">Academic Level</p>
-                            <p class="fw-bold">{{ $user->studentDetail->highest_education }}</p>
+                            <p class="fw-bold">{{ $user->highest_education }}</p>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-1 text-muted small">Identity Type</p>
-                            <p class="fw-bold">{{ $user->studentDetail->id_type }} ({{ $user->studentDetail->id_number }})</p>
+                            <p class="fw-bold">{{ $user->id_type }} ({{ $user->id_number }})</p>
                         </div>
                         <div class="col-12">
                             <p class="mb-1 text-muted small">Target Countries</p>
                             <p class="fw-bold">
-                                @php $countries = json_decode($user->studentDetail->preferred_countries, true); @endphp
-                                {{ is_array($countries) ? implode(', ', $countries) : $user->studentDetail->preferred_countries }}
+                                @php 
+                                    $countries = $user->preferred_countries;
+                                    if (is_string($countries)) {
+                                        $decoded = json_decode($countries, true);
+                                        if (json_last_error() === JSON_ERROR_NONE) {
+                                            $countries = $decoded;
+                                        }
+                                    }
+                                @endphp
+                                {{ is_array($countries) ? implode(', ', $countries) : $countries }}
                             </p>
                         </div>
                     </div>
                     <hr>
                     <h6 class="fw-bold mb-3 small text-uppercase text-muted">Identity Documents</h6>
-                    @if($user->studentDetail->id_doc)
-                        <a href="{{ asset('storage/' . $user->studentDetail->id_doc) }}" target="_blank" class="btn btn-light border shadow-sm">
+                    @if($user->id_doc)
+                        <a href="{{ asset('storage/' . $user->id_doc) }}" target="_blank" class="btn btn-light border shadow-sm">
                             <i class="fas fa-file-image text-info me-2"></i> View ID Document
                         </a>
                     @endif

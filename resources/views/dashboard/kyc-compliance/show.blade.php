@@ -111,38 +111,38 @@
                         </div>
                         @endif
 
-                        @if($user->account_type === 'reseller_agent' && $user->agentDetail)
-                        @if($user->agentDetail->registration_doc)
+                        @if($user->account_type === 'reseller_agent')
+                        @if($user->registration_doc)
                         <div class="col-md-6">
                             <div class="border rounded p-3 text-center">
                                 <i class="fas fa-file-invoice fa-2x mb-2 text-info"></i>
                                 <div class="small fw-bold mb-2">Business Registration</div>
-                                <a href="{{ asset('storage/' . $user->agentDetail->registration_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
+                                <a href="{{ asset('storage/' . $user->registration_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
                             </div>
                         </div>
                         @endif
-                        @if($user->agentDetail->id_doc)
+                        @if($user->id_doc)
                         <div class="col-md-6">
                             <div class="border rounded p-3 text-center">
                                 <i class="fas fa-id-card fa-2x mb-2 text-info"></i>
                                 <div class="small fw-bold mb-2">Identity Document</div>
-                                <a href="{{ asset('storage/' . $user->agentDetail->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
+                                <a href="{{ asset('storage/' . $user->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
                             </div>
                         </div>
                         @endif
-                        @elseif($user->account_type === 'student' && $user->studentDetail)
-                        @if($user->studentDetail->id_doc)
+                        @elseif($user->account_type === 'student')
+                        @if($user->id_doc)
                         <div class="col-md-6">
                             <div class="border rounded p-3 text-center">
                                 <i class="fas fa-id-card fa-2x mb-2 text-info"></i>
                                 <div class="small fw-bold mb-2">Student ID</div>
-                                <a href="{{ asset('storage/' . $user->studentDetail->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
+                                <a href="{{ asset('storage/' . $user->id_doc) }}" target="_blank" class="btn btn-sm btn-outline-info">View Document</a>
                             </div>
                         </div>
                         @endif
                         @endif
 
-                        @if(!$user->aadhar_card && !$user->pan_card && !($user->agentDetail && $user->agentDetail->registration_doc) && !($user->agentDetail && $user->agentDetail->id_doc) && !($user->studentDetail && $user->studentDetail->id_doc))
+                        @if(!$user->aadhar_card && !$user->pan_card && !$user->registration_doc && !$user->id_doc)
                         <div class="col-12 text-center py-4 text-muted">
                             <i class="fas fa-info-circle mb-2"></i>
                             <p>No KYC documents uploaded yet.</p>
@@ -152,13 +152,24 @@
                 </div>
             </div>
 
-            @if($user->account_type === 'reseller_agent' && $user->agentDetail)
+            @if($user->account_type === 'reseller_agent' && $user->business_name)
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold">Agent Details</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Agent details here as before -->
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Business Name</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->business_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Business Type</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->business_type }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Registration No.</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->registration_number }}</div>
+                    </div>
                 </div>
             </div>
             @endif

@@ -93,13 +93,50 @@
                 </div>
             </div>
 
-            @if($user->account_type === 'reseller_agent' && $user->agentDetail)
+            @if($user->account_type === 'reseller_agent' && $user->business_name)
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold">Agent Details</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Agent details here as before -->
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Business Name</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->business_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Business Type</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->business_type }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Registration No.</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->registration_number }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Website</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->website ?? 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if($user->account_type === 'student' && $user->exam_purpose)
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Student Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Exam Purpose</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->exam_purpose }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Highest Education</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->highest_education }} ({{ $user->passing_year }})</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Preferred Countries</div>
+                        <div class="col-sm-8 fw-bold">{{ $user->preferred_countries }}</div>
+                    </div>
                 </div>
             </div>
             @endif
