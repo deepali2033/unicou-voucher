@@ -1,3 +1,40 @@
+// dashbord click active start
+document.addEventListener("DOMContentLoaded", function () {
+    const navLinks = document.querySelectorAll("#sidebar .nav-link");
+    const currentPath = window.location.pathname;
+
+    navLinks.forEach(link => {
+        // Remove old active
+        link.classList.remove("active");
+
+        // URL match (refresh ke baad)
+        if (link.getAttribute("href") === currentPath) {
+            link.classList.add("active");
+        }
+
+        // Click par active + save
+        link.addEventListener("click", function () {
+            localStorage.setItem("activeSidebarLink", this.getAttribute("href"));
+
+            navLinks.forEach(l => l.classList.remove("active"));
+            this.classList.add("active");
+        });
+    });
+
+    // LocalStorage se restore
+    const savedLink = localStorage.getItem("activeSidebarLink");
+    if (savedLink) {
+        navLinks.forEach(link => {
+            if (link.getAttribute("href") === savedLink) {
+                link.classList.add("active");
+            }
+        });
+    }
+});
+// dashbord click active end
+
+
+
 document.addEventListener('click', function (e) {
 
     const badge = e.target.closest('.user-status-toggle');
