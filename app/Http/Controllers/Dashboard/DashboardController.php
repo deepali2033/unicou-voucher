@@ -48,10 +48,8 @@ class DashboardController extends Controller
 
     public function notifications()
     {
-        $notifications = [
-            ['title' => 'New Agent Registration', 'message' => 'A new agent has registered and is waiting for approval.', 'time' => now()->diffForHumans()],
-            ['title' => 'Low Stock Alert', 'message' => 'University Voucher stock is low (5 remaining).', 'time' => now()->subHours(2)->diffForHumans()],
-        ];
+        $notifications = auth()->user()->notifications()->paginate(20);
+        auth()->user()->unreadNotifications->markAsRead();
         return view('dashboard.notifications.index', compact('notifications'));
     }
 

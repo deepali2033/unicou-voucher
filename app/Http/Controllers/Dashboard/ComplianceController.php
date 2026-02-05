@@ -72,6 +72,13 @@ class ComplianceController extends Controller
 
     public function approve(User $user)
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Unauthorized action.'], 403);
+            }
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
         $user->update([
             'profile_verification_status' => 'verified',
             'verified_at' => now(),
@@ -93,6 +100,13 @@ class ComplianceController extends Controller
 
     public function reject(User $user)
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) {
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Unauthorized action.'], 403);
+            }
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
         $user->update([
             'profile_verification_status' => 'rejected',
             'verified_at' => now(),

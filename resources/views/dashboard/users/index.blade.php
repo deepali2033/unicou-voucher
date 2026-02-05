@@ -90,9 +90,11 @@
                 <a href="{{ route('users.pdf', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_create_user)
                 <a href="{{ route('users.create') }}" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> Add
                 </a>
+                @endif
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>

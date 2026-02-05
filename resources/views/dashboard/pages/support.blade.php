@@ -88,9 +88,11 @@
                 <a href="{{ route('users.pdf', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_create_user)
                 <a href="{{ route('users.create') }}" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> Add
                 </a>
+                @endif
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
@@ -141,10 +143,15 @@
                                 <span class="badge bg-info-subtle text-info">N/A</span>
                             </td>
                             <td>
-                                <span class="badge px-3 py-2 user-status-toggle {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
+                                @php
+                                $canFreeze = auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user;
+                                @endphp
+                                <span class="badge px-3 py-2 {{ $canFreeze ? 'user-status-toggle' : '' }} {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
+                                    @if($canFreeze)
                                     data-id="{{ $user->id }}"
                                     style="cursor:pointer;"
-                                    title="Click to {{ $user->is_active ? 'freeze' : 'unfreeze' }}">
+                                    title="Click to {{ $user->is_active ? 'freeze' : 'unfreeze' }}"
+                                    @endif>
                                     @if($user->is_active)
                                     <i class="fas fa-unlock me-1"></i> Active
                                     @else
@@ -156,22 +163,27 @@
                             {{-- Actions (Clean) --}}
                             <td class="text-end">
                                 <div class="d-flex justify-content-end gap-1">
+                                    @if(auth()->user()->account_type === 'admin')
                                     <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-light" title="Login as {{ $user->first_name }}">
                                             <i class="fas fa-external-link-alt text-warning"></i>
                                         </button>
                                     </form>
+                                    @endif
                                     <a class="btn btn-sm btn-light"
                                         href="{{ route('users.show', $user->id) }}" title="View">
                                         <i class="fas fa-eye text-primary"></i>
                                     </a>
 
+                                    @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
                                     <a class="btn btn-sm btn-light"
                                         href="{{ route('users.edit', $user->id) }}" title="Edit">
                                         <i class="fas fa-edit text-info"></i>
                                     </a>
+                                    @endif
 
+                                    @if(auth()->user()->account_type === 'admin')
                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="ajax-action">
                                         @csrf
                                         @method('DELETE')
@@ -180,7 +192,7 @@
                                         </button>
                                     </form>
 
-
+                                    @endif
 
                                 </div>
                             </td>

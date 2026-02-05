@@ -11,21 +11,18 @@
         <div class="card-body p-0">
             <div class="list-group list-group-flush">
                 @forelse($notifications as $notification)
-                <div class="list-group-item p-4">
+                <div class="list-group-item p-4 {{ $notification->unread() ? 'bg-light' : '' }}">
                     <div class="d-flex w-100 justify-content-between align-items-start">
                         <div class="d-flex gap-3">
                             <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <i class="fas fa-bell"></i>
+                                <i class="fas {{ ($notification->data['type'] ?? '') == 'user_created' ? 'fa-user-plus' : 'fa-bell' }}"></i>
                             </div>
                             <div>
-                                <h6 class="mb-1 fw-bold text-dark">{{ $notification['title'] }}</h6>
-                                <p class="mb-1 text-muted">{{ $notification['message'] }}</p>
-                                <small class="text-secondary">{{ $notification['time'] }}</small>
+                                <h6 class="mb-1 fw-bold text-dark">{{ ($notification->data['type'] ?? '') == 'user_created' ? 'New User Created' : 'Notification' }}</h6>
+                                <p class="mb-1 text-muted">{{ $notification->data['message'] ?? 'New notification received' }}</p>
+                                <small class="text-secondary">{{ $notification->created_at->diffForHumans() }}</small>
                             </div>
                         </div>
-                        <button class="btn btn-link btn-sm text-decoration-none text-muted p-0">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
                     </div>
                 </div>
                 @empty
@@ -36,6 +33,9 @@
                     </div>
                 </div>
                 @endforelse
+            </div>
+            <div class="p-3">
+                {{ $notifications->links() }}
             </div>
         </div>
     </div>

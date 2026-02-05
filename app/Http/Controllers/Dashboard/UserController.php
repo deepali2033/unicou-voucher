@@ -6,17 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserCreated;
+use App\Notifications\UserCreatedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('riskLevel')
-            ->where('id', '!=', auth()->id());
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
+
+        $query = User::with('riskLevel');
 
         if (auth()->user()->account_type === 'manager') {
             $query->whereNotIn('account_type', ['admin', 'manager']);
-        } elseif (auth()->user()->account_type !== 'admin') {
+        } else {
+            // For Admin and others, exclude admins to match "admin ko chhod kar"
             $query->where('account_type', '!=', 'admin');
         }
 
@@ -62,11 +70,17 @@ class UserController extends Controller
 
     public function create()
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_create_user) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         return view('dashboard.users.create');
     }
 
     public function store(Request $request)
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_create_user) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         $request->validate([
             'first_name' => 'required|string|max:255',
             // 'last_name' => 'required|string|max:255',
@@ -76,7 +90,7 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20',
         ]);
 
-        User::create([
+        $user = User::create([
             'user_id' => User::generateNextUserId($request->account_type),
             'first_name' => $request->first_name,
             // 'last_name' => $request->last_name,
@@ -90,7 +104,18 @@ class UserController extends Controller
             'verified_by' => auth()->id(),
         ]);
 
-        return redirect()->route('users.management')->with('success', 'User created successfully.');
+        // Send Welcome Email
+        try {
+            Mail::to($user->email)->send(new UserCreated($user, $request->password));
+        } catch (\Exception $e) {
+            \Log::error("Failed to send welcome email: " . $e->getMessage());
+        }
+
+        // Notify Admins and Managers
+        $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
+        Notification::send($adminsAndManagers, new UserCreatedNotification($user, auth()->user()));
+
+        return redirect()->route('users.management')->with('success', 'User created successfully and welcome email sent.');
     }
 
     public function show(User $user)
@@ -100,31 +125,104 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         return view('dashboard.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            // 'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
+
+        // If it's a file-only upload from the KYC tab, we relax the validation
+        $isFileUpload = $request->hasFile('profile_photo') ||
+            $request->hasFile('aadhar_card') ||
+            $request->hasFile('pan_card') ||
+            $request->hasFile('registration_doc') ||
+            $request->hasFile('id_doc') ||
+            $request->hasFile('id_doc_final');
+
+        $rules = [
+            'first_name' => $isFileUpload ? 'nullable|string|max:255' : 'required|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'email' => ($isFileUpload ? 'nullable' : 'required') . '|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
-            'status' => 'required|in:pending,verified,suspended',
-        ]);
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'zip_code' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'id_type' => 'nullable|string|max:255',
+            'id_number' => 'nullable|string|max:255',
+            'primary_contact' => 'nullable|string|max:255',
+            'whatsapp_number' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'post_code' => 'nullable|string|max:255',
+            'profile_verification_status' => 'nullable|in:pending,verified,suspended,rejected',
+            // Business fields
+            'business_name' => 'nullable|string|max:255',
+            'business_type' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:255',
+            'website' => 'nullable|url|max:255',
+            // Student fields
+            'exam_purpose' => 'nullable|string|max:255',
+            'highest_education' => 'nullable|string|max:255',
+            'passing_year' => 'nullable|integer',
+            'preferred_countries' => 'nullable|array',
+            'bank_name' => 'nullable|string|max:255',
+            'bank_country' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            // Files
+            'profile_photo' => 'nullable|image|max:2048',
+            'aadhar_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'registration_doc' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_doc' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_doc_final' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ];
 
-        $user->update([
-            'first_name' => $request->first_name,
-            // 'last_name' => $request->last_name,
-            'name' => $request->first_name . ' ' . $request->last_name,
-            'email' => $request->email,
-            'account_type' => $request->account_type,
-            'phone' => $request->phone,
-            'profile_verification_status' => $request->status,
-        ]);
+        $request->validate($rules);
 
-        return redirect()->route('users.management')->with('success', 'User updated successfully.');
+        $data = $request->except(['_token', '_method', 'profile_photo', 'aadhar_card', 'pan_card', 'registration_doc', 'id_doc', 'id_doc_final', 'preferred_countries']);
+
+        if ($request->has('first_name') && !empty($request->first_name)) {
+            $data['name'] = $request->first_name . ($request->last_name ? ' ' . $request->last_name : '');
+        }
+
+        if ($request->has('preferred_countries')) {
+            $data['preferred_countries'] = $request->preferred_countries;
+        }
+
+        // Sync primary_contact and phone
+        if ($request->has('phone') && !empty($request->phone)) {
+            $data['primary_contact'] = $request->phone;
+        } elseif ($request->has('primary_contact') && !empty($request->primary_contact)) {
+            $data['phone'] = $request->primary_contact;
+        }
+
+        // Handle File Uploads
+        $fileFields = ['profile_photo', 'aadhar_card', 'pan_card', 'registration_doc', 'id_doc', 'id_doc_final'];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                $data[$field] = $request->file($field)->store('users/' . $field, 'public');
+            }
+        }
+
+        // Filter out null values to prevent overwriting with null if fields are missing from request
+        $data = array_filter($data, function ($value) {
+            return !is_null($value);
+        });
+
+        $user->update($data);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => 'User details updated successfully.']);
+        }
+
+        return back()->with('success', 'User details updated successfully.');
     }
 
     public function destroy(User $user)
@@ -149,6 +247,15 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        if (auth()->user()->account_type === 'manager') {
+            if (!auth()->user()->can_freeze_user) {
+                return response()->json(['status' => 'error', 'message' => 'Unauthorized action.'], 403);
+            }
+            if (in_array($user->account_type, ['admin', 'manager'])) {
+                return response()->json(['status' => 'error', 'message' => 'You cannot freeze admin or manager accounts.'], 403);
+            }
+        }
+
         if ($user->id === auth()->id()) {
             return response()->json([
                 'status' => 'error',
@@ -159,16 +266,31 @@ class UserController extends Controller
         $user->is_active = $user->is_active ? 0 : 1;
         $user->save();
 
-        return response()->json([
-            'status'  => $user->is_active ? 'active' : 'frozen',
-            'message' => $user->is_active
-                ? 'User account unfrozen successfully'
-                : 'User account frozen successfully'
-        ]);
+        $message = $user->is_active
+            ? 'User account unfrozen successfully'
+            : 'User account frozen successfully';
+
+        if (request()->ajax()) {
+            return response()->json([
+                'status'  => $user->is_active ? 'active' : 'frozen',
+                'message' => $message
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function suspend(User $user)
     {
+        if (auth()->user()->account_type === 'manager') {
+            if (!auth()->user()->can_freeze_user) {
+                return back()->with('error', 'Unauthorized action.');
+            }
+            if (in_array($user->account_type, ['admin', 'manager'])) {
+                return back()->with('error', 'You cannot suspend admin or manager accounts.');
+            }
+        }
+
         $newStatus = $user->profile_verification_status === 'suspended' ? 'verified' : 'suspended';
         $user->update(['profile_verification_status' => $newStatus]);
 
@@ -183,6 +305,10 @@ class UserController extends Controller
 
     public function updatePassword(Request $request, User $user)
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_reset_password) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
         $request->validate([
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -192,6 +318,27 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Password updated successfully.');
+    }
+
+    public function updatePermissions(Request $request, User $user)
+    {
+        // Only admin can update manager permissions
+        if (auth()->user()->account_type !== 'admin') {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        $user->update([
+            'can_freeze_user' => $request->has('can_freeze_user'),
+            'can_reset_password' => $request->has('can_reset_password'),
+            'can_create_user' => $request->has('can_create_user'),
+            'can_edit_user' => $request->has('can_edit_user'),
+            'can_approve_user' => $request->has('can_approve_user'),
+            'can_view_users' => $request->has('can_view_users'),
+
+            'can_impersonate_user' => $request->has('can_impersonate_user'),
+        ]);
+
+        return back()->with('success', 'Manager permissions updated successfully.');
     }
 
     public function downloadPDF(Request $request)
@@ -267,26 +414,41 @@ class UserController extends Controller
 
     public function managers()
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         $users = User::where('account_type', 'manager')->latest()->paginate(10);
         return view('dashboard.pages.manager', compact('users'));
     }
     public function ResellerAgent()
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         $users = User::where('account_type', 'reseller_agent')->latest()->paginate(10);
         return view('dashboard.pages.reseller', compact('users'));
     }
     public function SupportTeam()
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         $users = User::where('account_type', 'support_team')->latest()->paginate(10);
         return view('dashboard.pages.support', compact('users'));
     }
     public function RegularAgent()
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         $users = User::where('account_type', 'agent')->latest()->paginate(10);
         return view('dashboard.pages.regularAgent', compact('users'));
     }
     public function Student()
     {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         $users = User::where('account_type', 'student')->latest()->paginate(10);
         return view('dashboard.pages.student', compact('users'));
     }
@@ -294,8 +456,16 @@ class UserController extends Controller
     public function impersonate(User $user)
     {
         // Only admin/manager can impersonate
-        if (!in_array(auth()->user()->account_type, ['admin', 'manager'])) {
+        if (auth()->user()->account_type === 'manager') {
+            if (!auth()->user()->can_impersonate_user) {
+                return back()->with('error', 'Unauthorized action.');
+            }
+        } elseif (auth()->user()->account_type !== 'admin') {
             return back()->with('error', 'Unauthorized action.');
+        }
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot impersonate yourself.');
         }
 
         // Store original user ID in session
@@ -313,14 +483,14 @@ class UserController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $adminId = session()->pull('impersonator_id');
-        $admin = User::find($adminId);
+        $originalUserId = session()->pull('impersonator_id');
+        $originalUser = User::find($originalUserId);
 
-        if ($admin) {
-            auth()->login($admin);
-            return redirect()->route('users.management')->with('success', 'Welcome back, ' . $admin->first_name);
+        if ($originalUser) {
+            auth()->login($originalUser);
+            return redirect()->route('users.management')->with('success', 'Back to your account.');
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('login');
     }
 }

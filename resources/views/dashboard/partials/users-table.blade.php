@@ -45,11 +45,11 @@
                 <td>
                     <div class="d-flex align-items-center gap-2">
                         <span
-                            class="badge px-3 py-2 user-status-toggle
+                            class="badge px-3 py-2 {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? '' : 'user-status-toggle' }}
                     {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
                             data-id="{{ $user->id }}"
-                            style="cursor:pointer;"
-                            title="Click to {{ $user->is_active ? 'freeze' : 'unfreeze' }}">
+                            style="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? 'cursor:default;' : 'cursor:pointer;' }}"
+                            title="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? 'No permission to change status' : 'Click to ' . ($user->is_active ? 'freeze' : 'unfreeze') }}">
                             @if($user->is_active)
                             <i class="fas fa-unlock me-1"></i> Active
                             @else
@@ -62,11 +62,11 @@
 
                 <td>
                     <span
-                        class="badge px-3 py-2 verification-status-toggle
+                        class="badge px-3 py-2 {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? '' : 'verification-status-toggle' }}
                         {{ in_array($user->profile_verification_status, ['verified', 'approved']) ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }}"
                         data-id="{{ $user->id }}"
-                        style="cursor:pointer;"
-                        title="Click to {{ in_array($user->profile_verification_status, ['verified', 'approved']) ? 'mark as pending' : 'verify' }}">
+                        style="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? 'cursor:default;' : 'cursor:pointer;' }}"
+                        title="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? 'No permission to approve users' : 'Click to ' . (in_array($user->profile_verification_status, ['verified', 'approved']) ? 'mark as pending' : 'verify') }}">
                         @if(in_array($user->profile_verification_status, ['verified', 'approved']))
                         <i class="fas fa-check-circle me-1"></i> Approved
                         @else
@@ -76,18 +76,12 @@
                 </td>
                 <td>
                     @php
-                    $risk = strtolower($user->countryRisk->risk_level ?? 'low');
+                    $risk = \App\Models\CountryRiskLevel::where('country_name', $user->country_iso)->first();
                     @endphp
+                    <span class="badge {{ ($risk->risk_level ?? 'Low') === 'High' ? 'bg-danger-subtle text-danger' : (($risk->risk_level ?? 'Low') === 'Medium' ? 'bg-warning-subtle text-warning' : 'bg-info-subtle text-info') }} w-100 py-2">
+                        {{ strtoupper($risk->risk_level ?? 'Low') }}
+                    </span>
 
-                    @if($risk === 'high')
-                    <span class="badge bg-danger-subtle text-danger">High</span>
-
-                    @elseif($risk === 'medium')
-                    <span class="badge bg-warning-subtle text-warning">Medium</span>
-
-                    @else
-                    <span class="badge bg-info-subtle text-info">Low</span>
-                    @endif
                 </td>
                 <td>
                     <div class="d-flex flex-wrap gap-1">
@@ -97,8 +91,25 @@
                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.7rem;">Email Unverified</span>
                         @endif
 
-                        @if($user->aadhar_card || $user->pan_card || ($user->agentDetail && $user->agentDetail->id_doc))
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem;">Docs Uploaded</span>
+
+                        {{-- Shufti Verification Status --}}
+                        @if($user->shufti_status === 'pending')
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.7rem;">
+                            Document Verification Pending
+                        </span>
+
+                        @elseif($user->shufti_status === 'approved')
+                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                            Document Verified
+                        </span>
+
+                        @elseif(in_array($user->shufti_status, ['declined', 'failed']))
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.7rem;">
+                            Document Verification Failed
+                        </span>
+
+                        @else
+
                         @endif
                     </div>
                 </td>
@@ -111,21 +122,26 @@
                 {{-- Actions (Clean) --}}
                 <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
-                        <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
+                        @if(auth()->user()->account_type === 'admin' || (auth()->user()->account_type === 'manager' && auth()->user()->can_impersonate_user))
+                        <form action="{{ route('users.impersonate', $user->id) }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-light" title="Login as {{ $user->first_name }}">
                                 <i class="fas fa-external-link-alt text-warning"></i>
                             </button>
                         </form>
+                        @endif
+
                         <a class="btn btn-sm btn-light"
                             href="{{ route('users.show', $user->id) }}" title="View">
                             <i class="fas fa-eye text-primary"></i>
                         </a>
 
+                        @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
                         <a class="btn btn-sm btn-light"
                             href="{{ route('users.edit', $user->id) }}" title="Edit">
                             <i class="fas fa-edit text-info"></i>
                         </a>
+                        @endif
 
                         @if(auth()->user()->account_type !== 'manager')
                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="ajax-action">
