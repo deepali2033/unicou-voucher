@@ -21,7 +21,7 @@
                 </a>
             </li>
             @endif
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- User Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('users.management') }}">
@@ -89,7 +89,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('support.team') }}">
@@ -97,7 +97,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() ||auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reseller.agent') }}">
@@ -105,7 +105,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('regular.agent') }}">
@@ -113,7 +113,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('student.page') }}">
@@ -136,7 +136,7 @@
             @endif -->
 
             <!-- Orders -->
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('orders.index') }}">
                     <i class="fas fa-truck me-2"></i> Orders & Delivery
@@ -152,18 +152,18 @@
             </li>
             @endif
 
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
             <!-- Pricing -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('pricing.index') }}">
-                    <i class="fas fa-tags me-2"></i> Pricing & Discounts
+                    <i class="fas fa-tags me-2"></i> Sales Pricing Discount
                 </a>
             </li>
 
             <!-- Inventory -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('inventory.index') }}">
-                    <i class="fas fa-boxes me-2"></i> Stock & Inventory
+                    <i class="fas fa-boxes me-2"></i> Vouchar Purches
                 </a>
             </li>
             @endif
@@ -189,7 +189,7 @@
             </li>
             @endif
 
-            @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
             <!-- Disputes -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('manager.disputes') }}">

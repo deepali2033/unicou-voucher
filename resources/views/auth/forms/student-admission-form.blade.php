@@ -360,7 +360,7 @@
     form.querySelector('select[name="id_type"]').value = "National ID Card";
     form.querySelector('input[name="id_number"]').value = "35201-1234567-1";
     form.querySelector('input[name="primary_contact"]').value = "+92 300 1234567";
-    form.querySelector('input[name="email"]').value = "ali.khan-demo@email.com";
+
     form.querySelector('input[name="whatsapp_number"]').value = "+92 300 1234567";
     form.querySelector('input[name="address"]').value = "House 45, Street 12, DHA Phase 5";
     form.querySelector('input[name="city"]').value = "Lahore";

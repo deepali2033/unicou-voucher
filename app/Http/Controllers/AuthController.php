@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\UserCreatedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class AuthController extends Controller
 {
@@ -74,7 +76,6 @@ class AuthController extends Controller
 
         // 🔹 Step 3: Create user
         $geo = LocationHelper::geo();
-        // 🔹 Step 3: Create user
         $user = User::create([
             'user_id'      => User::generateNextUserId(
                 $validated['account_type'],
@@ -83,13 +84,17 @@ class AuthController extends Controller
             'name'         => $validated['first_name'],
             'first_name'   => $validated['first_name'],
             'phone'        => $validated['phone'],
-            'country_iso'  => $geo['country_name'] ?? null,
+            'country_iso'  => $geo['country_code'] ?? null,
             'account_type' => $validated['account_type'],
             'email'        => $validated['email'],
             'password'     => Hash::make($validated['password']),
             'latitude'     => $validated['latitude'] ?? null,
             'longitude'    => $validated['longitude'] ?? null,
         ]);
+
+        // Notify Admins and Managers
+        $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
+        Notification::send($adminsAndManagers, new UserCreatedNotification($user));
 
         // 🔹 Step 4: Send Verification Email
         try {
@@ -269,6 +274,9 @@ class AuthController extends Controller
      */
     public function storeStudentDetails(Request $request)
     {
+
+
+
         $validated = $request->validate([
             'full_name'           => 'required|string|max:255',
             'dob'                 => 'required|date',
@@ -305,106 +313,76 @@ class AuthController extends Controller
             $data['id_doc_final'] = $request->file('id_doc_final')->store('student_docs', 'public');
         }
 
-        // Shufti Pro Verification
-        $shuftiResponse = $this->verifyWithShufti(
-            Auth::user()->email,
-            Auth::user()->country_iso,
-            $validated['full_name'],
-            $validated['dob'],
-            $validated['id_number'],
-            $data['id_doc']
-        );
-
-        if (isset($shuftiResponse['error']) || (isset($shuftiResponse['event']) && $shuftiResponse['event'] === 'verification.declined')) {
-            $errorMsg = $shuftiResponse['error'] ?? ($shuftiResponse['declined_reason'] ?? 'Verification declined by third party.');
-            return back()->withInput()->with('error', 'Verification Issue: ' . $errorMsg);
-        }
-
-        $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
+        // 🔑 Mark verification pending
+        $data['kyc_status'] = 'pending';
 
         Auth::user()->update($data);
 
-        return redirect()->route('dashboard')->with('success', 'Profile completed and verified successfully.');
+        // 🔑 Unique reference for Shufti
+        $reference = 'user_' . Auth::id() . '_' . time();
+
+        // 🔑 START Shufti verification (NOT result)
+        $shuftiResponse = $this->startShuftiVerification(Auth::user(), $reference);
+
+        if (!isset($shuftiResponse['verification_url'])) {
+
+            $error = $shuftiResponse['error'] ?? null;
+
+            Auth::user()->update([
+                'shufti_status' => 'failed',
+                'shufti_error'  => $error ? json_encode($error) : null
+            ]);
+
+            $errorMessage = is_array($error)
+                ? ($error['message'] ?? 'Unknown error')
+                : ($error ?? 'Unknown error');
+
+            return back()->with(
+                'error',
+                'Shufti verification start nahi ho paayi: ' . $errorMessage
+            );
+        }
+
+        // Save reference
+        Auth::user()->update([
+            'shufti_reference' => $reference,
+            'shufti_status' => 'pending',
+            'shufti_error' => null
+        ]);
+
+        // 🔥 Redirect user to Shufti
+        return redirect($shuftiResponse['verification_url']);
     }
 
-    /**
-     * Private helper for Shufti Pro Verification
-     */
-    private function verifyWithShufti($email, $country, $name, $dob, $idNumber, $idDocPath)
+
+
+    private function startShuftiVerification($user, $reference)
     {
-        // 🔹 Mock Verification for Testing or if credentials are missing
-        if (config('services.shuftipro.mock', true) || !config('services.shuftipro.client_id')) {
-            $user = Auth::user();
+        $payload = [
+            "reference" => $reference,
+            "country" => $user->country_iso ?? "GB",
+            "language" => "EN",
+            "email" => $user->email,
 
-            // Auto-approve in mock mode
-            $user->update([
-                'profile_verification_status' => 'verified',
-                'verified_at' => now(),
-            ]);
+            "callback_url" => "https://unicouuk.janshaurya.org/shufti/callback",
 
-            try {
-                Mail::to($user->email)->send(new \App\Mail\UserApproved($user));
-            } catch (\Exception $e) {
-                \Log::error("Mail Error during mock auto-approval: " . $e->getMessage());
-            }
+            "verification_mode" => "any",
 
-            return [
-                'event' => 'verification.accepted',
-                'status' => 'success',
-                'reference' => 'MOCK_' . Auth::id() . '_' . time(),
-                'message' => 'Verification accepted (Mock Mode)'
-            ];
-        }
+            "document" => [
+                "supported_types" => ["passport", "id_card", "driving_license"]
+            ],
 
-        try {
-            $filePath = storage_path('app/public/' . $idDocPath);
-            if (!file_exists($filePath)) {
-                return ['status' => 'failed', 'error' => 'ID document not found'];
-            }
+            "face" => new \stdClass(),
+        ];
 
-            $idDocBase64 = base64_encode(file_get_contents($filePath));
-            $finfo = new \finfo(FILEINFO_MIME_TYPE);
-            $mimeType = $finfo->file($filePath);
+        $response = Http::withBasicAuth(
+            env('SHUFTI_CLIENT_ID'),
+            env('SHUFTI_SECRET_KEY')
+        )->post('https://api.shuftipro.com/', $payload);
 
-            $response = Http::withBasicAuth(
-                config('services.shuftipro.client_id'),
-                config('services.shuftipro.secret_key')
-            )->post('https://api.shuftipro.com/', [
-                'reference'         => 'UC_' . Auth::id() . '_' . time(),
-                'country'           => $country,
-                'email'             => $email,
-                'verification_mode' => 'any',
-                'document'          => [
-                    'name'            => ['full_name' => $name],
-                    'dob'             => $dob,
-                    'document_number' => $idNumber,
-                    'proof'           => 'data:' . $mimeType . ';base64,' . $idDocBase64,
-                    'supported_types' => ['id_card', 'passport', 'driving_license'],
-                ],
-            ]);
-
-            $result = $response->json();
-
-            // Auto-approve logic if verification is accepted
-            if (isset($result['event']) && $result['event'] === 'verification.accepted') {
-                $user = Auth::user();
-                $user->update([
-                    'profile_verification_status' => 'verified',
-                    'verified_at' => now(),
-                ]);
-
-                try {
-                    Mail::to($user->email)->send(new \App\Mail\UserApproved($user));
-                } catch (\Exception $e) {
-                    \Log::error("Mail Error during auto-approval: " . $e->getMessage());
-                }
-            }
-
-            return $result;
-        } catch (\Exception $e) {
-            return ['status' => 'failed', 'error' => $e->getMessage()];
-        }
+        return $response->json();
     }
+
 
     public function test()
     {

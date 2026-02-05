@@ -84,6 +84,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'id_doc_final',
         'business_logo',
         'shufti_reference',
+        'shufti_status',
+        'shufti_error',
+        'can_freeze_user',
+        'can_reset_password',
+        'can_create_user',
+        'can_edit_user',
+        'can_approve_user',
+        'can_view_users',
+        'can_impersonate_user',
     ];
 
     /**
@@ -112,6 +121,13 @@ class User extends Authenticatable implements MustVerifyEmail
             'pending_profile_data' => 'array',
             'last_login_at' => 'datetime',
             'preferred_countries' => 'array',
+            'can_freeze_user' => 'boolean',
+            'can_reset_password' => 'boolean',
+            'can_create_user' => 'boolean',
+            'can_edit_user' => 'boolean',
+            'can_approve_user' => 'boolean',
+            'can_view_users' => 'boolean',
+            'can_impersonate_user' => 'boolean',
         ];
     }
 

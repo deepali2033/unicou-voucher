@@ -11,15 +11,35 @@ class WalletController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::where('account_type', '!=', 'admin')->get();
-        $ledger = WalletLedger::with('user')->latest()->limit(20)->get();
+        $query = User::with('riskLevel');
 
+        if (auth()->user()->account_type === 'manager') {
+            $query->whereNotIn('account_type', ['admin', 'manager']);
+        } else {
+            // For Admin and others, exclude admins as requested
+            $query->where('account_type', '!=', 'admin');
+        }
+
+        $users = $query->get();
+        
+        // Use a separate query for stats to ensure it matches the visible users
         $stats = [
-            'total_balance' => User::where('account_type', '!=', 'admin')->sum('wallet_balance'),
+            'total_balance' => $query->sum('wallet_balance'),
             'total_credits' => WalletLedger::where('type', 'credit')->sum('amount'),
             'total_debits' => WalletLedger::where('type', 'debit')->sum('amount'),
         ];
 
+        if ($request->ajax() || $request->has('tab')) {
+            $tab = $request->get('tab', 'users');
+            if ($tab === 'users') {
+                return view('dashboard.wallet.partials.users-table', compact('users'));
+            } elseif ($tab === 'ledger') {
+                $ledger = WalletLedger::with('user')->latest()->limit(20)->get();
+                return view('dashboard.wallet.partials.ledger-table', compact('ledger'));
+            }
+        }
+
+        $ledger = WalletLedger::with('user')->latest()->limit(20)->get();
         return view('dashboard.wallet.index', compact('users', 'ledger', 'stats'));
     }
 
