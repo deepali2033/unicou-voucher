@@ -346,11 +346,11 @@
 </div>
 
 <script>
-    window.loggedInUser = {
-        email: "{{ Auth::user()->email }}",
-        name: "{{ Auth::user()->name }}",
-        phone: "{{ Auth::user()->phone }}"
-    };
+  window.loggedInUser = {
+    email: "{{ Auth::user()->email }}",
+    name: "{{ Auth::user()->name }}",
+    phone: "{{ Auth::user()->phone }}"
+  };
 </script>
 
 
