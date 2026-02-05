@@ -340,7 +340,7 @@
         }
 
         .price-display span {
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .voucher-footer-info.d-flex.justify-content-between.align-items-center {

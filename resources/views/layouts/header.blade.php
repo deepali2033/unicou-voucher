@@ -1,4 +1,4 @@
-<header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
+<!-- <header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
     <div class="header-left">
         @yield('header_left')
         @if(!View::hasSection('header_left'))
@@ -103,4 +103,4 @@
             </div>
         </div>
     </div>
-</header>
+</header> -->

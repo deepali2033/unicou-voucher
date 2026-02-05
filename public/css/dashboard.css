@@ -139,6 +139,7 @@ body {
     width: 250px;
     min-height: 100vh;
     background: #129ad31f;
+    /* background-color: #fff; */
     /* background-color: transparent; */
     transition: transform 0.3s ease-in-out;
     position: fixed;
@@ -521,3 +522,15 @@ form.row.g-3.align-items-center.cls_kyc_filter {
 .offcanvas {
     transition: transform 0.4s ease-in-out, visibility 0.4s ease-in-out;
 }
+
+/* Support Center css start */
+.cls_Support_Center_select select, option {
+    font-size: 16px;
+}
+
+@media (max-width: 600px) {
+    .cls_Support_Center_select option {
+        font-size: 14px !important;
+    }
+}
+/* Support Center css end */

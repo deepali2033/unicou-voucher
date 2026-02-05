@@ -430,6 +430,10 @@ label.sat-consent.Preferred-Country_checkbox {
   color:#64748b;
 }
 
+.sat-consent p{
+  margin:0;
+}
+
 /* ===== BUTTON ===== */
 .sat-btn{
   width:100%;
@@ -652,4 +656,9 @@ button.btn.btn-primary.next-btn {
     width: max-content;
 }
 
-
+/* dashbord active start */
+.nav-link.active {
+    background-color: #0d6efd;
+    border-radius: 6px;
+}
+/* dashbord active end */

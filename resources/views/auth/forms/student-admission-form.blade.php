@@ -345,6 +345,15 @@
   </div>
 </div>
 
+<script>
+  window.loggedInUser = {
+    email: "{{ Auth::user()->email }}",
+    name: "{{ Auth::user()->name }}",
+    phone: "{{ Auth::user()->phone }}"
+  };
+</script>
+
+
 @push('scripts')
 <script>
   document.getElementById('satForm').addEventListener('submit', function() {
@@ -355,10 +364,12 @@
 
   function fillStudentDemoData() {
     const form = document.getElementById('satForm');
-    form.querySelector('input[name="full_name"]').value = "Muhammad Ali Khan";
+    form.querySelector('input[name="full_name"]').value = window.loggedInUser.name || '';
     form.querySelector('input[name="dob"]').value = "1998-05-15";
     form.querySelector('select[name="id_type"]').value = "National ID Card";
     form.querySelector('input[name="id_number"]').value = "35201-1234567-1";
+    form.querySelector('input[name="primary_contact"]').value = window.loggedInUser.phone || '';
+    form.querySelector('input[name="email"]').value = window.loggedInUser.email || '';
     form.querySelector('input[name="primary_contact"]').value = "+92 300 1234567";
 
     form.querySelector('input[name="whatsapp_number"]').value = "+92 300 1234567";
