@@ -467,8 +467,8 @@
                                 @php
                                 $docs = [
                                 'Profile Photo' => ['path' => $user->profile_photo, 'field' => 'profile_photo'],
-                                'Aadhar Card' => ['path' => $user->aadhar_card, 'field' => 'aadhar_card'],
-                                'PAN Card' => ['path' => $user->pan_card, 'field' => 'pan_card'],
+
+
                                 'Business Reg' => ['path' => $user->registration_doc, 'field' => 'registration_doc'],
                                 'ID Document' => ['path' => $user->id_doc, 'field' => 'id_doc'],
                                 'Final ID Doc' => ['path' => $user->id_doc_final, 'field' => 'id_doc_final'],

@@ -1,4 +1,4 @@
-<!-- <header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
+<header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
     <div class="header-left">
         @yield('header_left')
         @if(!View::hasSection('header_left'))
@@ -32,29 +32,11 @@
         </div>
         @endif
 
-        @if(Auth::user()->isAdmin() || Auth::user()->isManager())
-        @php
-        $unreadNotifications = Auth::user()->unreadNotifications;
-        $unreadCount = $unreadNotifications->count();
-        @endphp
-        <div class="">
-            <a href="{{route('notifications.index')}}" class="position-relative me-3 text-muted no-caret" aria-expanded="false">
-                <i class="far fa-bell" style="font-size: 1.2rem;"></i>
-                <!-- @if($unreadCount > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                        {{ $unreadCount }}
-                    </span>
-                @endif -->
-            </a>
-
-        </div>
-        @else
+        @if(!Auth::user()->isAdmin())
         <div class="notification-bell">
             <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
         </div>
-        @endif
 
-        @if(!Auth::user()->isAdmin())
         @php
         $countryCode = session('user_country_code', 'US');
         $countryName = session('user_country_name', 'United States');
@@ -103,4 +85,4 @@
             </div>
         </div>
     </div>
-</header> -->
+</header>

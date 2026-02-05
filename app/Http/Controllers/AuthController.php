@@ -227,7 +227,7 @@ class AuthController extends Controller
             'account_number'      => 'required|string',
             'registration_doc'    => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'id_doc'              => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'business_logo'       => 'nullable|image|max:2048',
+            'business_logo'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         $data = $validated;
@@ -246,27 +246,45 @@ class AuthController extends Controller
             $data['business_logo'] = $request->file('business_logo')->store('agent_logos', 'public');
         }
 
-        // Shufti Pro Verification
-        $shuftiResponse = $this->verifyWithShufti(
-            Auth::user()->email,
-            Auth::user()->country_iso,
-            $validated['representative_name'],
-            $validated['dob'],
-            $validated['id_number'],
-            $data['id_doc']
-        );
-
-        if (isset($shuftiResponse['error']) || (isset($shuftiResponse['event']) && $shuftiResponse['event'] === 'verification.declined')) {
-            $errorMsg = $shuftiResponse['error'] ?? ($shuftiResponse['declined_reason'] ?? 'Verification declined by third party.');
-            return back()->withInput()->with('error', 'Verification Issue: ' . $errorMsg);
-        }
-
-        // Store Shufti reference/status if needed
-        $data['shufti_reference'] = $shuftiResponse['reference'] ?? null;
+        // 🔑 Mark verification pending
+        $data['kyc_status'] = 'pending';
 
         Auth::user()->update($data);
 
-        return redirect()->route('dashboard')->with('success', 'Profile completed and verified successfully.');
+        // 🔑 Unique reference for Shufti
+        $reference = 'user_' . Auth::id() . '_' . time();
+
+        // 🔑 START Shufti verification (NOT result)
+        $shuftiResponse = $this->startShuftiVerification(Auth::user(), $reference);
+
+        if (!isset($shuftiResponse['verification_url'])) {
+
+            $error = $shuftiResponse['error'] ?? null;
+
+            Auth::user()->update([
+                'shufti_status' => 'failed',
+                'shufti_error'  => $error ? json_encode($error) : null
+            ]);
+
+            $errorMessage = is_array($error)
+                ? ($error['message'] ?? 'Unknown error')
+                : ($error ?? 'Unknown error');
+
+            return back()->with(
+                'error',
+                'Shufti verification start nahi ho paayi: ' . $errorMessage
+            );
+        }
+        dd($shuftiResponse['verification_url']);
+        // Save reference
+        Auth::user()->update([
+            'shufti_reference' => $reference,
+            'shufti_status' => 'pending',
+            'shufti_error' => null
+        ]);
+
+        // 🔥 Redirect user to Shufti
+        return redirect($shuftiResponse['verification_url']);
     }
 
     /**
@@ -430,6 +448,103 @@ class AuthController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+
+    /**
+     * Private helper for Shufti Pro Verification
+     */
+    // private function verifyWithShufti($email, $country, $name, $dob, $idNumber, $idDocPath)
+    // {
+    //     // 🔹 Mock Verification for Testing or if credentials are missing
+    //     if (config('services.shuftipro.mock', true) || !config('services.shuftipro.client_id')) {
+    //         $user = Auth::user();
+
+    //         // Auto-approve in mock mode
+    //         $user->update([
+    //             'profile_verification_status' => 'verified',
+    //             'verified_at' => now(),
+    //             'shufti_status' => 'verified',
+    //             'shufti_error' => null
+    //         ]);
+
+    //         try {
+    //             Mail::to($user->email)->send(new \App\Mail\UserApproved($user));
+    //         } catch (\Exception $e) {
+    //             \Log::error("Mail Error during mock auto-approval: " . $e->getMessage());
+    //         }
+
+    //         return [
+    //             'event' => 'verification.accepted',
+    //             'status' => 'success',
+    //             'reference' => 'MOCK_' . Auth::id() . '_' . time(),
+    //             'message' => 'Verification accepted (Mock Mode)'
+    //         ];
+    //     }
+
+    //     try {
+    //         $filePath = storage_path('app/public/' . $idDocPath);
+    //         if (!file_exists($filePath)) {
+    //             return ['status' => 'failed', 'error' => 'ID document not found'];
+    //         }
+
+    //         $idDocBase64 = base64_encode(file_get_contents($filePath));
+    //         $finfo = new \finfo(FILEINFO_MIME_TYPE);
+    //         $mimeType = $finfo->file($filePath);
+
+    //         $response = Http::withBasicAuth(
+    //             config('services.shuftipro.client_id'),
+    //             config('services.shuftipro.secret_key')
+    //         )->post('https://api.shuftipro.com/', [
+    //             'reference'         => 'UC_' . Auth::id() . '_' . time(),
+    //             'country'           => $country,
+    //             'email'             => $email,
+    //             'verification_mode' => 'any',
+    //             'document'          => [
+    //                 'name'            => ['full_name' => $name],
+    //                 'dob'             => $dob,
+    //                 'document_number' => $idNumber,
+    //                 'proof'           => 'data:' . $mimeType . ';base64,' . $idDocBase64,
+    //                 'supported_types' => ['id_card', 'passport', 'driving_license'],
+    //             ],
+    //         ]);
+
+    //         $result = $response->json();
+
+    //         $user = Auth::user();
+    //         // Auto-approve logic if verification is accepted
+    //         if (isset($result['event']) && $result['event'] === 'verification.accepted') {
+    //             $user->update([
+    //                 'profile_verification_status' => 'verified',
+    //                 'verified_at' => now(),
+    //                 'shufti_status' => 'verified',
+    //                 'shufti_error' => null
+    //             ]);
+
+    //             try {
+    //                 Mail::to($user->email)->send(new \App\Mail\UserApproved($user));
+    //             } catch (\Exception $e) {
+    //                 \Log::error("Mail Error during auto-approval: " . $e->getMessage());
+    //             }
+    //         } elseif (isset($result['event']) && $result['event'] === 'verification.declined') {
+    //             $user->update([
+    //                 'shufti_status' => 'failed',
+    //                 'shufti_error' => $result['declined_reason'] ?? 'Verification declined'
+    //             ]);
+    //         } elseif (isset($result['error'])) {
+    //             $user->update([
+    //                 'shufti_status' => 'failed',
+    //                 'shufti_error' => $result['error']['message'] ?? 'API Error'
+    //             ]);
+    //         }
+    //         return $result;
+    //     } catch (\Exception $e) {
+    //         Auth::user()->update([
+    //             'shufti_status' => 'failed',
+    //             'shufti_error' => $e->getMessage()
+    //         ]);
+    //         return ['status' => 'failed', 'error' => $e->getMessage()];
+    //     }
+    // }
 
 
     public function toggleUserStatus($id)

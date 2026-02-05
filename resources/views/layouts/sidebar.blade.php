@@ -197,12 +197,7 @@
                 </a>
             </li>
 
-            <!-- Reports -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('reports.index') }}">
-                    <i class="fas fa-chart-line me-2"></i> Reports & Analytics
-                </a>
-            </li>
+
 
             <!-- System Control -->
             <li class="nav-item">
