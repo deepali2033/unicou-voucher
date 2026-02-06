@@ -237,7 +237,7 @@
 @push('scripts')
 <script>
     // Handle Category Change
-    $(document).on('change', '.category-select', function() {
+    $(document).on('change', '.category', function() {
         let userId = $(this).data('user-id');
         let category = $(this).val();
 

@@ -277,7 +277,7 @@ class AuthController extends Controller
                 'Shufti verification start nahi ho paayi: ' . $errorMessage
             );
         }
-        dd($shuftiResponse['verification_url']);
+
         // Save reference
         Auth::user()->update([
             'shufti_reference' => $reference,

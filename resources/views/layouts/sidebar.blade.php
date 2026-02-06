@@ -63,6 +63,14 @@
             </li>
             @endif
 
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
+            <!-- Linked Banks -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('banks.bank-table') }}">
+                    <i class="fas fa-university me-2"></i> Banks
+                </a>
+            </li>
+            @endif
 
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
            

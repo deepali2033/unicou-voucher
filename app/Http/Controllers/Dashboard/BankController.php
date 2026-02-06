@@ -11,4 +11,8 @@ class BankController extends Controller
     {
         return view('dashboard.banks.link');
     }
+    public function bankreport()
+    {
+        return view('dashboard.banks.bank-table');
+    }
 }

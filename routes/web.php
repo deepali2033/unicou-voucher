@@ -67,13 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/register/student-details', [AuthController::class, 'showStudentForm'])->name('auth.form.student');
     Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
 });
-Route::get('/test-geo', function () {
-    $ip = request()->ip();
-    dd([
-        'detected_ip' => $ip,
-        'api_response' => @file_get_contents("https://ipapi.co/{$ip}/json/"),
-    ]);
-});
+
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
@@ -174,7 +168,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     // BANK
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
-
+    Route::get('/banks', [BankController::class, 'bankreport'])->name('banks.bank-table');
     // Customer Support
     Route::get('/customer-support', [CustomerController::class, 'supportindex'])->name('customer.support');
     Route::post('/customer-support', [CustomerController::class, 'storeSupportQuery'])->name('customer.support.store');
