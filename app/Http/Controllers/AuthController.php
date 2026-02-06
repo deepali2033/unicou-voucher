@@ -74,8 +74,10 @@ class AuthController extends Controller
                 ->withInput();
         }
 
-        // 🔹 Step 3: Create user
-        $geo = LocationHelper::geo();
+        $geo = \App\Helpers\LocationHelper::geo();
+
+        // 🔹 Step 4: Return JSON for frontend
+        return response()->json($geo);
         $user = User::create([
             'user_id'      => User::generateNextUserId(
                 $validated['account_type'],

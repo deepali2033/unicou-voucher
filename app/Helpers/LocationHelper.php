@@ -12,11 +12,9 @@ class LocationHelper
     ================================ */
     public static function geo()
     {
-        if (session()->has('geo')) {
-            return session('geo');
-        }
-
-        $ip = request()->ip();
+        $ip = request()->header('X-Forwarded-For')
+            ?? request()->header('CF-Connecting-IP')
+            ?? request()->ip();
 
         // Local testing ke liye:
         // $ip = '8.8.8.8';
@@ -39,6 +37,8 @@ class LocationHelper
 
         return $geo;
     }
+
+
 
     /* ===============================
        2. Currency Code

@@ -67,7 +67,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/register/student-details', [AuthController::class, 'showStudentForm'])->name('auth.form.student');
     Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
 });
-
+Route::get('/test-geo', function () {
+    $ip = request()->ip();
+    dd([
+        'detected_ip' => $ip,
+        'api_response' => @file_get_contents("https://ipapi.co/{$ip}/json/"),
+    ]);
+});
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 

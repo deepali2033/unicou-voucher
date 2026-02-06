@@ -24,7 +24,10 @@
         #toast-container>.toast {
             opacity: 1 !important;
         }
-        .iti { width: 100%; }
+
+        .iti {
+            width: 100%;
+        }
     </style>
     @stack('styles')
 </head>
@@ -37,7 +40,17 @@
             @php
             $role = auth()->user()->account_type ?? null;
             @endphp
+            @php
+            use App\Helpers\LocationHelper;
 
+
+            if (!session()->has('geo')) {
+            LocationHelper::geo();
+            }
+
+            // Ab safely geo le lo
+            $geo = session('geo');
+            @endphp
             @include('layouts.sidebar')
             <!-- Sidebar -->
 

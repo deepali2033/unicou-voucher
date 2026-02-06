@@ -5,7 +5,7 @@
     <div class="row mb-4">
         <div class="col-md-12 d-flex justify-content-between align-items-center">
             <h4 class="mb-0 fw-bold">Edit User</h4>
-            <a href="{{ route('users.management') }}" class="btn btn-secondary btn-sm">
+            <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left me-1"></i> Back to List
             </a>
         </div>
@@ -24,11 +24,11 @@
                                 <input type="text" name="first_name" class="form-control @error('first_name') is-invalid @enderror" value="{{ old('first_name', $user->first_name) }}" required>
                                 @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-6">
+                            <!-- <div class="col-md-6">
                                 <label class="form-label fw-semibold">Last Name</label>
                                 <input type="text" name="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name', $user->last_name) }}" required>
                                 @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="row mb-3">
@@ -39,8 +39,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Phone Number</label>
-                                <input type="text" id="phone" name="phone_dummy" class="form-control intl-phone @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
-                                <input type="hidden" name="phone" id="full_phone">
+                                <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
                                 @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>

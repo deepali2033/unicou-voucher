@@ -32,7 +32,6 @@
         </div>
         @endif
 
-        @if(!Auth::user()->isAdmin())
         <div class="notification-bell">
             <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
         </div>
@@ -45,9 +44,9 @@
 
         <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
             <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 30px; border-radius: 2px; border: 1px solid #eee;">
-            <span class="d-none d-md-inline text-muted small fw-bold">{{ strtoupper($countryCode) }}</span>
+            <span class="d-none d-md-inline text-muted small fw-bold"> {{ $geo['country_code'] }}</span>
         </div>
-        @endif
+
 
         <div class="user-dropdown d-flex align-items-center gap-2">
             <img src="{{ asset('images/user.png') }}" class="user-avatar rounded-circle" width="40" height="40">
