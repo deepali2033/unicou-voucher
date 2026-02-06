@@ -55,6 +55,7 @@
         <div class="card-body" id="table-container">
             @include('admin.partials.users-table')
         </div>
+
     </div>
 </div>
 

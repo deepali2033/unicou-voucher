@@ -39,7 +39,7 @@ class VoucherController extends Controller
             $query->where('sale_price', '<=', $request->max_price);
         }
 
-        $vouchers = $query->latest()->get();
+        $vouchers = $query->latest()->paginate(10)->withQueryString();
 
         $stats = [
             'total_vouchers' => InventoryVoucher::count(),

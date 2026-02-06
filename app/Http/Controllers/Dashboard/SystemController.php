@@ -37,7 +37,7 @@ class SystemController extends Controller
 
     public function auditLogs()
     {
-        $logs = AuditLog::with('user')->latest()->paginate(20);
+        $logs = AuditLog::with('user')->latest()->paginate(10);
         return view('dashboard.audit.index', compact('logs'));
     }
 

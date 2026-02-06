@@ -412,44 +412,69 @@ class UserController extends Controller
         return view('dashboard.my-profile.index', compact('user'));
     }
 
-    public function managers()
+    public function managers(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $users = User::where('account_type', 'manager')->latest()->paginate(10);
+
+        if ($request->ajax()) {
+            return view('dashboard.partials.manager-table', compact('users'))->render();
+        }
+
         return view('dashboard.pages.manager', compact('users'));
     }
-    public function ResellerAgent()
+    public function ResellerAgent(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $users = User::where('account_type', 'reseller_agent')->latest()->paginate(10);
+
+        if ($request->ajax()) {
+            return view('dashboard.partials.reseller-table', compact('users'))->render();
+        }
+
         return view('dashboard.pages.reseller', compact('users'));
     }
-    public function SupportTeam()
+    public function SupportTeam(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $users = User::where('account_type', 'support_team')->latest()->paginate(10);
+
+        if ($request->ajax()) {
+            return view('dashboard.partials.support-table', compact('users'))->render();
+        }
+
         return view('dashboard.pages.support', compact('users'));
     }
-    public function RegularAgent()
+    public function RegularAgent(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $users = User::where('account_type', 'agent')->latest()->paginate(10);
+
+        if ($request->ajax()) {
+            return view('dashboard.partials.regularAgent-table', compact('users'))->render();
+        }
+
         return view('dashboard.pages.regularAgent', compact('users'));
     }
-    public function Student()
+    public function Student(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $users = User::where('account_type', 'student')->latest()->paginate(10);
+
+        if ($request->ajax()) {
+            return view('dashboard.partials.student-table', compact('users'))->render();
+        }
+
         return view('dashboard.pages.student', compact('users'));
     }
 
