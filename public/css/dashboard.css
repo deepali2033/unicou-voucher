@@ -1,14 +1,66 @@
 body {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #1f2937; /* dark gray */
+}
+
+
+h1 { font-size: 28px; font-weight: 700; }
+h2 { font-size: 22px; font-weight: 600; }
+h3 { font-size: 18px; font-weight: 600; }
+h4 { font-size: 16px; font-weight: 600; }
+h5 { font-size: 14px; font-weight: 500; }
+h6 { font-size: 13px; font-weight: 500; }
+
+
+p {
+  font-size: 14px;
+  font-weight: 400;
+  color: #4b5563; /* soft gray */
+  line-height: 1.6;
+}
+
+
+a {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+span {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+.badge-success {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+button {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* body {
     font-family: "Parkinsans", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
-}
+} */
 .text-yellow {
     color: #f2d701;
 }
 .text-green {
     color: #3ca200;
-}
+} 
 .text-red {
     color: #dc3545;
 }
@@ -534,3 +586,13 @@ form.row.g-3.align-items-center.cls_kyc_filter {
     }
 }
 /* Support Center css end */
+
+.tab-pane button.btn.btn-upload {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tab-pane input.form-control.form-control-sm {
+    height: 100%;
+}

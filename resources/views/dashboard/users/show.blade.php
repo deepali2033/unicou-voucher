@@ -1,14 +1,133 @@
 @extends('layouts.master')
 
+@push('styles')
+<style>
+    .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    .status-dot {
+        position: absolute;
+        bottom: 10px;
+        right: 15px;
+        width: 15px;
+        height: 15px;
+        background-color: #22c55e;
+        border: 2px solid #fff;
+        border-radius: 50%;
+    }
+    .badge-soft-blue {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border: 1px solid #dbeafe;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 5px 15px;
+    }
+    .badge-soft-success {
+        background-color: #f0fdf4;
+        color: #16a34a;
+        font-weight: 600;
+    }
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.875rem; }
+    
+    .nav-tabs {
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6b7280;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        position: relative;
+    }
+    .nav-tabs .nav-link.active {
+        color: #3b82f6;
+        background: transparent;
+    }
+    .nav-tabs .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #3b82f6;
+    }
+    .progress-thin {
+        height: 6px;
+    }
+    .doc-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .doc-header {
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .doc-body {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9fafb;
+        position: relative;
+    }
+    .doc-footer {
+        padding: 10px 15px;
+        background-color: #fff;
+        border-top: 1px solid #e5e7eb;
+    }
+    .doc-status-missing {
+        background-color: #fef2f2;
+        color: #ef4444;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+    .doc-status-uploaded {
+        background-color: #f0fdf4;
+        color: #22c55e;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+    .btn-upload {
+        background-color: #1e293b;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 16px;
+    }
+    .btn-upload:hover {
+        background-color: #0f172a;
+        color: #fff;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0 fw-bold text-dark">User Command Center</h4>
-        <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="mb-1 fw-bold text-dark">User Command Center</h4>
+            <p class="text-muted mb-0">Manage user access, documents and risk profiles</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
             @if((auth()->user()->account_type !== 'manager' || auth()->user()->can_approve_user) && $user->profile_verification_status === 'pending')
             <form action="{{ route('approvals.approve', $user->id) }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-success shadow-sm" onclick="return confirm('Approve this user?')">
+                <button type="submit" class="btn btn-t-g shadow-sm" onclick="return confirm('Approve this user?')">
                     <i class="fas fa-check me-2"></i> Approve User
                 </button>
             </form>
@@ -17,23 +136,23 @@
             @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user)
             <form action="{{ route('users.toggle', $user->id) }}" method="POST" class="d-inline">
                 @csrf
-                <button type="submit" class="btn {{ $user->is_active ? 'btn-danger' : 'btn-success' }} shadow-sm">
-                    <i class="fas {{ $user->is_active ? 'fa-user-slash' : 'fa-user-check' }} me-2"></i>
+                <button type="submit" class="btn {{ $user->is_active ? 'btn-t-r' : 'btn-t-g' }} shadow-sm">
+                    <i class="fas {{ $user->is_active ? 'fa-snowflake' : 'fa-user-check' }} me-2"></i>
                     {{ $user->is_active ? 'Freeze Login' : 'Unfreeze Login' }}
                 </button>
             </form>
 
             <form action="{{ route('users.suspend', $user->id) }}" method="POST" class="d-inline">
                 @csrf
-                <button type="submit" class="btn {{ $user->profile_verification_status === 'suspended' ? 'btn-success' : 'btn-warning' }} shadow-sm">
-                    <i class="fas {{ $user->profile_verification_status === 'suspended' ? 'fa-id-badge' : 'fa-id-card-clip' }} me-2"></i>
-                    {{ $user->profile_verification_status === 'suspended' ? 'Verify KYC' : 'Suspend KYC' }}
+                <button type="submit" class="btn {{ $user->profile_verification_status === 'suspended' ? 'btn-t-g' : 'btn-t-y' }} shadow-sm">
+                    <i class="fas {{ $user->profile_verification_status === 'suspended' ? 'fa-user-check' : 'fa-user-minus' }} me-2"></i>
+                    {{ $user->profile_verification_status === 'suspended' ? 'Unsuspend KYC' : 'Suspend KYC' }}
                 </button>
             </form>
             @endif
 
-            <a href="{{ route('users.management') }}" class="btn btn-secondary shadow-sm">
-                <i class="fas fa-arrow-left me-2"></i> Back to List
+            <a href="{{ route('users.management') }}" class="btn btn-dark shadow-sm" style="background-color: #5c6c84; border-color: #5c6c84;">
+                <i class="fas fa-chevron-left me-2"></i> Back to List
             </a>
         </div>
     </div>
@@ -62,87 +181,100 @@
         <div class="col-xl-3 col-lg-4">
             <div class="card shadow-sm border-0 mb-4 overflow-hidden">
                 <div class="card-body text-center pt-5 pb-4">
-                    <div class="position-relative d-inline-block mb-3">
+                    <div class="avatar-wrapper mb-3">
                         <img src="{{ $user->profile_photo ? asset('storage/' . $user->profile_photo) : asset('images/user.png') }}"
                             class="rounded-circle border border-4 border-light shadow-sm" width="120" height="120" alt="Avatar" style="object-fit: cover;">
-                        <span class="position-absolute bottom-0 end-0 p-2 {{ $user->profile_verification_status === 'verified' ? 'bg-success' : ($user->profile_verification_status === 'suspended' ? 'bg-danger' : 'bg-warning') }} border border-2 border-white rounded-circle"></span>
+                        <span class="status-dot"></span>
                     </div>
                     <h5 class="fw-bold mb-1">{{ $user->first_name }} {{ $user->last_name }}</h5>
                     <p class="text-muted small mb-3">{{ $user->email }}</p>
-                    <div class="d-flex justify-content-center gap-2 mb-3">
-                        <span class="badge bg-primary-soft text-primary px-3 py-2">
-                            {{ strtoupper(str_replace('_', ' ', $user->account_type)) }}
+                    <div class="d-flex justify-content-center mb-4">
+                        <span class="badge rounded-pill badge-soft-blue text-uppercase">
+                            {{ str_replace('_', ' ', $user->account_type) }}
                         </span>
                     </div>
-                </div>
-                <div class="bg-light p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-muted">User ID</small>
-                        <small class="fw-bold">{{ $user->user_id }}</small>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-muted">Status</small>
-                        @if($user->profile_verification_status === 'verified')
-                        <span class="badge bg-success-soft text-success">Verified</span>
-                        @elseif($user->profile_verification_status === 'pending')
-                        <span class="badge bg-warning-soft text-warning">Pending</span>
-                        @elseif($user->profile_verification_status === 'suspended')
-                        <span class="badge bg-danger-soft text-danger">Suspended</span>
-                        @else
-                        <span class="badge bg-secondary-soft text-secondary">{{ ucfirst($user->profile_verification_status) }}</span>
-                        @endif
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-muted">Last Seen</small>
-                        <small class="fw-bold">{{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never' }}</small>
-                    </div>
-                </div>
-                <ul class="list-group list-group-flush border-top">
-                    <li class="list-group-item p-3">
-                        <h6 class="fw-bold mb-3 small text-uppercase text-muted">Quick Metrics</h6>
-                        <div class="row g-2 text-center">
-                            <div class="col-6">
-                                <div class="p-2 border rounded bg-white shadow-none">
-                                    <div class="small text-muted">Wallet</div>
-                                    <div class="fw-bold text-primary">₹{{ number_format($user->wallet_balance, 2) }}</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-2 border rounded bg-white shadow-none">
-                                    <div class="small text-muted">Points</div>
-                                    <div class="fw-bold text-success">{{ number_format(\App\Models\Order::where('user_id', $user->id)->sum('points_earned')) }}</div>
-                                </div>
-                            </div>
+
+                    <div class="px-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted text-sm">User ID</span>
+                            <span class="fw-bold text-sm text-dark">{{ $user->user_id }}</span>
                         </div>
-                    </li>
-                </ul>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted text-sm">Status</span>
+                            @if($user->profile_verification_status === 'verified')
+                            <span class="badge badge-soft-success text-sm px-3 py-1">VERIFIED</span>
+                            @elseif($user->profile_verification_status === 'pending')
+                            <span class="badge bg-warning-soft text-warning text-sm px-3 py-1">PENDING</span>
+                            @elseif($user->profile_verification_status === 'suspended')
+                            <span class="badge bg-danger-soft text-danger text-sm px-3 py-1">SUSPENDED</span>
+                            @else
+                            <span class="badge bg-secondary-soft text-secondary text-sm px-3 py-1">{{ strtoupper($user->profile_verification_status) }}</span>
+                            @endif
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted text-sm">Last Seen</span>
+                            <span class="text-dark fw-medium text-sm">{{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Metrics Card -->
+            <div class="card shadow-sm border-0 mb-4 p-3">
+                <h6 class="text-uppercase text-muted text-xs fw-bold mb-3">Quick Metrics</h6>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light bg-opacity-10 h-100">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="fas fa-wallet text-muted text-xs"></i>
+                                <span class="text-muted text-xs">Wallet</span>
+                            </div>
+                            <div class="fw-bold text-dark">₹{{ number_format($user->wallet_balance, 2) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded bg-light bg-opacity-10 h-100">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="fas fa-star text-muted text-xs"></i>
+                                <span class="text-muted text-xs">Points</span>
+                            </div>
+                            <div class="fw-bold text-dark">{{ number_format(\App\Models\Order::where('user_id', $user->id)->sum('points_earned')) }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Risk & Compliance Card -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-shield-alt me-2 text-danger"></i>Risk & Compliance</h6>
+            <div class="card shadow-sm border-0 mb-4 p-3">
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                    <h6 class="text-uppercase text-muted text-xs fw-bold mb-0">Risk & Compliance</h6>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="small text-muted d-block mb-1">Risk Level</label>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted text-xs">Risk Level</span>
                         @php
                         $risk = \App\Models\CountryRiskLevel::where('country_name', $user->country_iso)->first();
+                        $riskLevel = strtoupper($risk->risk_level ?? 'Low');
+                        $riskColor = ($riskLevel === 'HIGH') ? 'danger' : (($riskLevel === 'MEDIUM') ? 'warning' : 'success');
+                        $riskWidth = ($riskLevel === 'HIGH') ? '100' : (($riskLevel === 'MEDIUM') ? '60' : '30');
                         @endphp
-                        <span class="badge {{ ($risk->risk_level ?? 'Low') === 'High' ? 'bg-danger' : (($risk->risk_level ?? 'Low') === 'Medium' ? 'bg-warning' : 'bg-success') }} w-100 py-2">
-                            {{ strtoupper($risk->risk_level ?? 'Low') }}
-                        </span>
+                        <span class="text-{{ $riskColor }} text-xs fw-bold">{{ $riskLevel }}</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-muted">Complaints</small>
-                        <small class="badge bg-light text-dark">0</small>
+                    <div class="progress progress-thin">
+                        <div class="progress-bar bg-{{ $riskColor }}" role="progressbar" style="width: {{ $riskWidth }}%" aria-valuenow="{{ $riskWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Kyc Status</small>
-                        <small class="text-{{ $user->profile_verification_status === 'verified' ? 'success' : 'warning' }} fw-bold">
-                            {{ ucfirst($user->profile_verification_status) }}
-                        </small>
-                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted text-xs">Complaints</span>
+                    <span class="fw-bold text-dark text-xs">0</span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted text-xs">KYC Status</span>
+                    <span class="text-success text-xs fw-bold">Verified</span>
                 </div>
             </div>
         </div>
@@ -153,20 +285,20 @@
                 <div class="card-header bg-white p-0 border-bottom">
                     <ul class="nav nav-tabs border-0 px-3" id="userTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active py-3 px-4 fw-bold" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab">Overview</a>
+                            <a class="nav-link active py-3 px-4" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab">Overview</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link py-3 px-4 fw-bold" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab">Edit Profile</a>
+                            <a class="nav-link py-3 px-4" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab">Edit Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link py-3 px-4 fw-bold" id="kyc-tab" data-bs-toggle="tab" href="#kyc" role="tab">KYC & Documents</a>
+                            <a class="nav-link py-3 px-4" id="kyc-tab" data-bs-toggle="tab" href="#kyc" role="tab">KYC & Documents</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link py-3 px-4 fw-bold" id="security-tab" data-bs-toggle="tab" href="#security" role="tab">Security</a>
+                            <a class="nav-link py-3 px-4" id="security-tab" data-bs-toggle="tab" href="#security" role="tab">Security</a>
                         </li>
                         @if($user->account_type === 'manager')
                         <li class="nav-item">
-                            <a class="nav-link py-3 px-4 fw-bold" id="permissions-tab" data-bs-toggle="tab" href="#permissions" role="tab">Permissions</a>
+                            <a class="nav-link py-3 px-4" id="permissions-tab" data-bs-toggle="tab" href="#permissions" role="tab">Permissions</a>
                         </li>
                         @endif
                     </ul>
@@ -467,8 +599,6 @@
                                 @php
                                 $docs = [
                                 'Profile Photo' => ['path' => $user->profile_photo, 'field' => 'profile_photo'],
-
-
                                 'Business Reg' => ['path' => $user->registration_doc, 'field' => 'registration_doc'],
                                 'ID Document' => ['path' => $user->id_doc, 'field' => 'id_doc'],
                                 'Final ID Doc' => ['path' => $user->id_doc_final, 'field' => 'id_doc_final'],
@@ -477,67 +607,59 @@
 
                                 @foreach($docs as $label => $data)
                                 <div class="col-md-6 col-lg-4">
-                                    <div class="card border border-dashed p-3 h-100 shadow-sm hover-shadow transition">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 class="fw-bold mb-0 text-dark small text-uppercase">{{ $label }}</h6>
+                                    <div class="doc-card h-100">
+                                        <div class="doc-header">
+                                            <span class="text-muted text-xs fw-bold text-uppercase">{{ $label }}</span>
                                             @if($data['path'])
-                                            <span class="badge bg-success-soft text-success shadow-none border">Uploaded</span>
+                                            <span class="doc-status-uploaded">UPLOADED</span>
                                             @else
-                                            <span class="badge bg-danger-soft text-danger shadow-none border">Missing</span>
+                                            <span class="doc-status-missing">MISSING</span>
                                             @endif
                                         </div>
-
-                                        <div class="mb-3 text-center bg-light rounded p-2 d-flex align-items-center justify-content-center border" style="height: 180px;">
+                                        <div class="doc-body">
                                             @if($data['path'])
-                                            @php
-                                            $extension = strtolower(pathinfo($data['path'], PATHINFO_EXTENSION));
-                                            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                            @endphp
-
-                                            @if($isImage)
-                                            <a href="{{ asset('storage/' . $data['path']) }}" target="_blank" class="d-block w-100 h-100 d-flex align-items-center justify-content-center">
-                                                <img src="{{ asset('storage/' . $data['path']) }}" class="img-fluid rounded shadow-sm" style="max-height: 160px; cursor: pointer;" alt="{{ $label }}">
-                                            </a>
-                                            @elseif($extension === 'pdf')
-                                            <div class="h-100 d-flex flex-column align-items-center justify-content-center">
-                                                <i class="fas fa-file-pdf fa-4x text-danger mb-2"></i>
-                                                <span class="small text-muted text-truncate w-100 px-2">{{ basename($data['path']) }}</span>
-                                                <a href="{{ asset('storage/' . $data['path']) }}" target="_blank" class="btn btn-xs btn-outline-danger mt-2">
-                                                    Open PDF
-                                                </a>
-                                            </div>
+                                                @php
+                                                $extension = strtolower(pathinfo($data['path'], PATHINFO_EXTENSION));
+                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                @endphp
+                                                @if($isImage)
+                                                    <img src="{{ asset('storage/' . $data['path']) }}" class="img-fluid" style="max-height: 100%; width: 100%; object-fit: cover;">
+                                                    @if($user->profile_verification_status === 'verified' && $label === 'Final ID Doc')
+                                                    <div class="position-absolute bottom-0 start-0 m-3">
+                                                        <span class="badge bg-white text-success border px-2 py-1 text-xs">
+                                                            <i class="fas fa-check-circle me-1"></i> Verified
+                                                        </span>
+                                                    </div>
+                                                    @endif
+                                                @else
+                                                    <div class="text-center">
+                                                        <i class="fas fa-file-alt fa-3x text-muted mb-2"></i>
+                                                        <div class="text-xs text-muted px-2 text-truncate" style="max-width: 200px;">{{ basename($data['path']) }}</div>
+                                                    </div>
+                                                @endif
                                             @else
-                                            <div class="h-100 d-flex flex-column align-items-center justify-content-center">
-                                                <i class="fas fa-file-alt fa-4x text-primary mb-2"></i>
-                                                <span class="small text-muted text-truncate w-100 px-2">{{ basename($data['path']) }}</span>
-                                            </div>
-                                            @endif
-                                            @else
-                                            <div class="text-muted small">No file uploaded</div>
+                                                <div class="text-center">
+                                                    <i class="fas fa-file-alt fa-3x text-muted mb-2" style="opacity: 0.2;"></i>
+                                                    <div class="text-muted text-sm">No file uploaded</div>
+                                                </div>
                                             @endif
                                         </div>
-
-                                        @if($data['path'])
-                                        <div class="d-flex gap-2 mb-3">
-                                            <a href="{{ asset('storage/' . $data['path']) }}" target="_blank" class="btn btn-sm btn-primary flex-grow-1 shadow-sm">
-                                                <i class="fas fa-eye me-1"></i> View Full
-                                            </a>
-                                            <a href="{{ asset('storage/' . $data['path']) }}" download class="btn btn-sm btn-outline-secondary shadow-sm">
-                                                <i class="fas fa-download"></i>
-                                            </a>
+                                        <div class="doc-footer">
+                                            @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
+                                            <form action="{{ route('users.update', $user->id) }}#kyc" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="d-flex gap-2">
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" name="{{ $data['field'] }}" class="form-control form-control-sm" style="font-size: 11px;" required>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-upload">
+                                                        <i class="fas fa-upload"></i> Upload
+                                                    </button>
+                                                </div>
+                                            </form>
+                                            @endif
                                         </div>
-                                        @endif
-
-                                        @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
-                                        <form action="{{ route('users.update', $user->id) }}#kyc" method="POST" enctype="multipart/form-data">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="input-group input-group-sm shadow-none">
-                                                <input type="file" name="{{ $data['field'] }}" class="form-control" required>
-                                                <button class="btn btn-dark" type="submit">Upload</button>
-                                            </div>
-                                        </form>
-                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
