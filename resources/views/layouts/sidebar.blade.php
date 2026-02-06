@@ -93,7 +93,7 @@
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('manager.page') }}">
-                    <i class="fas fa-ticket-alt me-2"></i>Manager
+                    <i class="fas fa-user-tie me-2"></i>Manager
                 </a>
             </li>
             @endif
@@ -101,7 +101,7 @@
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('support.team') }}">
-                    <i class="fas fa-ticket-alt me-2"></i>Support Team
+                    <i class="fas fa-tools me-2"></i>Support Team
                 </a>
             </li>
             @endif
@@ -109,7 +109,7 @@
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('reseller.agent') }}">
-                    <i class="fas fa-ticket-alt me-2"></i>Reseller Agent
+                    <i class="fas fa-handshake me-2"></i>Reseller Agent
                 </a>
             </li>
             @endif
@@ -117,7 +117,7 @@
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('regular.agent') }}">
-                    <i class="fas fa-ticket-alt me-2"></i> Agent
+                    <i class="fas fa-user me-2"></i> Agent
                 </a>
             </li>
             @endif
@@ -125,7 +125,7 @@
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('student.page') }}">
-                    <i class="fas fa-ticket-alt me-2"></i> Student
+                    <i class="fas fa-user-graduate me-2"></i> Student
                 </a>
             </li>
             @endif

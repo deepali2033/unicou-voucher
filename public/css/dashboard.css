@@ -596,3 +596,7 @@ form.row.g-3.align-items-center.cls_kyc_filter {
 .tab-pane input.form-control.form-control-sm {
     height: 100%;
 }
+
+.d-none.flex-sm-fill.d-sm-flex.align-items-sm-center.justify-content-sm-between {
+    gap: 10px;
+}
