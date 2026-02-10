@@ -7,8 +7,9 @@
                 <th>Date of Reg.</th>
                 <th>Last Active date and time</th>
                 <th>Category</th>
-                <th>First Name</th>
-                <th>Last Name</th>
+                <th>Limit</th>
+                <th>Full Name</th>
+                <!-- <th>Last Name</th> -->
                 <th>Country</th>
                 <th>email ID(official)</th>
                 <th>contact No.</th>
@@ -39,8 +40,9 @@
                     <span class="badge bg-secondary">{{ ucfirst($user->account_type) }}</span>
                     @endif
                 </td>
-                <td>{{ $user->first_name }}</td>
-                <td>{{ $user->last_name }}</td>
+                <td></td>
+                <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+
                 <td>{{ $user->country_iso }}</td>
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->phone }}</td>
@@ -80,7 +82,9 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="17" class="text-center py-5 text-muted">No users found.</td></tr>
+            <tr>
+                <td colspan="17" class="text-center py-5 text-muted">No users found.</td>
+            </tr>
             @endforelse
         </tbody>
     </table>

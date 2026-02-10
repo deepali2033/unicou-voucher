@@ -41,6 +41,10 @@ class UserController extends Controller
             $query->where('profile_verification_status', $request->verification_status);
         }
 
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
         }
@@ -88,17 +92,18 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
             'phone' => 'nullable|string|max:20',
+            'country' => 'required|string|max:255',
         ]);
 
         $user = User::create([
             'user_id' => User::generateNextUserId($request->account_type),
             'first_name' => $request->first_name,
-            // 'last_name' => $request->last_name,
             'name' => $request->first_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'account_type' => $request->account_type,
             'phone' => $request->phone,
+            'country' => $request->country,
             'profile_verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
@@ -363,6 +368,10 @@ class UserController extends Controller
             $query->where('profile_verification_status', $request->verification_status);
         }
 
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
         }
@@ -388,18 +397,19 @@ class UserController extends Controller
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-        fputcsv($handle, ['User ID', 'Name', 'Email', 'Role', 'Phone', 'Status', 'Verification', 'Created At']);
+        fputcsv($handle, ['User ID', 'Name', 'Email', 'Role', 'Phone', 'Country', 'Status', 'Verification', 'Registered Date']);
 
         foreach ($users as $user) {
             fputcsv($handle, [
                 $user->user_id,
                 $user->first_name . ' ' . $user->last_name,
                 $user->email,
-                $user->account_type,
+                ucwords(str_replace('_', ' ', $user->account_type)),
                 $user->phone,
+                $user->country,
                 $user->is_active ? 'Active' : 'Frozen',
-                $user->profile_verification_status,
-                $user->created_at->format('Y-m-d H:i')
+                ucfirst($user->profile_verification_status),
+                $user->created_at->format('Y-m-d H:i:s')
             ]);
         }
 
@@ -417,7 +427,43 @@ class UserController extends Controller
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
-        $users = User::where('account_type', 'manager')->latest()->paginate(10);
+        
+        $query = User::where('account_type', 'manager');
+
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
+            $query->where('is_active', $request->status);
+        }
+
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+
+        if ($request->has('from_date') && $request->from_date != '') {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date') && $request->to_date != '') {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('time') && $request->time != '') {
+            $query->whereTime('created_at', $request->time);
+        }
+
+        if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
+            $query->where('rating', $request->rating);
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.manager-table', compact('users'))->render();
@@ -425,12 +471,172 @@ class UserController extends Controller
 
         return view('dashboard.pages.manager', compact('users'));
     }
+
+    public function managersDownloadCSV(Request $request)
+    {
+        return $this->exportRoleCSV('manager', $request);
+    }
+
+    public function supportTeamDownloadCSV(Request $request)
+    {
+        return $this->exportRoleCSV('support_team', $request);
+    }
+
+    public function resellerAgentDownloadCSV(Request $request)
+    {
+        return $this->exportRoleCSV('reseller_agent', $request);
+    }
+
+    public function regularAgentDownloadCSV(Request $request)
+    {
+        return $this->exportRoleCSV('agent', $request);
+    }
+
+    public function studentDownloadCSV(Request $request)
+    {
+        return $this->exportRoleCSV('student', $request);
+    }
+
+    private function exportRoleCSV($role, $request)
+    {
+        $query = User::where('account_type', $role);
+
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
+            $query->where('is_active', $request->status);
+        }
+
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+
+        if ($request->has('from_date') && $request->from_date != '') {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date') && $request->to_date != '') {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        if ($role === 'student') {
+            if ($request->has('highest_education') && $request->highest_education != '') {
+                $query->where('highest_education', 'like', "%{$request->highest_education}%");
+            }
+            if ($request->has('preferred_country') && $request->preferred_country != 'all' && $request->preferred_country != '') {
+                $query->where('preferred_country', $request->preferred_country);
+            }
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($role === 'student') {
+            $users = $query->withCount(['orders as orders_count' => function($q) {
+                $q->where('status', 'delivered');
+            }])->withSum(['orders as total_revenue' => function($q) {
+                $q->where('status', 'delivered');
+            }], 'total_amount')
+            ->latest()->get();
+        } else {
+            $users = $query->latest()->get();
+        }
+
+        $filename = "{$role}_export_" . date('Y-m-d_H-i-s') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        if ($role === 'student') {
+            fputcsv($handle, [
+                'Sr. No.', 'User ID', 'Date of Reg.', 'Last Active', 'Full Name', 
+                'Country', 'Email ID', 'Highest Education', 'Contact No.', 
+                'Vouchers Purchased', 'Revenue Paid', 'Disputed Payments', 
+                'Referral Points', 'Bonus Points', 'Status'
+            ]);
+
+            foreach ($users as $index => $user) {
+                fputcsv($handle, [
+                    $index + 1,
+                    $user->user_id,
+                    $user->created_at ? $user->created_at->format('d M Y') : 'N/A',
+                    $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never',
+                    $user->first_name . ' ' . $user->last_name,
+                    $user->country,
+                    $user->email,
+                    $user->highest_education ?? 'N/A',
+                    $user->phone,
+                    $user->orders_count ?? 0,
+                    number_format($user->total_revenue ?? 0, 2),
+                    $user->disputed_payments ?? 0,
+                    $user->referral_points ?? 0,
+                    $user->bonus_points ?? 0,
+                    $user->is_active ? 'Active' : 'Frozen'
+                ]);
+            }
+        } else {
+            fputcsv($handle, ['User ID', 'Name', 'Email', 'Country', 'Phone', 'Status', 'Registered Date']);
+
+            foreach ($users as $user) {
+                fputcsv($handle, [
+                    $user->user_id,
+                    $user->first_name . ' ' . $user->last_name,
+                    $user->email,
+                    $user->country,
+                    $user->phone,
+                    $user->is_active ? 'Active' : 'Frozen',
+                    $user->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+        }
+
+        fclose($handle);
+        exit;
+    }
+
     public function ResellerAgent(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
-        $users = User::where('account_type', 'reseller_agent')->latest()->paginate(10);
+        $query = User::where('account_type', 'reseller_agent');
+
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
+            $query->where('is_active', $request->status);
+        }
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+        if ($request->has('from_date') && $request->from_date != '') {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date') && $request->to_date != '') {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('time') && $request->time != '') {
+            $query->whereTime('created_at', $request->time);
+        }
+
+        if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
+            $query->where('rating', $request->rating);
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.reseller-table', compact('users'))->render();
@@ -438,12 +644,45 @@ class UserController extends Controller
 
         return view('dashboard.pages.reseller', compact('users'));
     }
+
     public function SupportTeam(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
-        $users = User::where('account_type', 'support_team')->latest()->paginate(10);
+        $query = User::where('account_type', 'support_team');
+
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
+            $query->where('is_active', $request->status);
+        }
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+        if ($request->has('from_date') && $request->from_date != '') {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date') && $request->to_date != '') {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('time') && $request->time != '') {
+            $query->whereTime('created_at', $request->time);
+        }
+
+        if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
+            $query->where('rating', $request->rating);
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.support-table', compact('users'))->render();
@@ -451,12 +690,45 @@ class UserController extends Controller
 
         return view('dashboard.pages.support', compact('users'));
     }
+
     public function RegularAgent(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
-        $users = User::where('account_type', 'agent')->latest()->paginate(10);
+        $query = User::where('account_type', 'agent');
+
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
+            $query->where('is_active', $request->status);
+        }
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+        if ($request->has('from_date') && $request->from_date != '') {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date') && $request->to_date != '') {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('time') && $request->time != '') {
+            $query->whereTime('created_at', $request->time);
+        }
+
+        if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
+            $query->where('rating', $request->rating);
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.regularAgent-table', compact('users'))->render();
@@ -464,12 +736,59 @@ class UserController extends Controller
 
         return view('dashboard.pages.regularAgent', compact('users'));
     }
+
     public function Student(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
-        $users = User::where('account_type', 'student')->latest()->paginate(10);
+        $query = User::where('account_type', 'student');
+
+        if ($request->has('status') && $request->status != 'all' && $request->status != '') {
+            $query->where('is_active', $request->status);
+        }
+        if ($request->has('country') && $request->country != 'all' && $request->country != '') {
+            $query->where('country', $request->country);
+        }
+        if ($request->has('from_date') && $request->from_date != '') {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date') && $request->to_date != '') {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        if ($request->has('highest_education') && $request->highest_education != '') {
+            $query->where('highest_education', 'like', "%{$request->highest_education}%");
+        }
+
+        if ($request->has('preferred_country') && $request->preferred_country != 'all' && $request->preferred_country != '') {
+            $query->where('preferred_country', $request->preferred_country);
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('user_id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('time') && $request->time != '') {
+            $query->whereTime('created_at', $request->time);
+        }
+
+        if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
+            $query->where('rating', $request->rating);
+        }
+
+        $users = $query->withCount(['orders as orders_count' => function($q) {
+            $q->where('status', 'delivered');
+        }])->withSum(['orders as total_revenue' => function($q) {
+            $q->where('status', 'delivered');
+        }], 'total_amount')
+        ->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.student-table', compact('users'))->render();

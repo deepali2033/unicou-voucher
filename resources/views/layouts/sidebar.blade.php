@@ -28,7 +28,31 @@
                     <i class="fas fa-users me-2"></i> User Management
                 </a>
             </li>
+            @if(auth()->user()->isAdmin() )
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('manager.page') }}">
+                    <i class="fas fa-user-tie me-2"></i>Manager
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('support.team') }}">
+                    <i class="fas fa-tools me-2"></i>Support Team
+                </a>
+            </li>
+            @endif
 
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('reseller.agent') }}">
+                    <i class="fas fa-handshake me-2"></i>Reseller Agent
+                </a>
+            </li>
+            @endif
             <!-- KYC & Compliance -->
             <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('kyc.compliance') }}">
@@ -36,7 +60,31 @@
                 </a>
             </li> -->
             @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+            <!-- Pricing -->
+            <!-- Inventory -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('sales.index') }}">
+                    <i class="fas fa-tags me-2"></i> Sales
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('inventory.index') }}">
+                    <i class="fas fa-boxes me-2"></i>Stocks
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('pricing.index') }}">
+                    <i class="fas fa-tags me-2"></i> Sales Pricing Discount
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('purches.purches.report') }}">
+                    <i class="fas fa-tags me-2"></i> Purchase
+                </a>
+            </li>
 
+            @endif
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager', 'reseller_agent']))
            
             <li class="nav-item">
@@ -96,30 +144,8 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() )
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('manager.page') }}">
-                    <i class="fas fa-user-tie me-2"></i>Manager
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('support.team') }}">
-                    <i class="fas fa-tools me-2"></i>Support Team
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('reseller.agent') }}">
-                    <i class="fas fa-handshake me-2"></i>Reseller Agent
-                </a>
-            </li>
-            @endif
+
+
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
@@ -176,21 +202,7 @@
             </li>
             @endif
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
-            <!-- Pricing -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('pricing.index') }}">
-                    <i class="fas fa-tags me-2"></i> Sales Pricing Discount
-                </a>
-            </li>
 
-            <!-- Inventory -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('inventory.index') }}">
-                    <i class="fas fa-boxes me-2"></i> Vouchar Purches
-                </a>
-            </li>
-            @endif
 
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Agent Points -->

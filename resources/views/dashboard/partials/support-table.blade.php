@@ -14,7 +14,7 @@
                 <th>Response Time</th>
                 <th>Rating By Customer</th>
                 <th>Status</th>
-                <th class="text-end">Actions</th>
+                <!-- <th class="text-end">Actions</th> -->
             </tr>
         </thead>
         <tbody>
@@ -25,7 +25,7 @@
                 <td>{{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}</td>
                 <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
-                <td>{{ $user->country_iso }}</td>
+                <td>{{ $user->country}}</td>
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->phone }}</td>
                 <td><span class="badge bg-info-subtle text-info">N/A</span></td>
@@ -38,7 +38,7 @@
                         @if($user->is_active) <i class="fas fa-unlock me-1"></i> Active @else <i class="fas fa-lock me-1"></i> Frozen @endif
                     </span>
                 </td>
-                <td class="text-end">
+                <!-- <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
                         @if(auth()->user()->account_type === 'admin')
                         <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
@@ -59,10 +59,12 @@
                         </form>
                         @endif
                     </div>
-                </td>
+                </td> -->
             </tr>
             @empty
-            <tr><td colspan="13" class="text-center py-5 text-muted">No users found.</td></tr>
+            <tr>
+                <td colspan="13" class="text-center py-5 text-muted">No users found.</td>
+            </tr>
             @endforelse
         </tbody>
     </table>

@@ -46,6 +46,19 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6">
+                                <label class="form-label fw-semibold">Country</label>
+                                <select name="country" id="country" class="form-select @error('country') is-invalid @enderror" required>
+                                    <option value="" disabled>Select Country</option>
+                                    @foreach(\App\Helpers\CountryHelper::getAllCountries() as $code => $name)
+                                        <option value="{{ $name }}" {{ old('country', $user->country) == $name ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('country') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Account Type</label>
                                 <select name="account_type" class="form-select @error('account_type') is-invalid @enderror" required>
                                     <option value="manager" {{ old('account_type', $user->account_type) == 'manager' ? 'selected' : '' }}>Manager</option>
@@ -78,4 +91,5 @@
         </div>
     </div>
 </div>
+
 @endsection

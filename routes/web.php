@@ -5,8 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\BankController;
+use App\Http\Controllers\Dashboard\SalesController;
 use App\Http\Controllers\Dashboard\CustomerController;
-
+use App\Http\Controllers\Dashboard\PurchesController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\VoucherController;
 use App\Http\Controllers\Dashboard\InventoryController;
@@ -81,6 +82,10 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/account/update', [DashboardController::class, 'updateAccount'])->name('account.update');
 
     Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+    Route::get('/pricing/create', [PricingController::class, 'create'])->name('pricing.create');
+    Route::get('/pricing/export', [PricingController::class, 'export'])->name('pricing.export');
+
+    Route::get('/pricing/voucher-details/{id}', [PricingController::class, 'getVoucherDetails'])->name('pricing.voucher-details');
     Route::post('/pricing/store', [PricingController::class, 'store'])->name('pricing.store');
     Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
@@ -101,10 +106,15 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
     Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
     Route::get('/mangers', [UserController::class, 'managers'])->name('manager.page');
+    Route::get('/mangers-export', [UserController::class, 'managersDownloadCSV'])->name('manager.export');
     Route::get('/support-team', [UserController::class, 'SupportTeam'])->name('support.team');
+    Route::get('/support-team-export', [UserController::class, 'supportTeamDownloadCSV'])->name('support.team.export');
     Route::get('/reseller-agents', [UserController::class, 'ResellerAgent'])->name('reseller.agent');
+    Route::get('/reseller-agents-export', [UserController::class, 'resellerAgentDownloadCSV'])->name('reseller.agent.export');
     Route::get('/regular-agents', [UserController::class, 'RegularAgent'])->name('regular.agent');
+    Route::get('/regular-agents-export', [UserController::class, 'regularAgentDownloadCSV'])->name('regular.agent.export');
     Route::get('/student-list', [UserController::class, 'student'])->name('student.page');
+    Route::get('/student-list-export', [UserController::class, 'studentDownloadCSV'])->name('student.page.export');
     // Voucher Management
     Route::get('/vouchers', [VoucherController::class, 'index'])->name('vouchers');
     Route::get('/vouchers/order/{id}', [VoucherController::class, 'showOrder'])->name('vouchers.order');
@@ -128,6 +138,16 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/inventory-import', [InventoryController::class, 'import'])->name('inventory.import');
     Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 
+    // Sales
+
+    Route::get('/sales', [SalesController::class, 'SalesReport'])->name('sales.index');
+
+
+
+    // Purches
+
+    Route::get('/purches-report', [PurchesController::class, 'purchesReport'])->name('purches.purches.report');
+    Route::get('/purches-report-export', [PurchesController::class, 'export'])->name('purches.export');
     // Order Management
     Route::middleware(['account_type:admin,manager,support_team'])->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');

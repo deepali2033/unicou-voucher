@@ -12,14 +12,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="filter-form" action="{{ route('users.management') }}" method="GET">
+            <form id="filter-form" action="{{ route('regular.agent') }}" method="GET">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Search</label>
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Name, Email, ID..." value="{{ request('search') }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -32,14 +29,12 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Role</label>
-                    <select name="role" class="form-select">
-                        <option value="all" {{ request('role') == 'all' ? 'selected' : '' }}>All Roles</option>
-                        <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
-                        <option value="support_team" {{ request('role') == 'support_team' ? 'selected' : '' }}>Support Team</option>
-                        <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
-                        <option value="reseller_agent" {{ request('role') == 'reseller_agent' ? 'selected' : '' }}>Reseller Agent</option>
-                        <option value="agent" {{ request('role') == 'agent' ? 'selected' : '' }}>Agent</option>
+                    <label class="form-label fw-bold">Country</label>
+                    <select name="country" class="form-select">
+                        <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
+                        @foreach(\App\Helpers\CountryHelper::getManagementCountries() as $name)
+                            <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -53,26 +48,25 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Verification Status</label>
-                    <select name="verification_status" class="form-select">
-                        <option value="all" {{ request('verification_status') == 'all' ? 'selected' : '' }}>All</option>
-                        <option value="pending" {{ request('verification_status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="verified" {{ request('verification_status') == 'verified' ? 'selected' : '' }}>Approved</option>
-                    </select>
+                    <label class="form-label fw-bold">Time</label>
+                    <input type="time" name="time" class="form-control" value="{{ request('time') }}">
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Compliance Flags</label>
-                    <select name="flags" class="form-select">
-                        <option value="all" {{ request('flags') == 'all' ? 'selected' : '' }}>All Flags</option>
-                        <option value="email_verified" {{ request('flags') == 'email_verified' ? 'selected' : '' }}>Email Verified</option>
-                        <option value="doc_verified" {{ request('flags') == 'doc_verified' ? 'selected' : '' }}>Document Verified</option>
+                    <label class="form-label fw-bold">Rating</label>
+                    <select name="rating" class="form-select">
+                        <option value="all">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
                     </select>
                 </div>
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{{ route('users.management') }}" class="btn btn-light">Reset All</a>
+                    <a href="{{ route('regular.agent') }}" class="btn btn-light">Reset All</a>
                 </div>
             </form>
         </div>
@@ -81,24 +75,21 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0 fw-bold">User Management</h5>
-                <small class="text-muted total-count">{{ $users->total() }} Users Found</small>
+                <h5 class="mb-0 fw-bold">Agent Management</h5>
+                <small class="text-muted total-count">{{ $users->total() }} Agents Found</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('users.pdf', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                <a href="{{ route('regular.agent.export', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_create_user)
-                <a href="{{ route('users.create') }}" class="btn btn-success btn-sm px-3 shadow-sm">
-                    <i class="fas fa-file-csv me-1"></i> Add
+                <a href="{{ route('users.create') }}?role=agent" class="btn btn-primary btn-sm px-3 shadow-sm">
+                    <i class="fas fa-plus me-1"></i> Add
                 </a>
                 @endif
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
-                <!-- <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm">
-                    <i class="fas fa-plus me-1"></i> Add User
-                </a> -->
             </div>
         </div>
         <div class="card-body" id="table-container">
@@ -119,7 +110,7 @@
                     window.history.pushState({}, '', url);
 
                     // Update CSV export link
-                    let csvUrl = "{{ route('users.pdf') }}?" + (url.split('?')[1] || '');
+                    let csvUrl = "{{ route('regular.agent.export') }}?" + (url.split('?')[1] || '');
                     $('#csv-export-link').attr('href', csvUrl);
                 }
             });

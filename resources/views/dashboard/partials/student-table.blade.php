@@ -5,15 +5,18 @@
                 <th>Sr. No.</th>
                 <th>User ID</th>
                 <th>Date of Reg.</th>
-                <th>Last Active date and time</th>
-                <th>First Name</th>
-                <th>Last Name</th>
+                <th>Last Active</th>
+                <th>Full Name</th>
                 <th>Country</th>
-                <th>email ID(official)</th>
-                <th>contact No.</th>
-                <th>Tasks/Performance</th>
+                <th>Email ID</th>
+                <th>Highest Education</th>
+                <th>Contact No.</th>
+                <th>Vouchers Purchased</th>
+                <th>Revenue Paid</th>
+                <th>Disputed Payments</th>
+                <th>Referral Points</th>
+                <th>Bonus Points</th>
                 <th>Status</th>
-                <th class="text-end">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -23,12 +26,16 @@
                 <td>{{ $user->user_id }}</td>
                 <td>{{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}</td>
                 <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
-                <td>{{ $user->first_name }}</td>
-                <td>{{ $user->last_name }}</td>
-                <td>{{ $user->country_iso }}</td>
+                <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                <td>{{ $user->country }}</td>
                 <td>{{ $user->email }}</td>
+                <td>{{ $user->highest_education ?? 'N/A' }}</td>
                 <td>{{ $user->phone }}</td>
-                <td><span class="badge bg-info-subtle text-info">N/A</span></td>
+                <td>{{ $user->orders_count ?? 0 }}</td>
+                <td>{{ number_format($user->total_revenue ?? 0, 2) }}</td>
+                <td>{{ $user->disputed_payments ?? 0 }}</td>
+                <td>{{ $user->referral_points ?? 0 }}</td>
+                <td>{{ $user->bonus_points ?? 0 }}</td>
                 <td>
                     @php $canFreeze = auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user; @endphp
                     <span class="badge px-3 py-2 {{ $canFreeze ? 'user-status-toggle' : '' }} {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
@@ -36,31 +43,11 @@
                         @if($user->is_active) <i class="fas fa-unlock me-1"></i> Active @else <i class="fas fa-lock me-1"></i> Frozen @endif
                     </span>
                 </td>
-                <td class="text-end">
-                    <div class="d-flex justify-content-end gap-1">
-                        @if(auth()->user()->account_type === 'admin')
-                        <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-sm btn-light" title="Login as {{ $user->first_name }}">
-                                <i class="fas fa-external-link-alt text-warning"></i>
-                            </button>
-                        </form>
-                        @endif
-                        <a class="btn btn-sm btn-light" href="{{ route('users.show', $user->id) }}" title="View"><i class="fas fa-eye text-primary"></i></a>
-                        @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
-                        <a class="btn btn-sm btn-light" href="{{ route('users.edit', $user->id) }}" title="Edit"><i class="fas fa-edit text-info"></i></a>
-                        @endif
-                        @if(auth()->user()->account_type === 'admin')
-                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="ajax-action">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-light" title="Delete"><i class="fas fa-trash text-danger"></i></button>
-                        </form>
-                        @endif
-                    </div>
-                </td>
             </tr>
             @empty
-            <tr><td colspan="12" class="text-center py-5 text-muted">No users found.</td></tr>
+            <tr>
+                <td colspan="15" class="text-center py-5 text-muted">No students found.</td>
+            </tr>
             @endforelse
         </tbody>
     </table>

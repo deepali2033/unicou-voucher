@@ -336,4 +336,13 @@ class CountryHelper
             "ZW" => "Zimbabwe"
         ];
     }
+
+    public static function getManagementCountries()
+    {
+        return \App\Models\User::whereNotNull('country')
+            ->where('country', '!=', '')
+            ->distinct()
+            ->pluck('country')
+            ->toArray();
+    }
 }

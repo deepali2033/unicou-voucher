@@ -7,8 +7,9 @@
                 <th>Date of Reg.</th>
                 <th>Last Active date and time</th>
                 <th>Category</th>
-                <th>First Name</th>
-                <th>Last Name</th>
+                <th>Limit</th>
+                <th>Full Name</th>
+                <!-- <th>Last Name</th> -->
                 <th>Country</th>
                 <th>email ID(official)</th>
                 <th>contact No.</th>
@@ -19,7 +20,7 @@
                 <th>Available Referral Points</th>
                 <th>Available Bonus Points</th>
                 <th>Status</th>
-                <th class="text-end">Actions</th>
+                <!-- <th class="text-end">Actions</th> -->
             </tr>
         </thead>
         <tbody>
@@ -40,9 +41,10 @@
                     <span class="badge bg-secondary">{{ ucfirst($user->category) }}</span>
                     @endif
                 </td>
-                <td>{{ $user->first_name }}</td>
-                <td>{{ $user->last_name }}</td>
-                <td>{{ $user->country_iso }}</td>
+                <td></td>
+                <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                <!-- <td>{{ $user->last_name }}</td> -->
+                <td>{{ $user->country }}</td>
                 <td>{{ $user->email }}</td>
                 <td>{{ $user->phone }}</td>
                 <td>0</td>
@@ -58,7 +60,7 @@
                         @if($user->is_active) <i class="fas fa-unlock me-1"></i> Active @else <i class="fas fa-lock me-1"></i> Frozen @endif
                     </span>
                 </td>
-                <td class="text-end">
+                <!-- <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
                         @if(auth()->user()->account_type === 'admin')
                         <form action="{{ route('users.impersonate', $user->id) }}" method="POST">
@@ -79,10 +81,12 @@
                         </form>
                         @endif
                     </div>
-                </td>
+                </td> -->
             </tr>
             @empty
-            <tr><td colspan="18" class="text-center py-5 text-muted">No users found.</td></tr>
+            <tr>
+                <td colspan="18" class="text-center py-5 text-muted">No users found.</td>
+            </tr>
             @endforelse
         </tbody>
     </table>

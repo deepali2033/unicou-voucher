@@ -43,14 +43,27 @@
                                 @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label fw-semibold">Country</label>
+                                <select name="country" id="country" class="form-select @error('country') is-invalid @enderror" required>
+                                    <option value="" selected disabled>Select Country</option>
+                                    @foreach(\App\Helpers\CountryHelper::getAllCountries() as $code => $name)
+                                        <option value="{{ $name }}" {{ old('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('country') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Account Type</label>
                                 <select name="account_type" class="form-select @error('account_type') is-invalid @enderror" required>
                                     <option value="" selected disabled>Select Role</option>
-                                    <option value="manager" {{ old('account_type') == 'manager' ? 'selected' : '' }}>Manager</option>
-                                    <option value="reseller_agent" {{ old('account_type') == 'reseller_agent' ? 'selected' : '' }}>Reseller Agent</option>
-                                    <option value="support_team" {{ old('account_type') == 'support_team' ? 'selected' : '' }}>Support Team</option>
-                                    <option value="student" {{ old('account_type') == 'student' ? 'selected' : '' }}>Student</option>
-                                    <option value="agent" {{ old('account_type') == 'agent' ? 'selected' : '' }}>Agent</option>
+                                    <option value="manager" {{ (old('account_type') == 'manager' || request('role') == 'manager') ? 'selected' : '' }}>Manager</option>
+                                    <option value="reseller_agent" {{ (old('account_type') == 'reseller_agent' || request('role') == 'reseller_agent') ? 'selected' : '' }}>Reseller Agent</option>
+                                    <option value="support_team" {{ (old('account_type') == 'support_team' || request('role') == 'support_team') ? 'selected' : '' }}>Support Team</option>
+                                    <option value="student" {{ (old('account_type') == 'student' || request('role') == 'student') ? 'selected' : '' }}>Student</option>
+                                    <option value="agent" {{ (old('account_type') == 'agent' || request('role') == 'agent') ? 'selected' : '' }}>Agent</option>
                                 </select>
                                 @error('account_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>

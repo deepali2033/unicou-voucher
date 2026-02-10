@@ -17,10 +17,25 @@
                     <label class="form-label fw-bold">Search</label>
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Name, Email, ID..." value="{{ request('search') }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
                     </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Date Range</label>
+                    <div class="d-flex flex-column gap-2">
+                        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}" placeholder="From">
+                        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}" placeholder="To">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Country</label>
+                    <select name="country" class="form-select">
+                        <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
+                        @foreach(\App\Helpers\CountryHelper::getManagementCountries() as $name)
+                            <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
@@ -29,6 +44,23 @@
                         <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
                         <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
                         <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Frozen</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Time</label>
+                    <input type="time" name="time" class="form-control" value="{{ request('time') }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Rating</label>
+                    <select name="rating" class="form-select">
+                        <option value="all">All Ratings</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
                     </select>
                 </div>
 
@@ -47,7 +79,7 @@
                 <small class="text-muted total-count">{{ $users->total() }} Managers Found</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('users.pdf', ['role' => 'manager']) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                <a href="{{ route('manager.export', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> Export CSV
                 </a>
                 @if(auth()->user()->account_type === 'admin')
@@ -68,6 +100,42 @@
 
 @push('scripts')
 <script>
+    $(document).ready(function() {
+        function updateTable(url) {
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    $('#table-container').html(data);
+                    window.history.pushState({}, '', url);
+
+                    // Update CSV export link
+                    let csvUrl = "{{ route('manager.export') }}?" + (url.split('?')[1] || '');
+                    $('#csv-export-link').attr('href', csvUrl);
+                    
+                    // Update total count if needed
+                    // $('.total-count').text(...)
+                }
+            });
+        }
+
+        // Handle Pagination
+        $(document).on('click', '.ajax-pagination a', function(e) {
+            e.preventDefault();
+            updateTable($(this).attr('href'));
+        });
+
+        // Handle Filters
+        $(document).on('submit', '#filter-form', function(e) {
+            e.preventDefault();
+            let url = $(this).attr('action') + '?' + $(this).serialize();
+            updateTable(url);
+
+            var offcanvasElement = document.getElementById('filterOffcanvas');
+            var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+            if (offcanvas) offcanvas.hide();
+        });
+    });
+
     function toggleUserStatus(userId) {
         if (!confirm('Are you sure you want to change this user\'s status?')) return;
 
