@@ -40,6 +40,7 @@
         $countryCode = session('user_country_code', 'US');
         $countryName = session('user_country_name', 'United States');
         $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
+
         @endphp
 
         <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">

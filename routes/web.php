@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\RefundController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
@@ -128,14 +129,22 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 
     // Order Management
-    Route::middleware(['account_type:admin,manager,support'])->group(function () {
+    Route::middleware(['account_type:admin,manager,support_team'])->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders-export', [OrderController::class, 'export'])->name('orders.export');
         Route::post('/orders/{id}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
         Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/orders/{id}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     });
     Route::get('/orders/history', [OrderController::class, 'orderHistory'])->name('orders.history');
 
+
+    // Refund Management
+    Route::get('/refunds', [RefundController::class, 'index'])->name('refunds.index');
+    Route::get('/my-refunds', [RefundController::class, 'userRefunds'])->name('refunds.user');
+    Route::post('/refunds/store', [RefundController::class, 'store'])->name('refunds.store');
+    Route::post('/refunds/{id}/approve', [RefundController::class, 'approve'])->name('refunds.approve');
+    Route::post('/refunds/{id}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
 
     // Wallet Management
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
@@ -169,6 +178,13 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
     Route::get('/banks', [BankController::class, 'bankreport'])->name('banks.bank-table');
+
+    // Admin Payment Methods
+    Route::get('/payment-methods', [BankController::class, 'index'])->name('payment-methods.index');
+    Route::post('/payment-methods', [BankController::class, 'store'])->name('payment-methods.store');
+    Route::post('/payment-methods/{id}', [BankController::class, 'update'])->name('payment-methods.update');
+    Route::delete('/payment-methods/{id}', [BankController::class, 'destroy'])->name('payment-methods.destroy');
+    Route::post('/payment-methods/{id}/toggle', [BankController::class, 'toggleStatus'])->name('payment-methods.toggle');
     // Customer Support
     Route::get('/customer-support', [CustomerController::class, 'supportindex'])->name('customer.support');
     Route::post('/customer-support', [CustomerController::class, 'storeSupportQuery'])->name('customer.support.store');

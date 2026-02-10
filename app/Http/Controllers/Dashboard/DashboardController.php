@@ -43,6 +43,15 @@ class DashboardController extends Controller
             return view('dashboard.student_dashboard');
         }
 
+        if ($user->isSupport()) {
+            $stats = [
+                'total_users' => User::count(),
+                'pending_approvals' => User::where('profile_verification_status', 'pending')->count(),
+                'students' => User::where('account_type', 'student')->count(),
+            ];
+            return view('dashboard.support_dashboard', compact('stats'));
+        }
+
         return redirect('/');
     }
 

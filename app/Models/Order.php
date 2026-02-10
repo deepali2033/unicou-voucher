@@ -18,6 +18,8 @@ class Order extends Model
         'referral_points',
         'delivery_details',
         'payment_method',
+        'admin_payment_method_id',
+        'payment_receipt',
         'bank_name',
         'account_number',
         'ifsc_code',

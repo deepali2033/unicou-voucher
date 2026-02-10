@@ -1,7 +1,7 @@
 @extends('layouts.master')
-
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid">
+
     {{-- Offcanvas Filter --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
@@ -45,87 +45,105 @@
         </div>
     </div>
 
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">Order Deliveries</h4>
-            <p class="text-muted small mb-0">Track and manage voucher deliveries for all users.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary bg-white shadow-sm px-3" style="border-radius: 10px;" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
-                <i class="fas fa-filter me-2 small"></i> Filter
-            </button>
-            <a href="{{ route('orders.export', request()->all()) }}" class="btn btn-success shadow-sm px-4" style="border-radius: 10px; border: none;">
-                <i class="fas fa-file-csv me-1"></i> Export CSV
-            </a>
-        </div>
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 12px;">
+        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+    @endif
 
-    <!-- Table Card -->
-    <div class="card border-0 shadow-sm" style="border-radius: 20px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold">Order Deliveries</h5>
+                <small class="text-muted">{{ $orders->total() }} Orders Found</small>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('orders.export', request()->all()) }}" class="btn btn-success btn-sm px-3 shadow-sm">
+                    <i class="fas fa-file-csv me-1"></i> CSV
+                </a>
+                <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                    <i class="fas fa-filter me-1"></i> Filter
+                </button>
+            </div>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light text-uppercase small fw-bold text-muted">
+                    <thead class="table-light">
                         <tr>
-                            <th class="ps-4 py-3">Order Details</th>
-                            <th class="py-3">Customer</th>
-                            <th class="py-3">Amount</th>
-                            <th class="py-3">Ref Points</th>
-                            <th class="py-3">Bonus Points</th>
-                            <th class="py-3">Status</th>
-                            <th class="text-end pe-4 py-3">Actions</th>
+                            <th class="ps-4">Order Details</th>
+                            <th>Customer</th>
+                            <th>Payment</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($orders as $order)
-                        <tr style="border-bottom: 1px solid #f1f3f5;">
-                            <td class="ps-4 py-4">
-                                <div class="fw-bold mb-1">{{ $order->order_id }}</div>
-                                <div class="text-muted small mb-1">{{ $order->created_at->format('Y-m-d') }}</div>
-                                <div class="text-muted extra-small">{{ $order->voucher->name ?? $order->voucher_type }}</div>
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ $order->order_id }}</div>
+                                <div class="text-muted small">{{ $order->created_at->format('d M Y H:i') }}</div>
+                                <div class="text-muted small">{{ $order->voucher->name ?? $order->voucher_type }} (Qty: {{ $order->quantity }})</div>
                             </td>
-                            <td class="py-4">
-                                <div class="fw-bold mb-1">{{ $order->user->name ?? 'Unknown' }}</div>
+                            <td>
+                                <div class="fw-bold text-dark">{{ $order->user->name ?? 'Unknown' }}</div>
                                 <div class="text-muted small">{{ $order->user->email ?? 'N/A' }}</div>
-                                <div class="badge bg-light text-dark extra-small">{{ ucfirst($order->user_role ?? 'user') }}</div>
+                                <span class="badge rounded-pill bg-light text-dark border px-2 mt-1">{{ ucfirst($order->user_role ?? 'user') }}</span>
                             </td>
-                            <td class="py-4">
-                                <span class="fw-bold">RS {{ number_format($order->amount) }}</span>
+                            <td>
+                                <div class="small">
+                                    <span class="text-muted d-block">Method: <span class="text-dark fw-bold text-capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</span></span>
+                                    <span class="text-muted d-block">Bank: <span class="text-dark">{{ $order->bank_name ?: 'N/A' }}</span></span>
+                                    @if($order->payment_receipt)
+                                    <a href="{{ asset('storage/'.$order->payment_receipt) }}" target="_blank" class="text-primary fw-bold small mt-1 d-inline-block">
+                                        <i class="fas fa-file-invoice me-1"></i> View Receipt
+                                    </a>
+                                    @endif
+                                </div>
                             </td>
-                            <td class="py-4">
-                                <span class="badge bg-soft-success text-success">{{ $order->referral_points }}</span>
+                            <td>
+                                <span class="fw-bold text-primary">RS {{ number_format($order->amount) }}</span>
                             </td>
-                            <td class="py-4">
-                                <span class="badge bg-soft-info text-info">{{ $order->bonus_amount }}</span>
-                            </td>
-                            <td class="py-4">
+                            <td>
                                 @if($order->status == 'delivered')
-                                <span class="badge rounded-pill px-3 py-2" style="background-color: #e8f7f0; color: #198754; font-weight: 500;">Delivered</span>
+                                <span class="badge bg-success-subtle text-success px-3 py-2">Delivered</span>
                                 @elseif($order->status == 'cancelled')
-                                <span class="badge rounded-pill px-3 py-2" style="background-color: #fdeaea; color: #dc3545; font-weight: 500;">Cancelled</span>
+                                <span class="badge bg-danger-subtle text-danger px-3 py-2">Cancelled</span>
+                                @elseif($order->status == 'pending')
+                                <span class="badge bg-warning-subtle text-warning px-3 py-2">Pending</span>
                                 @else
-                                <span class="badge rounded-pill px-3 py-2" style="background-color: #fff4e6; color: #fd7e14; font-weight: 500;">{{ ucfirst($order->status) }}</span>
+                                <span class="badge bg-primary-subtle text-primary px-3 py-2">{{ ucfirst($order->status) }}</span>
                                 @endif
                             </td>
-                            <td class="text-end pe-4 py-4">
-                                <div class="d-flex justify-content-end gap-3">
-                                    @if($order->status == 'pending' || $order->status == 'completed')
-                                    <button class="btn btn-link text-decoration-none p-0 fw-bold" style="color: #5e5ce6; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#deliverModal{{ $order->id }}">
-                                        Deliver Voucher
-                                    </button>
-                                    @endif
-                                    @if($order->status != 'cancelled')
-                                    <form action="{{ route('orders.cancel', $order->id) }}" method="POST" class="d-inline">
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    @if($order->status == 'pending')
+                                    <form action="{{ route('orders.approve', $order->id) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button class="btn btn-link text-decoration-none p-0 fw-bold" style="color: #ef9a9a; font-size: 0.85rem;" onclick="return confirm('Are you sure?')">
-                                            Cancel
+                                        <button class="btn btn-sm btn-light" title="Approve" onclick="return confirm('Approve this order?')">
+                                            <i class="fas fa-check-circle text-success"></i>
                                         </button>
                                     </form>
                                     @endif
+
+                                    @if($order->status == 'completed')
+                                    <button class="btn btn-sm btn-light" title="Deliver" data-bs-toggle="modal" data-bs-target="#deliverModal{{ $order->id }}">
+                                        <i class="fas fa-truck text-primary"></i>
+                                    </button>
+                                    @endif
+
+                                    @if($order->status != 'cancelled' && $order->status != 'delivered')
+                                    <button class="btn btn-sm btn-light" title="Cancel" data-bs-toggle="modal" data-bs-target="#cancelModal{{ $order->id }}">
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    </button>
+                                    @endif
+
                                     @if($order->status == 'delivered')
-                                    <button class="btn btn-link text-decoration-none p-0 fw-bold" style="color: #5e5ce6; font-size: 0.85rem;" onclick="alert('Codes: {{ $order->delivery_details }}')">
-                                        View Codes
+                                    <button class="btn btn-sm btn-light" title="View Codes" onclick="alert('Codes: {{ $order->delivery_details }}')">
+                                        <i class="fas fa-key text-info"></i>
                                     </button>
                                     @endif
                                 </div>
@@ -150,7 +168,32 @@
                                         </div>
                                         <div class="modal-footer border-0 pb-4 px-4">
                                             <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
-                                            <button type="submit" class="btn btn-success px-4" style="border-radius: 10px; background-color: #6fc2a6; border: none;">Deliver Now</button>
+                                            <button type="submit" class="btn btn-primary px-4" style="border-radius: 10px;">Deliver Now</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Modal -->
+                        <div class="modal fade" id="cancelModal{{ $order->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <form action="{{ route('orders.cancel', $order->id) }}" method="POST">
+                                    @csrf
+                                    <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+                                        <div class="modal-header border-0 pt-4 px-4">
+                                            <h5 class="fw-bold text-danger">Cancel Order: {{ $order->order_id }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body px-4">
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-muted text-uppercase">Reason for Cancellation</label>
+                                                <textarea name="reason" class="form-control border-0 bg-light p-3" rows="3" placeholder="Explain why the order is being cancelled..." style="border-radius: 10px;" required></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-0 pb-4 px-4">
+                                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Keep Order</button>
+                                            <button type="submit" class="btn btn-danger px-4" style="border-radius: 10px;">Confirm Cancellation</button>
                                         </div>
                                     </div>
                                 </form>
@@ -158,67 +201,18 @@
                         </div>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">No orders found.</td>
+                            <td colspan="6" class="text-center py-5 text-muted">No orders found.</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-        </div>
-        <!-- Pagination Footer -->
-        <div class="card-footer bg-white border-0 py-4 px-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Showing {{ $orders->firstItem() ?? 0 }} to {{ $orders->lastItem() ?? 0 }} of {{ $orders->total() }} results
-                </div>
-                <div class="pagination-container">
-                    {{ $orders->links('pagination::bootstrap-4') }}
+            <div class="card-footer bg-white border-0 py-4">
+                <div class="d-flex justify-content-center">
+                    {{ $orders->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-soft-success {
-        background-color: rgba(40, 167, 69, 0.1);
-    }
-
-    .bg-soft-info {
-        background-color: rgba(13, 202, 240, 0.1);
-    }
-
-    .extra-small {
-        font-size: 0.75rem;
-    }
-
-    .table thead th {
-        border-bottom: none;
-    }
-
-    .table td {
-        vertical-align: middle;
-    }
-
-    .pagination {
-        margin-bottom: 0;
-    }
-
-    .page-link {
-        border: 1px solid #f1f3f5;
-        color: #666;
-        padding: 0.5rem 1rem;
-        margin: 0 2px;
-        border-radius: 8px !important;
-    }
-
-    .page-item.active .page-link {
-        background-color: #5e5ce6;
-        border-color: #5e5ce6;
-    }
-
-    .btn-link:hover {
-        opacity: 0.8;
-    }
-</style>
 @endsection

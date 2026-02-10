@@ -44,12 +44,7 @@
 
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <span
-                            class="badge px-3 py-2 {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? '' : 'user-status-toggle' }}
-                    {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
-                            data-id="{{ $user->id }}"
-                            style="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? 'cursor:default;' : 'cursor:pointer;' }}"
-                            title="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? 'No permission to change status' : 'Click to ' . ($user->is_active ? 'freeze' : 'unfreeze') }}">
+                        <span class="badge px-3 py-2 {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? '' : 'user-status-toggle' }}    {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}" data-id="{{ $user->id }}" style=" {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? 'cursor:default;' : 'cursor:pointer;' }}" title="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_freeze_user) ? 'No permission to change status' : 'Click to ' . ($user->is_active ? 'freeze' : 'unfreeze') }}">
                             @if($user->is_active)
                             <i class="fas fa-unlock me-1"></i> Active
                             @else
@@ -61,12 +56,7 @@
                 </td>
 
                 <td>
-                    <span
-                        class="badge px-3 py-2 {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? '' : 'verification-status-toggle' }}
-                        {{ in_array($user->profile_verification_status, ['verified', 'approved']) ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }}"
-                        data-id="{{ $user->id }}"
-                        style="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? 'cursor:default;' : 'cursor:pointer;' }}"
-                        title="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? 'No permission to approve users' : 'Click to ' . (in_array($user->profile_verification_status, ['verified', 'approved']) ? 'mark as pending' : 'verify') }}">
+                    <span class="badge px-3 py-2 {{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? '' : 'verification-status-toggle' }}  {{ in_array($user->profile_verification_status, ['verified', 'approved']) ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }}" data-id="{{ $user->id }}" style="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? 'cursor:default;' : 'cursor:pointer;' }}" title="{{ (auth()->user()->account_type === 'manager' && !auth()->user()->can_approve_user) ? 'No permission to approve users' : 'Click to ' . (in_array($user->profile_verification_status, ['verified', 'approved']) ? 'mark as pending' : 'verify') }}">
                         @if(in_array($user->profile_verification_status, ['verified', 'approved']))
                         <i class="fas fa-check-circle me-1"></i> Approved
                         @else

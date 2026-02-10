@@ -48,7 +48,6 @@
             LocationHelper::geo();
             }
 
-            // Ab safely geo le lo
             $geo = session('geo');
             @endphp
             @include('layouts.sidebar')

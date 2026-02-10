@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\InventoryVoucher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -79,14 +81,74 @@ class OrderController extends Controller
             'status' => 'delivered',
             'delivery_details' => $request->codes
         ]);
-        return back()->with('success', 'Order marked as delivered and codes sent.');
+
+        // Send Email to User with codes
+        try {
+            $user = $order->user;
+            $codes = $request->codes;
+            Mail::send('emails.order-delivered', ['order' => $order, 'user' => $user, 'codes' => $codes], function($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Your Voucher Codes Have Been Delivered! - UniCou');
+            });
+        } catch (\Exception $e) {
+            // Log error but continue
+        }
+
+        return back()->with('success', 'Order marked as delivered and codes sent to user email.');
     }
 
-    public function cancel($id)
+    public function cancel(Request $request, $id)
     {
         $order = Order::findOrFail($id);
+        $reason = $request->reason ?? 'Order cancelled by administrator.';
+        
         $order->update(['status' => 'cancelled']);
-        return back()->with('success', 'Order cancelled.');
+
+        // Send Email to User
+        try {
+            $user = $order->user;
+            Mail::send('emails.order-cancelled', ['order' => $order, 'user' => $user, 'reason' => $reason], function($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Update Regarding Your Order - UniCou');
+            });
+        } catch (\Exception $e) {
+            // Log error but continue
+        }
+
+        return back()->with('success', 'Order cancelled and notification sent to user.');
+    }
+
+    public function approve($id)
+    {
+        $order = Order::findOrFail($id);
+        
+        if ($order->status !== 'pending') {
+            return back()->with('error', 'Only pending orders can be approved.');
+        }
+
+        // Deduct Inventory here if not already deducted (manual transfer cases)
+        $voucher = InventoryVoucher::where('sku_id', $order->voucher_id)->first();
+        if ($voucher) {
+            if ($voucher->quantity < $order->quantity) {
+                return back()->with('error', 'Insufficient stock to approve this order.');
+            }
+            $voucher->decrement('quantity', $order->quantity);
+        }
+
+        $order->update(['status' => 'completed']);
+
+        // Send Email to User
+        try {
+            $user = $order->user;
+            Mail::send('emails.order-approved', ['order' => $order, 'user' => $user], function($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Your Order Has Been Approved - UniCou');
+            });
+        } catch (\Exception $e) {
+            // Log error but continue
+        }
+
+        return back()->with('success', 'Order approved successfully.');
     }
 
     public function orderHistory()

@@ -70,6 +70,13 @@
                     <i class="fas fa-university me-2"></i> Banks
                 </a>
             </li>
+
+            <!-- Admin Payment Methods -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('payment-methods.index') }}">
+                    <i class="fas fa-credit-card me-2"></i> Payment Methods
+                </a>
+            </li>
             @endif
 
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
@@ -143,11 +150,15 @@
             </li>
             @endif -->
 
-            <!-- Orders -->
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('orders.index') }}">
                     <i class="fas fa-truck me-2"></i> Orders & Delivery
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('refunds.index') }}">
+                    <i class="fas fa-undo me-2"></i> Refund Requests
                 </a>
             </li>
             @endif
@@ -156,6 +167,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('orders.history') }}">
                     <i class="fas fa-shopping-cart me-2"></i> My Orders
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('refunds.user') }}">
+                    <i class="fas fa-undo me-2"></i> My Refunds
                 </a>
             </li>
             @endif
