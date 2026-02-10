@@ -99,6 +99,7 @@
                             <th class="py-3 border-0">Issue Date</th>
                             <th class="py-3 border-0">Expiry Date</th>
                             <th class="py-3 border-0">Credit Limit</th>
+                            <th class="py-3 border-0">Sale Price</th>
                             <th class="py-3 border-0">Status</th>
                             <th class="px-3 py-3 border-0 text-end">Action</th>
                         </tr>
@@ -135,6 +136,7 @@
                                 @endif
                             </td>
                             <td>${{ number_format($rule->credit_limit ?? 0, 2) }}</td>
+                            <td class="fw-bold text-success">${{ number_format($rule->sale_price ?? 0, 2) }}</td>
                             <td>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input toggle-status" type="checkbox"

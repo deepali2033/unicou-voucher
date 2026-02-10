@@ -1,6 +1,31 @@
 @extends('layouts.master')
 
 @section('content')
+<style>
+/* Fix height & alignment */
+.select2-container--default .select2-selection--multiple {
+    min-height: 42px;
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+}
+
+/* Selected items style */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #0d6efd;
+    border: none;
+    color: #fff;
+    padding: 2px 8px;
+    margin-top: 4px;
+    font-size: 13px;
+}
+
+/* Remove weird gray full-width highlight */
+.select2-results__option {
+    white-space: normal;
+}
+</style>
+
 <div class="container-fluid">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
@@ -138,14 +163,22 @@
 </div>
 @endsection
 
-@section('scripts')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@push('scripts')
 <script>
 $(document).ready(function() {
+    // Initialize Select2 for all select elements with class 'select2'
     $('.select2').select2({
         width: '100%',
-        placeholder: "Select options"
+        placeholder: "Select options",
+        allowClear: true
+    });
+
+    // Special initialization for countries to ensure it looks good as a multiple select
+    $('#countries').select2({
+        placeholder: "Select target countries",
+        allowClear: true,
+        width: '100%',
+        closeOnSelect: false
     });
 
     $('#voucherSelect').on('change', function() {
@@ -168,6 +201,11 @@ $(document).ready(function() {
                         $('#purchase_value').val(data.purchase_value);
                         $('#taxes').val(data.taxes);
                         $('#per_unit_price').val(data.purchase_value_per_unit);
+                        
+                        // Auto-fill Sale Price with Agent Sale Price as default
+                        if (data.agent_sale_price) {
+                            $('input[name="sale_price"]').val(data.agent_sale_price);
+                        }
                     }
                 }
             });
@@ -210,4 +248,4 @@ $(document).ready(function() {
     });
 });
 </script>
-@endsection
+@endpush
