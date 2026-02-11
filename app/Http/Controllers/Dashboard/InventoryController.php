@@ -53,7 +53,14 @@ class InventoryController extends Controller
 
     public function create()
     {
-        return view('dashboard.inventory.create');
+        $last_voucher = InventoryVoucher::orderBy('id', 'desc')->first();
+        $next_sku = 101;
+        
+        if ($last_voucher && is_numeric($last_voucher->sku_id)) {
+            $next_sku = (int)$last_voucher->sku_id + 1;
+        }
+
+        return view('dashboard.inventory.create', compact('next_sku'));
     }
 
     public function store(Request $request)
@@ -89,6 +96,10 @@ class InventoryController extends Controller
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('inventory_logos', 'public');
             $validated['logo'] = Storage::url($validated['logo']);
+        }
+
+        if ($request->filled('upload_vouchers')) {
+            $validated['upload_vouchers'] = array_map('trim', explode(',', $request->upload_vouchers));
         }
 
         InventoryVoucher::create($validated);
@@ -141,6 +152,10 @@ class InventoryController extends Controller
             }
             $validated['logo'] = $request->file('logo')->store('inventory_logos', 'public');
             $validated['logo'] = Storage::url($validated['logo']);
+        }
+
+        if ($request->filled('upload_vouchers')) {
+            $validated['upload_vouchers'] = array_map('trim', explode(',', $request->upload_vouchers));
         }
 
         $inventory->update($validated);

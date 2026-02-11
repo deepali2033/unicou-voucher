@@ -101,6 +101,7 @@ class BankController extends Controller
     }
     public function bankreport()
     {
-        return view('dashboard.banks.bank-table');
+        $methods = AdminPaymentMethod::all();
+        return view('dashboard.banks.bank-table', compact('methods'));
     }
 }

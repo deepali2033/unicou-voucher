@@ -149,7 +149,7 @@
 
                     <div class="col-12 mt-4">
                         <label class="form-label small fw-bold text-uppercase">Voucher Codes / Upload Info</label>
-                        <textarea name="upload_vouchers" class="form-control" rows="4" placeholder="Enter voucher codes or links here...">{{ old('upload_vouchers', $inventory->upload_vouchers) }}</textarea>
+                        <textarea name="upload_vouchers" class="form-control" rows="4" placeholder="Enter voucher codes or links here...">{{ old('upload_vouchers', is_array($inventory->upload_vouchers) ? implode(', ', $inventory->upload_vouchers) : $inventory->upload_vouchers) }}</textarea>
                     </div>
 
                     <div class="col-12 text-end mt-4">

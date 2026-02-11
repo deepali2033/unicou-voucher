@@ -22,7 +22,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold small">Voucher Purchases Summary (USD / GBP)</label>
+                    <label class="form-label fw-bold small">11. Voucher Purchases Summary (USD / GBP)</label>
                     <select name="currency" class="form-select">
                         <option value="">All Currencies</option>
                         <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
@@ -31,22 +31,22 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold small">Brand Purchase Report</label>
+                    <label class="form-label fw-bold small">13. Brand Purchase Report</label>
                     <input type="text" name="brand_name" class="form-control" placeholder="Brand Name" value="{{ request('brand_name') }}">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold small">Variant Purchase Report</label>
+                    <label class="form-label fw-bold small">14. Variant Purchase Report</label>
                     <input type="text" name="voucher_variant" class="form-control" placeholder="Variant" value="{{ request('voucher_variant') }}">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold small">Exam Type wise Report</label>
+                    <label class="form-label fw-bold small">15. Exam Type wise Report (Online/Center)</label>
                     <input type="text" name="voucher_type" class="form-control" placeholder="Exam Type" value="{{ request('voucher_type') }}">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold small">Country Name</label>
+                    <label class="form-label fw-bold small">17. Supplier-wise Purchase Report (Country)</label>
                     <input type="text" name="country_name" class="form-control" placeholder="Search country..." value="{{ request('country_name') }}">
                 </div>
 
@@ -100,6 +100,7 @@
                             <th class="py-3 border-0">Expiry Date</th>
                             <th class="py-3 border-0">Credit Limit</th>
                             <th class="py-3 border-0">Sale Price</th>
+                            <th class="py-3 border-0">Discount</th>
                             <th class="py-3 border-0">Status</th>
                             <th class="px-3 py-3 border-0 text-end">Action</th>
                         </tr>
@@ -138,12 +139,24 @@
                             <td>${{ number_format($rule->credit_limit ?? 0, 2) }}</td>
                             <td class="fw-bold text-success">${{ number_format($rule->sale_price ?? 0, 2) }}</td>
                             <td>
+                                @if($rule->discount_value > 0)
+                                    <span class="badge bg-soft-warning text-warning">
+                                        {{ $rule->discount_type == 'percentage' ? $rule->discount_value . '%' : '$' . number_format($rule->discount_value, 2) }}
+                                    </span>
+                                @else
+                                    <span class="text-muted small">No Discount</span>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input toggle-status" type="checkbox"
                                         data-id="{{ $rule->id }}" {{ $rule->is_active ? 'checked' : '' }}>
                                 </div>
                             </td>
                             <td class="px-3 text-end">
+                                <a href="{{ route('pricing.edit', $rule->id) }}" class="btn btn-sm btn-light me-1">
+                                    <i class="fas fa-edit text-primary"></i>
+                                </a>
                                 <button class="btn btn-sm btn-light delete-rule" data-id="{{ $rule->id }}">
                                     <i class="fas fa-trash text-danger"></i>
                                 </button>

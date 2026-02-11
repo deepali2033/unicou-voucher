@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid py-4">
-
+    @if( auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
     {{-- Offcanvas Filter --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
@@ -103,6 +103,7 @@
         </div>
         @endif
     </div>
+    @endif
 </div>
 
 @push('scripts')

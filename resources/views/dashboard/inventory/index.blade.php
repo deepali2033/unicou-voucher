@@ -102,7 +102,7 @@
 <div class="container-fluid px-4 py-4">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="cp-title mb-0">Voucher Control Panel</h2>
+        <h2 class="cp-title mb-0">Stocks</h2>
         <div class="d-flex gap-2">
             <a href="{{ route('inventory.export') }}" id="inventory-export-btn" class="btn btn-success btn-sm px-3 shadow-sm d-flex align-items-center">
                 <i class="fas fa-file-csv me-1"></i> CSV
@@ -110,9 +110,9 @@
             <button class="btn btn-outline-primary btn-sm px-3 shadow-sm d-flex align-items-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
                 <i class="fas fa-filter me-1"></i> Filter
             </button>
-            <button class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#importInventoryModal">
+            <!-- <button class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#importInventoryModal">
                 <i class="fas fa-file-import me-1"></i> Import
-            </button>
+            </button> -->
             <a href="{{ route('inventory.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center">
                 <i class="fas fa-plus me-1"></i> Add Voucher
             </a>
@@ -120,7 +120,7 @@
     </div>
 
     <!-- Filters Status Area -->
-    <div class="d-flex justify-content-end align-items-center mb-4">
+    <!-- <div class="d-flex justify-content-end align-items-center mb-4">
         <div class="d-flex align-items-center gap-3">
             <button type="button" id="reset-filters-btn" class="btn btn-link text-danger text-decoration-none fw-bold p-0">
                 <i class="fas fa-times me-1"></i> RESET
@@ -129,7 +129,7 @@
                 Showing <span id="vouchers-count">{{ $inventory->total() }}</span> Vouchers
             </span>
         </div>
-    </div>
+    </div> -->
 
     {{-- Offcanvas Filter --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
@@ -141,7 +141,7 @@
         </div>
         <div class="offcanvas-body">
             <form id="inventory-filter-form">
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <label class="form-label fw-bold">Country</label>
                     <div style="max-height: 200px; overflow-y: auto;" class="border rounded p-2 bg-light">
                         @foreach($countries as $country)
@@ -151,9 +151,9 @@
                         </div>
                         @endforeach
                     </div>
-                </div>
+                </div> -->
 
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <label class="form-label fw-bold">Voucher Type</label>
                     <div class="d-flex gap-3">
                         <div class="form-check">
@@ -165,25 +165,25 @@
                             <label class="form-check-label" for="type-physical">Physical</label>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Status</label>
-                    @foreach(['IN STOCK', 'LOW STOCK', 'OUT OF STOCK'] as $st)
+                    @foreach(['IN STOCK', 'OUT OF STOCK'] as $st)
                     <div class="form-check mb-1">
                         <input class="form-check-input filter-input" type="checkbox" name="status[]" value="{{ $st }}" id="status-{{ Str::slug($st) }}">
                         <label class="form-check-label" for="status-{{ Str::slug($st) }}">{{ $st }}</label>
                     </div>
                     @endforeach
                 </div>
-
+                <!-- 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Sort By</label>
                     <select name="sort" class="form-select filter-input" id="sort-input">
                         <option value="latest">Latest First</option>
                         <option value="oldest">Oldest First</option>
                     </select>
-                </div>
+                </div> -->
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
@@ -193,36 +193,7 @@
         </div>
     </div>
 
-    <!-- Stats -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon icon-blue">
-                    <i class="fas fa-box"></i>
-                </div>
-                <small class="text-muted fw-bold text-uppercase" style="font-size: 11px;">Total Stock</small>
-                <h3 class="fw-bold mb-0 mt-1">{{ number_format($stats['total_stock']) }}</h3>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon icon-green">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-                <small class="text-muted fw-bold text-uppercase" style="font-size: 11px;">Total Valuation</small>
-                <h3 class="fw-bold mb-0 mt-1">${{ number_format($stats['total_valuation'], 0) }}</h3>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-icon icon-orange">
-                    <i class="fas fa-tag"></i>
-                </div>
-                <small class="text-muted fw-bold text-uppercase" style="font-size: 11px;">Active Brands</small>
-                <h3 class="fw-bold mb-0 mt-1">{{ $stats['active_brands'] }}</h3>
-            </div>
-        </div>
-    </div>
+
 
     <!-- List -->
     <div id="voucher-list-container">
@@ -273,11 +244,11 @@
                 success: function(data) {
                     $('#voucher-list-container').html(data);
                     $('#voucher-list-container').css('opacity', '1');
-                    
+
                     // Update count display
                     const totalCount = $(data).find('#total-vouchers-count').val() || $(data).filter('#total-vouchers-count').val();
-                    if(totalCount) $('#vouchers-count').text(totalCount);
-                    
+                    if (totalCount) $('#vouchers-count').text(totalCount);
+
                     window.history.pushState({}, '', targetUrl);
                 }
             });
@@ -287,7 +258,7 @@
         $('#inventory-filter-form').on('submit', function(e) {
             e.preventDefault();
             fetchVouchers();
-            
+
             // Close offcanvas
             var offcanvasElement = document.getElementById('filterOffcanvas');
             var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
@@ -328,7 +299,7 @@
         $('#clear-filters, #reset-filters-btn').on('click', function() {
             $('#inventory-filter-form')[0].reset();
             fetchVouchers("{{ route('inventory.index') }}");
-            
+
             // Close offcanvas if it was open
             var offcanvasElement = document.getElementById('filterOffcanvas');
             var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);

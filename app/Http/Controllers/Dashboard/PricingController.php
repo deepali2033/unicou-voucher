@@ -156,6 +156,70 @@ class PricingController extends Controller
         return response()->json(['success' => true, 'data' => $voucher]);
     }
 
+    public function edit($id)
+    {
+        $rule = VoucherPriceRule::findOrFail($id);
+        $vouchers = InventoryVoucher::all();
+        $allCountries = CountryHelper::getAllCountries();
+        return view('dashboard.pricing.pricing-set-form', compact('rule', 'vouchers', 'allCountries'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $rule = VoucherPriceRule::findOrFail($id);
+
+        $request->validate([
+            'inventory_voucher_id' => 'required|exists:inventory_vouchers,id',
+            'country_code' => 'required|string',
+            'sale_price' => 'required|numeric|min:0',
+            'discount_type' => 'required|in:fixed,percentage',
+            'discount_value' => 'required|numeric|min:0',
+            'expiry_date' => 'nullable|date',
+
+            'brand_name' => 'nullable|string',
+            'currency' => 'nullable|string',
+            'country_region' => 'nullable|string',
+            'voucher_variant' => 'nullable|string',
+            'voucher_type' => 'nullable|string',
+            'purchase_invoice_no' => 'nullable|string',
+            'purchase_date' => 'nullable|date',
+            'total_quantity' => 'nullable|integer',
+            'purchase_value' => 'nullable|numeric',
+            'taxes' => 'nullable|numeric',
+            'per_unit_price' => 'nullable|numeric',
+            'issue_date' => 'nullable|date',
+            'credit_limit' => 'nullable|numeric',
+        ]);
+
+        $allCountries = CountryHelper::getAllCountries();
+        $country_name = $allCountries[$request->country_code] ?? $request->country_code;
+
+        $rule->update([
+            'inventory_voucher_id' => $request->inventory_voucher_id,
+            'brand_name' => $request->brand_name,
+            'currency' => $request->currency,
+            'country_region' => $request->country_region,
+            'voucher_variant' => $request->voucher_variant,
+            'voucher_type' => $request->voucher_type,
+            'purchase_invoice_no' => $request->purchase_invoice_no,
+            'purchase_date' => $request->purchase_date,
+            'total_quantity' => $request->total_quantity,
+            'purchase_value' => $request->purchase_value,
+            'taxes' => $request->taxes,
+            'per_unit_price' => $request->per_unit_price,
+            'issue_date' => $request->issue_date,
+            'credit_limit' => $request->credit_limit,
+            'country_code' => $request->country_code,
+            'country_name' => $country_name,
+            'sale_price' => $request->sale_price,
+            'discount_type' => $request->discount_type,
+            'discount_value' => $request->discount_value,
+            'expiry_date' => $request->expiry_date,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Price rule updated successfully.']);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

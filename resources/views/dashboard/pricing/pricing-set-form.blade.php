@@ -1,9 +1,11 @@
 @extends('layouts.master')
 
 @section('content')
+@php $isEdit = isset($rule); @endphp
 <style>
 /* Fix height & alignment */
-.select2-container--default .select2-selection--multiple {
+.select2-container--default .select2-selection--multiple,
+.select2-container--default .select2-selection--single {
     min-height: 42px;
     padding: 4px 8px;
     border: 1px solid #ced4da;
@@ -29,7 +31,7 @@
 <div class="container-fluid">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">Set Pricing & Discount Rule</h5>
+            <h5 class="mb-0 fw-bold">{{ $isEdit ? 'Edit Pricing & Discount Rule' : 'Set Pricing & Discount Rule' }}</h5>
             <a href="{{ route('pricing.index') }}" class="btn btn-light btn-sm">
                 <i class="fas fa-arrow-left me-1"></i> Back to Rules
             </a>
@@ -37,13 +39,18 @@
         <div class="card-body px-4">
             <form id="setPriceForm">
                 @csrf
+                @if($isEdit)
+                    <input type="hidden" name="id" value="{{ $rule->id }}">
+                @endif
                 <div class="row">
                     <div class="col-md-12 mb-4">
                         <label class="form-label fw-bold text-uppercase small">Select Voucher (Auto-fills details)</label>
                         <select name="inventory_voucher_id" id="voucherSelect" class="form-select select2" required>
                             <option value="">Choose a voucher from inventory...</option>
                             @foreach($vouchers as $v)
-                            <option value="{{ $v->id }}">{{ $v->brand_name }} ({{ $v->sku_id }})</option>
+                            <option value="{{ $v->id }}" {{ ($isEdit && $rule->inventory_voucher_id == $v->id) ? 'selected' : '' }}>
+                                {{ $v->brand_name }} ({{ $v->sku_id }})
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -52,71 +59,71 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Brand Name</label>
-                        <input type="text" name="brand_name" id="brand_name" class="form-control">
+                        <input type="text" name="brand_name" id="brand_name" class="form-control" value="{{ $isEdit ? $rule->brand_name : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Currency</label>
-                        <input type="text" name="currency" id="currency" class="form-control">
+                        <input type="text" name="currency" id="currency" class="form-control" value="{{ $isEdit ? $rule->currency : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Country/Region</label>
-                        <input type="text" name="country_region" id="country_region" class="form-control">
+                        <input type="text" name="country_region" id="country_region" class="form-control" value="{{ $isEdit ? $rule->country_region : '' }}">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Voucher Variant</label>
-                        <input type="text" name="voucher_variant" id="voucher_variant" class="form-control">
+                        <input type="text" name="voucher_variant" id="voucher_variant" class="form-control" value="{{ $isEdit ? $rule->voucher_variant : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Voucher Type</label>
-                        <input type="text" name="voucher_type" id="voucher_type" class="form-control">
+                        <input type="text" name="voucher_type" id="voucher_type" class="form-control" value="{{ $isEdit ? $rule->voucher_type : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Purchase Invoice No.</label>
-                        <input type="text" name="purchase_invoice_no" id="purchase_invoice_no" class="form-control">
+                        <input type="text" name="purchase_invoice_no" id="purchase_invoice_no" class="form-control" value="{{ $isEdit ? $rule->purchase_invoice_no : '' }}">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Purchase Date</label>
-                        <input type="date" name="purchase_date" id="purchase_date" class="form-control">
+                        <input type="date" name="purchase_date" id="purchase_date" class="form-control" value="{{ $isEdit && $rule->purchase_date ? \Carbon\Carbon::parse($rule->purchase_date)->format('Y-m-d') : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Total Quantity</label>
-                        <input type="number" name="total_quantity" id="total_quantity" class="form-control">
+                        <input type="number" name="total_quantity" id="total_quantity" class="form-control" value="{{ $isEdit ? $rule->total_quantity : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Purchase Value</label>
-                        <input type="number" step="0.01" name="purchase_value" id="purchase_value" class="form-control">
+                        <input type="number" step="0.01" name="purchase_value" id="purchase_value" class="form-control" value="{{ $isEdit ? $rule->purchase_value : '' }}">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Taxes</label>
-                        <input type="number" step="0.01" name="taxes" id="taxes" class="form-control">
+                        <input type="number" step="0.01" name="taxes" id="taxes" class="form-control" value="{{ $isEdit ? $rule->taxes : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Per Unit Price</label>
-                        <input type="number" step="0.01" name="per_unit_price" id="per_unit_price" class="form-control">
+                        <input type="number" step="0.01" name="per_unit_price" id="per_unit_price" class="form-control" value="{{ $isEdit ? $rule->per_unit_price : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Credit Limit</label>
-                        <input type="number" step="0.01" name="credit_limit" id="credit_limit" class="form-control">
+                        <input type="number" step="0.01" name="credit_limit" id="credit_limit" class="form-control" value="{{ $isEdit ? $rule->credit_limit : '' }}">
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Issue Date</label>
-                        <input type="date" name="issue_date" id="issue_date" class="form-control">
+                        <input type="date" name="issue_date" id="issue_date" class="form-control" value="{{ $isEdit && $rule->issue_date ? \Carbon\Carbon::parse($rule->issue_date)->format('Y-m-d') : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Expiry Date</label>
-                        <input type="date" name="expiry_date" id="expiry_date" class="form-control">
+                        <input type="date" name="expiry_date" id="expiry_date" class="form-control" value="{{ $isEdit && $rule->expiry_date ? \Carbon\Carbon::parse($rule->expiry_date)->format('Y-m-d') : '' }}">
                     </div>
                 </div>
 
@@ -124,37 +131,45 @@
 
                 <div class="row">
                     <div class="col-md-12 mb-4">
-                        <label class="form-label fw-bold text-uppercase small">Select Target Countries (Multiple)</label>
-                        <select name="countries[]" id="countries" class="form-select select2" multiple required>
-                            @foreach($allCountries as $code => $name)
-                            <option value="{{ $code }}">{{ $name }} ({{ $code }})</option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">You can apply this pricing rule to multiple countries at once.</small>
+                        <label class="form-label fw-bold text-uppercase small">Select Target {{ $isEdit ? 'Country' : 'Countries (Multiple)' }}</label>
+                        @if($isEdit)
+                            <select name="country_code" id="countries" class="form-select select2" required>
+                                @foreach($allCountries as $code => $name)
+                                <option value="{{ $code }}" {{ $rule->country_code == $code ? 'selected' : '' }}>{{ $name }} ({{ $code }})</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <select name="countries[]" id="countries" class="form-select select2" multiple required>
+                                @foreach($allCountries as $code => $name)
+                                <option value="{{ $code }}">{{ $name }} ({{ $code }})</option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">You can apply this pricing rule to multiple countries at once.</small>
+                        @endif
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Sale Price ($)</label>
-                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" required>
+                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" value="{{ $isEdit ? $rule->sale_price : '' }}" required>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Discount Type</label>
                         <select name="discount_type" class="form-select">
-                            <option value="fixed">Fixed Amount ($)</option>
-                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed" {{ ($isEdit && $rule->discount_type == 'fixed') ? 'selected' : '' }}>Fixed Amount ($)</option>
+                            <option value="percentage" {{ ($isEdit && $rule->discount_type == 'percentage') ? 'selected' : '' }}>Percentage (%)</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Discount Value</label>
-                        <input type="number" step="0.01" name="discount_value" class="form-control" value="0">
+                        <input type="number" step="0.01" name="discount_value" class="form-control" value="{{ $isEdit ? $rule->discount_value : '0' }}">
                     </div>
                 </div>
 
                 <div class="mt-4 pb-4 border-top pt-4 text-end">
                     <button type="submit" class="btn btn-primary px-5 shadow-sm" id="submitBtn">
-                        <i class="fas fa-check-circle me-1"></i> Save Pricing Rule
+                        <i class="fas fa-check-circle me-1"></i> {{ $isEdit ? 'Update Pricing Rule' : 'Save Pricing Rule' }}
                     </button>
                 </div>
             </form>
@@ -178,7 +193,7 @@ $(document).ready(function() {
         placeholder: "Select target countries",
         allowClear: true,
         width: '100%',
-        closeOnSelect: false
+        closeOnSelect: {{ $isEdit ? 'true' : 'false' }}
     });
 
     $('#voucherSelect').on('change', function() {
@@ -216,10 +231,10 @@ $(document).ready(function() {
         e.preventDefault();
         
         var btn = $('#submitBtn');
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Saving...');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> {{ $isEdit ? "Updating..." : "Saving..." }}');
 
         $.ajax({
-            url: "{{ route('pricing.store') }}",
+            url: "{{ $isEdit ? route('pricing.update', $rule->id) : route('pricing.store') }}",
             type: 'POST',
             data: $(this).serialize(),
             success: function(response) {
@@ -230,7 +245,7 @@ $(document).ready(function() {
                     }, 1500);
                 } else {
                     toastr.error(response.message);
-                    btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> Save Pricing Rule');
+                    btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> {{ $isEdit ? "Update Pricing Rule" : "Save Pricing Rule" }}');
                 }
             },
             error: function(xhr) {
@@ -242,7 +257,7 @@ $(document).ready(function() {
                 } else {
                     toastr.error('Something went wrong. Please try again.');
                 }
-                btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> Save Pricing Rule');
+                btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> {{ $isEdit ? "Update Pricing Rule" : "Save Pricing Rule" }}');
             }
         });
     });

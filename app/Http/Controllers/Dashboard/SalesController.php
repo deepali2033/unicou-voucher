@@ -9,6 +9,6 @@ class SalesController extends Controller
 {
     public function SalesReport()
     {
-        return view('dashboard.sales.index');
+        return view('dashboard.sales.sales-index');
     }
 }

@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">SKU ID</label>
-                        <input type="text" name="sku_id" class="form-control @error('sku_id') is-invalid @enderror" value="{{ old('sku_id') }}" required>
+                        <input type="text" name="sku_id" class="form-control @error('sku_id') is-invalid @enderror" value="{{ old('sku_id', $next_sku) }}" readonly required>
                         @error('sku_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-3">
@@ -45,7 +45,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Voucher Type</label>
-                        <input name="voucher_type" class="fform-control" value="{{ old('voucher_type') }}" required>
+                        <input name="voucher_type" class="form-control" value="{{ old('voucher_type') }}" required>
                     </div>
                     <div class=" col-md-6">
                         <label class="form-label small fw-bold text-uppercase">Logo Image</label>
@@ -141,7 +141,8 @@
 
                     <div class="col-12 mt-4">
                         <label class="form-label small fw-bold text-uppercase">Voucher Codes / Upload Info</label>
-                        <textarea name="upload_vouchers" class="form-control" rows="4" placeholder="Enter voucher codes or links here...">{{ old('upload_vouchers') }}</textarea>
+                        <textarea name="upload_vouchers" class="form-control" rows="4" placeholder="Enter voucher codes separated by comma...">{{ old('upload_vouchers') }}</textarea>
+                        <small class="text-muted">Enter multiple codes separated by commas (e.g., CODE1, CODE2, CODE3)</small>
                     </div>
 
                     <div class="col-12 text-end mt-4">

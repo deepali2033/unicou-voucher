@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\BankController;
 use App\Http\Controllers\Dashboard\SalesController;
 use App\Http\Controllers\Dashboard\CustomerController;
+use App\Http\Controllers\Dashboard\WebhookController;
 use App\Http\Controllers\Dashboard\PurchesController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\VoucherController;
@@ -70,9 +71,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
 });
 
+
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
-
+    Route::get('manager/disputes', [ManagerController::class, 'disputes'])->name('disputes');
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications.index');
     Route::get('/my-profile', [UserController::class, 'profile'])->name('profile.index');
@@ -87,6 +89,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     Route::get('/pricing/voucher-details/{id}', [PricingController::class, 'getVoucherDetails'])->name('pricing.voucher-details');
     Route::post('/pricing/store', [PricingController::class, 'store'])->name('pricing.store');
+    Route::get('/pricing/{id}/edit', [PricingController::class, 'edit'])->name('pricing.edit');
+    Route::post('/pricing/{id}/update', [PricingController::class, 'update'])->name('pricing.update');
     Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
 
@@ -198,6 +202,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
     Route::get('/banks', [BankController::class, 'bankreport'])->name('banks.bank-table');
+    Route::post('/webhook/save', [WebhookController::class, 'save'])->name('webhook.save');
 
     // Admin Payment Methods
     Route::get('/payment-methods', [BankController::class, 'index'])->name('payment-methods.index');
@@ -249,6 +254,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
         Route::get('/bank-link', [AgentController::class, 'bankLink'])->name('bank.link');
         Route::post('/bank-link', [AgentController::class, 'storeBank'])->name('bank.store');
     });
+
 
 
     // Manager Specific

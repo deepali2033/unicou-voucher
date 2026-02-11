@@ -75,7 +75,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('pricing.index') }}">
-                    <i class="fas fa-tags me-2"></i> Purchases
+                    <i class="fas fa-tags me-2"></i> Purches
                 </a>
             </li>
 
@@ -241,11 +241,11 @@
             </li>
 
             <!-- Audit -->
-            <!-- <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" href="{{ route('audit.index') }}">
                     <i class="fas fa-clipboard-list me-2"></i> Audit & Logs
                 </a>
-            </li> -->
+            </li>
 
             <!-- Settings -->
             <li class="nav-item">
