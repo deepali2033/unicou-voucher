@@ -38,6 +38,31 @@
             </a>
         </div>
         <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Total Stocks</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ $stats['total_users'] }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <a href="" class="text-decoration-none">
+                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100">
+                    <div class="card-body">
+                        <div class="text-muted small mb-1">Total Resellers</div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="fw-bold mb-0"></h3>
+                            <span class="ms-auto text-warning small fw-bold"><i class="fas fa-clock me-1"></i>Action Required</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body">
                     <div class="text-muted small mb-1">Active Agents</div>
@@ -59,30 +84,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-primary border-4">
-                <div class="card-body">
-                    <div class="text-muted small mb-1">Total Stocks</div>
-                    <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $stats['total_users'] }}</h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <a href="" class="text-decoration-none">
-                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100">
-                    <div class="card-body">
-                        <div class="text-muted small mb-1">Total Resellers</div>
-                        <div class="d-flex align-items-center">
-                            <h3 class="fw-bold mb-0"></h3>
-                            <span class="ms-auto text-warning small fw-bold"><i class="fas fa-clock me-1"></i>Action Required</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body">
@@ -114,7 +116,8 @@
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold">Voucher & Revenue Trends</h6>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary active">Weekly</button>
+                        <button class="btn btn-outline-secondary active">Daily</button>
+                        <button class="btn btn-outline-secondary ">Weekly</button>
                         <button class="btn btn-outline-secondary">Monthly</button>
                     </div>
                 </div>

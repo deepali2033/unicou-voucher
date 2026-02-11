@@ -93,6 +93,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_approve_user',
         'can_view_users',
         'can_impersonate_user',
+        'can_stop_system_sales',
+        'can_stop_country_sales',
+        'can_stop_voucher_sales',
+        'category',
     ];
 
     /**
@@ -128,6 +132,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'can_approve_user' => 'boolean',
             'can_view_users' => 'boolean',
             'can_impersonate_user' => 'boolean',
+            'can_stop_system_sales' => 'boolean',
+            'can_stop_country_sales' => 'boolean',
+            'can_stop_voucher_sales' => 'boolean',
         ];
     }
 

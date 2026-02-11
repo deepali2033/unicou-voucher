@@ -26,17 +26,25 @@
                     <form action="{{ route('system.control.update') }}" method="POST">
                         @csrf
                         <div class="row mb-4">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">Maintenance Mode</label>
-                                <select name="settings[maintenance_mode]" class="form-select">
+                                <select name="settings[maintenance_mode]" class="form-select" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
                                     <option value="off" {{ ($settings['maintenance_mode'] ?? 'off') == 'off' ? 'selected' : '' }}>Disabled (System Online)</option>
                                     <option value="on" {{ ($settings['maintenance_mode'] ?? 'off') == 'on' ? 'selected' : '' }}>Enabled (System Offline)</option>
                                 </select>
-                                <small class="text-muted">Prevents agents and students from accessing the dashboard.</small>
+                                <small class="text-muted">Prevents access to dashboard.</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-danger">Stop System Sales</label>
+                                <select name="settings[stop_system_sales]" class="form-select border-danger" {{ auth()->user()->account_type === 'manager' && !auth()->user()->can_stop_system_sales ? 'disabled' : '' }}>
+                                    <option value="off" {{ ($settings['stop_system_sales'] ?? 'off') == 'off' ? 'selected' : '' }}>Disabled (Sales Active)</option>
+                                    <option value="on" {{ ($settings['stop_system_sales'] ?? 'off') == 'on' ? 'selected' : '' }}>Enabled (STOP ALL SALES)</option>
+                                </select>
+                                <small class="text-muted">Instantly stops all sales.</small>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">Registration Status</label>
-                                <select name="settings[registration_enabled]" class="form-select">
+                                <select name="settings[registration_enabled]" class="form-select" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
                                     <option value="on" {{ ($settings['registration_enabled'] ?? 'on') == 'on' ? 'selected' : '' }}>Open</option>
                                     <option value="off" {{ ($settings['registration_enabled'] ?? 'on') == 'off' ? 'selected' : '' }}>Closed</option>
                                 </select>
@@ -46,22 +54,53 @@
 
                         <div class="row mb-4">
                             <div class="col-md-6">
+                                <label class="form-label fw-bold">Stop Country Sales</label>
+                                @php
+                                $stoppedCountries = json_decode($settings['stop_country_sales'] ?? '[]', true);
+                                @endphp
+                                <select name="settings[stop_country_sales][]" class="form-select" multiple size="5" {{ auth()->user()->account_type === 'manager' && !auth()->user()->can_stop_country_sales ? 'disabled' : '' }}>
+                                    @foreach($countries as $country)
+                                    <option value="{{ $country->country_iso }}" {{ in_array($country->country_iso, $stoppedCountries) ? 'selected' : '' }}>
+                                        {{ $country->country }} ({{ $country->country_iso }})
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Hold Ctrl to select multiple countries to stop sales.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Stop Voucher Sales</label>
+                                @php
+                                $stoppedVouchers = json_decode($settings['stop_voucher_sales'] ?? '[]', true);
+                                @endphp
+                                <select name="settings[stop_voucher_sales][]" class="form-select" multiple size="5" {{ auth()->user()->account_type === 'manager' && !auth()->user()->can_stop_voucher_sales ? 'disabled' : '' }}>
+                                    @foreach($vouchers as $voucher)
+                                    <option value="{{ $voucher->id }}" {{ in_array($voucher->id, $stoppedVouchers) ? 'selected' : '' }}>
+                                        {{ $voucher->brand_name }} - {{ $voucher->voucher_variant }} ({{ $voucher->country_name }})
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Hold Ctrl to select multiple vouchers to stop sales.</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold">Minimum Wallet Top-up</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" name="settings[min_topup]" class="form-control" value="{{ $settings['min_topup'] ?? '50' }}">
+                                    <input type="number" name="settings[min_topup]" class="form-control" value="{{ $settings['min_topup'] ?? '50' }}" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Daily Order Limit (per Agent)</label>
-                                <input type="number" name="settings[daily_order_limit]" class="form-control" value="{{ $settings['daily_order_limit'] ?? '100' }}">
+                                <input type="number" name="settings[daily_order_limit]" class="form-control" value="{{ $settings['daily_order_limit'] ?? '100' }}" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
                             </div>
                         </div>
 
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">System Announcement</label>
-                                <textarea name="settings[announcement]" class="form-control" rows="3" placeholder="Global message shown to all users...">{{ $settings['announcement'] ?? '' }}</textarea>
+                                <textarea name="settings[announcement]" class="form-control" rows="3" placeholder="Global message shown to all users..." {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>{{ $settings['announcement'] ?? '' }}</textarea>
                             </div>
                         </div>
 
@@ -118,8 +157,12 @@
                     <form action="{{ route('system.toggle') }}" method="POST" class="d-grid gap-3">
                         @csrf
                         <input type="hidden" name="reason" value="Emergency System Halt">
-                        <button type="submit" class="btn btn-outline-danger fw-bold py-3">
-                            <i class="fas fa-power-off me-2"></i> HOLD ALL TRANSACTIONS
+                        @php
+                        $isFrozen = ($settings['emergency_freeze'] ?? 'off') == 'on';
+                        $canToggle = auth()->user()->account_type !== 'manager' || auth()->user()->can_stop_system_sales;
+                        @endphp
+                        <button type="submit" class="btn {{ $isFrozen ? 'btn-danger' : 'btn-outline-danger' }} fw-bold py-3" {{ !$canToggle ? 'disabled' : '' }}>
+                            <i class="fas fa-power-off me-2"></i> {{ $isFrozen ? 'SYSTEM FROZEN - UNFREEZE' : 'HOLD ALL TRANSACTIONS' }}
                         </button>
                     </form>
 

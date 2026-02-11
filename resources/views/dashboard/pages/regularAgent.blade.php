@@ -100,6 +100,29 @@
 
 @push('scripts')
 <script>
+    // Handle Category Change
+    $(document).on('change', '.category-select', function() {
+        let userId = $(this).data('user-id');
+        let category = $(this).val();
+
+        $.ajax({
+            url: '/dashboard/users/' + userId + '/category',
+            method: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                category: category
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success('Category updated!');
+                }
+            },
+            error: function() {
+                toastr.error('Failed to update category.');
+            }
+        });
+    });
+
     $(document).ready(function() {
         function updateTable(url) {
             $.ajax({

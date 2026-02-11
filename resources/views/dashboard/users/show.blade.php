@@ -6,6 +6,7 @@
         position: relative;
         display: inline-block;
     }
+
     .status-dot {
         position: absolute;
         bottom: 10px;
@@ -16,6 +17,7 @@
         border: 2px solid #fff;
         border-radius: 50%;
     }
+
     .badge-soft-blue {
         background-color: #eff6ff;
         color: #3b82f6;
@@ -25,17 +27,25 @@
         letter-spacing: 0.5px;
         padding: 5px 15px;
     }
+
     .badge-soft-success {
         background-color: #f0fdf4;
         color: #16a34a;
         font-weight: 600;
     }
-    .text-xs { font-size: 0.75rem; }
-    .text-sm { font-size: 0.875rem; }
-    
+
+    .text-xs {
+        font-size: 0.75rem;
+    }
+
+    .text-sm {
+        font-size: 0.875rem;
+    }
+
     .nav-tabs {
         border-bottom: 1px solid #e5e7eb;
     }
+
     .nav-tabs .nav-link {
         border: none;
         color: #6b7280;
@@ -43,10 +53,12 @@
         padding: 1rem 1.5rem;
         position: relative;
     }
+
     .nav-tabs .nav-link.active {
         color: #3b82f6;
         background: transparent;
     }
+
     .nav-tabs .nav-link.active::after {
         content: '';
         position: absolute;
@@ -56,14 +68,17 @@
         height: 2px;
         background-color: #3b82f6;
     }
+
     .progress-thin {
         height: 6px;
     }
+
     .doc-card {
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         overflow: hidden;
     }
+
     .doc-header {
         padding: 15px;
         display: flex;
@@ -71,6 +86,7 @@
         align-items: center;
         border-bottom: 1px solid #e5e7eb;
     }
+
     .doc-body {
         height: 200px;
         display: flex;
@@ -79,11 +95,13 @@
         background-color: #f9fafb;
         position: relative;
     }
+
     .doc-footer {
         padding: 10px 15px;
         background-color: #fff;
         border-top: 1px solid #e5e7eb;
     }
+
     .doc-status-missing {
         background-color: #fef2f2;
         color: #ef4444;
@@ -93,6 +111,7 @@
         border-radius: 4px;
         text-transform: uppercase;
     }
+
     .doc-status-uploaded {
         background-color: #f0fdf4;
         color: #22c55e;
@@ -102,6 +121,7 @@
         border-radius: 4px;
         text-transform: uppercase;
     }
+
     .btn-upload {
         background-color: #1e293b;
         color: #fff;
@@ -109,6 +129,7 @@
         font-weight: 600;
         padding: 6px 16px;
     }
+
     .btn-upload:hover {
         background-color: #0f172a;
         color: #fff;
@@ -250,7 +271,7 @@
                     <i class="fas fa-exclamation-triangle text-danger"></i>
                     <h6 class="text-uppercase text-muted text-xs fw-bold mb-0">Risk & Compliance</h6>
                 </div>
-                
+
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted text-xs">Risk Level</span>
@@ -271,7 +292,7 @@
                     <span class="text-muted text-xs">Complaints</span>
                     <span class="fw-bold text-dark text-xs">0</span>
                 </div>
-                
+
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-muted text-xs">KYC Status</span>
                     <span class="text-success text-xs fw-bold">Verified</span>
@@ -618,30 +639,30 @@
                                         </div>
                                         <div class="doc-body">
                                             @if($data['path'])
-                                                @php
-                                                $extension = strtolower(pathinfo($data['path'], PATHINFO_EXTENSION));
-                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                                @endphp
-                                                @if($isImage)
-                                                    <img src="{{ asset('storage/' . $data['path']) }}" class="img-fluid" style="max-height: 100%; width: 100%; object-fit: cover;">
-                                                    @if($user->profile_verification_status === 'verified' && $label === 'Final ID Doc')
-                                                    <div class="position-absolute bottom-0 start-0 m-3">
-                                                        <span class="badge bg-white text-success border px-2 py-1 text-xs">
-                                                            <i class="fas fa-check-circle me-1"></i> Verified
-                                                        </span>
-                                                    </div>
-                                                    @endif
-                                                @else
-                                                    <div class="text-center">
-                                                        <i class="fas fa-file-alt fa-3x text-muted mb-2"></i>
-                                                        <div class="text-xs text-muted px-2 text-truncate" style="max-width: 200px;">{{ basename($data['path']) }}</div>
-                                                    </div>
-                                                @endif
+                                            @php
+                                            $extension = strtolower(pathinfo($data['path'], PATHINFO_EXTENSION));
+                                            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                            @endphp
+                                            @if($isImage)
+                                            <img src="{{ asset('storage/' . $data['path']) }}" class="img-fluid" style="max-height: 100%; width: 100%; object-fit: cover;">
+                                            @if($user->profile_verification_status === 'verified' && $label === 'Final ID Doc')
+                                            <div class="position-absolute bottom-0 start-0 m-3">
+                                                <span class="badge bg-white text-success border px-2 py-1 text-xs">
+                                                    <i class="fas fa-check-circle me-1"></i> Verified
+                                                </span>
+                                            </div>
+                                            @endif
                                             @else
-                                                <div class="text-center">
-                                                    <i class="fas fa-file-alt fa-3x text-muted mb-2" style="opacity: 0.2;"></i>
-                                                    <div class="text-muted text-sm">No file uploaded</div>
-                                                </div>
+                                            <div class="text-center">
+                                                <i class="fas fa-file-alt fa-3x text-muted mb-2"></i>
+                                                <div class="text-xs text-muted px-2 text-truncate" style="max-width: 200px;">{{ basename($data['path']) }}</div>
+                                            </div>
+                                            @endif
+                                            @else
+                                            <div class="text-center">
+                                                <i class="fas fa-file-alt fa-3x text-muted mb-2" style="opacity: 0.2;"></i>
+                                                <div class="text-muted text-sm">No file uploaded</div>
+                                            </div>
                                             @endif
                                         </div>
                                         <div class="doc-footer">
@@ -727,6 +748,9 @@
                                     ['name' => 'can_freeze_user', 'label' => 'Freeze Accounts', 'desc' => 'Suspend or reactivate user access'],
                                     ['name' => 'can_reset_password', 'label' => 'Reset Passwords', 'desc' => 'Change passwords for managed users'],
                                     ['name' => 'can_impersonate_user', 'label' => 'Access User Dashboards', 'desc' => 'Login as any student or agent to assist them'],
+                                    ['name' => 'can_stop_system_sales', 'label' => 'Stop System Sales', 'desc' => 'Allow manager to toggle global system sales status'],
+                                    ['name' => 'can_stop_country_sales', 'label' => 'Stop Country Sales', 'desc' => 'Allow manager to restrict sales for specific countries'],
+                                    ['name' => 'can_stop_voucher_sales', 'label' => 'Stop Voucher Sales', 'desc' => 'Allow manager to restrict sales for specific vouchers'],
                                     ];
                                     @endphp
 

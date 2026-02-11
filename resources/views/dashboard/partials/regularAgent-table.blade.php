@@ -31,13 +31,13 @@
                 <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
                 <td>
                     @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
-                    <select class="form-select form-select-sm account-type-select" data-user-id="{{ $user->id }}" style="min-width:140px;">
-                        <option value="silver" {{ $user->account_type == 'silver' ? 'selected' : '' }}>🥈 Silver</option>
-                        <option value="gold" {{ $user->account_type == 'gold' ? 'selected' : '' }}>🥇 Gold</option>
-                        <option value="diamond" {{ $user->account_type == 'diamond' ? 'selected' : '' }}>💎 Diamond</option>
+                    <select class="form-select form-select-sm category-select" data-user-id="{{ $user->id }}" style="min-width:140px;">
+                        <option value="silver" {{ $user->category == 'silver' ? 'selected' : '' }}>🥈 Silver</option>
+                        <option value="gold" {{ $user->category == 'gold' ? 'selected' : '' }}>🥇 Gold</option>
+                        <option value="diamond" {{ $user->category == 'diamond' ? 'selected' : '' }}>💎 Diamond</option>
                     </select>
                     @else
-                    <span class="badge bg-secondary">{{ ucfirst($user->account_type) }}</span>
+                    <span class="badge bg-secondary">{{ ucfirst($user->category) }}</span>
                     @endif
                 </td>
                 <td></td>

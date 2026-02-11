@@ -101,12 +101,12 @@
 @push('scripts')
 <script>
     // Handle Category Change
-    $(document).on('change', '.category', function() {
+    $(document).on('change', '.category-select', function() {
         let userId = $(this).data('user-id');
         let category = $(this).val();
 
         $.ajax({
-            url: '/users/' + userId + '/update-category', // ye route create karna padega
+            url: '/dashboard/users/' + userId + '/category',
             method: 'POST',
             data: {
                 _token: "{{ csrf_token() }}",

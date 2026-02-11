@@ -35,17 +35,24 @@
         <div class="notification-bell">
             <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
         </div>
-
         @php
-        $countryCode = session('user_country_code', 'US');
-        $countryName = session('user_country_name', 'United States');
-        $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
+        use App\Helpers\LocationHelper;
 
+        if (!session()->has('geo')) {
+        LocationHelper::geo();
+        }
         @endphp
 
+        @php
+        $countryCode = session('geo.country_code', 'US');
+        $countryName = session('geo.country_name', 'United States');
+        $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
+        @endphp
+
+
         <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
-            <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width: 30px; border-radius: 2px; border: 1px solid #eee;">
-            <span class="d-none d-md-inline text-muted small fw-bold"> {{ $geo['country_code'] }}</span>
+            <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width:30px;border-radius:2px;border:1px solid #eee;">
+            <span class="d-none d-md-inline text-muted small fw-bold">{{ $countryCode }}</span>
         </div>
 
 

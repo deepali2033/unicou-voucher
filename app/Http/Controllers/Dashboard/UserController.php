@@ -341,9 +341,29 @@ class UserController extends Controller
             'can_view_users' => $request->has('can_view_users'),
 
             'can_impersonate_user' => $request->has('can_impersonate_user'),
+            'can_stop_system_sales' => $request->has('can_stop_system_sales'),
+            'can_stop_country_sales' => $request->has('can_stop_country_sales'),
+            'can_stop_voucher_sales' => $request->has('can_stop_voucher_sales'),
         ]);
 
         return back()->with('success', 'Manager permissions updated successfully.');
+    }
+
+    public function updateCategory(Request $request, User $user)
+    {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+            return response()->json(['error' => 'Unauthorized action.'], 403);
+        }
+
+        $request->validate([
+            'category' => 'required|string|in:silver,gold,diamond',
+        ]);
+
+        $user->update([
+            'category' => $request->category,
+        ]);
+
+        return response()->json(['success' => 'Category updated successfully.']);
     }
 
     public function downloadPDF(Request $request)
@@ -427,7 +447,7 @@ class UserController extends Controller
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
-        
+
         $query = User::where('account_type', 'manager');
 
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {
@@ -536,12 +556,12 @@ class UserController extends Controller
         }
 
         if ($role === 'student') {
-            $users = $query->withCount(['orders as orders_count' => function($q) {
+            $users = $query->withCount(['orders as orders_count' => function ($q) {
                 $q->where('status', 'delivered');
-            }])->withSum(['orders as total_revenue' => function($q) {
+            }])->withSum(['orders as total_revenue' => function ($q) {
                 $q->where('status', 'delivered');
             }], 'total_amount')
-            ->latest()->get();
+                ->latest()->get();
         } else {
             $users = $query->latest()->get();
         }
@@ -554,10 +574,21 @@ class UserController extends Controller
 
         if ($role === 'student') {
             fputcsv($handle, [
-                'Sr. No.', 'User ID', 'Date of Reg.', 'Last Active', 'Full Name', 
-                'Country', 'Email ID', 'Highest Education', 'Contact No.', 
-                'Vouchers Purchased', 'Revenue Paid', 'Disputed Payments', 
-                'Referral Points', 'Bonus Points', 'Status'
+                'Sr. No.',
+                'User ID',
+                'Date of Reg.',
+                'Last Active',
+                'Full Name',
+                'Country',
+                'Email ID',
+                'Highest Education',
+                'Contact No.',
+                'Vouchers Purchased',
+                'Revenue Paid',
+                'Disputed Payments',
+                'Referral Points',
+                'Bonus Points',
+                'Status'
             ]);
 
             foreach ($users as $index => $user) {
@@ -783,12 +814,12 @@ class UserController extends Controller
             $query->where('rating', $request->rating);
         }
 
-        $users = $query->withCount(['orders as orders_count' => function($q) {
+        $users = $query->withCount(['orders as orders_count' => function ($q) {
             $q->where('status', 'delivered');
-        }])->withSum(['orders as total_revenue' => function($q) {
+        }])->withSum(['orders as total_revenue' => function ($q) {
             $q->where('status', 'delivered');
         }], 'total_amount')
-        ->latest()->paginate(10)->withQueryString();
+            ->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.student-table', compact('users'))->render();

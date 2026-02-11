@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class AuditLog extends Model
 {
     protected $fillable = ['user_id', 'action', 'description', 'ip_address'];
-    public $timestamps = false;
+    public $timestamps = true;
+    const UPDATED_AT = null;
+
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
 
     public function user()
     {
