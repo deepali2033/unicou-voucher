@@ -65,7 +65,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Active Agents</div>
+                    <div class="text-muted small mb-1">Total Agents</div>
                     <div class="d-flex align-items-center">
                         <h3 class="fw-bold mb-0">{{ $stats['agents'] }}</h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-user-tie me-1"></i>B2B</span>
@@ -76,7 +76,7 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Active Students</div>
+                    <div class="text-muted small mb-1">Total Students</div>
                     <div class="d-flex align-items-center">
                         <h3 class="fw-bold mb-0">{{ $stats['students'] }}</h3>
                         <span class="ms-auto text-info small fw-bold"><i class="fas fa-user-graduate me-1"></i>B2C</span>
@@ -119,6 +119,7 @@
                         <button class="btn btn-outline-secondary active">Daily</button>
                         <button class="btn btn-outline-secondary ">Weekly</button>
                         <button class="btn btn-outline-secondary">Monthly</button>
+                        <button class="btn btn-outline-secondary">Yearly</button>
                     </div>
                 </div>
                 <div class="card-body">

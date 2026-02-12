@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle" style="white-space: nowrap;">
         <thead class="table-light">
             <tr>
                 <th>Sr. No.</th>
