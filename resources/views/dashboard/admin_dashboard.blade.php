@@ -134,7 +134,7 @@
         </div>
         <div class="col-lg-4">
             <!-- Low Stock Alerts -->
-            <div class="card shadow-sm border-0 mb-4">
+            <!-- <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h6 class="mb-0 fw-bold text-danger"><i class="fas fa-exclamation-circle me-1"></i> Low Stock Alerts</h6>
                 </div>
@@ -163,7 +163,120 @@
                 <div class="card-footer bg-white text-center py-2">
                     <a href="{{ route('stock.alerts') }}" class="small text-decoration-none text-primary fw-bold">View All Alerts</a>
                 </div>
+            </div> -->
+<div class="card custom-accordion-card border-0 mb-4">
+    <div class="card-body p-0">
+
+        <div class="accordion" id="dashboardAccordion">
+
+            <!-- Top -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseOne">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>
+                        <span>Top</span>
+                    </button>
+                </h2>
+                <div id="collapseOne"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#dashboardAccordion">
+                    <div class="accordion-body">
+                        Top content goes here...
+                    </div>
+                </div>
             </div>
+
+            <!-- Selling Brand -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseTwo">
+                        <i class="fas fa-tags me-2 text-success"></i>
+                        <span>Selling Brand</span>
+                    </button>
+                </h2>
+                <div id="collapseTwo"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#dashboardAccordion">
+                    <div class="accordion-body">
+                        Selling Brand content goes here...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selling Varient -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseThree">
+                        <i class="fas fa-layer-group me-2 text-warning"></i>
+                        <span>Selling Varient</span>
+                    </button>
+                </h2>
+                <div id="collapseThree"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#dashboardAccordion">
+                    <div class="accordion-body">
+                        Selling Varient content goes here...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buyer -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseFour">
+                        <i class="fas fa-user me-2 text-danger"></i>
+                        <span>Buyer</span>
+                    </button>
+                </h2>
+                <div id="collapseFour"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#dashboardAccordion">
+                    <div class="accordion-body">
+                        Buyer content goes here...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Country -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseFive">
+                        <i class="fas fa-globe me-2 text-info"></i>
+                        <span>Country</span>
+                    </button>
+                </h2>
+                <div id="collapseFive"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#dashboardAccordion">
+                    <div class="accordion-body">
+                        Country content goes here...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+            
 
             <!-- System Stats -->
             <div class="card shadow-sm border-0">
