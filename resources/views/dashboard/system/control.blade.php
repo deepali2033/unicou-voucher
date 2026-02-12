@@ -11,145 +11,78 @@
 
     @if(session('success'))
     <div class="alert alert-success border-0 shadow-sm mb-4">
-        {{ session('success') }}
+        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
     </div>
     @endif
 
     <div class="row">
         <!-- System Settings -->
         <div class="col-md-8">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold">Global Settings</h5>
-                </div>
-                <div class="card-body">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Voucher Sales Controls</h5>
                     <form action="{{ route('system.control.update') }}" method="POST">
                         @csrf
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Maintenance Mode</label>
-                                <select name="settings[maintenance_mode]" class="form-select" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
-                                    <option value="off" {{ ($settings['maintenance_mode'] ?? 'off') == 'off' ? 'selected' : '' }}>Disabled (System Online)</option>
-                                    <option value="on" {{ ($settings['maintenance_mode'] ?? 'off') == 'on' ? 'selected' : '' }}>Enabled (System Offline)</option>
-                                </select>
-                                <small class="text-muted">Prevents access to dashboard.</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-danger">Stop System Sales</label>
-                                <select name="settings[stop_system_sales]" class="form-select border-danger" {{ auth()->user()->account_type === 'manager' && !auth()->user()->can_stop_system_sales ? 'disabled' : '' }}>
-                                    <option value="off" {{ ($settings['stop_system_sales'] ?? 'off') == 'off' ? 'selected' : '' }}>Disabled (Sales Active)</option>
-                                    <option value="on" {{ ($settings['stop_system_sales'] ?? 'off') == 'on' ? 'selected' : '' }}>Enabled (STOP ALL SALES)</option>
-                                </select>
-                                <small class="text-muted">Instantly stops all sales.</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Registration Status</label>
-                                <select name="settings[registration_enabled]" class="form-select" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
-                                    <option value="on" {{ ($settings['registration_enabled'] ?? 'on') == 'on' ? 'selected' : '' }}>Open</option>
-                                    <option value="off" {{ ($settings['registration_enabled'] ?? 'on') == 'off' ? 'selected' : '' }}>Closed</option>
-                                </select>
-                                <small class="text-muted">Enable or disable new user registrations.</small>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Stop Country Sales</label>
-                                @php
-                                $stoppedCountries = json_decode($settings['stop_country_sales'] ?? '[]', true);
-                                @endphp
-                                <select name="settings[stop_country_sales][]" class="form-select" multiple size="5" {{ auth()->user()->account_type === 'manager' && !auth()->user()->can_stop_country_sales ? 'disabled' : '' }}>
-                                    @foreach($countries as $country)
-                                    <option value="{{ $country->country_iso }}" {{ in_array($country->country_iso, $stoppedCountries) ? 'selected' : '' }}>
-                                        {{ $country->country }} ({{ $country->country_iso }})
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">Hold Ctrl to select multiple countries to stop sales.</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Stop Voucher Sales</label>
-                                @php
-                                $stoppedVouchers = json_decode($settings['stop_voucher_sales'] ?? '[]', true);
-                                @endphp
-                                <select name="settings[stop_voucher_sales][]" class="form-select" multiple size="5" {{ auth()->user()->account_type === 'manager' && !auth()->user()->can_stop_voucher_sales ? 'disabled' : '' }}>
-                                    @foreach($vouchers as $voucher)
-                                    <option value="{{ $voucher->id }}" {{ in_array($voucher->id, $stoppedVouchers) ? 'selected' : '' }}>
-                                        {{ $voucher->brand_name }} - {{ $voucher->voucher_variant }} ({{ $voucher->country_name }})
-                                    </option>
-                                    @endforeach
-                                </select>
-                                <small class="text-muted">Hold Ctrl to select multiple vouchers to stop sales.</small>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Minimum Wallet Top-up</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" name="settings[min_topup]" class="form-control" value="{{ $settings['min_topup'] ?? '50' }}" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
+                        
+                        <!-- 1. Stop All Sales -->
+                        <div class="form-check form-switch mb-4 p-3 bg-light rounded-3 border">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <label class="form-check-label fw-bold text-danger h6 mb-0" for="stop_all_sales">
+                                        <i class="fas fa-hand-paper me-2"></i> STOP ALL SALES GLOBALLY
+                                    </label>
+                                    <p class="small text-muted mb-0">Immediately hide all vouchers from all users (Students, Agents, Resellers).</p>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Daily Order Limit (per Agent)</label>
-                                <input type="number" name="settings[daily_order_limit]" class="form-control" value="{{ $settings['daily_order_limit'] ?? '100' }}" {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>
+                                <input class="form-check-input" type="checkbox" name="settings[stop_all_sales]" id="stop_all_sales" value="on" {{ ($settings['stop_all_sales'] ?? 'off') == 'on' ? 'checked' : '' }}>
                             </div>
                         </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">System Announcement</label>
-                                <textarea name="settings[announcement]" class="form-control" rows="3" placeholder="Global message shown to all users..." {{ auth()->user()->account_type === 'manager' ? 'disabled' : '' }}>{{ $settings['announcement'] ?? '' }}</textarea>
-                            </div>
+                        <hr class="my-4">
+
+                        <!-- 2. Stop Brand Sale -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="fas fa-tags me-2 text-primary"></i> Stop Brand-wise Sale</label>
+                            <p class="small text-muted">Select brands to stop their sales. Vouchers of these brands will be hidden.</p>
+                            @php
+                                $stoppedBrands = json_decode($settings['stopped_brands'] ?? '[]', true) ?: [];
+                                $allBrands = $vouchers->pluck('brand_name')->unique()->sort();
+                            @endphp
+                            <select name="settings[stopped_brands][]" class="form-select select2" multiple data-placeholder="Choose brands to stop...">
+                                @foreach($allBrands as $brand)
+                                    <option value="{{ $brand }}" {{ in_array($brand, $stoppedBrands) ? 'selected' : '' }}>{{ $brand }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">
-                            <i class="fas fa-save me-2"></i> Save Settings
-                        </button>
+                        <hr class="my-4">
+
+                        <!-- 3. Stop Country-wise Sale -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="fas fa-globe me-2 text-success"></i> Stop Country-wise Sale</label>
+                            <p class="small text-muted">Select countries where you want to disable voucher visibility.</p>
+                            @php
+                                $stoppedCountries = json_decode($settings['stopped_countries'] ?? '[]', true) ?: [];
+                            @endphp
+                            <select name="settings[stopped_countries][]" class="form-select select2" multiple data-placeholder="Choose countries to stop...">
+                                @foreach($countries as $country)
+                                    <option value="{{ $country->country }}" {{ in_array($country->country, $stoppedCountries) ? 'selected' : '' }}>{{ $country->country }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mt-5 border-top pt-4">
+                            <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-sm">
+                                <i class="fas fa-save me-2"></i> Save Sales Controls
+                            </button>
+                        </div>
                     </form>
-                </div>
-            </div>
-
-            <!-- Recent Control Logs -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold">System Audit Trail</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Admin</th>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                    <th>Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($logs as $log)
-                                <tr>
-                                    <td>{{ $log->user->name ?? 'System' }}</td>
-                                    <td><span class="badge bg-secondary">{{ $log->action }}</span></td>
-                                    <td>{{ $log->description }}</td>
-                                    <td><small>{{ $log->created_at ? $log->created_at->diffForHumans() : 'N/A' }}</small></td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">No recent system logs.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Emergency Actions -->
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 border-top border-danger border-4">
+            <div class="card shadow-sm border-0 border-top border-danger border-4 rounded-4 mb-4">
                 <div class="card-body py-4">
                     <h5 class="fw-bold text-danger mb-3">Emergency Actions</h5>
                     <p class="small text-muted mb-4">These actions have immediate global impact. Use with caution.</p>
@@ -178,7 +111,55 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Audit Logs Summary -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Recent Control Activity</h6>
+                    <div class="timeline small">
+                        @forelse($logs as $log)
+                        <div class="mb-3 pb-2 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold text-dark">{{ $log->action }}</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">{{ $log->created_at->diffForHumans() }}</span>
+                            </div>
+                            <div class="text-muted">{{ $log->description }}</div>
+                        </div>
+                        @empty
+                        <p class="text-muted italic">No recent logs</p>
+                        @endforelse
+                    </div>
+                    <a href="{{ route('audit.index') }}" class="btn btn-link btn-sm p-0 mt-2">View Full Audit Log</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<!-- Select2 CSS/JS for beautiful multi-select -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%',
+            theme: 'bootstrap-5',
+            closeOnSelect: false
+        });
+    });
+</script>
+<style>
+    .form-switch .form-check-input {
+        width: 3.5em;
+        height: 1.75em;
+        cursor: pointer;
+    }
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: 50px;
+        padding: 5px;
+    }
+</style>
+@endpush

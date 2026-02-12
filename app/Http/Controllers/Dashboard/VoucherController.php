@@ -17,7 +17,10 @@ class VoucherController extends Controller
 {
     public function index(Request $request)
     {
-        $query = VoucherPriceRule::with('inventoryVoucher');
+        $query = VoucherPriceRule::with('inventoryVoucher')
+            ->where('is_stopped', 0)
+            ->where('is_brand_stopped', 0)
+            ->where('is_country_stopped', 0);
 
         // Filter by Voucher Name (Brand Name)
         if ($request->filled('search')) {
@@ -114,6 +117,10 @@ class VoucherController extends Controller
                 'bank_name' => $adminBank->bank_name,
                 'account_number' => $adminBank->account_number,
                 'ifsc_code' => $adminBank->ifsc_code,
+                'transaction_id' => $request->transaction_id,
+                'account_holder_name' => $request->account_holder_name,
+                'amount_transferred' => $request->transfer_amount,
+                'captured_details' => $request->captured_details, // Storing JSON from OCR
             ];
             $status = 'pending';
         }

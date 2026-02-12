@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Vouchar;
+use App\Models\InventoryVoucher;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -20,6 +22,11 @@ class DashboardController extends Controller
                 'agents' => User::where('account_type', 'reseller_agent')->count(),
                 'students' => User::where('account_type', 'student')->count(),
                 'pending_approvals' => User::where('profile_verification_status', 'pending')->count(),
+                'total_vouchers' => InventoryVoucher::sum('quantity'),
+                'total_sales' => Order::where('status', 'delivered')->count(),
+                'total_revenue' => Order::where('status', 'delivered')->sum('amount'),
+                'total_referral_points' => Order::sum('referral_points'),
+                'total_bonus_points' => Order::sum('bonus_amount'),
             ];
             return view('dashboard.admin_dashboard', compact('users', 'stats'));
         }
@@ -28,8 +35,8 @@ class DashboardController extends Controller
             $stats = [
                 'total_users' => User::count(),
                 'pending_approvals' => User::where('profile_verification_status', 'pending')->count(),
-                'active_vouchers' => 1245,
-                'low_stock_alerts' => 2,
+                'active_vouchers' => InventoryVoucher::sum('quantity'),
+                'low_stock_alerts' => InventoryVoucher::where('quantity', '<', 10)->count(),
             ];
             return view('dashboard.manager_dashboard', compact('stats'));
         }
@@ -48,6 +55,7 @@ class DashboardController extends Controller
                 'total_users' => User::count(),
                 'pending_approvals' => User::where('profile_verification_status', 'pending')->count(),
                 'students' => User::where('account_type', 'student')->count(),
+                'active_vouchers' => InventoryVoucher::sum('quantity'),
             ];
             return view('dashboard.support_dashboard', compact('stats'));
         }

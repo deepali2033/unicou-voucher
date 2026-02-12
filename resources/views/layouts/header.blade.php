@@ -49,6 +49,7 @@
         $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
         @endphp
 
+        <span>{{ session('country_code', 'IN') }}</span>
 
         <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
             <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width:30px;border-radius:2px;border:1px solid #eee;">

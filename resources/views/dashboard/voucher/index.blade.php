@@ -74,7 +74,7 @@
                         <div class="company-info mb-2">
                             <div class="brand-logo-mini">
                                 @if($voucher->logo)
-                                <img src="/images/flipkartLogo.png" alt="{{ $voucher->brand_name }}">
+                                <img src="{{ asset($voucher->logo) }}" alt="{{ $voucher->brand_name }}">
                                 @else
                                 <i class="fas fa-ticket-alt text-primary"></i>
                                 @endif

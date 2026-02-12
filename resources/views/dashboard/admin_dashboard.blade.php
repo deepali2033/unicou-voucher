@@ -16,51 +16,47 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Total Vouchers</div>
+                    <div class="text-muted small mb-1">Total Users</div>
                     <div class="d-flex align-items-center">
                         <h3 class="fw-bold mb-0">{{ $stats['total_users'] }}</h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-users me-1"></i>Active</span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <a href="" class="text-decoration-none">
-                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100">
-                    <div class="card-body">
-                        <div class="text-muted small mb-1">Total Revenue</div>
-                        <div class="d-flex align-items-center">
-                            <h3 class="fw-bold mb-0"></h3>
-                            <span class="ms-auto text-warning small fw-bold"><i class="fas fa-clock me-1"></i>Action Required</span>
-                        </div>
+            <div class="card shadow-sm border-0 border-start border-warning border-4 h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Total Revenue</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">RS {{ number_format($stats['total_revenue'], 2) }}</h3>
+                        <span class="ms-auto text-warning small fw-bold"><i class="fas fa-money-bill-wave me-1"></i>Total</span>
                     </div>
                 </div>
-            </a>
+            </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Total Stocks</div>
+                    <div class="text-muted small mb-1">Total Voucher Stock</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $stats['total_users'] }}</h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                        <h3 class="fw-bold mb-0">{{ number_format($stats['total_vouchers'], 0) }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-ticket-alt me-1"></i>Units</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-3">
-            <a href="" class="text-decoration-none">
-                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100">
-                    <div class="card-body">
-                        <div class="text-muted small mb-1">Total Resellers</div>
-                        <div class="d-flex align-items-center">
-                            <h3 class="fw-bold mb-0"></h3>
-                            <span class="ms-auto text-warning small fw-bold"><i class="fas fa-clock me-1"></i>Action Required</span>
-                        </div>
+            <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Total Sales (Delivered)</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ $stats['total_sales'] }}</h3>
+                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-shopping-cart me-1"></i>Orders</span>
                     </div>
                 </div>
-            </a>
+            </div>
         </div>
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
@@ -88,10 +84,10 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Referral Points</div>
+                    <div class="text-muted small mb-1">Total Referral Points</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $stats['agents'] }}</h3>
-                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-user-tie me-1"></i>B2B</span>
+                        <h3 class="fw-bold mb-0">{{ number_format($stats['total_referral_points'], 0) }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-star me-1"></i>Total</span>
                     </div>
                 </div>
             </div>
@@ -99,10 +95,10 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Bonus Points</div>
+                    <div class="text-muted small mb-1">Total Bonus Points</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $stats['students'] }}</h3>
-                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-user-graduate me-1"></i>B2C</span>
+                        <h3 class="fw-bold mb-0">{{ number_format($stats['total_bonus_points'], 2) }}</h3>
+                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-gift me-1"></i>Total</span>
                     </div>
                 </div>
             </div>
