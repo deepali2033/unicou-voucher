@@ -447,6 +447,9 @@ class AuthController extends Controller
         if ($user->account_type === 'reseller_agent' && !$user->agentDetail) {
             return redirect()->route('auth.forms.B2BResellerAgent');
         }
+        if ($user->account_type === 'agent' && !$user->business_name) {
+            return redirect()->route('auth.forms.B2BResellerAgent');
+        }
 
         return redirect()->route('dashboard');
     }

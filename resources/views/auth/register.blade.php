@@ -71,7 +71,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 <div class="d-flex justify-content-center gap-2 role-switch">
 
                     <button type="button"
-                        class="role-btn {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
+                        class="role-btn {{ $defaultType === 'agent' ? 'active' : '' }}"
                         onclick="setActive('reseller_agent')"
                         id="btn-reseller_agent">
                         Agent

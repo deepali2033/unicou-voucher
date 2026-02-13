@@ -60,7 +60,7 @@
                 </a>
             </li> -->
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
             <!-- Pricing -->
             <!-- Inventory -->
             <li class="nav-item">
@@ -153,7 +153,7 @@
             @endif
 
 
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent()|| auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('regular.agent') }}">
@@ -161,7 +161,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport() || auth()->user()->isResellerAgent())
             <!-- Voucher Management -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('student.page') }}">

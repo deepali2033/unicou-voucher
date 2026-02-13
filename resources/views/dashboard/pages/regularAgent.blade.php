@@ -33,7 +33,7 @@
                     <select name="country" class="form-select">
                         <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
                         @foreach(\App\Helpers\CountryHelper::getManagementCountries() as $name)
-                            <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -84,7 +84,7 @@
                 </a>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_create_user)
                 <a href="{{ route('users.create') }}?role=agent" class="btn btn-primary btn-sm px-3 shadow-sm">
-                    <i class="fas fa-plus me-1"></i> Add
+                    <i class="fas fa-plus me-1"></i> Add Agent
                 </a>
                 @endif
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">

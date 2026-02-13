@@ -24,12 +24,12 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">SKU ID</label>
-                        <input type="text" name="sku_id" class="form-control @error('sku_id') is-invalid @enderror" value="{{ old('sku_id', $next_sku) }}" readonly required>
+                        <input type="text" name="sku_id" id="sku_id" class="form-control @error('sku_id') is-invalid @enderror" value="{{ old('sku_id') }}" readonly required>
                         @error('sku_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Brand Name</label>
-                        <input type="text" name="brand_name" class="form-control" value="{{ old('brand_name') }}" required>
+                        <input type="text" name="brand_name" id="brand_name" class="form-control" value="{{ old('brand_name') }}" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Country/Region</label>
@@ -37,11 +37,11 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency</label>
-                        <input type="text" name="currency" class="form-control" value="{{ old('currency', 'PKR') }}" required>
+                        <input type="text" name="currency" id="currency" class="form-control" value="{{ old('currency', 'PKR') }}" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Voucher Variant</label>
-                        <input type="text" name="voucher_variant" class="form-control" value="{{ old('voucher_variant') }}" placeholder="e.g. Subscription">
+                        <input type="text" name="voucher_variant" id="voucher_variant" class="form-control" value="{{ old('voucher_variant') }}" placeholder="e.g. Subscription">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Voucher Type</label>
@@ -158,6 +158,48 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
+        const nextId = {{ $next_id }};
+        
+        function generateSKU() {
+            let brand = $('#brand_name').val().trim();
+            let variant = $('#voucher_variant').val().trim();
+            let currency = $('#currency').val().trim();
+
+            if (brand.length >= 1) {
+                // 1. Brand Prefix Logic
+                let words = brand.split(/\s+/);
+                let brandPrefix = "";
+                
+                if (words.length >= 2) {
+                    // First letter of each word (e.g. Google Play -> GP, Subham Kumar Soni -> SKS)
+                    brandPrefix = words.map(w => w.substring(0, 1)).join('').toUpperCase();
+                } else if (brand.length >= 2) {
+                    // First two letters of single word (e.g. Netflix -> NE)
+                    brandPrefix = brand.substring(0, 2).toUpperCase();
+                } else {
+                    brandPrefix = brand.toUpperCase();
+                }
+
+                // 2. Variant Prefix (take first 2 letters if exists)
+                let variantPrefix = variant ? variant.substring(0, 2).toUpperCase() : "";
+
+                // 3. Currency (take first 2-3 letters)
+                let currencyPrefix = currency ? currency.substring(0, 3).toUpperCase() : "";
+
+                // 4. Numeric ID
+                let suffix = nextId.toString().padStart(3, '0');
+
+                // Final SKU: BRAND + VARIANT + CURRENCY + ID
+                $('#sku_id').val(brandPrefix + variantPrefix + currencyPrefix + suffix);
+            } else {
+                $('#sku_id').val('');
+            }
+        }
+
+        $('#brand_name, #voucher_variant, #currency').on('input', function() {
+            generateSKU();
+        });
+
         function calculateUnitValue() {
             let quantity = parseFloat($('input[name="quantity"]').val()) || 0;
             let totalValue = parseFloat($('input[name="purchase_value"]').val()) || 0;

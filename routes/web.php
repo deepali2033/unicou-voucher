@@ -54,6 +54,9 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     if ($user->account_type === 'reseller_agent' && !$user->business_name) {
         return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Email verified. Please complete your profile.');
     }
+    if ($user->account_type === 'agent' && !$user->business_name) {
+        return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Email verified. Please complete your profile.');
+    }
 
     return redirect()->route('dashboard')->with('success', 'Email verified successfully.');
 })->middleware(['auth', 'signed'])->name('verification.verify');
@@ -144,8 +147,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 
     // Sales
-
     Route::get('/sales', [SalesController::class, 'SalesReport'])->name('sales.index');
+    Route::get('/sales-export', [SalesController::class, 'export'])->name('sales.export');
 
 
 

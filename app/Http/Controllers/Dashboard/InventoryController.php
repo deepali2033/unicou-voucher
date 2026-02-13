@@ -54,13 +54,13 @@ class InventoryController extends Controller
     public function create()
     {
         $last_voucher = InventoryVoucher::orderBy('id', 'desc')->first();
-        $next_sku = 101;
+        $next_id = 1;
         
-        if ($last_voucher && is_numeric($last_voucher->sku_id)) {
-            $next_sku = (int)$last_voucher->sku_id + 1;
+        if ($last_voucher) {
+            $next_id = (int)$last_voucher->id + 1;
         }
 
-        return view('dashboard.inventory.create', compact('next_sku'));
+        return view('dashboard.inventory.create', compact('next_id'));
     }
 
     public function store(Request $request)
