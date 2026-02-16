@@ -49,8 +49,8 @@
                             <td>{{ $order->quantity }}</td>
                             <td class="fw-bold">RS {{ number_format($order->amount, 0) }}</td>
                             <td>
-                                <span class="badge bg-soft-success text-success">
-                                    <i class="fas fa-coins me-1"></i>{{ $order->referral_points }}
+                                <span class="badge bg-soft-success text-success" title="Referral: {{ $order->referral_points }}, Bonus: {{ (int)$order->bonus_amount }}">
+                                    <i class="fas fa-coins me-1"></i>{{ $order->referral_points + (int)$order->bonus_amount }}
                                 </span>
                             </td>
                             <td class="text-center">
@@ -159,7 +159,7 @@
             $('#m-sku-id').text(order.voucher_id || 'N/A');
             $('#m-quantity').text(order.quantity);
             $('#m-amount').text('RS ' + parseFloat(order.amount).toLocaleString());
-            $('#m-points').text(order.referral_points);
+            $('#m-points').text((parseInt(order.referral_points) || 0) + (parseInt(order.bonus_amount) || 0));
             $('#m-date').text(new Date(order.created_at).toLocaleDateString());
             $('#m-status').html('<span class="badge bg-' + (order.status === 'completed' ? 'success' : 'warning') + '">' + order.status.toUpperCase() + '</span>');
             $('#m-bank').text(order.bank_name || 'N/A');

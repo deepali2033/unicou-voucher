@@ -15,13 +15,13 @@
             </div>
         </div>
 
-        @if(auth()->user()->isAgent() )
+        @if(auth()->user()->isRegularAgent() )
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Agent Referral Points Per Unit </div>
+                    <div class="text-muted small mb-1">Agent Referral Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $rule->inventoryVoucher->agent_referral_points_per_unit}}</h3>
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $rule->inventoryVoucher->agent_referral_points_per_unit }}">{{ $rule->inventoryVoucher->agent_referral_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -30,9 +30,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Agent Bonus Points Per Unit </div>
+                    <div class="text-muted small mb-1">Agent Bonus Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $rule->inventoryVoucher->agent_bonus_points_per_unit }} <!-- InventoryVoucher --></h3>
+                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $rule->inventoryVoucher->agent_bonus_points_per_unit }}">{{ $rule->inventoryVoucher->agent_bonus_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -43,9 +43,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Student Referral Points Per Unit </div>
+                    <div class="text-muted small mb-1">Student Referral Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $rule->inventoryVoucher->student_referral_points_per_unit}}</h3>
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $rule->inventoryVoucher->student_referral_points_per_unit }}">{{ $rule->inventoryVoucher->student_referral_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -54,9 +54,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">Student Bonus Points Per Unit </div>
+                    <div class="text-muted small mb-1">Student Bonus Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $rule->inventoryVoucher->student_bonus_points_per_unit }} <!-- InventoryVoucher --></h3>
+                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $rule->inventoryVoucher->student_bonus_points_per_unit }}">{{ $rule->inventoryVoucher->student_bonus_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -67,9 +67,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
-                    <div class="text-muted small mb-1">reseller Referral Points Per Unit </div>
+                    <div class="text-muted small mb-1">Reseller Referral Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ $rule->inventoryVoucher->referral_points_reseller}}</h3>
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $rule->inventoryVoucher->referral_points_reseller }}">{{ $rule->inventoryVoucher->referral_points_reseller }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -395,6 +395,19 @@
             $('#subtotal').text(total.toLocaleString());
             $('#final-total').text(total.toLocaleString());
             $('.required-amount-text').text(total.toLocaleString());
+            
+            // Auto fill transfer amount
+            $('#transfer-amount').val(total);
+
+            // Update Points Display
+            $('.referral-points-display').each(function() {
+                let base = parseInt($(this).data('base')) || 0;
+                $(this).text(base * qty);
+            });
+            $('.bonus-points-display').each(function() {
+                let base = parseInt($(this).data('base')) || 0;
+                $(this).text(base * qty);
+            });
         }
         
         // Initial call
@@ -438,6 +451,11 @@
             } else {
                 $('#my-banks-section').addClass('d-none');
                 $('#admin-banks-section').removeClass('d-none');
+                
+                // Auto select first admin bank if none selected
+                if (!$('#admin-bank-selector').val()) {
+                    $('#admin-bank-selector').find('option:eq(1)').prop('selected', true).trigger('change');
+                }
             }
         });
 
@@ -529,13 +547,7 @@
                 contentType: false,
                 success: function(response) {
                     if (response.success) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: response.message,
-                            icon: 'success'
-                        }).then(() => {
-                            window.location.href = "{{ route('orders.history') }}";
-                        });
+                        window.location.href = "{{ route('orders.history') }}";
                     }
                 },
                 error: function(xhr) {

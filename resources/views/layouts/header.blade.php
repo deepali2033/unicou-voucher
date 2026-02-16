@@ -32,8 +32,19 @@
         </div>
         @endif
 
-        <div class="notification-bell">
-            <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
+        <div class="notification-bell position-relative">
+            <a href="{{ route('notifications.index') }}" class="text-decoration-none">
+                <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
+                @php
+                    $unreadCount = auth()->user()->unreadNotifications->count();
+                @endphp
+                @if($unreadCount > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.25em 0.4em;">
+                    {{ $unreadCount }}
+                    <span class="visually-hidden">unread notifications</span>
+                </span>
+                @endif
+            </a>
         </div>
         @php
         use App\Helpers\LocationHelper;
