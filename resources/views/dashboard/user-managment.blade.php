@@ -72,7 +72,7 @@
                 }
             });
         }
-
+ 
         // Handle Pagination
         $(document).on('click', '.ajax-pagination a', function(e) {
             e.preventDefault();
