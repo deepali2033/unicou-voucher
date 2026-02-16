@@ -29,7 +29,10 @@ class VoucherPriceRule extends Model
         'discount_type',
         'discount_value',
         'expiry_date',
-        'is_active'
+        'is_active',
+        'is_stopped',
+        'is_brand_stopped',
+        'is_country_stopped'
     ];
 
     public function inventoryVoucher(): BelongsTo

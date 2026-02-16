@@ -29,6 +29,10 @@ class Order extends Model
         'points_redeemed',
         'bonus_amount',
         'sub_agent_id',
+        'transaction_id',
+        'account_holder_name',
+        'amount_transferred',
+        'captured_details',
     ];
 
     public function user()
@@ -39,6 +43,11 @@ class Order extends Model
     public function voucher()
     {
         return $this->belongsTo(Vouchar::class, 'voucher_id', 'voucher_id');
+    }
+
+    public function inventoryVoucher()
+    {
+        return $this->belongsTo(InventoryVoucher::class, 'voucher_id', 'sku_id');
     }
 
     public function subAgent()

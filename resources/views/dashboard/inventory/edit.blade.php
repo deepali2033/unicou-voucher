@@ -24,12 +24,12 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">SKU ID</label>
-                        <input type="text" name="sku_id" class="form-control @error('sku_id') is-invalid @enderror" value="{{ old('sku_id', $inventory->sku_id) }}" required>
+                        <input type="text" name="sku_id" id="sku_id" class="form-control @error('sku_id') is-invalid @enderror" value="{{ old('sku_id', $inventory->sku_id) }}" readonly required>
                         @error('sku_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Brand Name</label>
-                        <input type="text" name="brand_name" class="form-control" value="{{ old('brand_name', $inventory->brand_name) }}" required>
+                        <input type="text" name="brand_name" id="brand_name" class="form-control" value="{{ old('brand_name', $inventory->brand_name) }}" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Country/Region</label>
@@ -37,11 +37,11 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency</label>
-                        <input type="text" name="currency" class="form-control" value="{{ old('currency', $inventory->currency) }}" required>
+                        <input type="text" name="currency" id="currency" class="form-control" value="{{ old('currency', $inventory->currency) }}" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Voucher Variant</label>
-                        <input type="text" name="voucher_variant" class="form-control" value="{{ old('voucher_variant', $inventory->voucher_variant) }}" placeholder="e.g. Subscription">
+                        <input type="text" name="voucher_variant" id="voucher_variant" class="form-control" value="{{ old('voucher_variant', $inventory->voucher_variant) }}" placeholder="e.g. Subscription">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Voucher Type</label>
@@ -165,6 +165,47 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
+        const currentId = {
+            {
+                $inventory - > id
+            }
+        };
+
+        function generateSKU() {
+            let brand = $('#brand_name').val().trim();
+            let variant = $('#voucher_variant').val().trim();
+            let currency = $('#currency').val().trim();
+
+            if (brand.length >= 1) {
+                // 1. Brand Prefix Logic
+                let words = brand.split(/\s+/);
+                let brandPrefix = "";
+
+                if (words.length >= 2) {
+                    brandPrefix = words.map(w => w.substring(0, 1)).join('').toUpperCase();
+                } else if (brand.length >= 2) {
+                    brandPrefix = brand.substring(0, 2).toUpperCase();
+                } else {
+                    brandPrefix = brand.toUpperCase();
+                }
+
+                // 2. Variant Prefix
+                let variantPrefix = variant ? variant.substring(0, 2).toUpperCase() : "";
+
+                // 3. Currency
+                let currencyPrefix = currency ? currency.substring(0, 3).toUpperCase() : "";
+
+                // 4. Numeric ID
+                let suffix = currentId.toString().padStart(3, '0');
+
+                $('#sku_id').val(brandPrefix + variantPrefix + currencyPrefix + suffix);
+            }
+        }
+
+        $('#brand_name, #voucher_variant, #currency').on('input', function() {
+            generateSKU();
+        });
+
         function calculateUnitValue() {
             let quantity = parseFloat($('input[name="quantity"]').val()) || 0;
             let totalValue = parseFloat($('input[name="purchase_value"]').val()) || 0;

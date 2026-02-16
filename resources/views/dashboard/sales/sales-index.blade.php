@@ -6,12 +6,12 @@
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">
-                <i class="fas fa-filter me-2"></i>Filter Purchases
+                <i class="fas fa-filter me-2"></i>Filter Sales
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="filter-form" action="{{ route('purches.purches.report') }}" method="GET">
+            <form id="filter-form" action="{{ route('sales.index') }}" method="GET">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Date Wise Report (From - To)</label>
                     <div class="d-flex flex-column gap-2">
@@ -21,7 +21,17 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Voucher Purchases Summary (Currency)</label>
+                    <label class="form-label fw-bold">Buyer Type</label>
+                    <select name="user_role" class="form-select">
+                        <option value="">All Buyer Types</option>
+                        <option value="student" {{ request('user_role') == 'student' ? 'selected' : '' }}>Student</option>
+                        <option value="reseller_agent" {{ request('user_role') == 'reseller_agent' ? 'selected' : '' }}>Reseller Agent</option>
+                        <option value="regular_agent" {{ request('user_role') == 'regular_agent' ? 'selected' : '' }}>Regular Agent</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Voucher Sales Summary (Currency)</label>
                     <select name="currency" class="form-select">
                         <option value="">All Currencies</option>
                         <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
@@ -30,12 +40,12 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Brand Purchase Report</label>
+                    <label class="form-label fw-bold">Brand Sale Report</label>
                     <input type="text" name="brand_name" class="form-control" placeholder="Brand Name" value="{{ request('brand_name') }}">
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Variant Purchase Report</label>
+                    <label class="form-label fw-bold">Variant Sale Report</label>
                     <input type="text" name="voucher_variant" class="form-control" placeholder="Variant" value="{{ request('voucher_variant') }}">
                 </div>
 
@@ -59,7 +69,7 @@
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{{ route('purches.purches.report') }}" class="btn btn-light">Reset All</a>
+                    <a href="{{ route('sales.index') }}" class="btn btn-light">Reset All</a>
                 </div>
             </form>
         </div>
@@ -68,9 +78,17 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0 fw-bold text-dark">Purchase Report</h5>
+                <h5 class="mb-0 fw-bold text-dark">Sales Report</h5>
             </div>
             <div class="d-flex gap-2">
+                <form id="search-form" class="d-flex gap-2 me-2">
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <input type="text" name="search" class="form-control" placeholder="Search Sale ID, Customer..." value="{{ request('search') }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
                 <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> Export CSV
                 </a>
@@ -96,7 +114,7 @@
                     window.history.pushState({}, '', url);
 
                     // Update CSV export link
-                    let csvUrl = "{{ route('purches.export') }}?" + (url.split('?')[1] || '');
+                    let csvUrl = "{{ route('sales.export') }}?" + (url.split('?')[1] || '');
                     $('#csv-export-link').attr('href', csvUrl);
                 }
             });
@@ -104,7 +122,7 @@
 
         // Initialize CSV export link
         let initialUrl = window.location.href;
-        let initialCsvUrl = "{{ route('purches.export') }}?" + (initialUrl.split('?')[1] || '');
+        let initialCsvUrl = "{{ route('sales.export') }}?" + (initialUrl.split('?')[1] || '');
         $('#csv-export-link').attr('href', initialCsvUrl);
 
         // Handle Pagination
@@ -113,10 +131,17 @@
             updateTable($(this).attr('href'));
         });
 
+        // Handle Search Form
+        $(document).on('submit', '#search-form', function(e) {
+            e.preventDefault();
+            let url = "{{ route('sales.index') }}?" + $(this).serialize() + '&' + $('#filter-form').serialize();
+            updateTable(url);
+        });
+
         // Handle Filters
         $(document).on('submit', '#filter-form', function(e) {
             e.preventDefault();
-            let url = $(this).attr('action') + '?' + $(this).serialize();
+            let url = $(this).attr('action') + '?' + $(this).serialize() + '&' + $('#search-form').serialize();
             updateTable(url);
 
             var offcanvasElement = document.getElementById('filterOffcanvas');

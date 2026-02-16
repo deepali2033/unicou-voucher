@@ -71,9 +71,9 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 <div class="d-flex justify-content-center gap-2 role-switch">
 
                     <button type="button"
-                        class="role-btn {{ $defaultType === 'reseller_agent' ? 'active' : '' }}"
-                        onclick="setActive('reseller_agent')"
-                        id="btn-reseller_agent">
+                        class="role-btn {{ $defaultType === 'agent' || $defaultType === 'reseller_agent' ? 'active' : '' }}"
+                        onclick="setActive('agent')"
+                        id="btn-agent">
                         Agent
                     </button>
 
@@ -83,6 +83,19 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                         id="btn-student">
                         Student
                     </button>
+                </div>
+
+                <div id="agent-options" class="mt-3" style="display: {{ $defaultType === 'agent' || $defaultType === 'reseller_agent' ? 'block' : 'none' }};">
+                    <div class="d-flex justify-content-center gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="agent_subtype" id="regularAgent" value="agent" checked onclick="setSubtype('agent')">
+                            <label class="form-check-label" for="regularAgent">Regular Agent</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="agent_subtype" id="resellerAgent" value="reseller_agent" onclick="setSubtype('reseller_agent')">
+                            <label class="form-check-label" for="resellerAgent">Reseller Agent</label>
+                        </div>
+                    </div>
                 </div>
 
                 @else
@@ -204,6 +217,18 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 
     function setActive(type) {
         document.getElementById('accountType').value = type;
+        
+        // Handle Agent Subtypes Visibility
+        const agentOptions = document.getElementById('agent-options');
+        if (type === 'agent' || type === 'reseller_agent') {
+            agentOptions.style.display = 'block';
+            // If switched to agent, use the currently selected radio value
+            const selectedSubtype = document.querySelector('input[name="agent_subtype"]:checked').value;
+            document.getElementById('accountType').value = selectedSubtype;
+        } else {
+            agentOptions.style.display = 'none';
+        }
+
         document.querySelectorAll('.role-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -211,6 +236,10 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
         if (activeBtn) {
             activeBtn.classList.add('active');
         }
+    }
+
+    function setSubtype(subtype) {
+        document.getElementById('accountType').value = subtype;
     }
 </script>
 @endpush

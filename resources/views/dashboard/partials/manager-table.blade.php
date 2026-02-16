@@ -9,6 +9,7 @@
                 <th>Full Name</th>
                 <th>Country</th>
                 <th>Email</th>
+                <th>Task/Performance</th>
                 <th>Contact</th>
                 <th>Status</th>
                 <!-- <th class="text-end">Actions</th> -->
@@ -35,6 +36,9 @@
                 <td><span class="badge bg-light text-dark border">{{ $user->country ?: 'N/A' }}</span></td>
                 <td>
                     <div class="small">{{ $user->email }}</div>
+                </td>
+                <td>
+                    <div class="small"></div>
                 </td>
                 <td>
                     <div class="small">{{ $user->phone }}</div>

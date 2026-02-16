@@ -31,35 +31,39 @@ class SystemController extends Controller
 
     public function updateControl(Request $request)
     {
-        if ($request->has('settings')) {
-            foreach ($request->settings as $key => $value) {
-                // Permission checks for managers
-                if (auth()->user()->account_type === 'manager') {
-                    if ($key === 'stop_system_sales' && !auth()->user()->can_stop_system_sales) continue;
-                    if ($key === 'stop_country_sales' && !auth()->user()->can_stop_country_sales) continue;
-                    if ($key === 'stop_voucher_sales' && !auth()->user()->can_stop_voucher_sales) continue;
+        $inputSettings = $request->input('settings', []);
 
-                    // Maintenance mode and others only for admin
-                    if (in_array($key, ['maintenance_mode', 'registration_enabled', 'min_topup', 'daily_order_limit', 'announcement'])) {
-                        continue;
-                    }
-                }
+        // 1. Handle Global Stop Sales
+        $stopAll = isset($inputSettings['stop_all_sales']) && $inputSettings['stop_all_sales'] == 'on';
+        SystemSetting::updateOrCreate(['settings_key' => 'stop_all_sales'], ['settings_value' => $stopAll ? 'on' : 'off']);
+        VoucherPriceRule::query()->update(['is_stopped' => $stopAll ? 1 : 0]);
 
-                if (is_array($value)) {
-                    $value = json_encode($value);
-                }
+        // 2. Handle Brand-wise Stop
+        $stoppedBrands = $inputSettings['stopped_brands'] ?? [];
+        SystemSetting::updateOrCreate(['settings_key' => 'stopped_brands'], ['settings_value' => json_encode($stoppedBrands)]);
+        
+        if (!empty($stoppedBrands)) {
+            VoucherPriceRule::whereIn('brand_name', $stoppedBrands)->update(['is_brand_stopped' => 1]);
+            VoucherPriceRule::whereNotIn('brand_name', $stoppedBrands)->update(['is_brand_stopped' => 0]);
+        } else {
+            VoucherPriceRule::query()->update(['is_brand_stopped' => 0]);
+        }
 
-                SystemSetting::updateOrCreate(
-                    ['settings_key' => $key],
-                    ['settings_value' => $value]
-                );
-            }
+        // 3. Handle Country-wise Stop
+        $stoppedCountries = $inputSettings['stopped_countries'] ?? [];
+        SystemSetting::updateOrCreate(['settings_key' => 'stopped_countries'], ['settings_value' => json_encode($stoppedCountries)]);
+
+        if (!empty($stoppedCountries)) {
+            VoucherPriceRule::whereIn('country_name', $stoppedCountries)->update(['is_country_stopped' => 1]);
+            VoucherPriceRule::whereNotIn('country_name', $stoppedCountries)->update(['is_country_stopped' => 0]);
+        } else {
+            VoucherPriceRule::query()->update(['is_country_stopped' => 0]);
         }
 
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'System Update',
-            'description' => 'System settings updated',
+            'description' => 'System sales controls updated',
             'ip_address' => $request->ip()
         ]);
 

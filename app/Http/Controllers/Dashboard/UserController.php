@@ -85,17 +85,23 @@ class UserController extends Controller
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_create_user) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
+
+        $accountTypeRule = 'required|in:manager,reseller_agent,support_team,student,agent';
+        if (auth()->user()->account_type === 'reseller_agent') {
+            $accountTypeRule = 'required|in:agent';
+        }
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             // 'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'account_type' => 'required|in:manager,reseller_agent,support_team,student,agent',
+            'account_type' => $accountTypeRule,
             'phone' => 'nullable|string|max:20',
             'country' => 'required|string|max:255',
         ]);
 
-        $user = User::create([
+        $userData = [
             'user_id' => User::generateNextUserId($request->account_type),
             'first_name' => $request->first_name,
             'name' => $request->first_name,
@@ -107,11 +113,34 @@ class UserController extends Controller
             'profile_verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
-        ]);
+        ];
+
+        if (auth()->user()->account_type === 'reseller_agent') {
+            $userData['sub_agent_id'] = auth()->id();
+        }
+
+        $user = User::create($userData);
 
         // Send Welcome Email
         try {
-            Mail::to($user->email)->send(new UserCreated($user, $request->password));
+            if (auth()->user()->account_type === 'reseller_agent') {
+                // Custom message for agents created by resellers including credentials
+                $resellerName = auth()->user()->name;
+                $email = $user->email;
+                $password = $request->password;
+                $messageContent = "Your account has been created by Reseller Agent $resellerName.\n\n" .
+                                 "Login Details:\n" .
+                                 "Email: $email\n" .
+                                 "Password: $password\n\n" .
+                                 "Please login to complete your profile.";
+                
+                Mail::raw($messageContent, function ($message) use ($user) {
+                    $message->to($user->email)
+                        ->subject('Account Created - Unicou Voucher Login Details');
+                });
+            } else {
+                Mail::to($user->email)->send(new UserCreated($user, $request->password));
+            }
         } catch (\Exception $e) {
             \Log::error("Failed to send welcome email: " . $e->getMessage());
         }
@@ -119,6 +148,10 @@ class UserController extends Controller
         // Notify Admins and Managers
         $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
         Notification::send($adminsAndManagers, new UserCreatedNotification($user, auth()->user()));
+
+        if (auth()->user()->account_type === 'reseller_agent') {
+            return redirect()->route('regular.agent')->with('success', 'Agent created successfully and notification email sent.');
+        }
 
         return redirect()->route('users.management')->with('success', 'User created successfully and welcome email sent.');
     }

@@ -25,6 +25,9 @@ use App\Http\Controllers\Dashboard\ManagerController;
 use App\Http\Controllers\Dashboard\PricingController;
 use App\Http\Controllers\Dashboard\ReferralController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 
 Route::get('/', function () {
     return view('home.home');
@@ -44,19 +47,32 @@ Route::get('/email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    $user = User::findOrFail($id);
 
-    $user = auth()->user();
+    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        abort(403);
+    }
+
+    if (!$user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+    }
+
+    // Auto-login if not logged in or logged in as different user
+    if (!auth()->check() || auth()->id() != $user->id) {
+        auth()->login($user);
+    }
+
     if ($user->account_type === 'student' && !$user->exam_purpose) {
         return redirect()->route('auth.form.student')->with('success', 'Email verified. Please complete your profile.');
     }
-    if ($user->account_type === 'reseller_agent' && !$user->business_name) {
+    if (in_array($user->account_type, ['reseller_agent', 'agent']) && !$user->business_name) {
         return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Email verified. Please complete your profile.');
     }
 
     return redirect()->route('dashboard')->with('success', 'Email verified successfully.');
-})->middleware(['auth', 'signed'])->name('verification.verify');
+})->middleware(['signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
     ->middleware(['auth', 'throttle:6,1'])
@@ -144,8 +160,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 
     // Sales
-
     Route::get('/sales', [SalesController::class, 'SalesReport'])->name('sales.index');
+    Route::get('/sales-export', [SalesController::class, 'export'])->name('sales.export');
 
 
 
