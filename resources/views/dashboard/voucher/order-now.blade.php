@@ -105,7 +105,7 @@
                             <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="decrease-qty">
                                 <i class="fas fa-minus small text-muted"></i>
                             </button>
-                            <input type="number" id="voucher-quantity" class="form-control form-control-sm bg-transparent border-0 text-center fw-bold" value="1" min="1" max="{{ $rule->inventoryVoucher->quantity }}" style="width: 50px;">
+                            <input type="number" id="voucher-quantity" class="form-control form-control-sm bg-transparent border-0 text-center fw-bold" value="1" min="1" max="{{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->inventoryVoucher->quantity) : $rule->inventoryVoucher->quantity }}" style="width: 50px;">
                             <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="increase-qty">
                                 <i class="fas fa-plus small text-muted"></i>
                             </button>
@@ -328,7 +328,7 @@
 <script>
     $(document).ready(function() {
         let finalPrice = {{ $rule->final_price }};
-        let maxQty = {{ $rule->inventoryVoucher->quantity }};
+        let maxQty = {{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->inventoryVoucher->quantity) : $rule->inventoryVoucher->quantity }};
         let capturedDetails = null;
 
         // Tesseract OCR Logic

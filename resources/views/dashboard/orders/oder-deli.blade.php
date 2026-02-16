@@ -142,7 +142,7 @@
                                     @endif
 
                                     @if($order->status == 'delivered')
-                                    <button class="btn btn-sm btn-light" title="View Codes" onclick="alert('Codes: {{ $order->delivery_details }}')">
+                                    <button class="btn btn-sm btn-light" title="View Codes" data-bs-toggle="modal" data-bs-target="#viewCodesModal{{ $order->id }}">
                                         <i class="fas fa-key text-info"></i>
                                     </button>
                                     @endif
@@ -162,8 +162,45 @@
                                         </div>
                                         <div class="modal-body px-4">
                                             <div class="mb-3">
-                                                <label class="form-label small fw-bold text-muted text-uppercase">Voucher Codes</label>
-                                                <textarea name="codes" class="form-control border-0 bg-light p-3" rows="5" placeholder="Enter codes (one per line)..." style="border-radius: 10px;" required></textarea>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <label class="form-label small fw-bold text-muted text-uppercase mb-0">Voucher Codes (Order Qty: {{ $order->quantity }})</label>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="autoPickCodes({{ $order->id }}, {{ $order->quantity }})">
+                                                        <i class="fas fa-magic me-1"></i> Auto Pick
+                                                    </button>
+                                                </div>
+                                                
+                                                @if($order->inventoryVoucher && $order->inventoryVoucher->upload_vouchers)
+                                                    <div class="available-codes-container mb-3 p-2 bg-light rounded" style="max-height: 150px; overflow-y: auto; border: 1px solid #eee;">
+                                                        <div class="row g-2">
+                                                            @foreach($order->inventoryVoucher->upload_vouchers as $code)
+                                                                @php
+                                                                    $isDelivered = in_array($code, $deliveredCodes);
+                                                                @endphp
+                                                                <div class="col-6">
+                                                                    <div class="code-item p-2 rounded {{ $isDelivered ? 'bg-danger-subtle text-danger' : 'bg-white border text-dark' }} small d-flex justify-content-between align-items-center" 
+                                                                         style="cursor: {{ $isDelivered ? 'not-allowed' : 'pointer' }};"
+                                                                         @if(!$isDelivered) onclick="toggleCode({{ $order->id }}, '{{ $code }}')" @endif
+                                                                         data-code="{{ $code }}"
+                                                                         data-order-id="{{ $order->id }}">
+                                                                        <span class="text-truncate">{{ $code }}</span>
+                                                                        @if($isDelivered)
+                                                                            <i class="fas fa-check-circle ms-1" title="Already Delivered"></i>
+                                                                        @else
+                                                                            <i class="far fa-circle ms-1"></i>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="alert alert-warning small p-2 mb-3">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i> No voucher codes found in inventory for this SKU.
+                                                    </div>
+                                                @endif
+
+                                                <textarea id="codes_textarea_{{ $order->id }}" name="codes" class="form-control border-0 bg-light p-3" rows="4" placeholder="Selected codes will appear here..." style="border-radius: 10px;" required></textarea>
+                                                <small class="text-muted mt-1 d-block">Please ensure you select exactly {{ $order->quantity }} code(s).</small>
                                             </div>
                                         </div>
                                         <div class="modal-footer border-0 pb-4 px-4">
@@ -199,6 +236,45 @@
                                 </form>
                             </div>
                         </div>
+
+                        <!-- View Codes Modal -->
+                        @if($order->status == 'delivered')
+                        <div class="modal fade" id="viewCodesModal{{ $order->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+                                    <div class="modal-header border-0 pt-4 px-4">
+                                        <h5 class="fw-bold">Delivered Codes: {{ $order->order_id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body px-4 pb-4">
+                                        <div class="bg-light p-3 rounded-4">
+                                            <div class="d-flex flex-column gap-2">
+                                                @php
+                                                    $codes = explode("\n", str_replace("\r", "", $order->delivery_details));
+                                                @endphp
+                                                @foreach($codes as $code)
+                                                    @if(trim($code))
+                                                        <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
+                                                            <code class="text-primary fw-bold" style="font-size: 1.1rem;">{{ trim($code) }}</code>
+                                                            <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('{{ trim($code) }}')" title="Copy Code">
+                                                                <i class="far fa-copy"></i>
+                                                            </button>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 small text-muted text-center">
+                                            <i class="fas fa-info-circle me-1"></i> These codes were delivered on {{ $order->updated_at->format('d M Y H:i') }}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0 px-4 pb-4">
+                                        <button type="button" class="btn btn-primary w-100 py-2" data-bs-dismiss="modal" style="border-radius: 10px;">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         @empty
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">No orders found.</td>
@@ -216,3 +292,72 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function toggleCode(orderId, code) {
+    const textarea = document.getElementById('codes_textarea_' + orderId);
+    let currentCodes = textarea.value.split('\n').map(c => c.trim()).filter(c => c !== '');
+    
+    const index = currentCodes.indexOf(code);
+    if (index > -1) {
+        currentCodes.splice(index, 1);
+        updateCodeItemUI(orderId, code, false);
+    } else {
+        currentCodes.push(code);
+        updateCodeItemUI(orderId, code, true);
+    }
+    
+    textarea.value = currentCodes.join('\n');
+}
+
+function updateCodeItemUI(orderId, code, isSelected) {
+    const items = document.querySelectorAll(`.code-item[data-order-id="${orderId}"][data-code="${code}"]`);
+    items.forEach(item => {
+        const icon = item.querySelector('i');
+        if (isSelected) {
+            item.classList.remove('bg-white', 'border');
+            item.classList.add('bg-primary', 'text-white');
+            icon.classList.remove('far', 'fa-circle');
+            icon.classList.add('fas', 'fa-check-circle');
+        } else {
+            item.classList.remove('bg-primary', 'text-white');
+            item.classList.add('bg-white', 'border', 'text-dark');
+            icon.classList.remove('fas', 'fa-check-circle');
+            icon.classList.add('far', 'fa-circle');
+        }
+    });
+}
+
+function autoPickCodes(orderId, quantity) {
+    const availableItems = Array.from(document.querySelectorAll(`.code-item[data-order-id="${orderId}"]:not(.bg-danger-subtle)`));
+    const textarea = document.getElementById('codes_textarea_' + orderId);
+    
+    // Reset selections for this order first
+    availableItems.forEach(item => {
+        updateCodeItemUI(orderId, item.dataset.code, false);
+    });
+    
+    const selectedCodes = [];
+    for (let i = 0; i < Math.min(quantity, availableItems.length); i++) {
+        const code = availableItems[i].dataset.code;
+        selectedCodes.push(code);
+        updateCodeItemUI(orderId, code, true);
+    }
+    
+    textarea.value = selectedCodes.join('\n');
+    
+    if (availableItems.length < quantity) {
+        alert(`Warning: Only ${availableItems.length} codes available in inventory, but ${quantity} required.`);
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        toastr.success('Code copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+}
+</script>
+@endpush

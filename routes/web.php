@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\DisputeController;
 use App\Http\Controllers\Dashboard\RefundController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Dashboard\ReportController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\AgentController;
 use App\Http\Controllers\Dashboard\BonusController;
+use App\Http\Controllers\Dashboard\DisputesController;
 use App\Http\Controllers\Dashboard\StudentController;
 use App\Http\Controllers\Dashboard\ManagerController;
 use App\Http\Controllers\Dashboard\PricingController;
@@ -90,7 +92,7 @@ Route::middleware('auth')->group(function () {
 
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
-    Route::get('manager/disputes', [ManagerController::class, 'disputes'])->name('disputes');
+
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications.index');
     Route::get('/my-profile', [UserController::class, 'profile'])->name('profile.index');
@@ -109,7 +111,6 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/pricing/{id}/update', [PricingController::class, 'update'])->name('pricing.update');
     Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
-
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.management');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
@@ -241,10 +242,17 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     //Bonus Points
     Route::get('/bonus-point', [BonusController::class, 'bonus'])->name('bonus');
 
+    // Dispute Management
+    Route::get('/disputes', [DisputeController::class, 'index'])->name('disputes.index');
+    Route::post('/disputes/store', [DisputeController::class, 'store'])->name('disputes.store');
+    Route::get('/disputes/{id}', [DisputeController::class, 'show'])->name('disputes.show');
+    Route::post('/disputes/{id}/send', [DisputeController::class, 'sendMessage'])->name('disputes.send');
+    Route::get('/disputes/{id}/fetch', [DisputeController::class, 'fetchMessages'])->name('disputes.fetch');
+    Route::post('/disputes/{id}/typing', [DisputeController::class, 'updateTyping'])->name('disputes.typing');
+    Route::post('/disputes/{id}/status', [DisputeController::class, 'updateStatus'])->name('disputes.status');
+
     // Other placeholder routes
-    Route::get('/disputes', function () {
-        return "Disputes";
-    })->name('disputes.index');
+
     Route::get('/credits', function () {
         return "Add Credit";
     })->name('credits.add');
@@ -283,7 +291,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
         Route::post('/users/{user}/approve', [ManagerController::class, 'approveUser'])->name('users.approve');
         Route::post('/users/{user}/add-credit', [ManagerController::class, 'addCredit'])->name('users.add_credit');
         Route::get('/vouchers/stock', [ManagerController::class, 'voucherStock'])->name('vouchers.stock');
-        Route::get('/disputes', [ManagerController::class, 'disputes'])->name('disputes');
+
         Route::get('/system/stop', [ManagerController::class, 'stopSystem'])->name('system.stop');
         Route::get('/reports', [ManagerController::class, 'reports'])->name('reports');
     });

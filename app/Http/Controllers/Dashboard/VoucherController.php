@@ -20,6 +20,7 @@ class VoucherController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
         $query = VoucherPriceRule::with('inventoryVoucher')
             ->where('is_stopped', 0)
             ->where('is_brand_stopped', 0)
@@ -48,6 +49,30 @@ class VoucherController extends Controller
 
         $vouchers = $query->latest()->paginate(10)->withQueryString();
 
+        // Calculate limits for each voucher
+        foreach ($vouchers as $rule) {
+            $limit = 0;
+            if ($user->isStudent()) {
+                $limit = $rule->student_daily_limit;
+            } elseif ($user->isResellerAgent()) {
+                $limit = $rule->reseller_daily_limit;
+            } elseif ($user->isRegularAgent()) {
+                $limit = $rule->agent_daily_limit;
+            }
+
+            if ($limit > 0) {
+                $boughtLast24h = Order::where('user_id', $user->id)
+                    ->where('voucher_id', $rule->inventoryVoucher->sku_id)
+                    ->where('created_at', '>=', now()->subHours(24))
+                    ->sum('quantity');
+                $rule->is_limited = ($boughtLast24h >= $limit);
+                $rule->remaining_limit = max(0, $limit - $boughtLast24h);
+            } else {
+                $rule->is_limited = false;
+                $rule->remaining_limit = -1; // No limit
+            }
+        }
+
         $stats = [
             'total_vouchers' => InventoryVoucher::count(),
             'total_stock' => InventoryVoucher::sum('quantity'),
@@ -63,14 +88,39 @@ class VoucherController extends Controller
         $rule = VoucherPriceRule::with('inventoryVoucher')->findOrFail($id);
 
         $user = auth()->user();
+
+        // Check 24h limit
+        $limit = 0;
+        if ($user->isStudent()) {
+            $limit = $rule->student_daily_limit;
+        } elseif ($user->isResellerAgent()) {
+            $limit = $rule->reseller_daily_limit;
+        } elseif ($user->isRegularAgent()) {
+            $limit = $rule->agent_daily_limit;
+        }
+
+        $maxAllowed = -1; // Unlimited
+        if ($limit > 0) {
+            $boughtLast24h = Order::where('user_id', $user->id)
+                ->where('voucher_id', $rule->inventoryVoucher->sku_id)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->sum('quantity');
+            
+            if ($boughtLast24h >= $limit) {
+                return redirect()->route('voucher.index')->with('error', 'You have reached your 24-hour purchase limit for this voucher.');
+            }
+            $maxAllowed = $limit - $boughtLast24h;
+        }
+
         $banks = BankAccountModel::where('user_id', $user->id)->get();
         $adminBanks = AdminPaymentMethod::where('status', true)->get();
 
-        // Mock data for points and store credit (you may want to fetch these from actual user models)
+        // Mock data for points and store credit
         $userPoints = [
             'quarterly' => 0,
             'yearly' => 0,
             'store_credit' => $user->wallet_balance ?? 0,
+            'max_allowed' => $maxAllowed
         ];
 
         return view('dashboard.voucher.order-now', compact('rule', 'userPoints', 'banks', 'adminBanks'));
@@ -89,6 +139,27 @@ class VoucherController extends Controller
         $rule = VoucherPriceRule::with('inventoryVoucher')->findOrFail($id);
         $voucher = $rule->inventoryVoucher;
         $user = auth()->user();
+
+        // Check 24h limit
+        $limit = 0;
+        if ($user->isStudent()) {
+            $limit = $rule->student_daily_limit;
+        } elseif ($user->isResellerAgent()) {
+            $limit = $rule->reseller_daily_limit;
+        } elseif ($user->isRegularAgent()) {
+            $limit = $rule->agent_daily_limit;
+        }
+
+        if ($limit > 0) {
+            $boughtLast24h = Order::where('user_id', $user->id)
+                ->where('voucher_id', $voucher->sku_id)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->sum('quantity');
+            
+            if ($boughtLast24h + $request->quantity > $limit) {
+                return response()->json(['message' => 'This order exceeds your 24-hour purchase limit for this voucher. Remaining: ' . ($limit - $boughtLast24h)], 400);
+            }
+        }
 
         if ($voucher->quantity < $request->quantity) {
             return response()->json(['message' => 'Insufficient stock available.'], 400);
@@ -172,11 +243,11 @@ class VoucherController extends Controller
 
             // Notify Admins and Managers
             $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
-            $adminMsg = "New voucher order placed by " . $user->name . " (Order ID: " . $order->order_id . ")";
+            $adminMsg = "Voucher order kiya he by " . $user->name . " (Order ID: " . $order->order_id . ")";
             Notification::send($adminsAndManagers, new OrderPlacedNotification($order, $adminMsg, 'order_placed'));
 
             // Notify the User
-            $userMsg = "Your order for " . $order->quantity . " " . $order->voucher_type . " voucher(s) has been placed. Amount: " . $order->amount . ". Order ID: " . $order->order_id;
+            $userMsg = "Aapne jo order kiya uska order ho gaya he. Voucher: " . $order->voucher_type . ", Amount: " . $order->amount . ", Order ID: " . $order->order_id;
             $user->notify(new OrderPlacedNotification($order, $userMsg, 'order_placed'));
 
             DB::commit();
