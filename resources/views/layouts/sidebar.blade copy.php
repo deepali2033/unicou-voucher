@@ -226,7 +226,7 @@
             @if(auth()->user()->isAdmin() || auth()->user()->isManager())
             <!-- Disputes -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('manager.disputes') }}">
+                <a class="nav-link" href="">
                     <i class="fas fa-gavel me-2"></i> Disputes & Refunds
                 </a>
             </li>

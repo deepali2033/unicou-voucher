@@ -89,7 +89,7 @@
                             <div class="p-3 border rounded bg-light">
                                 <h6 class="fw-bold mb-2"><i class="fas fa-gavel text-warning me-2"></i> Disputes</h6>
                                 <p class="small text-muted mb-3">Review refund requests and resolve disputes.</p>
-                                <a href="{{ route('manager.disputes') }}" class="btn btn-sm btn-outline-warning text-dark">Review Disputes</a>
+                                <a href="" class="btn btn-sm btn-outline-warning text-dark">Review Disputes</a>
                             </div>
                         </div>
                         <div class="col-md-4">
