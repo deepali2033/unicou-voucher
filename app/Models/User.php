@@ -193,6 +193,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return in_array($this->account_type, ['reseller_agent', 'agent']);
     }
 
+    public function isRegularAgent(): bool
+    {
+        return $this->account_type === 'agent';
+    }
+
     /**
      * Check if the user is a student.
      *
@@ -205,7 +210,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isResellerAgent(): bool
     {
-        return in_array($this->account_type, ['reseller_agent', 'agent']);
+        return $this->account_type === 'reseller_agent';
     }
 
     /**
@@ -383,28 +388,47 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function generateNextUserId(string $accountType, string $countryCode = 'IN'): string
     {
         $countryCode = strtoupper($countryCode);
-        $prefix = 'UN' . $countryCode;
+        $basePrefix = 'UN' . $countryCode;
+        $subPrefix = '';
+        $padding = 5;
+        $startNumber = '00171';
 
         if ($accountType === 'student') {
-            $prefix .= 'A';
+            $subPrefix = 'A';
+        } elseif ($accountType === 'manager') {
+            $subPrefix = 'MN';
+            $padding = 2;
+            $startNumber = '01';
+        } elseif ($accountType === 'support_team') {
+            $subPrefix = 'ST';
+            $padding = 2;
+            $startNumber = '01';
+        } elseif ($accountType === 'reseller_agent') {
+            $subPrefix = 'RSA';
+            $padding = 2;
+            $startNumber = '01';
         }
 
+        $prefix = $basePrefix . $subPrefix;
+
         // Find last user with this exact prefix
-        // We ensure we don't pick up Student IDs (with 'A') when generating Agent IDs (without 'A')
         $query = self::where('user_id', 'like', $prefix . '%');
 
-        if ($accountType !== 'student') {
-            // Exclude student IDs which have 'A' after country code
-            $query->where('user_id', 'not like', $prefix . 'A%');
+        // Exclude specific sub-prefixes when searching for regular agent IDs (empty subPrefix)
+        if ($subPrefix === '') {
+            $query->where('user_id', 'not like', $basePrefix . 'A%')
+                  ->where('user_id', 'not like', $basePrefix . 'MN%')
+                  ->where('user_id', 'not like', $basePrefix . 'ST%')
+                  ->where('user_id', 'not like', $basePrefix . 'RSA%');
         }
 
         $lastUser = $query->orderBy('user_id', 'desc')->first();
 
         if ($lastUser && preg_match('/(\d+)$/', $lastUser->user_id, $matches)) {
             $lastNumber = (int)$matches[1];
-            $newNumber = str_pad($lastNumber + 1, 5, '0', STR_PAD_LEFT);
+            $newNumber = str_pad($lastNumber + 1, $padding, '0', STR_PAD_LEFT);
         } else {
-            $newNumber = '00171';
+            $newNumber = $startNumber;
         }
 
         return $prefix . $newNumber;

@@ -15,10 +15,22 @@
                     <div class="d-flex w-100 justify-content-between align-items-start">
                         <div class="d-flex gap-3">
                             <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                <i class="fas {{ ($notification->data['type'] ?? '') == 'user_created' ? 'fa-user-plus' : 'fa-bell' }}"></i>
+                                @php
+                                    $type = $notification->data['type'] ?? '';
+                                    $icon = 'fa-bell';
+                                    $title = 'Notification';
+                                    if ($type == 'user_created') {
+                                        $icon = 'fa-user-plus';
+                                        $title = 'New User Created';
+                                    } elseif ($type == 'order_placed') {
+                                        $icon = 'fa-shopping-cart';
+                                        $title = 'Voucher Order';
+                                    }
+                                @endphp
+                                <i class="fas {{ $icon }}"></i>
                             </div>
                             <div>
-                                <h6 class="mb-1 fw-bold text-dark">{{ ($notification->data['type'] ?? '') == 'user_created' ? 'New User Created' : 'Notification' }}</h6>
+                                <h6 class="mb-1 fw-bold text-dark">{{ $title }}</h6>
                                 <p class="mb-1 text-muted">{{ $notification->data['message'] ?? 'New notification received' }}</p>
                                 <small class="text-secondary">{{ $notification->created_at->diffForHumans() }}</small>
                             </div>
