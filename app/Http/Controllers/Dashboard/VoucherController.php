@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\BankAccountModel;
 use App\Models\AdminPaymentMethod;
+use App\Models\User;
+use App\Notifications\OrderPlacedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class VoucherController extends Controller
 {
@@ -131,6 +134,9 @@ class VoucherController extends Controller
             $referralPointsPerUnit = $voucher->student_referral_points_per_unit;
             $bonusPointsPerUnit = $voucher->student_bonus_points_per_unit;
         } elseif ($user->isResellerAgent()) {
+            $referralPointsPerUnit = $voucher->referral_points_reseller;
+            $bonusPointsPerUnit = 0;
+        } elseif ($user->isRegularAgent()) {
             $referralPointsPerUnit = $voucher->agent_referral_points_per_unit;
             $bonusPointsPerUnit = $voucher->agent_bonus_points_per_unit;
         }
@@ -164,7 +170,18 @@ class VoucherController extends Controller
                 $voucher->decrement('quantity', $request->quantity);
             }
 
+            // Notify Admins and Managers
+            $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
+            $adminMsg = "New voucher order placed by " . $user->name . " (Order ID: " . $order->order_id . ")";
+            Notification::send($adminsAndManagers, new OrderPlacedNotification($order, $adminMsg, 'order_placed'));
+
+            // Notify the User
+            $userMsg = "Your order for " . $order->quantity . " " . $order->voucher_type . " voucher(s) has been placed. Amount: " . $order->amount . ". Order ID: " . $order->order_id;
+            $user->notify(new OrderPlacedNotification($order, $userMsg, 'order_placed'));
+
             DB::commit();
+
+            session()->flash('success', $status == 'completed' ? 'Order placed successfully.' : 'Order submitted. Waiting for admin approval.');
 
             return response()->json([
                 'success' => true,
