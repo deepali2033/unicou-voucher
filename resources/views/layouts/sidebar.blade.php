@@ -223,16 +223,24 @@
 
             <!-- @endif -->
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
-            <!-- Disputes -->
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('manager.disputes') }}">
-                    <i class="fas fa-gavel me-2"></i> Disputes & Refunds
+                <a class="nav-link" href="{{ route('disputes.index') }}">
+                    <i class="fas fa-gavel me-2"></i> Disputes Management
                 </a>
             </li>
+            @endif
+
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('disputes.index') }}">
+                    <i class="fas fa-gavel me-2"></i> My Disputes
+                </a>
+            </li>
+            @endif
 
 
-
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- System Control -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('system.control') }}">

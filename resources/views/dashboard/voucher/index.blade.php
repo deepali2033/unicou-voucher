@@ -105,6 +105,13 @@
                                     <i class="fas fa-globe-americas text-primary me-1"></i> {{ $rule->country_name }}
                                 </span>
                             </div>
+                            @if($rule->remaining_limit >= 0)
+                            <div class="limit-info mt-1">
+                                <span class="badge {{ $rule->is_limited ? 'bg-danger' : 'bg-info' }} text-white border-0 small">
+                                    <i class="fas fa-clock me-1"></i> 24h Limit: {{ $rule->is_limited ? 'Reached' : $rule->remaining_limit . ' left' }}
+                                </span>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -124,13 +131,15 @@
                         </div>
                         <div class="tag-footer">
                             @if($stock > 0)
-                            <!-- <button class="order-action-btn" title="Order Now">
-                                <i class="fas fa-shopping-cart"></i>
-                            </button> -->
-
-                            <a href="{{ route('vouchers.order', $rule->id) }}" class="order-action-btn" title="Order Now">
-                                <i class="fas fa-shopping-cart"></i>
-                            </a>
+                                @if($rule->is_limited)
+                                <div class="disabled-action" title="24h Limit Reached">
+                                    <i class="fas fa-history text-white-50"></i>
+                                </div>
+                                @else
+                                <a href="{{ route('vouchers.order', $rule->id) }}" class="order-action-btn" title="Order Now">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </a>
+                                @endif
                             @else
                             <div class="disabled-action">
                                 <i class="fas fa-lock"></i>

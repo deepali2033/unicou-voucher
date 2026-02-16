@@ -54,8 +54,10 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                @if($order->status == 'completed')
-                                <span class="badge bg-success">Completed</span>
+                                @if($order->status == 'delivered')
+                                <span class="badge bg-success">Delivered</span>
+                                @elseif($order->status == 'completed')
+                                <span class="badge bg-info">Completed</span>
                                 @elseif($order->status == 'pending')
                                 <span class="badge bg-warning">Pending</span>
                                 @else
@@ -161,7 +163,13 @@
             $('#m-amount').text('RS ' + parseFloat(order.amount).toLocaleString());
             $('#m-points').text((parseInt(order.referral_points) || 0) + (parseInt(order.bonus_amount) || 0));
             $('#m-date').text(new Date(order.created_at).toLocaleDateString());
-            $('#m-status').html('<span class="badge bg-' + (order.status === 'completed' ? 'success' : 'warning') + '">' + order.status.toUpperCase() + '</span>');
+            let statusBadge = '';
+            if (order.status === 'delivered') statusBadge = '<span class="badge bg-success">DELIVERED</span>';
+            else if (order.status === 'completed') statusBadge = '<span class="badge bg-info">COMPLETED</span>';
+            else if (order.status === 'pending') statusBadge = '<span class="badge bg-warning text-dark">PENDING</span>';
+            else statusBadge = '<span class="badge bg-danger">' + order.status.toUpperCase() + '</span>';
+            
+            $('#m-status').html(statusBadge);
             $('#m-bank').text(order.bank_name || 'N/A');
             if (order.account_number) {
                 $('#m-bank-details').text(order.account_number + (order.ifsc_code ? ' (' + order.ifsc_code + ')' : ''));

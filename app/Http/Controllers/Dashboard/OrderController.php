@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\InventoryVoucher;
+use App\Models\User;
+use App\Notifications\VoucherDeliveredNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with(['user', 'voucher'])->latest();
+        $query = Order::with(['user', 'voucher', 'inventoryVoucher'])->latest();
 
         if ($request->filled('order_id')) {
             $query->where('order_id', 'like', '%' . $request->order_id . '%');
@@ -27,7 +30,19 @@ class OrderController extends Controller
         }
 
         $orders = $query->paginate(10)->withQueryString();
-        return view('dashboard.orders.oder-deli', compact('orders'));
+        
+        // Get delivered codes across all orders to identify used codes
+        $deliveredCodes = Order::whereNotNull('delivery_details')
+            ->pluck('delivery_details')
+            ->flatMap(function($details) {
+                return array_map('trim', explode("\n", str_replace("\r", "", $details)));
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return view('dashboard.orders.oder-deli', compact('orders', 'deliveredCodes'));
     }
 
     public function export(Request $request)
@@ -82,10 +97,18 @@ class OrderController extends Controller
             'delivery_details' => $request->codes
         ]);
 
-        // Send Email to User with codes
+        // Notify User
         try {
             $user = $order->user;
             $codes = $request->codes;
+            
+            // Database Notification for User
+            $user->notify(new VoucherDeliveredNotification(
+                $order, 
+                "You have received voucher codes for Order #{$order->order_id}. Total amount: RS {$order->amount}."
+            ));
+
+            // Email to User
             Mail::send('emails.order-delivered', ['order' => $order, 'user' => $user, 'codes' => $codes], function($message) use ($user) {
                 $message->to($user->email);
                 $message->subject('Your Voucher Codes Have Been Delivered! - UniCou');
@@ -94,7 +117,18 @@ class OrderController extends Controller
             // Log error but continue
         }
 
-        return back()->with('success', 'Order marked as delivered and codes sent to user email.');
+        // Notify Admins, Managers, and Support Team
+        try {
+            $staff = User::whereIn('account_type', ['admin', 'manager', 'support_team'])->get();
+            Notification::send($staff, new VoucherDeliveredNotification(
+                $order,
+                "Voucher codes delivered for Order #{$order->order_id} by " . auth()->user()->name
+            ));
+        } catch (\Exception $e) {
+            // Log error but continue
+        }
+
+        return back()->with('success', 'Order marked as delivered and codes sent to user.');
     }
 
     public function cancel(Request $request, $id)
