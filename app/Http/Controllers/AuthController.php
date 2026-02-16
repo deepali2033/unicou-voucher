@@ -76,8 +76,7 @@ class AuthController extends Controller
 
         $geo = \App\Helpers\LocationHelper::geo();
 
-        // 🔹 Step 4: Return JSON for frontend
-        return response()->json($geo);
+        // 🔹 Step 3: Create User
         $user = User::create([
             'user_id'      => User::generateNextUserId(
                 $validated['account_type'],
@@ -109,16 +108,7 @@ class AuthController extends Controller
         // 🔹 Step 5: Login & redirect
         Auth::login($user);
 
-        if ($user->account_type === 'student') {
-            return redirect()->route('auth.form.student')->with('success', 'Registration successful. Please complete your profile.');
-        }
-
-        if ($user->account_type === 'reseller_agent') {
-            return redirect()->route('auth.forms.B2BResellerAgent')->with('success', 'Registration successful. Please complete your profile.');
-        }
-
-
-        return redirect()->route('verification.notice');
+        return redirect()->route('verification.notice')->with('success', 'Registration successful. Please verify your email.');
     }
 
     /**
@@ -156,10 +146,6 @@ class AuthController extends Controller
         auth()->user()->update([
             'last_login_at' => now()
         ]);
-
-        if (!auth()->user()->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
-        }
 
         return $this->redirectByRole(auth()->user());
     }
@@ -441,13 +427,10 @@ class AuthController extends Controller
      */
     private function redirectByRole(User $user)
     {
-        if ($user->account_type === 'student' && !$user->studentDetail) {
+        if ($user->account_type === 'student' && !$user->exam_purpose) {
             return redirect()->route('auth.form.student');
         }
-        if ($user->account_type === 'reseller_agent' && !$user->agentDetail) {
-            return redirect()->route('auth.forms.B2BResellerAgent');
-        }
-        if ($user->account_type === 'agent' && !$user->business_name) {
+        if (in_array($user->account_type, ['reseller_agent', 'agent']) && !$user->business_name) {
             return redirect()->route('auth.forms.B2BResellerAgent');
         }
 
