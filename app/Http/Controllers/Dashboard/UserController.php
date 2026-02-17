@@ -521,7 +521,7 @@ class UserController extends Controller
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
-            $query->where('rating', $request->rating);
+            $query->where('rating', '>=', $request->rating);
         }
 
         if ($request->has('category') && $request->category != 'all' && $request->category != '') {
@@ -716,7 +716,7 @@ class UserController extends Controller
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
-            $query->where('rating', $request->rating);
+            $query->where('rating', '>=', $request->rating);
         }
 
         if ($request->has('category') && $request->category != 'all' && $request->category != '') {
@@ -773,7 +773,7 @@ class UserController extends Controller
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
-            $query->where('rating', $request->rating);
+            $query->where('rating', '>=', $request->rating);
         }
 
         if ($request->has('category') && $request->category != 'all' && $request->category != '') {
@@ -830,7 +830,7 @@ class UserController extends Controller
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
-            $query->where('rating', $request->rating);
+            $query->where('rating', '>=', $request->rating);
         }
 
         if ($request->has('category') && $request->category != 'all' && $request->category != '') {
@@ -896,7 +896,7 @@ class UserController extends Controller
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
-            $query->where('rating', $request->rating);
+            $query->where('rating', '>=', $request->rating);
         }
 
         if ($request->has('category') && $request->category != 'all' && $request->category != '') {

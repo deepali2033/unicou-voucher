@@ -15,11 +15,19 @@ class DisputeController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = Dispute::with(['user', 'messages'])->latest();
+        $query = Dispute::with(['user', 'messages', 'assignedStaff'])->latest();
 
         // If not staff, only show their own disputes
         if (!$user->isAdmin() && !$user->isManager() && !$user->isSupport()) {
             $query->where('user_id', $user->id);
+        }
+
+        // If support member, only show unassigned OR disputes assigned to them
+        if ($user->isSupport() && !($user->isAdmin() || $user->isManager())) {
+            $query->where(function($q) use ($user) {
+                $q->whereNull('assigned_to')
+                  ->orWhere('assigned_to', $user->id);
+            });
         }
 
         if ($request->filled('status')) {
@@ -97,10 +105,16 @@ class DisputeController extends Controller
         ]);
 
         $dispute = Dispute::findOrFail($id);
+        $user = auth()->user();
+
+        // If support member replies to an unassigned dispute, assign it to them
+        if ($user->isSupport() && is_null($dispute->assigned_to)) {
+            $dispute->update(['assigned_to' => $user->id]);
+        }
         
         $message = DisputeMessage::create([
             'dispute_id' => $dispute->id,
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
             'message' => $request->message,
         ]);
 
@@ -144,13 +158,17 @@ class DisputeController extends Controller
         $otherUser = null;
         
         if ($isCustomer) {
-            // If I am customer, the other is the staff who replied last
-            $lastStaffMsg = $dispute->messages()
-                ->where('user_id', '!=', $user->id)
-                ->latest()
-                ->first();
-            if ($lastStaffMsg) {
-                $otherUser = $lastStaffMsg->user;
+            // If I am customer, the other is the assigned staff OR the staff who replied last
+            if ($dispute->assigned_to) {
+                $otherUser = $dispute->assignedStaff;
+            } else {
+                $lastStaffMsg = $dispute->messages()
+                    ->where('user_id', '!=', $user->id)
+                    ->latest()
+                    ->first();
+                if ($lastStaffMsg) {
+                    $otherUser = $lastStaffMsg->user;
+                }
             }
         } else {
             // If I am staff, the other is the customer
@@ -189,5 +207,55 @@ class DisputeController extends Controller
         $dispute->update(['status' => $request->status]);
 
         return back()->with('success', 'Dispute status updated.');
+    }
+
+    public function transfer(Request $request, $id)
+    {
+        $request->validate([
+            'support_id' => 'required|exists:users,id',
+        ]);
+
+        $dispute = Dispute::findOrFail($id);
+        
+        // Authorization: Only admin, manager, or currently assigned support can transfer
+        if (!auth()->user()->isAdmin() && !auth()->user()->isManager() && auth()->id() !== $dispute->assigned_to) {
+            abort(403);
+        }
+
+        $dispute->update(['assigned_to' => $request->support_id]);
+
+        return back()->with('success', 'Dispute transferred successfully.');
+    }
+
+    public function submitFeedback(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'feedback' => 'nullable|string',
+        ]);
+
+        $dispute = Dispute::findOrFail($id);
+        
+        // Only the user who opened the dispute can give feedback
+        if (auth()->id() !== $dispute->user_id) {
+            abort(403);
+        }
+
+        $dispute->update([
+            'rating' => $request->rating,
+            'feedback' => $request->feedback,
+        ]);
+
+        // Update staff average rating
+        if ($dispute->assigned_to) {
+            $staff = User::find($dispute->assigned_to);
+            $avgRating = Dispute::where('assigned_to', $staff->id)
+                ->whereNotNull('rating')
+                ->avg('rating');
+            
+            $staff->update(['rating' => $avgRating]);
+        }
+
+        return back()->with('success', 'Thank you for your feedback!');
     }
 }
