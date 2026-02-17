@@ -189,16 +189,26 @@ button {
 }
 .koa-sidebar-wrapper .sidebar {
     width: 250px;
-    min-height: 100vh;
-    background: #129ad31f;
-    /* background-color: #fff; */
-    /* background-color: transparent; */
+    height: 100vh;
+    background-color: #f1f8fc; /* solid light background to prevent transparency issues */
     transition: transform 0.3s ease-in-out;
     position: fixed;
     top: 0;
-    bottom: 0;
+    left: 0;
     z-index: 1000;
     overflow-y: auto;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 992px) {
+    .koa-sidebar-wrapper .sidebar {
+        position: fixed;
+        transform: translateX(0);
+    }
+    .koa-sidebar-wrapper .main-content {
+        margin-left: 250px;
+        width: calc(100% - 250px);
+    }
 }
 .koa-sidebar-wrapper .sidebar-hidden {
     transform: translateX(-100%);
@@ -494,16 +504,20 @@ button {
 @media only screen and (min-width: 1200px) {
     /* CSS for large desktops */
 }
+/* Sidebar handling is already defined above */
 @media (min-width: 992px) {
     .koa-sidebar-wrapper .sidebar {
         transform: translateX(0);
-        position: static;
+        position: fixed;
     }
     .koa-sidebar-wrapper .sidebar-hidden {
         transform: translateX(0);
     }
     .koa-sidebar-wrapper .main-content {
         margin-left: 250px;
+        width: calc(100% - 250px);
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
     .koa-sidebar-wrapper .overlay {
         display: none;
@@ -599,4 +613,9 @@ form.row.g-3.align-items-center.cls_kyc_filter {
 
 .d-none.flex-sm-fill.d-sm-flex.align-items-sm-center.justify-content-sm-between {
     gap: 10px;
+}
+
+svg.w-5.h-5 {
+    width: 24px;
+    height: 24px;
 }

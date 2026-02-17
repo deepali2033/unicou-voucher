@@ -95,6 +95,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [DashboardController::class, 'markAllNotificationsAsRead'])->name('notifications.markAllRead');
+    Route::post('/notifications/bulk-action', [DashboardController::class, 'notificationsBulkAction'])->name('notifications.bulkAction');
     Route::get('/my-profile', [UserController::class, 'profile'])->name('profile.index');
 
     Route::get('/stock-alerts', [DashboardController::class, 'stockAlerts'])->name('stock.alerts');
