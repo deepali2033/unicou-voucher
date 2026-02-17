@@ -34,7 +34,7 @@
 
 <body>
     <div class="container-fluid">
-        <div class="row koa-sidebar-wrapper flex-lg-nowrap">
+        <div class="row koa-sidebar-wrapper">
             <!-- Overlay -->
             <div id="overlay" class="overlay"></div>
             @php
@@ -64,7 +64,7 @@
             </div>
 
             <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-9 px-md-4 main-content">
+            <main class="main-content">
 
                 @include('layouts.header')
 

@@ -65,9 +65,38 @@ class DashboardController extends Controller
 
     public function notifications()
     {
-        $notifications = auth()->user()->notifications()->paginate(20);
-        auth()->user()->unreadNotifications->markAsRead();
+        $notifications = auth()->user()->notifications()->paginate(10);
         return view('dashboard.notifications.index', compact('notifications'));
+    }
+
+    public function markAllNotificationsAsRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back()->with('success', 'All notifications marked as read.');
+    }
+
+    public function notificationsBulkAction(Request $request)
+    {
+        $action = $request->input('action');
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'No notifications selected.');
+        }
+
+        $notifications = auth()->user()->notifications()->whereIn('id', $ids);
+
+        if ($action === 'read') {
+            $notifications->update(['read_at' => now()]);
+            $message = 'Selected notifications marked as read.';
+        } elseif ($action === 'delete') {
+            $notifications->delete();
+            $message = 'Selected notifications deleted.';
+        } else {
+            return back()->with('error', 'Invalid action.');
+        }
+
+        return back()->with('success', $message);
     }
 
     public function stockAlerts()
