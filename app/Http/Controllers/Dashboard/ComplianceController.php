@@ -91,7 +91,7 @@ class ComplianceController extends Controller
             // Log error or handle silently
         }
 
-        if (request()->ajax()) {
+        if (request()->expectsJson() || request()->ajax()) {
             return response()->json(['success' => 'User approved successfully and notification email sent.']);
         }
 
@@ -113,7 +113,7 @@ class ComplianceController extends Controller
             'verified_by' => auth()->id()
         ]);
 
-        if (request()->ajax()) {
+        if (request()->expectsJson() || request()->ajax()) {
             return response()->json(['success' => 'User KYC rejected successfully.']);
         }
 

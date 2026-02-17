@@ -308,7 +308,7 @@ class UserController extends Controller
             ? 'User account unfrozen successfully'
             : 'User account frozen successfully';
 
-        if (request()->ajax()) {
+        if (request()->expectsJson() || request()->ajax()) {
             return response()->json([
                 'status'  => $user->is_active ? 'active' : 'frozen',
                 'message' => $message

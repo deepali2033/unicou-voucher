@@ -44,25 +44,14 @@
                 </a>
             </li>
             @endif
-
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('reseller.agent') }}">
-                    <i class="fas fa-handshake me-2"></i>Reseller Agent
-                </a>
-            </li>
-            @endif
-            <!-- KYC & Compliance -->
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="{{ route('kyc.compliance') }}">
-                    <i class="fas fa-id-card me-2"></i> KYC & Compliance
-                </a>
-            </li> -->
-            @endif
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
             <!-- Pricing -->
             <!-- Inventory -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('pricing.index') }}">
+                    <i class="fas fa-tags me-2"></i> Purchases
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('sales.index') }}">
                     <i class="fas fa-tags me-2"></i> Sales
@@ -73,25 +62,115 @@
                     <i class="fas fa-boxes me-2"></i>Stocks upload
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('pricing.index') }}">
-                    <i class="fas fa-tags me-2"></i> Purchases
-                </a>
-            </li>
+
 
 
             @endif
 
-            <li class="nav-item">
-                <a class="nav-link" href="{{route('bonus')}}">
-                    <i class="fas fa-calendar-alt me-2"></i> Bonus Point
+            <!-- KYC & Compliance -->
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="{{ route('kyc.compliance') }}">
+                    <i class="fas fa-id-card me-2"></i> KYC & Compliance
                 </a>
-            </li>
+            </li> -->
+            @endif
+
             <li class="nav-item">
                 <a class="nav-link" href="{{route('referral')}}">
                     <i class="fas fa-users me-2"></i> Referral Points
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('bonus')}}">
+                    <i class="fas fa-calendar-alt me-2"></i> Bonus Point
+                </a>
+            </li>
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('reseller.agent') }}">
+                    <i class="fas fa-handshake me-2"></i>Reseller Agent
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent()|| auth()->user()->isSupport())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('regular.agent') }}">
+                    <i class="fas fa-user me-2"></i> Agent
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport() || auth()->user()->isResellerAgent())
+            <!-- Voucher Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('student.page') }}">
+                    <i class="fas fa-user-graduate me-2"></i> Student
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
+            <!-- Linked Banks -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('banks.bank-table') }}">
+                    <i class="fas fa-university me-2"></i> Banks
+                </a>
+            </li>
+
+            @if(auth()->user()->isAdmin() ||auth()->user()->isAgent() ||auth()->user()->isManager()|| auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            <!-- System Control -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('system.control') }}">
+                    <i class="fas fa-cogs me-2"></i> System Control
+                </a>
+            </li>
+
+            <!-- Audit -->
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="{{ route('audit.index') }}">
+                    <i class="fas fa-clipboard-list me-2"></i> Audit & Logs
+                </a>
+            </li> -->
+
+            <!-- Settings -->
+
+            @endif
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            <!-- Support Center -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('customer.support') }}">
+                    <i class="fas fa-headset me-2"></i> Customer Support
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+            <!-- Support Center -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('customer.query') }}">
+                    <i class="fas fa-headset me-2"></i> Customer Query
+                </a>
+            </li>
+            @endif
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('disputes.index') }}">
+                    <i class="fas fa-gavel me-2"></i> Disputes Management
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('settings.risk-levels') }}">
+                    <i class="fas fa-globe me-2"></i> Country Risk Levels
+                </a>
+            </li>
+            @endif
+            <!-- Admin Payment Methods -->
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="{{ route('payment-methods.index') }}">
+                    <i class="fas fa-credit-card me-2"></i> Payment Methods
+                </a>
+            </li> -->
+            @endif
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager', 'reseller_agent']))
            
             <li class="nav-item">
@@ -118,21 +197,7 @@
             </li>
             @endif
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
-            <!-- Linked Banks -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('banks.bank-table') }}">
-                    <i class="fas fa-university me-2"></i> Banks
-                </a>
-            </li>
 
-            <!-- Admin Payment Methods -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('payment-methods.index') }}">
-                    <i class="fas fa-credit-card me-2"></i> Payment Methods
-                </a>
-            </li>
-            @endif
 
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
            
@@ -153,22 +218,7 @@
             @endif
 
 
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent()|| auth()->user()->isSupport())
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('regular.agent') }}">
-                    <i class="fas fa-user me-2"></i> Agent
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport() || auth()->user()->isResellerAgent())
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('student.page') }}">
-                    <i class="fas fa-user-graduate me-2"></i> Student
-                </a>
-            </li>
-            @endif
+
             <!-- @if(in_array(auth()->user()->account_type, ['reseller_agent', 'student']))
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('agent.vouchers') }}">
@@ -223,13 +273,7 @@
 
             <!-- @endif -->
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('disputes.index') }}">
-                    <i class="fas fa-gavel me-2"></i> Disputes Management
-                </a>
-            </li>
-            @endif
+
 
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
@@ -240,44 +284,6 @@
             @endif
 
 
-            @if(auth()->user()->isAgent() ||auth()->user()->isManager()|| auth()->user()->isStudent() || auth()->user()->isResellerAgent())
-            <!-- System Control -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('system.control') }}">
-                    <i class="fas fa-cogs me-2"></i> System Control
-                </a>
-            </li>
-
-            <!-- Audit -->
-            <!-- <li class="nav-item">
-                <a class="nav-link" href="{{ route('audit.index') }}">
-                    <i class="fas fa-clipboard-list me-2"></i> Audit & Logs
-                </a>
-            </li> -->
-
-            <!-- Settings -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('settings.risk-levels') }}">
-                    <i class="fas fa-globe me-2"></i> Country Risk Levels
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
-            <!-- Support Center -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('customer.support') }}">
-                    <i class="fas fa-headset me-2"></i> Customer Support
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
-            <!-- Support Center -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('customer.query') }}">
-                    <i class="fas fa-headset me-2"></i> Customer Query
-                </a>
-            </li>
-            @endif
         </ul>
 
         <hr class="my-3" style="border-color: #495057;">

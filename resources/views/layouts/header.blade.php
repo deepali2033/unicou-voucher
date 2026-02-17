@@ -36,7 +36,7 @@
             <a href="{{ route('notifications.index') }}" class="text-decoration-none">
                 <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
                 @php
-                    $unreadCount = auth()->user()->unreadNotifications->count();
+                $unreadCount = auth()->user()->unreadNotifications->count();
                 @endphp
                 @if($unreadCount > 0)
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.25em 0.4em;">
@@ -60,11 +60,11 @@
         $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
         @endphp
 
-        <span>{{ session('country_code', 'IN') }}</span>
 
-        <div class="d-flex align-items-center gap-2" title="{{ $countryName }}">
-            <img src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width:30px;border-radius:2px;border:1px solid #eee;">
-            <span class="d-none d-md-inline text-muted small fw-bold">{{ $countryCode }}</span>
+
+        <div class="d-flex align-items-center gap-2" title="{{ $countryName }}" id="header-country-container">
+            <img id="header-country-flag" src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width:30px;border-radius:2px;border:1px solid #eee;">
+            <span id="header-country-code" class="d-none d-md-inline text-muted small fw-bold">{{ $countryCode }}</span>
         </div>
 
 
