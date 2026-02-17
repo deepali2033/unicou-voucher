@@ -104,6 +104,41 @@ document.addEventListener('click', function (e) {
 });
 
 /**
+ * Shared Header Flag UI Update
+ */
+function updateHeaderFlagUI(iso2, name) {
+    if (!iso2) return;
+    const code = iso2.toUpperCase();
+    const flagUrl = `https://flagcdn.com/w40/${iso2.toLowerCase()}.png`;
+    
+    const headerFlag = document.getElementById('header-country-flag');
+    const headerCode = document.getElementById('header-country-code');
+    const headerCodeTop = document.getElementById('header-country-code-top');
+    const headerContainer = document.getElementById('header-country-container');
+
+    if (headerFlag) headerFlag.src = flagUrl;
+    if (headerCode) headerCode.textContent = code;
+    if (headerCodeTop) headerCodeTop.textContent = code;
+    if (headerContainer) headerContainer.title = name;
+}
+
+/**
+ * Global Header Sync with IP (when no phone input is present)
+ */
+function syncGlobalHeaderWithIP() {
+    if (document.querySelectorAll(".intl-phone").length === 0) {
+        fetch("https://ipapi.co/json")
+            .then(res => res.json())
+            .then(data => {
+                updateHeaderFlagUI(data.country_code, data.country_name);
+            })
+            .catch(() => {
+                // Fallback handled by PHP initial load
+            });
+    }
+}
+
+/**
  * Initialize intl-tel-input for all elements with class .intl-phone
  */
 function initIntlPhone() {
@@ -119,8 +154,14 @@ function initIntlPhone() {
             geoIpLookup: function(success, failure) {
                 fetch("https://ipapi.co/json")
                     .then(res => res.json())
-                    .then(data => success(data.country_code))
-                    .catch(() => success("pk"));
+                    .then(data => {
+                        success(data.country_code);
+                        updateHeaderFlagUI(data.country_code, data.country_name);
+                    })
+                    .catch(() => {
+                        success("pk");
+                        updateHeaderFlagUI("pk", "Pakistan");
+                    });
             },
             separateDialCode: true,
             utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
@@ -132,27 +173,15 @@ function initIntlPhone() {
             }
         };
 
-        const updateHeaderFlag = () => {
+        const syncHeaderAndDropdown = () => {
             const countryData = iti.getSelectedCountryData();
             if (countryData && countryData.iso2) {
-                const code = countryData.iso2.toUpperCase();
-                const flagUrl = `https://flagcdn.com/w40/${countryData.iso2.toLowerCase()}.png`;
-                
-                const headerFlag = document.getElementById('header-country-flag');
-                const headerCode = document.getElementById('header-country-code');
-                const headerCodeTop = document.getElementById('header-country-code-top');
-                const headerContainer = document.getElementById('header-country-container');
-
-                if (headerFlag) headerFlag.src = flagUrl;
-                if (headerCode) headerCode.textContent = code;
-                if (headerCodeTop) headerCodeTop.textContent = code;
-                if (headerContainer) headerContainer.title = countryData.name;
+                updateHeaderFlagUI(countryData.iso2, countryData.name);
 
                 // Sync with country dropdown if it exists
                 const countrySelect = document.getElementById('country');
                 if (countrySelect) {
-                    const countryName = countryData.name.split(' (')[0]; // Simple name
-                    // Try to find by value (which is name in create.blade.php)
+                    const countryName = countryData.name.split(' (')[0];
                     for (let i = 0; i < countrySelect.options.length; i++) {
                         if (countrySelect.options[i].text === countryName || countrySelect.options[i].value === countryName) {
                             countrySelect.selectedIndex = i;
@@ -167,11 +196,8 @@ function initIntlPhone() {
         input.addEventListener('keyup', updateFullPhone);
         input.addEventListener('countrychange', () => {
             updateFullPhone();
-            updateHeaderFlag();
+            syncHeaderAndDropdown();
         });
-
-        // Update header flag immediately after initialization
-        setTimeout(updateHeaderFlag, 500);
 
         // Numeric only and digit limitation
         input.addEventListener('keypress', function(e) {
@@ -186,9 +212,12 @@ function initIntlPhone() {
             }
         });
 
-        // Store instance for later use if needed
+        // Store instance for later use
         input.iti = iti;
         input.dataset.intlInitialized = "true";
+
+        // Initial sync if value exists or after load
+        setTimeout(syncHeaderAndDropdown, 500);
 
         // Sync dropdown change back to iti
         const countrySelect = document.getElementById('country');
@@ -205,4 +234,7 @@ function initIntlPhone() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', initIntlPhone);
+document.addEventListener('DOMContentLoaded', () => {
+    initIntlPhone();
+    syncGlobalHeaderWithIP();
+});
