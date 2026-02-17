@@ -37,9 +37,12 @@
                                 <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
                                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
+
+
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Phone Number</label>
-                                <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
+                                <input type="text" id="phone" name="phone_dummy" class="form-control intl-phone @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
+                                <input type="hidden" name="phone" id="full_phone">
                                 @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -50,7 +53,7 @@
                                 <select name="country" id="country" class="form-select @error('country') is-invalid @enderror" required>
                                     <option value="" disabled>Select Country</option>
                                     @foreach(\App\Helpers\CountryHelper::getAllCountries() as $code => $name)
-                                        <option value="{{ $name }}" {{ old('country', $user->country) == $name ? 'selected' : '' }}>{{ $name }}</option>
+                                    <option value="{{ $name }}" {{ old('country', $user->country) == $name ? 'selected' : '' }}>{{ $name }}</option>
                                     @endforeach
                                 </select>
                                 @error('country') <div class="invalid-feedback">{{ $message }}</div> @enderror

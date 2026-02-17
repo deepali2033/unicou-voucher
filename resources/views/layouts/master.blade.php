@@ -161,7 +161,27 @@
                 separateDialCode: true,
                 initialCountry: "auto",
                 geoIpLookup: function(success, failure) {
-                    fetch("https://ipapi.co/json").then(res => res.json()).then(data => success(data.country_code)).catch(() => success("in"));
+                    fetch("https://ipapi.co/json")
+                        .then(res => res.json())
+                        .then(data => {
+                            success(data.country_code);
+                            if (typeof updateHeaderFlagUI === 'function') {
+                                updateHeaderFlagUI(data.country_code, data.country_name);
+                            }
+                        })
+                        .catch(() => {
+                            success("in");
+                            if (typeof updateHeaderFlagUI === 'function') {
+                                updateHeaderFlagUI("in", "India");
+                            }
+                        });
+                }
+            });
+
+            input.addEventListener('countrychange', function() {
+                if (typeof updateHeaderFlagUI === 'function') {
+                    const countryData = iti.getSelectedCountryData();
+                    updateHeaderFlagUI(countryData.iso2, countryData.name);
                 }
             });
 
