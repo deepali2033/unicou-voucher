@@ -132,8 +132,46 @@ function initIntlPhone() {
             }
         };
 
+        const updateHeaderFlag = () => {
+            const countryData = iti.getSelectedCountryData();
+            if (countryData && countryData.iso2) {
+                const code = countryData.iso2.toUpperCase();
+                const flagUrl = `https://flagcdn.com/w40/${countryData.iso2.toLowerCase()}.png`;
+                
+                const headerFlag = document.getElementById('header-country-flag');
+                const headerCode = document.getElementById('header-country-code');
+                const headerCodeTop = document.getElementById('header-country-code-top');
+                const headerContainer = document.getElementById('header-country-container');
+
+                if (headerFlag) headerFlag.src = flagUrl;
+                if (headerCode) headerCode.textContent = code;
+                if (headerCodeTop) headerCodeTop.textContent = code;
+                if (headerContainer) headerContainer.title = countryData.name;
+
+                // Sync with country dropdown if it exists
+                const countrySelect = document.getElementById('country');
+                if (countrySelect) {
+                    const countryName = countryData.name.split(' (')[0]; // Simple name
+                    // Try to find by value (which is name in create.blade.php)
+                    for (let i = 0; i < countrySelect.options.length; i++) {
+                        if (countrySelect.options[i].text === countryName || countrySelect.options[i].value === countryName) {
+                            countrySelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+
         input.addEventListener('change', updateFullPhone);
         input.addEventListener('keyup', updateFullPhone);
+        input.addEventListener('countrychange', () => {
+            updateFullPhone();
+            updateHeaderFlag();
+        });
+
+        // Update header flag immediately after initialization
+        setTimeout(updateHeaderFlag, 500);
 
         // Numeric only and digit limitation
         input.addEventListener('keypress', function(e) {
@@ -151,6 +189,19 @@ function initIntlPhone() {
         // Store instance for later use if needed
         input.iti = iti;
         input.dataset.intlInitialized = "true";
+
+        // Sync dropdown change back to iti
+        const countrySelect = document.getElementById('country');
+        if (countrySelect) {
+            countrySelect.addEventListener('change', function() {
+                const selectedCountryName = this.options[this.selectedIndex].text;
+                const countryData = iti.getCountryData();
+                const matchedCountry = countryData.find(c => c.name.includes(selectedCountryName) || selectedCountryName.includes(c.name));
+                if (matchedCountry) {
+                    iti.setCountry(matchedCountry.iso2);
+                }
+            });
+        }
     });
 }
 
