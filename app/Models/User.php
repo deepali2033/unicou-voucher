@@ -99,6 +99,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_stop_voucher_sales',
         'can_view_user_email_name',
         'category',
+        'rating',
     ];
 
     /**

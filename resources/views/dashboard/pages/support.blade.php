@@ -55,6 +55,18 @@
                     </div>
                 </div>
 
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Rating</label>
+                    <select name="rating" class="form-select">
+                        <option value="all" {{ request('rating') == 'all' ? 'selected' : '' }}>All Ratings</option>
+                        <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>5 Stars</option>
+                        <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4 Stars</option>
+                        <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3 Stars</option>
+                        <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2 Stars</option>
+                        <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1 Star</option>
+                    </select>
+                </div>
+
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
                     <a href="{{ route('support.team') }}" class="btn btn-light">Reset All</a>

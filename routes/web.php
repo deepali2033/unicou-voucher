@@ -250,6 +250,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/disputes/{id}/fetch', [DisputeController::class, 'fetchMessages'])->name('disputes.fetch');
     Route::post('/disputes/{id}/typing', [DisputeController::class, 'updateTyping'])->name('disputes.typing');
     Route::post('/disputes/{id}/status', [DisputeController::class, 'updateStatus'])->name('disputes.status');
+    Route::post('/disputes/{id}/transfer', [DisputeController::class, 'transfer'])->name('disputes.transfer');
+    Route::post('/disputes/{id}/feedback', [DisputeController::class, 'submitFeedback'])->name('disputes.feedback');
 
     // Other placeholder routes
 

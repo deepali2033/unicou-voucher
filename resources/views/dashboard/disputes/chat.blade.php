@@ -106,6 +106,38 @@
                         <label class="text-muted small text-uppercase fw-bold mb-2 d-block">Opened On</label>
                         <p class="mb-0">{{ $dispute->created_at->format('M d, Y \a\t h:i A') }}</p>
                     </div>
+
+                    @if(auth()->user()->isAdmin() || auth()->user()->isManager() || (auth()->user()->isSupport() && auth()->id() === $dispute->assigned_to))
+                    <div class="mt-4 pt-4 border-top">
+                        <label class="text-muted small text-uppercase fw-bold mb-2 d-block">Transfer Chat</label>
+                        <button type="button" class="btn btn-outline-primary btn-sm w-100 p-2" data-bs-toggle="modal" data-bs-target="#transferModal" style="border-radius: 0.8rem;">
+                            <i class="fas fa-exchange-alt me-2"></i>Transfer to Member
+                        </button>
+                    </div>
+                    @endif
+
+                    @if(auth()->id() === $dispute->user_id && ($dispute->status === 'resolved' || $dispute->status === 'closed') && is_null($dispute->rating))
+                    <div class="mt-4 pt-4 border-top">
+                        <label class="text-muted small text-uppercase fw-bold mb-2 d-block">Rate our Support</label>
+                        <button type="button" class="btn btn-warning btn-sm w-100 p-2 text-white" data-bs-toggle="modal" data-bs-target="#feedbackModal" style="border-radius: 0.8rem;">
+                            <i class="fas fa-star me-2"></i>Give Feedback
+                        </button>
+                    </div>
+                    @endif
+
+                    @if(!is_null($dispute->rating))
+                    <div class="mt-4 pt-4 border-top">
+                        <label class="text-muted small text-uppercase fw-bold mb-2 d-block">User Feedback</label>
+                        <div class="d-flex align-items-center mb-2">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star {{ $i <= $dispute->rating ? 'text-warning' : 'text-muted' }}"></i>
+                            @endfor
+                        </div>
+                        @if($dispute->feedback)
+                        <p class="small text-muted italic mb-0">"{{ $dispute->feedback }}"</p>
+                        @endif
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -119,6 +151,94 @@
         </div>
     </div>
 </div>
+
+@if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold">Transfer Dispute</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('disputes.transfer', $dispute->id) }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Support Member</label>
+                        <select name="support_id" class="form-select border-0 bg-light p-3" style="border-radius: 0.8rem;" required>
+                            <option value="">Choose member...</option>
+                            @foreach(\App\Models\User::where('account_type', 'support_team')->where('id', '!=', auth()->id())->get() as $member)
+                                <option value="{{ $member->id }}">{{ $member->name }} ({{ $member->email }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Confirm Transfer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+@if(auth()->id() === $dispute->user_id)
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold">Share your Feedback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('disputes.feedback', $dispute->id) }}" method="POST">
+                @csrf
+                <div class="modal-body p-4 text-center">
+                    <p class="text-muted mb-4">How would you rate the support you received for this dispute?</p>
+                    
+                    <div class="rating-stars mb-4">
+                        @for($i = 5; $i >= 1; $i--)
+                        <input type="radio" name="rating" value="{{ $i }}" id="star{{ $i }}" required>
+                        <label for="star{{ $i }}"><i class="fas fa-star fa-2x"></i></label>
+                        @endfor
+                    </div>
+
+                    <div class="text-start">
+                        <label class="form-label fw-semibold">Comment (Optional)</label>
+                        <textarea name="feedback" class="form-control border-0 bg-light p-3" rows="3" placeholder="Tell us more about your experience..." style="border-radius: 0.8rem;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">Submit Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-stars {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 10px;
+}
+.rating-stars input { display: none; }
+.rating-stars label {
+    cursor: pointer;
+    color: #e9ecef;
+    transition: color 0.2s;
+}
+.rating-stars label:hover,
+.rating-stars label:hover ~ label,
+.rating-stars input:checked ~ label {
+    color: #ffc107;
+}
+</style>
+@endif
 
 @push('scripts')
 <script>

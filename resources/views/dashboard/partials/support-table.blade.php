@@ -38,7 +38,17 @@
                 <td>{{ $user->phone }}</td>
                 <td><span class="badge bg-info-subtle text-info">N/A</span></td>
                 <td><span class="badge bg-info-subtle text-info">N/A</span></td>
-                <td><span class="badge bg-info-subtle text-info">N/A</span></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        @php $rating = number_format($user->rating, 1); @endphp
+                        <span class="fw-bold text-warning me-1">{{ $rating }}</span>
+                        <div class="text-warning small">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star {{ $i <= round($user->rating) ? '' : 'text-muted opacity-25' }}"></i>
+                            @endfor
+                        </div>
+                    </div>
+                </td>
                 <td>
                     @php $canFreeze = auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user; @endphp
                     <span class="badge px-3 py-2 {{ $canFreeze ? 'user-status-toggle' : '' }} {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"

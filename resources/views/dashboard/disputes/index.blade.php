@@ -45,6 +45,15 @@
                                     <span class="small fw-semibold text-dark">{{ $dispute->user->name }}</span>
                                 </div>
                                 <span class="text-muted small">ID: {{ $dispute->dispute_id }}</span>
+                                @if($dispute->assignedStaff)
+                                <div class="badge bg-info-subtle text-info small">
+                                    <i class="fas fa-user-shield me-1"></i> {{ $dispute->assignedStaff->name }}
+                                </div>
+                                @else
+                                <div class="badge bg-secondary-subtle text-secondary small">
+                                    <i class="fas fa-user-clock me-1"></i> Unassigned
+                                </div>
+                                @endif
                             </div>
                         </div>
                         <div class="text-end">
