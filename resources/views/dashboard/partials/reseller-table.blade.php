@@ -7,11 +7,15 @@
                 <th>Date of Reg.</th>
                 <th>Last Active date and time</th>
                 <th>Category</th>
-                <th>Limit</th>
+                <th>Limit</th>€
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
+                @endif
                 <!-- <th>Last Name</th> -->
                 <th>Country</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>email ID(official)</th>
+                @endif
                 <th>contact No.</th>
                 <th>Total Agent</th>
                 <th>Total Vouchers Purchased</th>
@@ -42,10 +46,14 @@
                     @endif
                 </td>
                 <td></td>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                @endif
                 <!-- <td>{{ $user->last_name }}</td> -->
                 <td>{{ $user->country }}</td>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->email }}</td>
+                @endif
                 <td>{{ $user->phone }}</td>
                 <td>0</td>
                 <td>{{ $user->orders->where('status', 'delivered')->count() }}</td>

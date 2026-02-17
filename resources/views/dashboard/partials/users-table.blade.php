@@ -24,14 +24,21 @@
                             style="object-fit: cover; border: 1px solid #eee;">
                         <div>
                             <div class="fw-bold text-dark">
-                                {{ $user->first_name }} {{ $user->last_name }}
-                            </div>
-                            <div class="text-muted small">
-                                <div class="user_id">{{ $user->user_id }}</div>
-                                <div class="user_id_email">{{ $user->email }}</div>
+                                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
+                                <div class="fw-bold text-dark">
+                                    {{ $user->first_name }} {{ $user->last_name }}
+                                </div>
+                                @endif
+
+
+                                <div class="text-muted small">
+                                    <div class="user_id">{{ $user->user_id }}</div>
+                                    @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
+                                    <div class="user_id_email">{{ $user->email }}</div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
                 </td>
 
                 <td>

@@ -6,9 +6,13 @@
                 <th>Manager ID</th>
                 <th>Date of Reg.</th>
                 <th>Last Active</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
+                @endif
                 <th>Country</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Email</th>
+                @endif
                 <th>Task/Performance</th>
                 <th>Contact</th>
                 <th>Status</th>
@@ -32,6 +36,7 @@
                     <span class="text-muted small">Never</span>
                     @endif
                 </td>
+
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                 <td><span class="badge bg-light text-dark border">{{ $user->country ?: 'N/A' }}</span></td>
                 <td>
