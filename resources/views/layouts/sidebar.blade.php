@@ -240,7 +240,7 @@
             @endif
 
 
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            @if(auth()->user()->isAgent() ||auth()->user()->isManager()|| auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- System Control -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('system.control') }}">

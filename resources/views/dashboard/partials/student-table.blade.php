@@ -6,9 +6,13 @@
                 <th>User ID</th>
                 <th>Date of Reg.</th>
                 <th>Last Active</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
+                @endif
                 <th>Country</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Email ID</th>
+                @endif
                 <th>Highest Education</th>
                 <th>Contact No.</th>
                 <th>Vouchers Purchased</th>
@@ -26,9 +30,13 @@
                 <td>{{ $user->user_id }}</td>
                 <td>{{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}</td>
                 <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                @endif
                 <td>{{ $user->country }}</td>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->email }}</td>
+                @endif
                 <td>{{ $user->highest_education ?? 'N/A' }}</td>
                 <td>{{ $user->phone }}</td>
                 <td>{{ $user->orders_count ?? 0 }}</td>

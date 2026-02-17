@@ -207,8 +207,20 @@
                             class="rounded-circle border border-4 border-light shadow-sm" width="120" height="120" alt="Avatar" style="object-fit: cover;">
                         <span class="status-dot"></span>
                     </div>
-                    <h5 class="fw-bold mb-1">{{ $user->first_name }} {{ $user->last_name }}</h5>
-                    <p class="text-muted small mb-3">{{ $user->email }}</p>
+                    <h5 class="fw-bold mb-1">
+                        @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
+                            {{ $user->first_name }} {{ $user->last_name }}
+                        @else
+                            {{ $user->user_id }}
+                        @endif
+                    </h5>
+                    <p class="text-muted small mb-3">
+                        @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
+                            {{ $user->email }}
+                        @else
+                            Email Hidden
+                        @endif
+                    </p>
                     <div class="d-flex justify-content-center mb-4">
                         <span class="badge rounded-pill badge-soft-blue text-uppercase">
                             {{ str_replace('_', ' ', $user->account_type) }}
@@ -334,11 +346,23 @@
                                     <table class="table table-borderless table-sm">
                                         <tr>
                                             <td class="text-muted" width="40%">Full Name</td>
-                                            <td class="fw-bold">{{ $user->first_name }} {{ $user->last_name }}</td>
+                                            <td class="fw-bold">
+                                                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
+                                                    {{ $user->first_name }} {{ $user->last_name }}
+                                                @else
+                                                    {{ $user->user_id }}
+                                                @endif
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td class="text-muted">Email</td>
-                                            <td class="fw-bold">{{ $user->email }}</td>
+                                            <td class="fw-bold">
+                                                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
+                                                    {{ $user->email }}
+                                                @else
+                                                    Hidden
+                                                @endif
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td class="text-muted">Primary Phone</td>
@@ -751,6 +775,7 @@
                                     ['name' => 'can_stop_system_sales', 'label' => 'Stop System Sales', 'desc' => 'Allow manager to toggle global system sales status'],
                                     ['name' => 'can_stop_country_sales', 'label' => 'Stop Country Sales', 'desc' => 'Allow manager to restrict sales for specific countries'],
                                     ['name' => 'can_stop_voucher_sales', 'label' => 'Stop Voucher Sales', 'desc' => 'Allow manager to restrict sales for specific vouchers'],
+                                    ['name' => 'can_view_user_email_name', 'label' => 'View Name & Email', 'desc' => 'Allow manager to see real names and emails of users'],
                                     ];
                                     @endphp
 

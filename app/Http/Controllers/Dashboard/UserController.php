@@ -377,6 +377,7 @@ class UserController extends Controller
             'can_stop_system_sales' => $request->has('can_stop_system_sales'),
             'can_stop_country_sales' => $request->has('can_stop_country_sales'),
             'can_stop_voucher_sales' => $request->has('can_stop_voucher_sales'),
+            'can_view_user_email_name' => $request->has('can_view_user_email_name'),
         ]);
 
         return back()->with('success', 'Manager permissions updated successfully.');
@@ -509,11 +510,22 @@ class UserController extends Controller
         }
 
         if ($request->has('time') && $request->time != '') {
-            $query->whereTime('created_at', $request->time);
+            $query->whereTime('last_login_at', $request->time);
+        }
+
+        if ($request->has('from_time') && $request->from_time != '') {
+            $query->whereTime('last_login_at', '>=', $request->from_time);
+        }
+        if ($request->has('to_time') && $request->to_time != '') {
+            $query->whereTime('last_login_at', '<=', $request->to_time);
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
             $query->where('rating', $request->rating);
+        }
+
+        if ($request->has('category') && $request->category != 'all' && $request->category != '') {
+            $query->where('category', $request->category);
         }
 
         $users = $query->latest()->paginate(10)->withQueryString();
@@ -693,11 +705,22 @@ class UserController extends Controller
         }
 
         if ($request->has('time') && $request->time != '') {
-            $query->whereTime('created_at', $request->time);
+            $query->whereTime('last_login_at', $request->time);
+        }
+
+        if ($request->has('from_time') && $request->from_time != '') {
+            $query->whereTime('last_login_at', '>=', $request->from_time);
+        }
+        if ($request->has('to_time') && $request->to_time != '') {
+            $query->whereTime('last_login_at', '<=', $request->to_time);
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
             $query->where('rating', $request->rating);
+        }
+
+        if ($request->has('category') && $request->category != 'all' && $request->category != '') {
+            $query->where('category', $request->category);
         }
 
         $users = $query->latest()->paginate(10)->withQueryString();
@@ -739,11 +762,22 @@ class UserController extends Controller
         }
 
         if ($request->has('time') && $request->time != '') {
-            $query->whereTime('created_at', $request->time);
+            $query->whereTime('last_login_at', $request->time);
+        }
+
+        if ($request->has('from_time') && $request->from_time != '') {
+            $query->whereTime('last_login_at', '>=', $request->from_time);
+        }
+        if ($request->has('to_time') && $request->to_time != '') {
+            $query->whereTime('last_login_at', '<=', $request->to_time);
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
             $query->where('rating', $request->rating);
+        }
+
+        if ($request->has('category') && $request->category != 'all' && $request->category != '') {
+            $query->where('category', $request->category);
         }
 
         $users = $query->latest()->paginate(10)->withQueryString();
@@ -785,11 +819,22 @@ class UserController extends Controller
         }
 
         if ($request->has('time') && $request->time != '') {
-            $query->whereTime('created_at', $request->time);
+            $query->whereTime('last_login_at', $request->time);
+        }
+
+        if ($request->has('from_time') && $request->from_time != '') {
+            $query->whereTime('last_login_at', '>=', $request->from_time);
+        }
+        if ($request->has('to_time') && $request->to_time != '') {
+            $query->whereTime('last_login_at', '<=', $request->to_time);
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
             $query->where('rating', $request->rating);
+        }
+
+        if ($request->has('category') && $request->category != 'all' && $request->category != '') {
+            $query->where('category', $request->category);
         }
 
         $users = $query->latest()->paginate(10)->withQueryString();
@@ -840,11 +885,22 @@ class UserController extends Controller
         }
 
         if ($request->has('time') && $request->time != '') {
-            $query->whereTime('created_at', $request->time);
+            $query->whereTime('last_login_at', $request->time);
+        }
+
+        if ($request->has('from_time') && $request->from_time != '') {
+            $query->whereTime('last_login_at', '>=', $request->from_time);
+        }
+        if ($request->has('to_time') && $request->to_time != '') {
+            $query->whereTime('last_login_at', '<=', $request->to_time);
         }
 
         if ($request->has('rating') && $request->rating != 'all' && $request->rating != '') {
             $query->where('rating', $request->rating);
+        }
+
+        if ($request->has('category') && $request->category != 'all' && $request->category != '') {
+            $query->where('category', $request->category);
         }
 
         $users = $query->withCount(['orders as orders_count' => function ($q) {

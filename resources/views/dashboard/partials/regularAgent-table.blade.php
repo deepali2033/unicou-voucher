@@ -8,10 +8,14 @@
                 <th>Last Active date and time</th>
                 <th>Category</th>
                 <th>Limit</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
+                @endif
                 <!-- <th>Last Name</th> -->
                 <th>Country</th>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>email ID(official)</th>
+                @endif
                 <th>contact No.</th>
                 <th>Total Vouchers purchased</th>
                 <th>Total Revenue Paid</th>
@@ -41,10 +45,13 @@
                     @endif
                 </td>
                 <td></td>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
-
+                @endif
                 <td>{{ $user->country_iso }}</td>
+                @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->email }}</td>
+                @endif
                 <td>{{ $user->phone }}</td>
                 <td>{{ $user->orders->where('status', 'delivered')->count() }}</td>
                 <td>{{ number_format($user->orders->where('status', 'delivered')->sum('amount'), 2) }}</td>

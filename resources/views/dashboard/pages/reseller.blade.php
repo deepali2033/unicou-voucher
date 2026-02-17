@@ -48,19 +48,20 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Time</label>
-                    <input type="time" name="time" class="form-control" value="{{ request('time') }}">
+                    <label class="form-label fw-bold">Active Login Time</label>
+                    <div class="d-flex gap-2">
+                        <input type="time" name="from_time" class="form-control" value="{{ request('from_time') }}" title="From Time">
+                        <input type="time" name="to_time" class="form-control" value="{{ request('to_time') }}" title="To Time">
+                    </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Rating</label>
-                    <select name="rating" class="form-select">
-                        <option value="all">All Ratings</option>
-                        <option value="5">5 Stars</option>
-                        <option value="4">4 Stars</option>
-                        <option value="3">3 Stars</option>
-                        <option value="2">2 Stars</option>
-                        <option value="1">1 Star</option>
+                    <label class="form-label fw-bold">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="all" {{ request('category') == 'all' ? 'selected' : '' }}>All Categories</option>
+                        <option value="silver" {{ request('category') == 'silver' ? 'selected' : '' }}>Silver</option>
+                        <option value="gold" {{ request('category') == 'gold' ? 'selected' : '' }}>Gold</option>
+                        <option value="diamond" {{ request('category') == 'diamond' ? 'selected' : '' }}>Diamond</option>
                     </select>
                 </div>
 
