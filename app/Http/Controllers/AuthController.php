@@ -184,6 +184,12 @@ class AuthController extends Controller
         return view('auth.forms.student-admission-form');
     }
 
+
+    public function showSupportForm()
+    {
+
+        return view('auth.forms.supportTeam');
+    }
     /**
      * Store Agent details
      */

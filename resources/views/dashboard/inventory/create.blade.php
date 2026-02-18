@@ -10,7 +10,7 @@
         <a href="{{ route('inventory.index') }}" class="btn btn-light rounded-pill px-4">
             <i class="fas fa-arrow-left me-2"></i> Back to Inventory
         </a>
-    </div> 
+    </div>
 
     <div class="card border-0 shadow-sm" style="border-radius: 20px;">
         <div class="card-body p-4">
@@ -67,7 +67,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Quantity</label>
-                        <input type="number" name="quantity" class="form-control" value="{{ old('quantity', 0) }}" required>
+                        <input type="number" name="quantity" class="form-control bg-light" value="{{ old('quantity', 0) }}" readonly required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Status</label>
@@ -158,8 +158,8 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        const nextId = {{ $next_id }};
-        
+        const nextId = "{{ $next_id }}";
+
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
             let variant = $('#voucher_variant').val().trim();
@@ -169,27 +169,27 @@
                 // 1. Brand Prefix Logic
                 let words = brand.split(/\s+/);
                 let brandPrefix = "";
-                
+
                 if (words.length >= 2) {
-                    // First letter of each word (e.g. Google Play -> GP, Subham Kumar Soni -> SKS)
+                    // First letter of each word
                     brandPrefix = words.map(w => w.substring(0, 1)).join('').toUpperCase();
                 } else if (brand.length >= 2) {
-                    // First two letters of single word (e.g. Netflix -> NE)
+                    // First two letters of single word
                     brandPrefix = brand.substring(0, 2).toUpperCase();
                 } else {
                     brandPrefix = brand.toUpperCase();
                 }
 
-                // 2. Variant Prefix (take first 2 letters if exists)
+                // 2. Variant Prefix
                 let variantPrefix = variant ? variant.substring(0, 2).toUpperCase() : "";
 
-                // 3. Currency (take first 2-3 letters)
+                // 3. Currency
                 let currencyPrefix = currency ? currency.substring(0, 3).toUpperCase() : "";
 
                 // 4. Numeric ID
                 let suffix = nextId.toString().padStart(3, '0');
 
-                // Final SKU: BRAND + VARIANT + CURRENCY + ID
+                // Final SKU
                 $('#sku_id').val(brandPrefix + variantPrefix + currencyPrefix + suffix);
             } else {
                 $('#sku_id').val('');
@@ -214,6 +214,46 @@
 
         $('input[name="quantity"], input[name="purchase_value"]').on('input', function() {
             calculateUnitValue();
+        });
+
+        function formatVouchers(val) {
+            // Replace newlines, tabs, and spaces with a comma
+            let cleaned = val.replace(/[\n\r\t\s]+/g, ',');
+            // Replace multiple commas with a single comma
+            cleaned = cleaned.replace(/,+/g, ',');
+            // Trim leading/trailing commas
+            cleaned = cleaned.replace(/^,|,$/g, '');
+
+            // Calculate quantity based on number of codes
+            let codes = cleaned.split(',').filter(code => code.trim().length > 0);
+            let count = codes.length;
+
+            // For display, use ", " for better readability
+            let displayValue = codes.join(', ');
+            
+            return {
+                display: displayValue,
+                count: count
+            };
+        }
+
+        // Auto-format voucher codes and update quantity
+        $('textarea[name="upload_vouchers"]').on('input change blur', function() {
+            let res = formatVouchers($(this).val());
+            $(this).val(res.display);
+            $('input[name="quantity"]').val(res.count);
+            calculateUnitValue();
+        });
+
+        // Better handling for paste
+        $('textarea[name="upload_vouchers"]').on('paste', function(e) {
+            let self = this;
+            setTimeout(function() {
+                let res = formatVouchers($(self).val());
+                $(self).val(res.display);
+                $('input[name="quantity"]').val(res.count);
+                calculateUnitValue();
+            }, 100);
         });
     });
 </script>

@@ -6,7 +6,7 @@
 <div class="login-wrapper">
     <!-- LEFT IMAGE -->
     <div class="login-image">
-        <img src="https://static.vecteezy.com/system/resources/thumbnails/003/689/228/small/online-registration-or-sign-up-login-for-account-on-smartphone-app-user-interface-with-secure-password-mobile-application-for-ui-web-banner-access-cartoon-people-illustration-vector.jpg" alt="Login Image">
+        <img src="{{asset('images/login_image.jpg')}}">
     </div>
 
     <!-- RIGHT FORM -->

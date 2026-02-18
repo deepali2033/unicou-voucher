@@ -9,6 +9,10 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmail;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -422,9 +426,9 @@ class User extends Authenticatable implements MustVerifyEmail
         // Exclude specific sub-prefixes when searching for regular agent IDs (empty subPrefix)
         if ($subPrefix === '') {
             $query->where('user_id', 'not like', $basePrefix . 'A%')
-                  ->where('user_id', 'not like', $basePrefix . 'MN%')
-                  ->where('user_id', 'not like', $basePrefix . 'ST%')
-                  ->where('user_id', 'not like', $basePrefix . 'RSA%');
+                ->where('user_id', 'not like', $basePrefix . 'MN%')
+                ->where('user_id', 'not like', $basePrefix . 'ST%')
+                ->where('user_id', 'not like', $basePrefix . 'RSA%');
         }
 
         $lastUser = $query->orderBy('user_id', 'desc')->first();
@@ -460,8 +464,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the plans booked by this user.
+     * Send the email verification notification.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return void
      */
+    public function sendEmailVerificationNotification()
+    {
+        $verificationUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $this->getKey(), 'hash' => sha1($this->getEmailForVerification())]
+        );
+
+        \Illuminate\Support\Facades\Mail::to($this->email)->send(new \App\Mail\VerifyEmail($this, $verificationUrl));
+    }
 }

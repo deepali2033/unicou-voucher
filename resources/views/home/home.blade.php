@@ -232,6 +232,14 @@
         </div>
 
         <ul class="menu-links">
+
+            @auth
+            <li class="nav-item">
+                <a href="{{ route('dashboard') }}">
+                    Dashboard
+                </a>
+            </li>
+            @endauth
             <li><a href="#">ABOUT</a></li>
             <li><a href="#">STUDY ABROAD</a></li>
             <li><a href="#">EXAMS</a></li>

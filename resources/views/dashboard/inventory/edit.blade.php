@@ -74,7 +74,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Quantity</label>
-                        <input type="number" name="quantity" class="form-control" value="{{ old('quantity', $inventory->quantity) }}" required>
+                        <input type="number" name="quantity" class="form-control bg-light" value="{{ old('quantity', $inventory->quantity) }}" readonly required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Status</label>
@@ -165,11 +165,7 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        const currentId = {
-            {
-                $inventory - > id
-            }
-        };
+        const currentId = "{{ $inventory->id }}";
 
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
@@ -220,6 +216,46 @@
 
         $('input[name="quantity"], input[name="purchase_value"]').on('input', function() {
             calculateUnitValue();
+        });
+
+        function formatVouchers(val) {
+            // Replace newlines, tabs, and spaces with a comma
+            let cleaned = val.replace(/[\n\r\t\s]+/g, ',');
+            // Replace multiple commas with a single comma
+            cleaned = cleaned.replace(/,+/g, ',');
+            // Trim leading/trailing commas
+            cleaned = cleaned.replace(/^,|,$/g, '');
+
+            // Calculate quantity based on number of codes
+            let codes = cleaned.split(',').filter(code => code.trim().length > 0);
+            let count = codes.length;
+
+            // For display, use ", " for better readability
+            let displayValue = codes.join(', ');
+            
+            return {
+                display: displayValue,
+                count: count
+            };
+        }
+
+        // Auto-format voucher codes and update quantity
+        $('textarea[name="upload_vouchers"]').on('input change blur', function() {
+            let res = formatVouchers($(this).val());
+            $(this).val(res.display);
+            $('input[name="quantity"]').val(res.count);
+            calculateUnitValue();
+        });
+
+        // Better handling for paste
+        $('textarea[name="upload_vouchers"]').on('paste', function(e) {
+            let self = this;
+            setTimeout(function() {
+                let res = formatVouchers($(self).val());
+                $(self).val(res.display);
+                $('input[name="quantity"]').val(res.count);
+                calculateUnitValue();
+            }, 100);
         });
     });
 </script>

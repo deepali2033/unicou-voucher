@@ -15,49 +15,168 @@ $defaultType = in_array($requestedType, $allowedTypes, true) ? $requestedType : 
 $accountLocked = $lockRequested && $defaultType === $requestedType;
 @endphp
 <style>
+    .auth-body {
+        overflow: hidden;
+        height: 100vh;
+        padding: 0;
+        margin: 0;
+    }
+
+    .register_page_sec {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* background: #f8fafc; */
+    }
+
+    .auth-wrapper {
+        height: 90vh;
+        max-height: 850px;
+        display: flex;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        width: 95%;
+        max-width: 1100px;
+        overflow: hidden;
+    }
+
+    .auth-image {
+        width: 45%;
+        position: relative;
+    }
+
+    .auth-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .auth-image::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(35, 170, 226, 0.2), rgba(30, 64, 175, 0.4));
+    }
+
+    .auth-form {
+        width: 55%;
+        padding: 40px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
     .role-switch {
-        background: #eaf3ff;
-        padding: 6px;
+        background: #f1f5f9;
+        padding: 4px;
         border-radius: 50px;
+        display: inline-flex;
+        margin: 0 auto 20px;
     }
 
     .role-btn {
         border: none;
-        padding: 10px 28px;
+        padding: 8px 32px;
         border-radius: 40px;
         font-weight: 600;
+        font-size: 14px;
         cursor: pointer;
         background: transparent;
-        color: #1d4ed8;
-        /* blue text */
+        color: #64748b;
         transition: all 0.3s ease;
     }
 
     .role-btn.active {
         background: #23aae2;
-        /* dark blue */
         color: #fff;
-        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+        box-shadow: 0 4px 12px rgba(35, 170, 226, 0.3);
     }
 
-    .role-btn:hover:not(.active) {
-        background: #dbeafe;
-        /* light blue hover */
+    .form-group-custom {
+        margin-bottom: 15px;
+    }
+
+    .form-group-custom label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+
+    .form-group-custom input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group-custom input:focus {
+        border-color: #23aae2;
+        box-shadow: 0 0 0 3px rgba(35, 170, 226, 0.1);
+        outline: none;
+    }
+
+    .btn-register {
+        background: #23aae2;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-register:hover {
+        background: #1c8bbd;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(35, 170, 226, 0.4);
+    }
+
+    .captcha-wrapper {
+        transform: scale(0.9);
+        transform-origin: left;
+        margin: 10px 0;
+    }
+
+    @media (max-width: 992px) {
+        .auth-image {
+            display: none;
+        }
+
+        .auth-form {
+            width: 100%;
+            padding: 30px;
+        }
+
+        .auth-wrapper {
+            height: auto;
+            max-height: 95vh;
+        }
     }
 </style>
 <section class="register_page_sec">
     <div class="auth-wrapper">
         <div class="auth-image">
-            <img src="https://media.istockphoto.com/id/2205696704/photo/online-registration-form-identity-verification-personal-information-verification-concept.jpg?s=612x612&w=0&k=20&c=2X_45rxke9VrEez-D7JPchhSQwM_Od2jR_vyS1O5MTY=" alt="Register Illustration">
+            <img id="roleImage" src="{{asset('images/registration_image.jpg')}}" alt="Register">
         </div>
         <div class="auth-form">
             <div class="text-center mb-4">
-                <h2 class="title" id="formTitle">Create Account</h2>
-                <p class="subtitle">Join UniCou and start managing your vouchers</p>
+                <h2 class="fw-bold text-dark mb-1">Join UniCou</h2>
+                <p class="text-muted small">Create your account to start managing vouchers</p>
             </div>
 
             @if ($errors->any())
-            <div class="alert alert-danger">
+            <div class="alert alert-danger py-2 small">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -66,102 +185,83 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             </div>
             @endif
 
-            <div class="type-selector-wrapper mb-4 text-center">
+            <div class="text-center mb-3">
                 @if(!$accountLocked)
-                <div class="d-flex justify-content-center gap-2 role-switch">
-
-                    <button type="button"
-                        class="role-btn {{ $defaultType === 'agent' || $defaultType === 'reseller_agent' ? 'active' : '' }}"
-                        onclick="setActive('agent')"
-                        id="btn-agent">
-                        Agent
-                    </button>
-
-                    <button type="button"
-                        class="role-btn {{ $defaultType === 'student' ? 'active' : '' }}"
-                        onclick="setActive('student')"
-                        id="btn-student">
-                        Student
-                    </button>
+                <div class="role-switch">
+                    <button type="button" class="role-btn {{ $defaultType === 'agent' || $defaultType === 'reseller_agent' ? 'active' : '' }}" onclick="setActive('agent')" id="btn-agent">Agent</button>
+                    <button type="button" class="role-btn {{ $defaultType === 'student' ? 'active' : '' }}" onclick="setActive('student')" id="btn-student">Student</button>
                 </div>
 
-                <div id="agent-options" class="mt-3" style="display: {{ $defaultType === 'agent' || $defaultType === 'reseller_agent' ? 'block' : 'none' }};">
+                <div id="agent-options" class="mb-3" style="display: {{ $defaultType === 'agent' || $defaultType === 'reseller_agent' ? 'block' : 'none' }};">
                     <div class="d-flex justify-content-center gap-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="agent_subtype" id="regularAgent" value="agent" checked onclick="setSubtype('agent')">
-                            <label class="form-check-label" for="regularAgent">Regular Agent</label>
+                        <div class="form-check small">
+                            <input class="form-check-input" type="radio" name="agent_subtype" id="regularAgent" value="agent" {{ $defaultType === 'agent' ? 'checked' : '' }} onclick="setSubtype('agent')">
+                            <label class="form-check-label fw-600" for="regularAgent">Regular Agent</label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="agent_subtype" id="resellerAgent" value="reseller_agent" onclick="setSubtype('reseller_agent')">
-                            <label class="form-check-label" for="resellerAgent">Reseller Agent</label>
+                        <div class="form-check small">
+                            <input class="form-check-input" type="radio" name="agent_subtype" id="resellerAgent" value="reseller_agent" {{ $defaultType === 'reseller_agent' ? 'checked' : '' }} onclick="setSubtype('reseller_agent')">
+                            <label class="form-check-label fw-600" for="resellerAgent">Reseller Agent</label>
                         </div>
                     </div>
                 </div>
-
                 @else
-                <div class="text-center p-2 bg-light rounded border">
-                    <strong>Registering as {{ ucfirst(str_replace('_', ' ', $defaultType)) }}</strong>
+                <div class="badge bg-light text-primary border p-2 px-3 mb-3">
+                    Registering as {{ ucfirst(str_replace('_', ' ', $defaultType)) }}
                 </div>
                 @endif
             </div>
 
-            <form id="registerForm" method="POST" action="{{ route('register.post') }}">
+            <form id="registerForm" method="POST" action="{{ route('register.post') }}" class="flex-grow-1">
                 @csrf
                 <input type="hidden" name="account_type" id="accountType" value="{{ $defaultType }}">
-                <input type="hidden" id="regifeetaken" name="regifeetaken" value="">
+                <input type="hidden" id="regifeetaken" name="regifeetaken" value="no">
                 <input type="hidden" name="latitude" id="latitude">
                 <input type="hidden" name="longitude" id="longitude">
 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6 field">
-                        <label for="firstName">Full Name</label>
-                        <input name="first_name" type="text" id="firstName" placeholder="First Name" required>
-                    </div>
-
+                <div class="form-group-custom">
+                    <label>Full Name</label>
+                    <input name="first_name" type="text" placeholder="Enter your full name" value="{{ old('first_name') }}" required>
                 </div>
 
-                <div class="field mb-3">
-                    <label for="email">Email Address</label>
-                    <input name="email" type="email" id="email" placeholder="Email" required>
+                <div class="form-group-custom">
+                    <label>Email Address</label>
+                    <input name="email" type="email" placeholder="Enter your email" value="{{ old('email') }}" required>
                 </div>
 
-                <div class="field mb-3">
-                    <label for="phone_input">Phone Number</label>
-                    <input type="tel" id="phone_input" name="phone_dummy" class="intl-phone" data-full-field="#full_phone" required style="width: 100%;">
+                <div class="form-group-custom">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone_input" name="phone_dummy" class="intl-phone" required style="width: 100%;">
                     <input type="hidden" name="phone" id="full_phone">
                     <input type="hidden" name="country_code" id="country_code">
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6 field">
-                        <label for="password">Password</label>
-                        <input name="password" type="password" id="password" placeholder="Password" required>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label>Password</label>
+                            <input name="password" type="password" placeholder="••••••••" required>
+                        </div>
                     </div>
-                    <div class="col-md-6 field">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <input name="password_confirmation" type="password" id="confirmPassword" placeholder="Confirm" required>
-                    </div>
-                </div>
-
-                <div class="field mb-3">
-                    <div class="captcha-wrapper p-3 border rounded bg-light d-flex align-items-center">
-
-                        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE') }}"></div>
-
-                        <!-- <div class="ms-auto">
-                            <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" width="30">
-                        </div> -->
+                    <div class="col-md-6">
+                        <div class="form-group-custom">
+                            <label>Confirm Password</label>
+                            <input name="password_confirmation" type="password" placeholder="••••••••" required>
+                        </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn-primary w-100" id="submitBtns">
-                    Register Now
+                <div class="captcha-wrapper">
+                    <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE') }}"></div>
+                </div>
+
+                <button type="button" class="btn-register w-100 mt-3" id="submitBtns">
+                    Create Account
                 </button>
                 <button hidden type="submit" id="realSubmitBtn"></button>
 
-                <div class="bottom-text mt-4">
-                    Already have an account? <a href="{{ route('login') }}">Login here</a>
-                </div>
+                <p class="text-center mt-4 small text-muted">
+                    Already have an account? <a href="{{ route('login') }}" class="text-primary fw-bold text-decoration-none">Login here</a>
+                </p>
             </form>
         </div>
     </div>
@@ -198,11 +298,24 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 return;
             }
 
-            // Get phone from intl-tel-input instance attached by dashboard.js
+            // Get phone from intl-tel-input instance
             const phoneInput = document.querySelector("#phone_input");
             if (phoneInput && phoneInput.iti) {
                 document.getElementById('full_phone').value = phoneInput.iti.getNumber();
                 document.getElementById('country_code').value = phoneInput.iti.getSelectedCountryData().iso2.toUpperCase();
+            }
+
+            // Final safety check for account type before submission
+            const activeBtn = document.querySelector('.role-btn.active');
+            if (activeBtn && activeBtn.id === 'btn-student') {
+                document.getElementById('accountType').value = 'student';
+            } else if (activeBtn && activeBtn.id === 'btn-agent') {
+                const radioChecked = document.querySelector('input[name="agent_subtype"]:checked');
+                if (radioChecked) {
+                    document.getElementById('accountType').value = radioChecked.value;
+                } else {
+                    document.getElementById('accountType').value = 'agent';
+                }
             }
 
             document.getElementById('regifeetaken').value = 'no';
@@ -213,34 +326,65 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             }
             document.getElementById('realSubmitBtn').click();
         });
+
+        // On page load, if Agent is default, ensure Regular Agent is selected
+        const defaultRadio = document.querySelector('input[name="agent_subtype"]:checked');
+        if (!defaultRadio) {
+            const regularAgentRadio = document.getElementById('regularAgent');
+            if (regularAgentRadio) {
+                regularAgentRadio.checked = true;
+                document.getElementById('accountType').value = 'agent';
+            }
+        } else {
+            document.getElementById('accountType').value = defaultRadio.value;
+        }
     });
 
     function setActive(type) {
-        document.getElementById('accountType').value = type;
-        
-        // Handle Agent Subtypes Visibility
-        const agentOptions = document.getElementById('agent-options');
-        if (type === 'agent' || type === 'reseller_agent') {
-            agentOptions.style.display = 'block';
-            // If switched to agent, use the currently selected radio value
-            const selectedSubtype = document.querySelector('input[name="agent_subtype"]:checked').value;
-            document.getElementById('accountType').value = selectedSubtype;
+        // Reset all buttons
+        document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+
+        // Set clicked button to active
+        const activeBtn = document.getElementById('btn-' + type);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Update Image
+        const roleImage = document.getElementById('roleImage');
+        if (type === 'agent') {
+            roleImage.src = "{{ asset('images/agent_regis_image.jpg') }}";
         } else {
-            agentOptions.style.display = 'none';
+            roleImage.src = "{{ asset('images/registration_image.jpg') }}";
         }
 
-        document.querySelectorAll('.role-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        const activeBtn = document.getElementById('btn-' + type);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
+        const agentOptions = document.getElementById('agent-options');
+
+        if (type === 'agent') {
+            // Show agent subtype options
+            agentOptions.style.display = 'block';
+            // Set accountType based on selected subtype or default to regular agent
+            const selectedSubtype = document.querySelector('input[name="agent_subtype"]:checked');
+            if (selectedSubtype) {
+                document.getElementById('accountType').value = selectedSubtype.value;
+            } else {
+                document.getElementById('regularAgent').checked = true;
+                document.getElementById('accountType').value = 'agent';
+            }
+        } else {
+            // Student selected → hide agent options and force accountType = student
+            agentOptions.style.display = 'none';
+            document.getElementById('accountType').value = type; // student
         }
     }
 
+    // Agent subtype radios
     function setSubtype(subtype) {
-        document.getElementById('accountType').value = subtype;
+        // Only update accountType if Agent role is active
+        const activeAgentBtn = document.getElementById('btn-agent').classList.contains('active');
+        if (activeAgentBtn) {
+            document.getElementById('accountType').value = subtype;
+        }
     }
 </script>
+
 @endpush
 @endsection

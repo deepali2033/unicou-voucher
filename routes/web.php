@@ -46,8 +46,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 // Email Verification Routes
 Route::get('/email/verify', function () {
+    $user = auth()->user();
+    if ($user && $user->hasVerifiedEmail()) {
+        if ($user->account_type === 'student' && !$user->exam_purpose) {
+            return redirect()->route('auth.form.student');
+        }
+        if (in_array($user->account_type, ['reseller_agent', 'agent']) && !$user->business_name) {
+            return redirect()->route('auth.forms.B2BResellerAgent');
+        }
+        return redirect()->route('dashboard');
+    }
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
+
+Route::get('/email/check-verification', function () {
+    return response()->json(['verified' => auth()->user()->hasVerifiedEmail()]);
+})->middleware('auth')->name('verification.check');
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
     $user = User::findOrFail($id);
@@ -88,7 +102,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/register/student-details', [AuthController::class, 'showStudentForm'])->name('auth.form.student');
     Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
 });
-
+Route::get('/register/support-team-details', [AuthController::class, 'showSupportForm'])->name('auth.form.support');
 
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
