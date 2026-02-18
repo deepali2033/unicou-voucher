@@ -129,11 +129,11 @@ class UserController extends Controller
                 $email = $user->email;
                 $password = $request->password;
                 $messageContent = "Your account has been created by Reseller Agent $resellerName.\n\n" .
-                                 "Login Details:\n" .
-                                 "Email: $email\n" .
-                                 "Password: $password\n\n" .
-                                 "Please login to complete your profile.";
-                
+                    "Login Details:\n" .
+                    "Email: $email\n" .
+                    "Password: $password\n\n" .
+                    "Please login to complete your profile.";
+
                 Mail::raw($messageContent, function ($message) use ($user) {
                     $message->to($user->email)
                         ->subject('Account Created - Unicou Voucher Login Details');
@@ -378,6 +378,7 @@ class UserController extends Controller
             'can_stop_country_sales' => $request->has('can_stop_country_sales'),
             'can_stop_voucher_sales' => $request->has('can_stop_voucher_sales'),
             'can_view_user_email_name' => $request->has('can_view_user_email_name'),
+            'has_job_permission' => $request->has('has_job_permission'),
         ]);
 
         return back()->with('success', 'Manager permissions updated successfully.');
@@ -943,16 +944,16 @@ class UserController extends Controller
 
     public function stopImpersonating()
     {
-        if (!session()->has('impersonator_id')) {
+        $adminId = session('impersonator_id');
+
+        if (!$adminId) {
             return redirect()->route('dashboard');
         }
 
-        $originalUserId = session()->pull('impersonator_id');
-        $originalUser = User::find($originalUserId);
-
-        if ($originalUser) {
-            auth()->login($originalUser);
-            return redirect()->route('users.management')->with('success', 'Back to your account.');
+        // Use Auth::loginUsingId which handles session updates internally
+        if (\Illuminate\Support\Facades\Auth::loginUsingId($adminId)) {
+            session()->forget('impersonator_id');
+            return redirect()->route('dashboard')->with('success', 'Back to your account.');
         }
 
         return redirect()->route('login');
