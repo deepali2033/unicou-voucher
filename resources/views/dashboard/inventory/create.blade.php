@@ -10,7 +10,7 @@
         <a href="{{ route('inventory.index') }}" class="btn btn-light rounded-pill px-4">
             <i class="fas fa-arrow-left me-2"></i> Back to Inventory
         </a>
-    </div>
+    </div> 
 
     <div class="card border-0 shadow-sm" style="border-radius: 20px;">
         <div class="card-body p-4">
