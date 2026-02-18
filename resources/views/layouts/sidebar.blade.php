@@ -21,13 +21,20 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- User Management -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('users.management') ? 'active' : '' }}" href="{{ route('users.management') }}">
                     <i class="fas fa-users me-2"></i> User Management
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('support.team') ? 'active' : '' }}" href="{{ route('support.team') }}">
+                    <i class="fas fa-tools me-2"></i>Support Team
+                </a>
+            </li>
+            @endif
+
             @if(auth()->user()->isAdmin() )
             <!-- Voucher Management -->
             <li class="nav-item">
@@ -36,14 +43,14 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
-            <!-- Voucher Management -->
+            <!-- @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
+     
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('support.team') ? 'active' : '' }}" href="{{ route('support.team') }}">
                     <i class="fas fa-tools me-2"></i>Support Team
                 </a>
             </li>
-            @endif
+            @endif -->
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
             <!-- Pricing -->
             <!-- Inventory -->
@@ -73,7 +80,6 @@
                     <i class="fas fa-id-card me-2"></i> KYC & Compliance
                 </a>
             </li> -->
-            @endif
 
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('referral') ? 'active' : '' }}" href="{{route('referral')}}">
@@ -109,6 +115,7 @@
                 </a>
             </li>
             @endif
+
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <!-- Linked Banks -->
             <li class="nav-item">
@@ -151,19 +158,6 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->has_job_permission))
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('jobs.index') ? 'active' : '' }}" href="{{ route('jobs.index') }}">
-                    <i class="fas fa-briefcase me-2"></i> Job Vacancy
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('jobs.applications') ? 'active' : '' }}" href="{{ route('jobs.applications') }}">
-                    <i class="fas fa-file-alt me-2"></i> Job Applies
-                </a>
-            </li>
-            @endif
-
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
@@ -287,7 +281,11 @@
             <!-- @endif -->
 
 
-
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('jobApplication') ? 'active' : '' }}" href="{{ route('jobApplication') }}">
+                    <i class="fas fa-tools me-2"></i>Job Applications
+                </a>
+            </li>
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">

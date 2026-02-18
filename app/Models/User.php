@@ -102,7 +102,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_stop_country_sales',
         'can_stop_voucher_sales',
         'can_view_user_email_name',
-        'has_job_permission',
         'category',
         'rating',
     ];
@@ -145,7 +144,6 @@ class User extends Authenticatable implements MustVerifyEmail
             'can_stop_country_sales' => 'boolean',
             'can_stop_voucher_sales' => 'boolean',
             'can_view_user_email_name' => 'boolean',
-            'has_job_permission' => 'boolean',
         ];
     }
 

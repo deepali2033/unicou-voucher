@@ -776,7 +776,6 @@
                                     ['name' => 'can_stop_country_sales', 'label' => 'Stop Country Sales', 'desc' => 'Allow manager to restrict sales for specific countries'],
                                     ['name' => 'can_stop_voucher_sales', 'label' => 'Stop Voucher Sales', 'desc' => 'Allow manager to restrict sales for specific vouchers'],
                                     ['name' => 'can_view_user_email_name', 'label' => 'View Name & Email', 'desc' => 'Allow manager to see real names and emails of users'],
-                                    ['name' => 'has_job_permission', 'label' => 'Manage Job Postings', 'desc' => 'Allow manager to create and manage job vacancies and applications'],
                                     ];
                                     @endphp
 

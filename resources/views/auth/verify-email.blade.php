@@ -61,15 +61,4 @@
         transform: translateY(-5px);
     }
 </style>
-<script>
-    setInterval(function() {
-        fetch("{{ route('verification.check') }}")
-            .then(response => response.json())
-            .then(data => {
-                if (data.verified) {
-                    window.location.reload();
-                }
-            });
-    }, 5000);
-</script>
 @endsection

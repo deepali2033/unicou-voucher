@@ -195,29 +195,29 @@
 
                 <div class="sat-grid-2">
                     @if(auth()->user()->account_type === 'agent')
-                    <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
-                        <input type="radio" name="agentType" value="Regular" checked required style="width: 20px; height: 20px;">
-                        <div class="ms-2">
-                            <p class="mb-0 fw-bold">Regular Agent</p>
-                        </div>
-                    </label>
+                        <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
+                            <input type="radio" name="agentType" value="Regular" checked required style="width: 20px; height: 20px;">
+                            <div class="ms-2">
+                                <p class="mb-0 fw-bold">Regular Agent</p>
+                            </div>
+                        </label>
                     @else
-                    <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
-                        <input type="radio" name="agentType" value="Regular" required style="width: 20px; height: 20px;">
-                        <div class="ms-2">
-                            <p class="mb-0 fw-bold">Regular Agent</p>
-                        </div>
-                    </label>
+                        <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
+                            <input type="radio" name="agentType" value="Regular" required style="width: 20px; height: 20px;">
+                            <div class="ms-2">
+                                <p class="mb-0 fw-bold">Regular Agent</p>
+                            </div>
+                        </label>
 
-                    <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
-                        <input type="radio" name="agentType" value="Reseller" required style="width: 20px; height: 20px;">
-                        <div class="ms-2">
-                            <p class="mb-0 fw-bold">Reseller Agent</p>
-                            <small class="text-muted" style="font-size: 0.75rem;">
-                                (Can view sub-agent list & order history only. No access to vouchers or sensitive data.)
-                            </small>
-                        </div>
-                    </label>
+                        <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
+                            <input type="radio" name="agentType" value="Reseller" required style="width: 20px; height: 20px;">
+                            <div class="ms-2">
+                                <p class="mb-0 fw-bold">Reseller Agent</p>
+                                <small class="text-muted" style="font-size: 0.75rem;">
+                                    (Can view sub-agent list & order history only. No access to vouchers or sensitive data.)
+                                </small>
+                            </div>
+                        </label>
                     @endif
                 </div>
 

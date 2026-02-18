@@ -298,24 +298,11 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                 return;
             }
 
-            // Get phone from intl-tel-input instance
+            // Get phone from intl-tel-input instance attached by dashboard.js
             const phoneInput = document.querySelector("#phone_input");
             if (phoneInput && phoneInput.iti) {
                 document.getElementById('full_phone').value = phoneInput.iti.getNumber();
                 document.getElementById('country_code').value = phoneInput.iti.getSelectedCountryData().iso2.toUpperCase();
-            }
-
-            // Final safety check for account type before submission
-            const activeBtn = document.querySelector('.role-btn.active');
-            if (activeBtn && activeBtn.id === 'btn-student') {
-                document.getElementById('accountType').value = 'student';
-            } else if (activeBtn && activeBtn.id === 'btn-agent') {
-                const radioChecked = document.querySelector('input[name="agent_subtype"]:checked');
-                if (radioChecked) {
-                    document.getElementById('accountType').value = radioChecked.value;
-                } else {
-                    document.getElementById('accountType').value = 'agent';
-                }
             }
 
             document.getElementById('regifeetaken').value = 'no';
@@ -326,65 +313,47 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
             }
             document.getElementById('realSubmitBtn').click();
         });
-
-        // On page load, if Agent is default, ensure Regular Agent is selected
-        const defaultRadio = document.querySelector('input[name="agent_subtype"]:checked');
-        if (!defaultRadio) {
-            const regularAgentRadio = document.getElementById('regularAgent');
-            if (regularAgentRadio) {
-                regularAgentRadio.checked = true;
-                document.getElementById('accountType').value = 'agent';
-            }
-        } else {
-            document.getElementById('accountType').value = defaultRadio.value;
-        }
     });
 
     function setActive(type) {
         // Reset all buttons
-        document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.role-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
 
         // Set clicked button to active
         const activeBtn = document.getElementById('btn-' + type);
-        if (activeBtn) activeBtn.classList.add('active');
-
-        // Update Image
-        const roleImage = document.getElementById('roleImage');
-        if (type === 'agent') {
-            roleImage.src = "{{ asset('images/agent_regis_image.jpg') }}";
-        } else {
-            roleImage.src = "{{ asset('images/registration_image.jpg') }}";
+        if (activeBtn) {
+            activeBtn.classList.add('active');
         }
 
-        const agentOptions = document.getElementById('agent-options');
+        // Update Image based on role
+        const roleImage = document.getElementById('roleImage');
+        if (type === 'agent' || type === 'reseller_agent') {
+            roleImage.src = "{{asset('images/agent_regis_image.jpg')}}"; // Agent Image
+        } else {
+            roleImage.src = "{{asset('images/registration_image.jpg')}}"; // Student Image
+        }
 
-        if (type === 'agent') {
-            // Show agent subtype options
+        document.getElementById('accountType').value = type;
+
+        // Handle Agent Subtypes Visibility
+        const agentOptions = document.getElementById('agent-options');
+        if (type === 'agent' || type === 'reseller_agent') {
             agentOptions.style.display = 'block';
-            // Set accountType based on selected subtype or default to regular agent
-            const selectedSubtype = document.querySelector('input[name="agent_subtype"]:checked');
-            if (selectedSubtype) {
-                document.getElementById('accountType').value = selectedSubtype.value;
-            } else {
-                document.getElementById('regularAgent').checked = true;
-                document.getElementById('accountType').value = 'agent';
+            // If switched to agent, use the currently selected radio value
+            const radioChecked = document.querySelector('input[name="agent_subtype"]:checked');
+            if (radioChecked) {
+                document.getElementById('accountType').value = radioChecked.value;
             }
         } else {
-            // Student selected → hide agent options and force accountType = student
             agentOptions.style.display = 'none';
-            document.getElementById('accountType').value = type; // student
         }
     }
 
-    // Agent subtype radios
     function setSubtype(subtype) {
-        // Only update accountType if Agent role is active
-        const activeAgentBtn = document.getElementById('btn-agent').classList.contains('active');
-        if (activeAgentBtn) {
-            document.getElementById('accountType').value = subtype;
-        }
+        document.getElementById('accountType').value = subtype;
     }
 </script>
-
 @endpush
 @endsection

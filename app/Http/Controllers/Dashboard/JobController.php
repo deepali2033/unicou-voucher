@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobVacancy;
-use App\Models\JobApplication;
+use App\Models\JobapplicationModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,10 +14,10 @@ use Illuminate\Support\Str;
 class JobController extends Controller
 {
     // List job vacancies for Admin/Manager
-    public function index()
+    public function jobApplication()
     {
-        $vacancies = JobVacancy::latest()->get();
-        return view('dashboard.jobs.index', compact('vacancies'));
+        // $vacancies = JobVacancy::latest()->get();
+        return view('dashboard.jobs.job_apllications');
     }
 
     // Create job vacancy form

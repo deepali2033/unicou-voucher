@@ -129,11 +129,11 @@ class UserController extends Controller
                 $email = $user->email;
                 $password = $request->password;
                 $messageContent = "Your account has been created by Reseller Agent $resellerName.\n\n" .
-                    "Login Details:\n" .
-                    "Email: $email\n" .
-                    "Password: $password\n\n" .
-                    "Please login to complete your profile.";
-
+                                 "Login Details:\n" .
+                                 "Email: $email\n" .
+                                 "Password: $password\n\n" .
+                                 "Please login to complete your profile.";
+                
                 Mail::raw($messageContent, function ($message) use ($user) {
                     $message->to($user->email)
                         ->subject('Account Created - Unicou Voucher Login Details');
