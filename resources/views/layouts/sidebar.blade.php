@@ -109,7 +109,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <!-- Linked Banks -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('banks.bank-table') ? 'active' : '' }}" href="{{ route('banks.bank-table') }}">
@@ -143,7 +143,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager())
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <!-- Support Center -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('customer.query') ? 'active' : '' }}" href="{{ route('customer.query') }}">

@@ -149,16 +149,7 @@
     <div class="sat-card">
         <div class="sat-header d-flex justify-content-between align-items-center">
             <div>
-                <h2>
-                    @if(Auth::user()->account_type === 'reseller_agent')
-                    B2B Reseller Agent
-                    @elseif(Auth::user()->account_type === 'agent')
-                    Regular Agent
-                    @else
-                    {{ ucfirst(str_replace('_', ' ', Auth::user()->account_type)) }}
-                    @endif
-                </h2>
-
+                <h2>B2B Reseller Agent</h2>
                 <h4 class="text-primary mt-2">USER ID: {{ Auth::user()->user_id }}</h4>
                 <p>
                     Establish your identity node according to global standards.

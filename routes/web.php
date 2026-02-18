@@ -103,7 +103,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/register/student-details', [AuthController::class, 'storeStudentDetails'])->name('auth.form.student.post');
 });
 Route::get('/register/support-team-details', [AuthController::class, 'showSupportForm'])->name('auth.form.support');
-
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 

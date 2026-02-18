@@ -680,7 +680,8 @@
                         <li>Admission Hub</li>
                         <li>About Us</li>
                         <li>Apply Now</li>
-                        <li>Career</li>
+
+                        <li><a href="{{route('auth.form.support')}}">Career</a></li>
                     </ul>
                 </div>
 
