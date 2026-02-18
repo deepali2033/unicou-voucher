@@ -39,7 +39,7 @@
                 $unreadCount = auth()->user()->unreadNotifications->count();
                 @endphp
                 @if($unreadCount > 0)
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.25em 0.4em;">
+                <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.25em 0.4em;">
                     {{ $unreadCount }}
                     <span class="visually-hidden">unread notifications</span>
                 </span>
@@ -105,3 +105,65 @@
         </div>
     </div>
 </header>
+
+<script>
+let audioContext;
+let lastCount = {{ $unreadCount ?? 0 }};
+
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
+document.addEventListener('click', function initAudio() {
+    getAudioContext().resume();
+    document.removeEventListener('click', initAudio);
+});
+
+function playEmailNotificationSound() {
+    const ctx = getAudioContext();
+
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 880 + (i * 220);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            const now = ctx.currentTime;
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.4, now + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
+
+            oscillator.start(now);
+            oscillator.stop(now + 0.11);
+        }, i * 100);
+    }
+}
+
+setInterval(() => {
+    fetch("{{ route('notifications.unreadCount') }}")
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.count > lastCount) {
+                playEmailNotificationSound();
+            }
+
+            lastCount = data.count;
+
+            let badge = document.getElementById('notification-count');
+            if (badge) {
+                badge.innerText = data.count;
+                badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+            }
+        });
+}, 5000);
+</script>

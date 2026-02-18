@@ -16,22 +16,22 @@
 
             <!-- Dashboard -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('dashboard') }}">
-                    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                 </a>
             </li>
             @endif
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- User Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('users.management') }}">
+                <a class="nav-link {{ request()->routeIs('users.management') ? 'active' : '' }}" href="{{ route('users.management') }}">
                     <i class="fas fa-users me-2"></i> User Management
                 </a>
             </li>
             @if(auth()->user()->isAdmin() )
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('manager.page') }}">
+                <a class="nav-link {{ request()->routeIs('manager.page') ? 'active' : '' }}" href="{{ route('manager.page') }}">
                     <i class="fas fa-user-tie me-2"></i>Manager
                 </a>
             </li>
@@ -39,7 +39,7 @@
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('support.team') }}">
+                <a class="nav-link {{ request()->routeIs('support.team') ? 'active' : '' }}" href="{{ route('support.team') }}">
                     <i class="fas fa-tools me-2"></i>Support Team
                 </a>
             </li>
@@ -48,17 +48,17 @@
             <!-- Pricing -->
             <!-- Inventory -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('pricing.index') }}">
+                <a class="nav-link {{ request()->routeIs('pricing.index') ? 'active' : '' }}" href="{{ route('pricing.index') }}">
                     <i class="fas fa-tags me-2"></i> Purchases
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('sales.index') }}">
+                <a class="nav-link {{ request()->routeIs('sales.index') ? 'active' : '' }}" href="{{ route('sales.index') }}">
                     <i class="fas fa-tags me-2"></i> Sales
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('inventory.index') }}">
+                <a class="nav-link {{ request()->routeIs('inventory.index') ? 'active' : '' }}" href="{{ route('inventory.index') }}">
                     <i class="fas fa-boxes me-2"></i>Stocks upload
                 </a>
             </li>
@@ -76,19 +76,19 @@
             @endif
 
             <li class="nav-item">
-                <a class="nav-link" href="{{route('referral')}}">
+                <a class="nav-link {{ request()->routeIs('referral') ? 'active' : '' }}" href="{{route('referral')}}">
                     <i class="fas fa-users me-2"></i> Referral Points
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{route('bonus')}}">
+                <a class="nav-link {{ request()->routeIs('bonus') ? 'active' : '' }}" href="{{route('bonus')}}">
                     <i class="fas fa-calendar-alt me-2"></i> Bonus Point
                 </a>
             </li>
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('reseller.agent') }}">
+                <a class="nav-link {{ request()->routeIs('reseller.agent') ? 'active' : '' }}" href="{{ route('reseller.agent') }}">
                     <i class="fas fa-handshake me-2"></i>Reseller Agent
                 </a>
             </li>
@@ -96,7 +96,7 @@
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent()|| auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('regular.agent') }}">
+                <a class="nav-link {{ request()->routeIs('regular.agent') ? 'active' : '' }}" href="{{ route('regular.agent') }}">
                     <i class="fas fa-user me-2"></i> Agent
                 </a>
             </li>
@@ -104,7 +104,7 @@
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport() || auth()->user()->isResellerAgent())
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('student.page') }}">
+                <a class="nav-link {{ request()->routeIs('student.page') ? 'active' : '' }}" href="{{ route('student.page') }}">
                     <i class="fas fa-user-graduate me-2"></i> Student
                 </a>
             </li>
@@ -112,7 +112,7 @@
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
             <!-- Linked Banks -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('banks.bank-table') }}">
+                <a class="nav-link {{ request()->routeIs('banks.bank-table') ? 'active' : '' }}" href="{{ route('banks.bank-table') }}">
                     <i class="fas fa-university me-2"></i> Banks
                 </a>
             </li>
@@ -120,7 +120,7 @@
             @if(auth()->user()->isAdmin() ||auth()->user()->isAgent() ||auth()->user()->isManager()|| auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- System Control -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('system.control') }}">
+                <a class="nav-link {{ request()->routeIs('system.control') ? 'active' : '' }}" href="{{ route('system.control') }}">
                     <i class="fas fa-cogs me-2"></i> System Control
                 </a>
             </li>
@@ -138,7 +138,7 @@
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Support Center -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('customer.support') }}">
+                <a class="nav-link {{ request()->routeIs('customer.support') ? 'active' : '' }}" href="{{ route('customer.support') }}">
                     <i class="fas fa-headset me-2"></i> Customer Support
                 </a>
             </li>
@@ -146,20 +146,20 @@
             @if(auth()->user()->isAdmin() || auth()->user()->isManager())
             <!-- Support Center -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('customer.query') }}">
+                <a class="nav-link {{ request()->routeIs('customer.query') ? 'active' : '' }}" href="{{ route('customer.query') }}">
                     <i class="fas fa-headset me-2"></i> Customer Query
                 </a>
             </li>
             @endif
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('disputes.index') }}">
+                <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
                     <i class="fas fa-gavel me-2"></i> Disputes Management
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('settings.risk-levels') }}">
+                <a class="nav-link {{ request()->routeIs('settings.risk-levels') ? 'active' : '' }}" href="{{ route('settings.risk-levels') }}">
                     <i class="fas fa-globe me-2"></i> Country Risk Levels
                 </a>
             </li>
@@ -182,7 +182,7 @@
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Wallet / Store Credit -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('profile.index') }}">
+                <a class="nav-link {{ request()->routeIs('profile.index') ? 'active' : '' }}" href="{{ route('profile.index') }}">
                     <i class="fas fa-wallet me-2"></i> My Profile
                 </a>
             </li>
@@ -191,7 +191,7 @@
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Linked Banks -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('bank.link') }}">
+                <a class="nav-link {{ request()->routeIs('bank.link') ? 'active' : '' }}" href="{{ route('bank.link') }}">
                     <i class="fas fa-university me-2"></i> Linked Banks
                 </a>
             </li>
@@ -211,7 +211,7 @@
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Voucher Management -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('vouchers') }}">
+                <a class="nav-link {{ request()->routeIs('vouchers') ? 'active' : '' }}" href="{{ route('vouchers') }}">
                     <i class="fas fa-ticket-alt me-2"></i> Voucher
                 </a>
             </li>
@@ -235,12 +235,12 @@
 
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('orders.index') }}">
+                <a class="nav-link {{ request()->routeIs('orders.index') ? 'active' : '' }}" href="{{ route('orders.index') }}">
                     <i class="fas fa-truck me-2"></i> Orders & Delivery
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('refunds.index') }}">
+                <a class="nav-link {{ request()->routeIs('refunds.index') ? 'active' : '' }}" href="{{ route('refunds.index') }}">
                     <i class="fas fa-undo me-2"></i> Refund Requests
                 </a>
             </li>
@@ -248,12 +248,12 @@
 
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('orders.history') }}">
+                <a class="nav-link {{ request()->routeIs('orders.history') ? 'active' : '' }}" href="{{ route('orders.history') }}">
                     <i class="fas fa-shopping-cart me-2"></i> My Orders
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('refunds.user') }}">
+                <a class="nav-link {{ request()->routeIs('refunds.user') ? 'active' : '' }}" href="{{ route('refunds.user') }}">
                     <i class="fas fa-undo me-2"></i> My Refunds
                 </a>
             </li>
@@ -277,7 +277,7 @@
 
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('disputes.index') }}">
+                <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
                     <i class="fas fa-gavel me-2"></i> My Disputes
                 </a>
             </li>
@@ -297,7 +297,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('notifications.index') }}">
+                <a class="nav-link {{ request()->routeIs('notifications.index') ? 'active' : '' }}" href="{{ route('notifications.index') }}">
                     <i class="fas fa-bell me-2"></i>
                     Notifications
                 </a>
