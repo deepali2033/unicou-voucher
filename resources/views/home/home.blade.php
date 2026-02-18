@@ -681,7 +681,7 @@
                         <li>About Us</li>
                         <li>Apply Now</li>
 
-                        <li><a href="{{route('auth.form.support')}}">Career</a></li>
+                        <li><a href="{{route('careers')}}">Career</a></li>
                     </ul>
                 </div>
 
