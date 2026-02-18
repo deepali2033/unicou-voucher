@@ -5,6 +5,7 @@ use App\Http\Controllers\Dashboard\RefundController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\JobController;
 use App\Http\Controllers\Dashboard\BankController;
 use App\Http\Controllers\Dashboard\SalesController;
 use App\Http\Controllers\Dashboard\CustomerController;
@@ -320,4 +321,21 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::prefix('student')->name('student.')->middleware(['account_type:student'])->group(function () {
         Route::get('/', [StudentController::class, 'dashboard'])->name('dashboard');
     });
+
+    // Job Management (Admin/Authorized Manager)
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
+        Route::get('/jobs/create', [JobController::class, 'create'])->name('jobs.create');
+        Route::post('/jobs/store', [JobController::class, 'store'])->name('jobs.store');
+        Route::delete('/jobs/{vacancy}', [JobController::class, 'destroy'])->name('jobs.destroy');
+
+        Route::get('/job-applications', [JobController::class, 'applications'])->name('jobs.applications');
+        Route::post('/job-applications/{application}/status', [JobController::class, 'updateApplicationStatus'])->name('jobs.application.status');
+        Route::delete('/job-applications/{application}', [JobController::class, 'destroyApplication'])->name('jobs.application.destroy');
+    });
 });
+
+// Public Job Routes
+Route::get('/careers', [JobController::class, 'careers'])->name('careers');
+Route::get('/careers/apply/{vacancy}', [JobController::class, 'applyForm'])->name('careers.apply');
+Route::post('/careers/apply', [JobController::class, 'submitApplication'])->name('careers.submit');
