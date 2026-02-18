@@ -151,6 +151,19 @@
                 </a>
             </li>
             @endif
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->has_job_permission))
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('jobs.index') ? 'active' : '' }}" href="{{ route('jobs.index') }}">
+                    <i class="fas fa-briefcase me-2"></i> Job Vacancy
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('jobs.applications') ? 'active' : '' }}" href="{{ route('jobs.applications') }}">
+                    <i class="fas fa-file-alt me-2"></i> Job Applies
+                </a>
+            </li>
+            @endif
+
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
