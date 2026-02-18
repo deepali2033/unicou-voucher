@@ -378,7 +378,6 @@ class UserController extends Controller
             'can_stop_country_sales' => $request->has('can_stop_country_sales'),
             'can_stop_voucher_sales' => $request->has('can_stop_voucher_sales'),
             'can_view_user_email_name' => $request->has('can_view_user_email_name'),
-            'has_job_permission' => $request->has('has_job_permission'),
         ]);
 
         return back()->with('success', 'Manager permissions updated successfully.');
@@ -944,16 +943,16 @@ class UserController extends Controller
 
     public function stopImpersonating()
     {
-        $adminId = session('impersonator_id');
-
-        if (!$adminId) {
+        if (!session()->has('impersonator_id')) {
             return redirect()->route('dashboard');
         }
 
-        // Use Auth::loginUsingId which handles session updates internally
-        if (\Illuminate\Support\Facades\Auth::loginUsingId($adminId)) {
-            session()->forget('impersonator_id');
-            return redirect()->route('dashboard')->with('success', 'Back to your account.');
+        $originalUserId = session()->pull('impersonator_id');
+        $originalUser = User::find($originalUserId);
+
+        if ($originalUser) {
+            auth()->login($originalUser);
+            return redirect()->route('users.management')->with('success', 'Back to your account.');
         }
 
         return redirect()->route('login');
