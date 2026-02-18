@@ -69,6 +69,13 @@ class DashboardController extends Controller
         return view('dashboard.notifications.index', compact('notifications'));
     }
 
+    public function getUnreadNotificationsCount()
+    {
+        return response()->json([
+            'count' => auth()->user()->unreadNotifications()->count()
+        ]);
+    }
+
     public function markAllNotificationsAsRead()
     {
         auth()->user()->unreadNotifications->markAsRead();
