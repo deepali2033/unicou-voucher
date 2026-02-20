@@ -161,12 +161,18 @@
                     <i class="fas fa-headset me-2"></i> Customer Support
                 </a>
             </li>
+
             @endif
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <!-- Support Center -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('customer.query') ? 'active' : '' }}" href="{{ route('customer.query') }}">
                     <i class="fas fa-headset me-2"></i> Customer Query
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}" href="{{ route('reports.index') }}">
+                    <i class="fas fa-headset me-2"></i> Reports
                 </a>
             </li>
             @endif

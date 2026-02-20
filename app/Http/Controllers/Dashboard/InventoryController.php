@@ -55,7 +55,7 @@ class InventoryController extends Controller
     {
         $last_voucher = InventoryVoucher::orderBy('id', 'desc')->first();
         $next_id = 1;
-        
+
         if ($last_voucher) {
             $next_id = (int)$last_voucher->id + 1;
         }
@@ -67,20 +67,20 @@ class InventoryController extends Controller
     {
         $original = InventoryVoucher::findOrFail($id);
         $new = $original->replicate();
-        
+
         // Generate new unique SKU ID
         $baseSku = $original->sku_id;
         // Remove trailing numbers if any to get the base
         $basePrefix = preg_replace('/-\d+$/', '', $baseSku);
-        
+
         $count = 1;
         $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
-        
+
         while (InventoryVoucher::where('sku_id', $newSku)->exists()) {
             $count++;
             $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
         }
-        
+
         $new->sku_id = $newSku;
         $new->quantity = 0; // Reset quantity for duplicate
         $new->status = 'OUT OF STOCK';
@@ -101,18 +101,18 @@ class InventoryController extends Controller
             $original = InventoryVoucher::find($id);
             if ($original) {
                 $new = $original->replicate();
-                
+
                 $baseSku = $original->sku_id;
                 $basePrefix = preg_replace('/-\d+$/', '', $baseSku);
-                
+
                 $count = 1;
                 $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
-                
+
                 while (InventoryVoucher::where('sku_id', $newSku)->exists()) {
                     $count++;
                     $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
                 }
-                
+
                 $new->sku_id = $newSku;
                 $new->quantity = 0;
                 $new->status = 'OUT OF STOCK';
@@ -269,17 +269,27 @@ class InventoryController extends Controller
         ];
 
         $columns = [
-            'SKU ID', 'Brand Name', 'Country/Region', 'Currency', 
-            'Voucher Variant', 'Voucher Type', 'Quantity', 'Status', 
-            'Purchase Value', 'Agent Sale Price', 'Student Sale Price'
+            'Sr No.',
+            'SKU ID',
+            'Brand Name',
+            'Country/Region',
+            'Currency',
+            'Voucher Variant',
+            'Voucher Type',
+            'Quantity',
+            'Status',
+            'Purchase Value',
+            'Agent Sale Price',
+            'Student Sale Price'
         ];
 
         $callback = function () use ($records, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-
+            $serial = 1;
             foreach ($records as $record) {
                 fputcsv($file, [
+                    $serial++,
                     $record->sku_id,
                     $record->brand_name,
                     $record->country_region,

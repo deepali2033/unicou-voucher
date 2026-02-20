@@ -238,6 +238,17 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     // Reports & Revenue
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/stock', [ReportController::class, 'stockReport'])->name('reports.stock');
+    Route::get('/reports/profit-loss', [ReportController::class, 'profitAndLossReport'])->name('reports.profit-loss');
+    Route::get('/reports/gross-margin', [ReportController::class, 'grossMarginReport'])->name('reports.gross-margin');
+    Route::get('/reports/distributor-margin', [ReportController::class, 'distributorMarginReport'])->name('reports.distributor-margin');
+    Route::get('/reports/platform-fee', [ReportController::class, 'platformFeeReport'])->name('reports.platform-fee');
+    Route::get('/reports/operational-expense', [ReportController::class, 'operationalExpenseReport'])->name('reports.operational-expense');
+
+    // CSV Exports
+    Route::get('/reports/stock/export', [ReportController::class, 'exportStockReport'])->name('reports.stock.export');
+    Route::get('/reports/profit-loss/export', [ReportController::class, 'exportProfitLossReport'])->name('reports.profit-loss.export');
+
     Route::get('/revenue', [ReportController::class, 'revenue'])->name('revenue.index');
 
     // Settings
@@ -250,6 +261,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
     Route::get('/banks', [BankController::class, 'bankreport'])->name('banks.bank-table');
+    Route::get('/banks-export', [BankController::class, 'exportBankReport'])->name('banks.bank-table.export');
     Route::post('/webhook/save', [WebhookController::class, 'save'])->name('webhook.save');
 
     // Admin Payment Methods

@@ -44,6 +44,108 @@
         </div>
     </div>
 
+    <!-- Reports Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h4 class="fw-bold mb-3">Available Reports</h4>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-boxes text-primary fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Stock Report</h5>
+                    </div>
+                    <p class="text-muted small">Comprehensive view of inventory including purchased, in-stock, sold, and lost items.</p>
+                    <a href="{{ route('reports.stock') }}" class="btn btn-primary w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-chart-line text-success fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Profit & Loss</h5>
+                    </div>
+                    <p class="text-muted small">Analyze your gross profit and loss across different SKUs and voucher types.</p>
+                    <a href="{{ route('reports.profit-loss') }}" class="btn btn-success w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-percentage text-info fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Gross Margin</h5>
+                    </div>
+                    <p class="text-muted small">Margin analysis by exam type to understand which products are most profitable.</p>
+                    <a href="{{ route('reports.gross-margin') }}" class="btn btn-info text-white w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-users text-warning fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Distributor Margin</h5>
+                    </div>
+                    <p class="text-muted small">Track margins and performance of B2B partners and distributors.</p>
+                    <a href="{{ route('reports.distributor-margin') }}" class="btn btn-warning w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-danger-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-credit-card text-danger fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Platform Fee</h5>
+                    </div>
+                    <p class="text-muted small">Report on gateway fees and platform-related transaction costs.</p>
+                    <a href="{{ route('reports.platform-fee') }}" class="btn btn-danger w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-dark-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-file-invoice-dollar text-dark fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Op. Expense</h5>
+                    </div>
+                    <p class="text-muted small">Overview of operational expenses and overhead costs.</p>
+                    <a href="{{ route('reports.operational-expense') }}" class="btn btn-dark w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+        .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+        .bg-info-soft { background-color: rgba(13, 202, 240, 0.1); }
+        .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+        .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+        .bg-dark-soft { background-color: rgba(33, 37, 41, 0.1); }
+        .transition { transition: all 0.3s ease; }
+        .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+    </style>
+
     <div class="row">
         <!-- Recent Orders -->
         <div class="col-md-8">

@@ -4,8 +4,9 @@
 <style>
     .hover-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
     }
+
     .edit-method-btn:hover {
         background-color: #e9ecef !important;
         transform: scale(1.1);
@@ -55,7 +56,7 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 overflow-hidden position-relative hover-card"
                 style="border-radius:20px; transition: all 0.3s ease;">
-                
+
                 <div style="height: 6px; background: {{ $method->method_type == 'qr' ? 'linear-gradient(90deg, #8b5cf6, #a78bfa)' : ($method->method_type == 'upi' ? 'linear-gradient(90deg, #10b981, #34d399)' : 'linear-gradient(90deg, #2563eb, #60a5fa)') }};"></div>
 
                 <div class="card-body p-4">
@@ -71,9 +72,9 @@
                             @endif
                         </div>
                         <div class="d-flex gap-2 align-items-center">
-                            <button class="btn btn-light btn-sm rounded-circle edit-method-btn shadow-sm" 
-                                    data-method="{{ json_encode($method) }}"
-                                    style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee;">
+                            <button class="btn btn-light btn-sm rounded-circle edit-method-btn shadow-sm"
+                                data-method="{{ json_encode($method) }}"
+                                style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee;">
                                 <i class="fas fa-pencil-alt text-primary small"></i>
                             </button>
                             <span class="badge rounded-pill px-3 py-2"
@@ -132,7 +133,7 @@
                 <button class="btn btn-primary btn-sm px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addMethodModal">
                     <i class="fas fa-plus me-1"></i> Add Payment Method
                 </button>
-                <a href="{{ route('users.pdf', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                <a href="{{ route('banks.bank-table.export') }}" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_create_user)
@@ -190,7 +191,7 @@
             <div class="modal-body p-4">
                 <form id="editPaymentMethodForm" method="POST" enctype="multipart/form-data">
                     @csrf
-                    
+
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Method Type</label>
                         <select name="method_type" class="form-select rounded-3 p-2 type-selector" required disabled>
@@ -534,10 +535,10 @@
             let method = $(this).data('method');
             let modal = $('#editMethodModal');
             let form = $('#editPaymentMethodForm');
-            
+
             // Set form action
             form.attr('action', `/dashboard/payment-methods/${method.id}`);
-            
+
             // Populate fields
             modal.find('select[name="method_type"]').val(method.method_type).trigger('change');
             $('#edit_method_type_hidden').val(method.method_type);
@@ -548,7 +549,7 @@
             $('#edit_bank_code_type').val(method.bank_code_type);
             $('#edit_bank_code_value').val(method.bank_code_value);
             $('#edit_upi_id').val(method.upi_id);
-            
+
             modal.modal('show');
         });
 
@@ -570,7 +571,7 @@
                 success: function(response) {
                     toastr.success('Payment method updated successfully');
                     $('#editMethodModal').modal('hide');
-                    location.reload(); 
+                    location.reload();
                 },
                 error: function(xhr) {
                     let errors = xhr.responseJSON.errors;

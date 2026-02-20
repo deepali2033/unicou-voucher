@@ -104,4 +104,58 @@ class BankController extends Controller
         $methods = AdminPaymentMethod::all();
         return view('dashboard.banks.bank-table', compact('methods'));
     }
+
+    public function exportBankReport()
+    {
+        $records = AdminPaymentMethod::all();
+
+        $filename = "bank_report_" . date('Ymd_His') . ".csv";
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = [
+            'Sr. No.',
+            'Bank ID',
+            'Currency',
+            'Country/Region',
+            'Vouchers Sold',
+            'Sale Value in Local Currency',
+            'Refunds',
+            'Disputes',
+            'Currency Conversion @',
+            'Sale Value in Buying Currency',
+            'FX Gain/Loss',
+            'Created At'
+        ];
+
+        $callback = function () use ($records, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($records as $index => $record) {
+                fputcsv($file, [
+                    $index + 1,
+                    $record->bank_name ?? 'BNK-' . ($index + 100),
+                    'USD',
+                    $record->country ?? 'N/A',
+                    0,
+                    0.00,
+                    0.00,
+                    0.00,
+                    '1.00',
+                    0.00,
+                    '0.00',
+                    $record->created_at->format('Y-m-d')
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

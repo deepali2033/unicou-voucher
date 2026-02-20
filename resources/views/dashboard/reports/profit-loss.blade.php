@@ -1,0 +1,136 @@
+@extends('layouts.master')
+
+@section('content')
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-2 border-end">
+            <h6 class="fw-bold mb-3 border-bottom pb-2">Reports Navigation</h6>
+            <ul class="nav flex-column gap-2" id="report-nav">
+                <li class="nav-item">
+                    <a href="{{ route('reports.profit-loss') }}" class="nav-link p-2 rounded {{ request()->routeIs('reports.profit-loss') ? 'bg-primary text-white' : 'text-dark hover-bg' }}">
+                        <span class="small fw-bold">Gross Profit & Loss</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('reports.bank') }}" class="nav-link p-2 rounded {{ request()->routeIs('reports.bank') ? 'bg-primary text-white' : 'text-dark hover-bg' }}">
+                        <span class="small fw-bold">Bank Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item ps-3">
+                    <span class="small text-muted">28. Bank-wise Collection</span>
+                </li>
+                <li class="nav-item ps-3">
+                    <span class="small text-muted">29. Gateway Settlement</span>
+                </li>
+                <li class="nav-item ps-3">
+                    <span class="small text-muted">30. Bank Reconciliation</span>
+                </li>
+                <li class="nav-item ps-3">
+                    <span class="small text-muted">31. AR Aging</span>
+                </li>
+                <li class="nav-item ps-3">
+                    <span class="small text-muted">32. AP Aging</span>
+                </li>
+                <li class="nav-item mt-2">
+                    <a href="{{ route('reports.gross-margin') }}" class="nav-link p-2 rounded {{ request()->routeIs('reports.gross-margin') ? 'bg-primary text-white' : 'text-dark hover-bg' }}">
+                        <span class="small fw-bold">Gross Margin by Exam</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold text-dark mb-0">Gross Profit & Loss</h3>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('reports.profit-loss.export') }}" id="csv-export-link" class="btn btn-success btn-sm">
+                        <i class="fas fa-file-csv me-1"></i> CSV Download
+                    </a>
+                    <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+                        <i class="fas fa-filter me-1"></i> Filter
+                    </button>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0" id="table-container">
+                    @include('dashboard.reports.partials.profit-loss-table')
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Offcanvas Filter --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">Filter Report</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form id="filter-form" action="{{ route('reports.profit-loss') }}" method="GET">
+            <div class="mb-4">
+                <label class="form-label fw-bold">SKU ID</label>
+                <input type="text" name="sku_id" class="form-control" placeholder="Search SKU" value="{{ request('sku_id') }}">
+            </div>
+            <div class="d-grid gap-2 pt-3 border-top">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ route('reports.profit-loss') }}" class="btn btn-light">Reset All</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .hover-bg:hover {
+        background-color: #f8f9fa;
+    }
+
+    .nav-link {
+        font-size: 13px;
+        line-height: 1.2;
+    }
+
+    table th {
+        font-size: 12px;
+    }
+
+    table td {
+        font-size: 12px;
+    }
+</style>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        function updateTable(url) {
+            $.ajax({
+                url: url,
+                success: function(data) {
+                    $('#table-container').html(data);
+                    window.history.pushState({}, '', url);
+                    let csvUrl = "{{ route('reports.profit-loss.export') }}?" + (url.split('?')[1] || '');
+                    $('#csv-export-link').attr('href', csvUrl);
+                }
+            });
+        }
+
+        $(document).on('click', '.ajax-pagination a', function(e) {
+            e.preventDefault();
+            updateTable($(this).attr('href'));
+        });
+
+        $(document).on('submit', '#filter-form', function(e) {
+            e.preventDefault();
+            let url = $(this).attr('action') + '?' + $(this).serialize();
+            updateTable(url);
+            bootstrap.Offcanvas.getInstance(document.getElementById('filterOffcanvas')).hide();
+        });
+    });
+</script>
+@endpush
+@endsection
