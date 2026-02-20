@@ -246,6 +246,7 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
                         <div class="form-group-custom">
                             <label>Confirm Password</label>
                             <input name="password_confirmation" type="password" placeholder="••••••••" required>
+                            <small id="password-error" class="text-danger" style="display: none; font-size: 11px;">Passwords do not match</small>
                         </div>
                     </div>
                 </div>
@@ -278,6 +279,29 @@ $accountLocked = $lockRequested && $defaultType === $requestedType;
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Real-time password validation
+        const passwordInput = document.querySelector('input[name="password"]');
+        const confirmInput = document.querySelector('input[name="password_confirmation"]');
+        const errorSpan = document.getElementById('password-error');
+
+        function checkPasswordMatch() {
+            if (confirmInput.value.length > 0) {
+                if (passwordInput.value !== confirmInput.value) {
+                    errorSpan.style.display = 'block';
+                    confirmInput.style.borderColor = '#dc3545';
+                } else {
+                    errorSpan.style.display = 'none';
+                    confirmInput.style.borderColor = '#23aae2';
+                }
+            } else {
+                errorSpan.style.display = 'none';
+                confirmInput.style.borderColor = '#e2e8f0';
+            }
+        }
+
+        passwordInput.addEventListener('input', checkPasswordMatch);
+        confirmInput.addEventListener('input', checkPasswordMatch);
+
         // Geolocation tracking
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
