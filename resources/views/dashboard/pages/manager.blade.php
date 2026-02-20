@@ -32,7 +32,7 @@
                     <label class="form-label fw-bold">Country</label>
                     <select name="country" class="form-select">
                         <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
-                        @foreach(\App\Helpers\CountryHelper::getManagementCountries() as $name)
+                        @foreach(\App\Models\User::where('account_type', 'manager')->whereNotNull('country')->where('country', '!=', '')->distinct()->orderBy('country')->pluck('country') as $name)
                             <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
                         @endforeach
                     </select>

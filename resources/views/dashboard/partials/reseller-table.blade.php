@@ -45,7 +45,16 @@
                     <span class="badge bg-secondary">{{ ucfirst($user->category) }}</span>
                     @endif
                 </td>
-                <td></td>
+                <td>
+                    @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
+                    <input type="number" class="form-control form-control-sm update-limit" 
+                           data-user-id="{{ $user->id }}" 
+                           value="{{ $user->voucher_limit }}" 
+                           min="0" style="width: 70px;">
+                    @else
+                    {{ $user->voucher_limit }}
+                    @endif
+                </td>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                 @endif

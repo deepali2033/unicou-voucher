@@ -33,7 +33,15 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Country/Region</label>
-                        <input type="text" name="country_region" class="form-control" value="{{ old('country_region', $inventory->country_region) }}" required>
+                        <select name="country_region" id="country" class="form-select" required>
+                            <option value="{{ $inventory->country_region }}" selected>{{ $inventory->country_region }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-uppercase">State</label>
+                        <select name="state" id="state" class="form-select">
+                            <option value="{{ $inventory->state }}" selected>{{ $inventory->state ?: 'Select State' }}</option>
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency</label>
@@ -170,35 +178,50 @@
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
             let variant = $('#voucher_variant').val().trim();
-            let currency = $('#currency').val().trim();
+            let country = $('#country').val().trim();
 
-            if (brand.length >= 1) {
-                // 1. Brand Prefix Logic
-                let words = brand.split(/\s+/);
-                let brandPrefix = "";
+            if (brand.length >= 1 && country.length >= 1) {
+                // 1. Country Part (First 2-3 characters)
+                let countryPart = country.substring(0, 3).toUpperCase();
 
-                if (words.length >= 2) {
-                    brandPrefix = words.map(w => w.substring(0, 1)).join('').toUpperCase();
+                // 2. Brand Part (2 characters)
+                let brandWords = brand.split(/\s+/).filter(w => w.length > 0);
+                let brandPart = "";
+                if (brandWords.length >= 2) {
+                    brandPart = brandWords[0][0].toUpperCase() + brandWords[1][0].toUpperCase();
                 } else if (brand.length >= 2) {
-                    brandPrefix = brand.substring(0, 2).toUpperCase();
+                    brandPart = brand.substring(0, 2).toUpperCase();
                 } else {
-                    brandPrefix = brand.toUpperCase();
+                    brandPart = brand.toUpperCase() + "X";
                 }
 
-                // 2. Variant Prefix
-                let variantPrefix = variant ? variant.substring(0, 2).toUpperCase() : "";
-
-                // 3. Currency
-                let currencyPrefix = currency ? currency.substring(0, 3).toUpperCase() : "";
+                // 3. Variant Part (2 characters)
+                let variantPart = "VAR";
+                if (variant) {
+                    let variantWords = variant.split(/\s+/).filter(w => w.length > 0);
+                    if (variantWords.length >= 2) {
+                        variantPart = variantWords[0][0].toUpperCase() + variantWords[1][0].toUpperCase();
+                    } else if (variant.length >= 2) {
+                        variantPart = variant.substring(0, 2).toUpperCase();
+                    } else {
+                        variantPart = variant.toUpperCase() + "X";
+                    }
+                }
 
                 // 4. Numeric ID
-                let suffix = currentId.toString().padStart(3, '0');
+                let suffix = "001";
+                let currentSku = "{{ $inventory->sku_id }}";
+                if (currentSku.includes('-')) {
+                    let parts = currentSku.split('-');
+                    suffix = parts[parts.length - 1];
+                }
 
-                $('#sku_id').val(brandPrefix + variantPrefix + currencyPrefix + suffix);
+                // Final SKU: COUNTRY-BRAND-VARIANT-001
+                $('#sku_id').val(countryPart + "-" + brandPart + "-" + variantPart + "-" + suffix);
             }
         }
 
-        $('#brand_name, #voucher_variant, #currency').on('input', function() {
+        $('#brand_name, #voucher_variant, #country').on('input change', function() {
             generateSKU();
         });
 
@@ -256,6 +279,63 @@
                 $('input[name="quantity"]').val(res.count);
                 calculateUnitValue();
             }, 100);
+        });
+    });
+</script>
+
+<script type="module">
+    import {
+        Country,
+        State
+    } from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const countrySelect = document.getElementById("country");
+        const stateSelect = document.getElementById("state");
+        const initialCountry = "{{ $inventory->country_region }}";
+        const initialState = "{{ $inventory->state }}";
+
+        // Populate Countries
+        const countries = Country.getAllCountries();
+        countrySelect.innerHTML = '<option value="">Select Country</option>';
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name;
+            option.textContent = country.name;
+            option.dataset.code = country.isoCode;
+            if (country.name === initialCountry) {
+                option.selected = true;
+            }
+            countrySelect.appendChild(option);
+        });
+
+        function updateStates(countryCode, selectedState = null) {
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            if (countryCode) {
+                const states = State.getStatesOfCountry(countryCode);
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.name;
+                    option.textContent = state.name;
+                    if (state.name === selectedState) {
+                        option.selected = true;
+                    }
+                    stateSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Initial states
+        const initialCountryCode = countrySelect.options[countrySelect.selectedIndex]?.dataset.code;
+        if (initialCountryCode) {
+            updateStates(initialCountryCode, initialState);
+        }
+
+        // Country Change Event
+        countrySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const countryCode = selectedOption.dataset.code;
+            updateStates(countryCode);
         });
     });
 </script>

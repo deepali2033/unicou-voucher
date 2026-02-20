@@ -13,11 +13,52 @@ use Illuminate\Support\Str;
 
 class JobController extends Controller
 {
-    // List job vacancies for Admin/Manager
-    public function jobApplication()
+    private function checkPermission()
     {
-        // $vacancies = JobVacancy::latest()->get();
-        return view('dashboard.jobs.job_apllications');
+        $user = auth()->user();
+        if ($user->account_type === 'manager' && !$user->has_job_permission) {
+            abort(403, 'Unauthorized access to job applications.');
+        }
+    }
+
+    // List job vacancies for Admin/Manager
+    public function jobApplication(Request $request)
+    {
+        $this->checkPermission();
+        $query = JobapplicationModel::with('vacancy');
+
+        if ($request->filled('country')) {
+            $query->where('country', 'like', '%' . $request->country . '%');
+        }
+
+        if ($request->filled('designation')) {
+            $query->where('designation', $request->designation);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        $applications = $query->latest()->get();
+        return view('dashboard.jobs.job_apllications', compact('applications'));
+    }
+
+    // View application details
+    public function viewApplication(JobapplicationModel $application)
+    {
+        $this->checkPermission();
+        return response()->json([
+            'success' => true,
+            'data' => $application
+        ]);
     }
 
     // Create job vacancy form
@@ -48,15 +89,39 @@ class JobController extends Controller
     }
 
     // List applications
-    public function applications()
+    public function applications(Request $request)
     {
-        $applications = JobApplication::with('vacancy')->latest()->get();
+        $this->checkPermission();
+        $query = JobapplicationModel::with('vacancy');
+
+        if ($request->filled('country')) {
+            $query->where('country', 'like', '%' . $request->country . '%');
+        }
+
+        if ($request->filled('designation')) {
+            $query->where('designation', $request->designation);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        $applications = $query->latest()->get();
         return view('dashboard.jobs.applications', compact('applications'));
     }
 
     // Update application status
-    public function updateApplicationStatus(Request $request, JobApplication $application)
+    public function updateApplicationStatus(Request $request, JobapplicationModel $application)
     {
+        $this->checkPermission();
         $request->validate(['status' => 'required|in:selected,rejected']);
         $application->update(['status' => $request->status]);
 
@@ -70,13 +135,13 @@ class JobController extends Controller
                     'email' => $application->email,
                     'phone' => $application->phone,
                     'password' => Hash::make($password),
-                    'account_type' => $application->vacancy->category,
+                    'account_type' => $application->vacancy ? $application->vacancy->category : 'support_team',
                     'is_active' => true,
                 ]);
 
                 // Send Email Notification
                 try {
-                    $message = "Congratulations! Your application for '{$application->vacancy->title}' has been SELECTED.\n\n" .
+                    $message = "Congratulations! Your application has been SELECTED.\n\n" .
                         "Your account has been created on UniCou.\n" .
                         "Login Email: {$application->email}\n" .
                         "Temporary Password: {$password}\n\n" .
@@ -90,10 +155,38 @@ class JobController extends Controller
                 } catch (\Exception $e) {
                     \Log::error("Failed to send job selection email: " . $e->getMessage());
                 }
+            } else {
+                 // Send selection email if user already exists
+                 try {
+                    $message = "Congratulations! Your application has been SELECTED.\n\n" .
+                        "Our team will connect with you soon.";
+
+                    Mail::raw($message, function ($mail) use ($application) {
+                        $mail->to($application->email)
+                            ->subject('UniCou Job Selection');
+                    });
+                } catch (\Exception $e) {
+                    \Log::error("Failed to send job selection email: " . $e->getMessage());
+                }
+            }
+        } elseif ($request->status === 'rejected') {
+            try {
+                $message = "We regret to inform you that your application has been REJECTED.\n\n" .
+                    "Thank you for your interest in UniCou.";
+
+                Mail::raw($message, function ($mail) use ($application) {
+                    $mail->to($application->email)
+                        ->subject('UniCou Job Application Update');
+                });
+            } catch (\Exception $e) {
+                \Log::error("Failed to send job rejection email: " . $e->getMessage());
             }
         }
 
-        return back()->with('success', 'Application status updated to ' . $request->status);
+        return response()->json([
+            'success' => true,
+            'message' => 'Application status updated to ' . $request->status
+        ]);
     }
 
     // Public list for careers
@@ -112,54 +205,67 @@ class JobController extends Controller
     // Submit application
     public function submitApplication(Request $request)
     {
-        $validated = $request->validate([
-            'vacancy_id' => 'nullable|exists:job_vacancies,id',
-            'name' => 'nullable|string|max:255',
-            'dob' => 'nullable|date',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'whatsapp_number' => 'nullable|string|max:20',
-            'social_link' => 'nullable|url|max:255',
-            'address' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'post_code' => 'nullable|string|max:20',
-            'reference_name' => 'nullable|string|max:255',
-            'organization_name' => 'nullable|string|max:255',
-            'reference_email' => 'nullable|email|max:255',
-            'reference_phone' => 'nullable|string|max:20',
-            'id_type' => 'nullable|string',
-            'id_number' => 'nullable|string|max:50',
-            'designation' => 'nullable|string',
-            'bank_name' => 'nullable|string|max:255',
-            'bank_country' => 'nullable|string|max:100',
-            'bank_account_number' => 'nullable|string|max:50',
-            'id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'photograph' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
-            'reference_letter' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        try {
+            $validated = $request->validate([
+                'vacancy_id' => 'nullable|exists:job_vacancies,id',
+                'name' => 'required|string|max:255',
+                'dob' => 'required|date',
+                'email' => 'required|email|max:255',
+                'phone' => 'required|string|max:20',
+                'whatsapp_number' => 'required|string|max:20',
+                'social_link' => 'nullable|url|max:255',
+                'address' => 'required|string|max:255',
+                'city' => 'required|string|max:100',
+                'state' => 'required|string|max:100',
+                'country' => 'required|string|max:100',
+                'post_code' => 'required|string|max:20',
+                'reference_name' => 'required|string|max:255',
+                'organization_name' => 'required|string|max:255',
+                'reference_email' => 'required|email|max:255',
+                'reference_phone' => 'required|string|max:20',
+                'id_type' => 'required|string',
+                'id_number' => 'required|string|max:50',
+                'designation' => 'required|string',
+                'bank_name' => 'required|string|max:255',
+                'bank_country' => 'required|string|max:100',
+                'bank_account_number' => 'required|string|max:50',
+                'id_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'photograph' => 'required|file|mimes:jpg,jpeg,png|max:5120',
+                'reference_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            ]);
 
+            // Handle File Uploads
+            if ($request->hasFile('id_document')) {
+                $validated['id_document'] = $request->file('id_document')->store('applications/ids', 'public');
+            }
+            if ($request->hasFile('photograph')) {
+                $validated['photograph'] = $request->file('photograph')->store('applications/photos', 'public');
+            }
+            if ($request->hasFile('reference_letter')) {
+                $validated['reference_letter'] = $request->file('reference_letter')->store('applications/references', 'public');
+            }
 
-        ]);
+            JobapplicationModel::create($validated);
 
-        // Handle File Uploads
-        if ($request->hasFile('id_document')) {
-            $validated['id_document'] = $request->file('id_document')->store('applications/ids', 'public');
+            return response()->json([
+                'success' => true,
+                'message' => 'Your application has been submitted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
-        if ($request->hasFile('photograph')) {
-            $validated['photograph'] = $request->file('photograph')->store('applications/photos', 'public');
-        }
-        if ($request->hasFile('reference_letter')) {
-            $validated['reference_letter'] = $request->file('reference_letter')->store('applications/references', 'public');
-        }
-
-        JobApplication::create($validated);
-        return redirect()->route('home')->with('success', 'Your application has been submitted successfully.');
     }
 
-    public function destroyApplication(JobApplication $application)
+    public function destroyApplication(JobapplicationModel $application)
     {
+        $this->checkPermission();
         $application->delete();
-        return back()->with('success', 'Application deleted successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Application deleted successfully.'
+        ]);
     }
 }

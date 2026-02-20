@@ -28,11 +28,6 @@
                     <i class="fas fa-users me-2"></i> User Management
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('support.team') ? 'active' : '' }}" href="{{ route('support.team') }}">
-                    <i class="fas fa-tools me-2"></i>Support Team
-                </a>
-            </li>
             @endif
 
             @if(auth()->user()->isAdmin() )
@@ -43,6 +38,15 @@
                 </a>
             </li>
             @endif
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || (auth()->user()->isManager() && auth()->user()->can_view_users))
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('support.team') ? 'active' : '' }}" href="{{ route('support.team') }}">
+                    <i class="fas fa-tools me-2"></i>Support Team
+                </a>
+            </li>
+            @endif
+
+
             <!-- @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
      
             <li class="nav-item">
@@ -51,6 +55,14 @@
                 </a>
             </li>
             @endif -->
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() ||auth()->user()->isResellerAgent() )
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('sales.index') ? 'active' : '' }}" href="{{ route('sales.index') }}">
+                    <i class="fas fa-tags me-2"></i> Sales
+                </a>
+            </li>
+
+            @endif
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
             <!-- Pricing -->
             <!-- Inventory -->
@@ -280,15 +292,16 @@
 
             <!-- @endif -->
 
-
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->has_job_permission) )
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('jobApplication') ? 'active' : '' }}" href="{{ route('jobApplication') }}">
                     <i class="fas fa-tools me-2"></i>Job Applications
                 </a>
             </li>
+            @endif
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
+                <a class="nav-link " href="{{ route('disputes.index') }}">
                     <i class="fas fa-gavel me-2"></i> My Disputes
                 </a>
             </li>

@@ -130,9 +130,27 @@
                                     @endif
 
                                     @if($order->status == 'completed')
-                                    <button class="btn btn-sm btn-light" title="Deliver" data-bs-toggle="modal" data-bs-target="#deliverModal{{ $order->id }}">
-                                        <i class="fas fa-truck text-primary"></i>
-                                    </button>
+                                    <form action="{{ route('orders.deliver', $order->id) }}" method="POST" class="d-inline" id="auto-deliver-{{ $order->id }}">
+                                        @csrf
+                                        @php
+                                        $autoCodes = [];
+                                        if($order->inventoryVoucher && $order->inventoryVoucher->upload_vouchers) {
+                                        $available = array_diff($order->inventoryVoucher->upload_vouchers, $deliveredCodes);
+                                        $autoCodes = array_slice($available, 0, $order->quantity);
+                                        }
+                                        $codesString = implode("\n", $autoCodes);
+                                        @endphp
+                                        <input type="hidden" name="codes" value="{{ $codesString }}">
+                                        <button type="button" class="btn btn-sm btn-light" title="Quick Deliver (Auto Pick)"
+                                            onclick="if(confirm('Auto-pick and deliver {{ $order->quantity }} codes?')) document.getElementById('auto-deliver-{{ $order->id }}').submit();"
+                                            @if(count($autoCodes) < $order->quantity) disabled @endif>
+                                            <i class="fas fa-magic text-primary"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- <button class="btn btn-sm btn-light" title="Manual Deliver" data-bs-toggle="modal" data-bs-target="#deliverModal{{ $order->id }}">
+                                        <i class="fas fa-truck text-muted"></i>
+                                    </button> -->
                                     @endif
 
                                     @if($order->status != 'cancelled' && $order->status != 'delivered')
@@ -151,7 +169,7 @@
                         </tr>
 
                         <!-- Deliver Modal -->
-                        <div class="modal fade" id="deliverModal{{ $order->id }}" tabindex="-1">
+                        <!-- <div class="modal fade" id="deliverModal{{ $order->id }}" tabindex="-1">
                             <div class="modal-dialog modal-dialog-centered">
                                 <form action="{{ route('orders.deliver', $order->id) }}" method="POST">
                                     @csrf
@@ -210,7 +228,7 @@
                                     </div>
                                 </form>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Cancel Modal -->
                         <div class="modal fade" id="cancelModal{{ $order->id }}" tabindex="-1">
@@ -250,17 +268,17 @@
                                         <div class="bg-light p-3 rounded-4">
                                             <div class="d-flex flex-column gap-2">
                                                 @php
-                                                    $codes = explode("\n", str_replace("\r", "", $order->delivery_details));
+                                                $codes = explode("\n", str_replace("\r", "", $order->delivery_details));
                                                 @endphp
                                                 @foreach($codes as $code)
-                                                    @if(trim($code))
-                                                        <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
-                                                            <code class="text-primary fw-bold" style="font-size: 1.1rem;">{{ trim($code) }}</code>
-                                                            <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('{{ trim($code) }}')" title="Copy Code">
-                                                                <i class="far fa-copy"></i>
-                                                            </button>
-                                                        </div>
-                                                    @endif
+                                                @if(trim($code))
+                                                <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
+                                                    <code class="text-primary fw-bold" style="font-size: 1.1rem;">{{ trim($code) }}</code>
+                                                    <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('{{ trim($code) }}')" title="Copy Code">
+                                                        <i class="far fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                @endif
                                                 @endforeach
                                             </div>
                                         </div>
@@ -295,69 +313,69 @@
 
 @push('scripts')
 <script>
-function toggleCode(orderId, code) {
-    const textarea = document.getElementById('codes_textarea_' + orderId);
-    let currentCodes = textarea.value.split('\n').map(c => c.trim()).filter(c => c !== '');
-    
-    const index = currentCodes.indexOf(code);
-    if (index > -1) {
-        currentCodes.splice(index, 1);
-        updateCodeItemUI(orderId, code, false);
-    } else {
-        currentCodes.push(code);
-        updateCodeItemUI(orderId, code, true);
-    }
-    
-    textarea.value = currentCodes.join('\n');
-}
+    function toggleCode(orderId, code) {
+        const textarea = document.getElementById('codes_textarea_' + orderId);
+        let currentCodes = textarea.value.split('\n').map(c => c.trim()).filter(c => c !== '');
 
-function updateCodeItemUI(orderId, code, isSelected) {
-    const items = document.querySelectorAll(`.code-item[data-order-id="${orderId}"][data-code="${code}"]`);
-    items.forEach(item => {
-        const icon = item.querySelector('i');
-        if (isSelected) {
-            item.classList.remove('bg-white', 'border');
-            item.classList.add('bg-primary', 'text-white');
-            icon.classList.remove('far', 'fa-circle');
-            icon.classList.add('fas', 'fa-check-circle');
+        const index = currentCodes.indexOf(code);
+        if (index > -1) {
+            currentCodes.splice(index, 1);
+            updateCodeItemUI(orderId, code, false);
         } else {
-            item.classList.remove('bg-primary', 'text-white');
-            item.classList.add('bg-white', 'border', 'text-dark');
-            icon.classList.remove('fas', 'fa-check-circle');
-            icon.classList.add('far', 'fa-circle');
+            currentCodes.push(code);
+            updateCodeItemUI(orderId, code, true);
         }
-    });
-}
 
-function autoPickCodes(orderId, quantity) {
-    const availableItems = Array.from(document.querySelectorAll(`.code-item[data-order-id="${orderId}"]:not(.bg-danger-subtle)`));
-    const textarea = document.getElementById('codes_textarea_' + orderId);
-    
-    // Reset selections for this order first
-    availableItems.forEach(item => {
-        updateCodeItemUI(orderId, item.dataset.code, false);
-    });
-    
-    const selectedCodes = [];
-    for (let i = 0; i < Math.min(quantity, availableItems.length); i++) {
-        const code = availableItems[i].dataset.code;
-        selectedCodes.push(code);
-        updateCodeItemUI(orderId, code, true);
+        textarea.value = currentCodes.join('\n');
     }
-    
-    textarea.value = selectedCodes.join('\n');
-    
-    if (availableItems.length < quantity) {
-        alert(`Warning: Only ${availableItems.length} codes available in inventory, but ${quantity} required.`);
-    }
-}
 
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        toastr.success('Code copied to clipboard!');
-    }).catch(err => {
-        console.error('Failed to copy: ', err);
-    });
-}
+    function updateCodeItemUI(orderId, code, isSelected) {
+        const items = document.querySelectorAll(`.code-item[data-order-id="${orderId}"][data-code="${code}"]`);
+        items.forEach(item => {
+            const icon = item.querySelector('i');
+            if (isSelected) {
+                item.classList.remove('bg-white', 'border');
+                item.classList.add('bg-primary', 'text-white');
+                icon.classList.remove('far', 'fa-circle');
+                icon.classList.add('fas', 'fa-check-circle');
+            } else {
+                item.classList.remove('bg-primary', 'text-white');
+                item.classList.add('bg-white', 'border', 'text-dark');
+                icon.classList.remove('fas', 'fa-check-circle');
+                icon.classList.add('far', 'fa-circle');
+            }
+        });
+    }
+
+    function autoPickCodes(orderId, quantity) {
+        const availableItems = Array.from(document.querySelectorAll(`.code-item[data-order-id="${orderId}"]:not(.bg-danger-subtle)`));
+        const textarea = document.getElementById('codes_textarea_' + orderId);
+
+        // Reset selections for this order first
+        availableItems.forEach(item => {
+            updateCodeItemUI(orderId, item.dataset.code, false);
+        });
+
+        const selectedCodes = [];
+        for (let i = 0; i < Math.min(quantity, availableItems.length); i++) {
+            const code = availableItems[i].dataset.code;
+            selectedCodes.push(code);
+            updateCodeItemUI(orderId, code, true);
+        }
+
+        textarea.value = selectedCodes.join('\n');
+
+        if (availableItems.length < quantity) {
+            alert(`Warning: Only ${availableItems.length} codes available in inventory, but ${quantity} required.`);
+        }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            toastr.success('Code copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
 </script>
 @endpush

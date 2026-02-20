@@ -33,7 +33,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Country/Region</label>
-                        <input type="text" name="country_region" class="form-control" value="{{ old('country_region') }}" required>
+                        <input type="text" name="country_region" id="country_region" class="form-control" value="{{ old('country_region') }}" placeholder="e.g. IN" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency</label>
@@ -109,7 +109,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label small fw-bold text-uppercase text-success">Agent Sale Price</label>
+                        <label class="form-label small fw-bold text-uppercase text-success">Reseller Agent /Agent Sale Price</label>
                         <input type="number" step="0.01" name="agent_sale_price" class="form-control border-success" value="{{ old('agent_sale_price', 0) }}" required>
                     </div>
                     <div class="col-md-4">
@@ -163,40 +163,47 @@
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
             let variant = $('#voucher_variant').val().trim();
-            let currency = $('#currency').val().trim();
+            let country = $('#country_region').val().trim();
 
-            if (brand.length >= 1) {
-                // 1. Brand Prefix Logic
-                let words = brand.split(/\s+/);
-                let brandPrefix = "";
+            if (brand.length >= 1 && country.length >= 1) {
+                // 1. Country Part (First 2-3 characters)
+                let countryPart = country.substring(0, 3).toUpperCase();
 
-                if (words.length >= 2) {
-                    // First letter of each word
-                    brandPrefix = words.map(w => w.substring(0, 1)).join('').toUpperCase();
+                // 2. Brand Part (2 characters)
+                let brandWords = brand.split(/\s+/).filter(w => w.length > 0);
+                let brandPart = "";
+                if (brandWords.length >= 2) {
+                    brandPart = brandWords[0][0].toUpperCase() + brandWords[1][0].toUpperCase();
                 } else if (brand.length >= 2) {
-                    // First two letters of single word
-                    brandPrefix = brand.substring(0, 2).toUpperCase();
+                    brandPart = brand.substring(0, 2).toUpperCase();
                 } else {
-                    brandPrefix = brand.toUpperCase();
+                    brandPart = brand.toUpperCase() + "X";
                 }
 
-                // 2. Variant Prefix
-                let variantPrefix = variant ? variant.substring(0, 2).toUpperCase() : "";
-
-                // 3. Currency
-                let currencyPrefix = currency ? currency.substring(0, 3).toUpperCase() : "";
+                // 3. Variant Part (2 characters)
+                let variantPart = "VAR";
+                if (variant) {
+                    let variantWords = variant.split(/\s+/).filter(w => w.length > 0);
+                    if (variantWords.length >= 2) {
+                        variantPart = variantWords[0][0].toUpperCase() + variantWords[1][0].toUpperCase();
+                    } else if (variant.length >= 2) {
+                        variantPart = variant.substring(0, 2).toUpperCase();
+                    } else {
+                        variantPart = variant.toUpperCase() + "X";
+                    }
+                }
 
                 // 4. Numeric ID
                 let suffix = nextId.toString().padStart(3, '0');
 
-                // Final SKU
-                $('#sku_id').val(brandPrefix + variantPrefix + currencyPrefix + suffix);
+                // Final SKU: COUNTRY-BRAND-VARIANT-001
+                $('#sku_id').val(countryPart + "-" + brandPart + "-" + variantPart + "-" + suffix);
             } else {
                 $('#sku_id').val('');
             }
         }
 
-        $('#brand_name, #voucher_variant, #currency').on('input', function() {
+        $('#brand_name, #voucher_variant, #country_region').on('input', function() {
             generateSKU();
         });
 
@@ -230,7 +237,7 @@
 
             // For display, use ", " for better readability
             let displayValue = codes.join(', ');
-            
+
             return {
                 display: displayValue,
                 count: count

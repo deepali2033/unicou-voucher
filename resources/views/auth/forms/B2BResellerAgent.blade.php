@@ -195,29 +195,29 @@
 
                 <div class="sat-grid-2">
                     @if(auth()->user()->account_type === 'agent')
-                        <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
-                            <input type="radio" name="agentType" value="Regular" checked required style="width: 20px; height: 20px;">
-                            <div class="ms-2">
-                                <p class="mb-0 fw-bold">Regular Agent</p>
-                            </div>
-                        </label>
+                    <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
+                        <input type="radio" name="agentType" value="Regular" checked required style="width: 20px; height: 20px;">
+                        <div class="ms-2">
+                            <p class="mb-0 fw-bold">Regular Agent</p>
+                        </div>
+                    </label>
                     @else
-                        <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
-                            <input type="radio" name="agentType" value="Regular" required style="width: 20px; height: 20px;">
-                            <div class="ms-2">
-                                <p class="mb-0 fw-bold">Regular Agent</p>
-                            </div>
-                        </label>
+                    <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
+                        <input type="radio" name="agentType" value="Regular" required style="width: 20px; height: 20px;">
+                        <div class="ms-2">
+                            <p class="mb-0 fw-bold">Regular Agent</p>
+                        </div>
+                    </label>
 
-                        <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
-                            <input type="radio" name="agentType" value="Reseller" required style="width: 20px; height: 20px;">
-                            <div class="ms-2">
-                                <p class="mb-0 fw-bold">Reseller Agent</p>
-                                <small class="text-muted" style="font-size: 0.75rem;">
-                                    (Can view sub-agent list & order history only. No access to vouchers or sensitive data.)
-                                </small>
-                            </div>
-                        </label>
+                    <label class="sat-consent cls_radio_btn d-flex align-items-center gap-2 p-3 border rounded cursor-pointer">
+                        <input type="radio" name="agentType" value="Reseller" required style="width: 20px; height: 20px;">
+                        <div class="ms-2">
+                            <p class="mb-0 fw-bold">Reseller Agent</p>
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                (Can view sub-agent list & order history only. No access to vouchers or sensitive data.)
+                            </small>
+                        </div>
+                    </label>
                     @endif
                 </div>
 
@@ -281,18 +281,18 @@
                     </div>
 
                     <div class="sat-field">
-                        <label>City *</label>
-                        <input type="text" name="city" placeholder="City" required>
-                    </div>
-
-                    <div class="sat-field">
-                        <label>State / Province *</label>
-                        <input type="text" name="state" placeholder="State or province" required>
-                    </div>
-
-                    <div class="sat-field">
                         <label>Country *</label>
-                        <input type="text" name="country" placeholder="Country" required>
+                        <select name="country" id="country" required></select>
+                    </div>
+
+                    <div class="sat-field">
+                        <label>State *</label>
+                        <select name="state" id="state" required></select>
+                    </div>
+
+                    <div class="sat-field">
+                        <label>City *</label>
+                        <select name="city" id="city" required></select>
                     </div>
 
                     <div class="sat-field">
@@ -534,11 +534,9 @@
         form.querySelector('select[name="business_type"]').value = "Company";
         form.querySelector('input[name="registration_number"]').value = "REG123456789";
         form.querySelector('input[name="business_contact"]').value = "+44 7700 900000";
-        form.querySelector('input[name="business_email"]').value = "contact@unicou-demo.uk";
+
         form.querySelector('input[name="address"]').value = "123 Business Avenue, Tech City";
-        form.querySelector('input[name="city"]').value = "London";
-        form.querySelector('input[name="state"]').value = "Greater London";
-        form.querySelector('input[name="country"]').value = "United Kingdom";
+
         form.querySelector('input[name="post_code"]').value = "EC1A 1BB";
         form.querySelector('input[name="website"]').value = "https://unicou-demo.uk";
         form.querySelector('input[name="social_media"]').value = "https://linkedin.com/company/unicou";
@@ -610,7 +608,73 @@
         });
     });
 </script>
+<script type="module">
+    import {
+        Country,
+        State,
+        City
+    }
+    from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
 
+    document.addEventListener("DOMContentLoaded", function() {
 
+        const countrySelect = document.getElementById("country");
+        const stateSelect = document.getElementById("state");
+        const citySelect = document.getElementById("city");
+
+        // Set default options
+        countrySelect.innerHTML = '<option value="">Select Country</option>';
+        stateSelect.innerHTML = '<option value="">Select State</option>';
+        citySelect.innerHTML = '<option value="">Select City</option>';
+
+        // Populate Countries
+        const countries = Country.getAllCountries();
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name;
+            option.textContent = country.name;
+            option.dataset.code = country.isoCode;
+            countrySelect.appendChild(option);
+        });
+
+        // Country Change Event
+        countrySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const countryCode = selectedOption.dataset.code;
+
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            citySelect.innerHTML = '<option value="">Select City</option>';
+
+            if (countryCode) {
+                const states = State.getStatesOfCountry(countryCode);
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.name;
+                    option.textContent = state.name;
+                    option.dataset.code = state.isoCode;
+                    stateSelect.appendChild(option);
+                });
+            }
+        });
+
+        // State Change Event
+        stateSelect.addEventListener('change', function() {
+            const countryCode = countrySelect.options[countrySelect.selectedIndex].dataset.code;
+            const stateCode = this.options[this.selectedIndex].dataset.code;
+
+            citySelect.innerHTML = '<option value="">Select City</option>';
+
+            if (countryCode && stateCode) {
+                const cities = City.getCitiesOfState(countryCode, stateCode);
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.name;
+                    option.textContent = city.name;
+                    citySelect.appendChild(option);
+                });
+            }
+        });
+    });
+</script>
 @endpush
 @endsection

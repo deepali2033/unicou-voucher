@@ -105,9 +105,15 @@ Route::middleware('auth')->group(function () {
 });
 Route::get('/register/support-team-details', [AuthController::class, 'showSupportForm'])->name('auth.form.support');
 
+Route::post('/job-applications/apply', [JobController::class, 'submitApplication'])->name('job.apply');
 Route::get('/job-applications', [JobController::class, 'jobApplication'])->name('jobApplication');
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
+
+    Route::get('/job-applications', [JobController::class, 'jobApplication'])->name('job.applications');
+    Route::get('/job-applications/{application}/view', [JobController::class, 'viewApplication'])->name('job.view');
+    Route::post('/job-applications/{application}/status', [JobController::class, 'updateApplicationStatus'])->name('job.updateStatus');
+    Route::delete('/job-applications/{application}', [JobController::class, 'destroyApplication'])->name('job.destroy');
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications.index');
@@ -145,6 +151,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
     Route::post('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
     Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
+    Route::post('/users/{user}/limit', [UserController::class, 'updateLimit'])->name('users.limit.update');
     Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
     Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
     Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
@@ -178,6 +185,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/inventory/{id}/update', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{id}/delete', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::get('/inventory-export', [InventoryController::class, 'export'])->name('inventory.export');
+    Route::post('/inventory/{id}/duplicate', [InventoryController::class, 'duplicate'])->name('inventory.duplicate');
+    Route::post('/inventory/bulk-duplicate', [InventoryController::class, 'bulkDuplicate'])->name('inventory.bulk-duplicate');
     Route::post('/inventory-import', [InventoryController::class, 'import'])->name('inventory.import');
     Route::post('/inventory-upload', [InventoryController::class, 'upload'])->name('inventory.upload');
 

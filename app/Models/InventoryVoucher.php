@@ -12,6 +12,7 @@ class InventoryVoucher extends Model
         'sku_id',
         'brand_name',
         'country_region',
+        'state',
         'currency',
         'voucher_variant',
         'voucher_type',

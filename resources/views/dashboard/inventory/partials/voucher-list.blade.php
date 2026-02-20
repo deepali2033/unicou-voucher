@@ -1,145 +1,212 @@
 <style>
+    .v-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
     .v-card {
-        background: #fff;
-        border-radius: 20px;
+        border-radius: 24px;
         padding: 1.5rem;
         border: none;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s;
-        height: 100%;
+        position: relative;
         display: flex;
         flex-direction: column;
+        min-height: 240px;
+        transition: transform 0.2s ease;
+        overflow: hidden;
     }
 
     .v-card:hover {
         transform: translateY(-5px);
     }
 
-    .v-logo {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        margin-right: 1.5rem;
+    /* Pastel Backgrounds */
+    .bg-pastel-orange { background-color: #fdf2e9; }
+    .bg-pastel-blue { background-color: #ebf5ff; }
+    .bg-pastel-green { background-color: #eafaf1; }
+    .bg-pastel-purple { background-color: #f5eef8; }
+    .bg-pastel-teal { background-color: #e8f8f5; }
+    .bg-pastel-gray { background-color: #f8fafc; }
+
+    .v-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
     }
 
-    .v-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #333;
-        margin-bottom: 0.5rem;
-    }
-
-    .v-price {
-        font-size: 20px;
-        font-weight: 800;
-        color: #1a1a1a;
-    }
-
-    .v-old-price {
-        font-size: 14px;
-        color: #ef4444;
-        text-decoration: line-through;
-        margin-left: 0.5rem;
-    }
-
-    .v-btn-edit {
-        background: #3b82f6;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1.5rem;
-        font-weight: 600;
-        flex: 1;
-    }
-
-    .v-btn-edit:hover {
-        color: #fff;
-        background: #2563eb;
-    }
-
-    .v-btn-del {
-        background: transparent;
-        border: 1px solid #ef4444;
-        color: #ef4444;
-        border-radius: 8px;
-        width: 42px;
+    .v-icon-box {
+        width: 48px;
+        height: 48px;
+        background: #fff;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
-    .v-btn-del:hover {
-        background: #fee2e2;
-        color: #ef4444;
+    .v-icon-box img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
     }
 
-    .v-footer {
-        margin-top: auto;
-        padding-top: 1rem;
-        border-top: 1px solid #f3f4f6;
-        display: flex;
-        justify-content: space-between;
+    .v-category-badge {
+        font-size: 10px;
+        font-weight: 800;
+        padding: 4px 12px;
+        background: rgba(0, 0, 0, 0.05);
+        color: rgba(0, 0, 0, 0.5);
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .v-brand {
         font-size: 13px;
         font-weight: 600;
-        color: #6b7280;
+        color: #64748b;
+        margin-bottom: 0.25rem;
     }
+
+    .v-main-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1.3;
+        margin-bottom: 0.5rem;
+    }
+
+    .v-desc {
+        font-size: 12px;
+        color: #64748b;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .v-divider {
+        margin-top: auto;
+        border-top: 1px dashed rgba(0, 0, 0, 0.1);
+        padding-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .v-meta {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+    }
+
+    .v-actions-overlay {
+        display: flex;
+        gap: 0.4rem;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        color: #64748b;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background: #1e293b;
+        color: #fff;
+    }
+
+    .btn-del:hover {
+        background: #ef4444;
+        color: #fff;
+    }
+
+    /* Ticket Cutouts */
+    .v-card::before, .v-card::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: #f3f4f6; /* Match your page background */
+        border-radius: 50%;
+        bottom: 42px;
+    }
+    .v-card::before { left: -10px; }
+    .v-card::after { right: -10px; }
+
 </style>
 
 <input type="hidden" id="total-vouchers-count" value="{{ $inventory->total() }}">
-<div class="row g-4">
-    @forelse($inventory as $v)
-    <div class="col-md-6 col-lg-4">
-        <div class="v-card">
-            <div class="d-flex mb-3">
+<div class="v-grid">
+    @php
+        $bgClasses = ['bg-pastel-orange', 'bg-pastel-blue', 'bg-pastel-green', 'bg-pastel-purple', 'bg-pastel-teal', 'bg-pastel-gray'];
+    @endphp
+    
+    @forelse($inventory as $index => $v)
+    <div class="v-card {{ $bgClasses[$index % count($bgClasses)] }}">
+        <div class="v-card-top">
+            <div class="v-icon-box">
                 @if($v->logo)
-                <img src="{{ $v->logo }}" class="v-logo" alt="Logo">
+                    <img src="{{ $v->logo }}" alt="{{ $v->brand_name }}">
                 @else
-                <div class="v-logo d-flex flex-column align-items-center justify-content-center bg-light text-muted" style="border-radius: 10px;">
-                    <i class="fas fa-image fa-2x mb-1"></i>
-                    <small style="font-size: 10px;">No Logo</small>
-                </div>
+                    <i class="fas fa-ticket-alt text-muted"></i>
                 @endif
-                <div class="flex-grow-1">
-                    <h5 class="v-title">{{ $v->brand_name }}</h5>
-                    <div class="d-flex align-items-baseline mb-3">
-                        <span class="v-price">{{ $v->currency }} {{ number_format($v->agent_sale_price) }}</span>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('inventory.edit', $v->id) }}" class="v-btn-edit text-center text-decoration-none">
-                            <i class="fas fa-edit me-1"></i> Edit
-                        </a>
-                        <button type="button" class="v-btn-del delete-voucher-btn" data-id="{{ $v->id }}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
             </div>
+            <div class="v-category-badge">
+                <input type="checkbox" class="voucher-checkbox me-2" value="{{ $v->id }}">
+                {{ $v->voucher_type }}
+            </div>
+        </div>
 
-            <div class="v-footer">
-                <div class="d-flex align-items-center">
-                    <span class="me-1">📦</span>
-                    Stock: {{ number_format($v->quantity) }}
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="me-1">🌍</span>
-                    {{ $v->country_region }}
-                </div>
+        <div class="v-brand">{{ $v->brand_name }}</div>
+        <h3 class="v-main-title">{{ $v->currency }} {{ number_format($v->agent_sale_price) }} - {{ $v->voucher_variant ?: 'Special' }}</h3>
+        <p class="v-desc">SKU: {{ $v->sku_id }} | {{ $v->country_region }} | Qty: {{ number_format($v->quantity) }}</p>
+
+        <div class="v-divider">
+            <div class="v-meta">
+                <i class="far fa-calendar-alt"></i>
+                CREATED: {{ $v->created_at->format('M Y') }}
             </div>
-            <div class="v-footer" style="border-top: none; padding-top: 5px;">
-                <div class="d-flex align-items-center">
-                    <span class="me-1">🎟️</span>
-                    Type: {{ $v->voucher_type }}
-                </div>
-                <div class="d-flex align-items-center">
-                    <span class="me-1">🏷️</span>
-                    SKU: {{ $v->sku_id }}
-                </div>
+            
+            <div class="v-actions-overlay">
+                <a href="{{ route('inventory.edit', $v->id) }}" class="action-btn" title="Edit">
+                    <i class="fas fa-edit fa-xs"></i>
+                </a>
+                <form action="{{ route('inventory.duplicate', $v->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="action-btn" title="Duplicate">
+                        <i class="fas fa-copy fa-xs"></i>
+                    </button>
+                </form>
+                <button type="button" class="action-btn btn-del delete-voucher-btn" data-id="{{ $v->id }}" title="Delete">
+                    <i class="fas fa-trash-alt fa-xs"></i>
+                </button>
             </div>
         </div>
     </div>
     @empty
     <div class="col-12 text-center py-5">
-        <h5 class="text-muted">No vouchers found</h5>
+        <div class="mb-3">
+            <i class="fas fa-box-open fa-3x text-muted"></i>
+        </div>
+        <h5 class="text-muted">No vouchers found in inventory</h5>
     </div>
     @endforelse
 </div>

@@ -63,7 +63,18 @@
         @forelse($vouchers as $rule)
         @php
         $voucher = $rule->inventoryVoucher;
-        $finalPrice = $rule->final_price;
+        $user = auth()->user();
+        
+        // Show correct price based on user role
+        if ($user->isStudent()) {
+            $finalPrice = $voucher->student_sale_price;
+            $originalPrice = $rule->sale_price; // Rule sale price as reference
+        } else {
+            // Agent and Reseller see same price
+            $finalPrice = $voucher->agent_sale_price;
+            $originalPrice = $rule->sale_price;
+        }
+        
         $stock = $voucher->quantity ?? 0;
         @endphp
         <div class="col-xl-4 col-lg-6 mb-4">
@@ -120,12 +131,12 @@
                         <div class="value-tag-content text-center">
                             <span class="value-label text-uppercase">Value</span>
                             <div class="price-display">
-                                <span class="currency-symbol">$</span>
+                                <span class="currency-symbol">{{ $voucher->currency }}</span>
                                 <span class="price-amount">{{ number_format($finalPrice, 0) }}</span>
                             </div>
-                            @if($rule->discount_value > 0)
+                            @if($originalPrice > $finalPrice)
                             <span class="original-price text-decoration-line-through small text-white-50">
-                                ${{ number_format($rule->sale_price, 0) }}
+                                {{ $voucher->currency }}{{ number_format($originalPrice, 0) }}
                             </span>
                             @endif
                         </div>

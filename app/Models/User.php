@@ -102,8 +102,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_stop_country_sales',
         'can_stop_voucher_sales',
         'can_view_user_email_name',
+        'has_job_permission',
         'category',
         'rating',
+        'voucher_limit',
+        'sub_agent_id',
     ];
 
     /**
@@ -390,6 +393,32 @@ class User extends Authenticatable implements MustVerifyEmail
      */
 
 
+    public function getVoucherLimitAttribute($value)
+    {
+        if ($value !== null) {
+            return $value;
+        }
+
+        if ($this->isStudent()) {
+            return 2;
+        }
+
+        if ($this->isAgent()) {
+            switch ($this->category) {
+                case 'silver':
+                    return 5;
+                case 'gold':
+                    return 10;
+                case 'diamond':
+                    return 25;
+                default:
+                    return 5; // Default for agent if category not set
+            }
+        }
+
+        return 0;
+    }
+
     /**
      * Generate the next custom User ID based on country and account type.
      * Format: UC + Country ISO + (A if student) + 5-digit incrementing number starting from 00171
@@ -441,6 +470,16 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $prefix . $newNumber;
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(User::class, 'sub_agent_id');
+    }
+
+    public function subAgents()
+    {
+        return $this->hasMany(User::class, 'sub_agent_id');
     }
 
     public function agentDetail()

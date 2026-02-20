@@ -99,6 +99,8 @@ class UserController extends Controller
             'account_type' => $accountTypeRule,
             'phone' => 'nullable|string|max:20',
             'country' => 'required|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
         ]);
 
         $userData = [
@@ -110,6 +112,8 @@ class UserController extends Controller
             'account_type' => $request->account_type,
             'phone' => $request->phone,
             'country' => $request->country,
+            'state' => $request->state,
+            'city' => $request->city,
             'profile_verification_status' => 'verified',
             'verified_at' => now(),
             'verified_by' => auth()->id(),
@@ -378,6 +382,7 @@ class UserController extends Controller
             'can_stop_country_sales' => $request->has('can_stop_country_sales'),
             'can_stop_voucher_sales' => $request->has('can_stop_voucher_sales'),
             'can_view_user_email_name' => $request->has('can_view_user_email_name'),
+            'has_job_permission' => $request->has('has_job_permission'),
         ]);
 
         return back()->with('success', 'Manager permissions updated successfully.');
@@ -398,6 +403,23 @@ class UserController extends Controller
         ]);
 
         return response()->json(['success' => 'Category updated successfully.']);
+    }
+
+    public function updateLimit(Request $request, User $user)
+    {
+        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+            return response()->json(['error' => 'Unauthorized action.'], 403);
+        }
+
+        $request->validate([
+            'voucher_limit' => 'required|integer|min:0',
+        ]);
+
+        $user->update([
+            'voucher_limit' => $request->voucher_limit,
+        ]);
+
+        return response()->json(['success' => 'Voucher limit updated successfully.']);
     }
 
     public function downloadPDF(Request $request)
@@ -796,6 +818,11 @@ class UserController extends Controller
         }
         $query = User::where('account_type', 'agent');
 
+        if (auth()->user()->account_type === 'reseller_agent') {
+            $query->where('country', auth()->user()->country)
+                  ->where('state', auth()->user()->state);
+        }
+
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {
             $query->where('is_active', $request->status);
         }
@@ -852,6 +879,11 @@ class UserController extends Controller
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'student');
+
+        if (auth()->user()->account_type === 'reseller_agent') {
+            $query->where('country', auth()->user()->country)
+                  ->where('state', auth()->user()->state);
+        }
 
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {
             $query->where('is_active', $request->status);

@@ -32,7 +32,7 @@
                     <label class="form-label fw-bold">Country</label>
                     <select name="country" class="form-select">
                         <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
-                        @foreach(\App\Helpers\CountryHelper::getManagementCountries() as $name)
+                        @foreach(\App\Models\User::where('account_type', 'student')->whereNotNull('country')->where('country', '!=', '')->distinct()->orderBy('country')->pluck('country') as $name)
                             <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
                         @endforeach
                     </select>
@@ -116,6 +116,29 @@
 
 @push('scripts')
 <script>
+    // Handle Limit Update
+    $(document).on('change', '.update-limit', function() {
+        let userId = $(this).data('user-id');
+        let limit = $(this).val();
+
+        $.ajax({
+            url: '/dashboard/users/' + userId + '/limit',
+            method: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                voucher_limit: limit
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success('Voucher limit updated!');
+                }
+            },
+            error: function(xhr) {
+                toastr.error('Failed to update limit.');
+            }
+        });
+    });
+
     $(document).ready(function() {
         function updateTable(url) {
             $.ajax({

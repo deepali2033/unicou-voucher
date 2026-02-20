@@ -27,9 +27,17 @@ class AgentController extends Controller
 
     public function orderHistory(Request $request)
     {
-        
-        
-        $query = Order::where('user_id', Auth::id());
+        $user = Auth::user();
+        $query = Order::query();
+
+        if ($user->account_type == 'reseller_agent') {
+            $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('sub_agent_id', $user->id);
+            });
+        } else {
+            $query->where('user_id', $user->id);
+        }
 
         // Date Filter
         if ($request->filled('from_date')) {
@@ -66,7 +74,8 @@ class AgentController extends Controller
 
         // Stats for the top cards
         $stats = [
-            'points_earned' => Order::where('user_id', Auth::id())->sum('points_earned'),
+            'points_earned' => Order::where('user_id', Auth::id())->sum('referral_points') + 
+                               Order::where('sub_agent_id', Auth::id())->sum('referral_points'),
             'points_redeemed' => Order::where('user_id', Auth::id())->sum('points_redeemed'),
             'current_bonus' => Order::where('user_id', Auth::id())->sum('bonus_amount'),
         ];
@@ -74,8 +83,7 @@ class AgentController extends Controller
         // Fetch sub agents for the filter dropdown
         $subAgents = [];
         if (Auth::user()->account_type == 'reseller_agent') {
-            // Assuming sub agents might be linked via some logic, for now just fetch other users or a specific role
-            $subAgents = User::where('account_type', 'student')->get(); // Placeholder logic
+            $subAgents = Auth::user()->subAgents;
         }
 
         return view('dashboard.orders.history', compact('orders', 'stats', 'subAgents'));

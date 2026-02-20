@@ -63,12 +63,74 @@ class InventoryController extends Controller
         return view('dashboard.inventory.create', compact('next_id'));
     }
 
+    public function duplicate($id)
+    {
+        $original = InventoryVoucher::findOrFail($id);
+        $new = $original->replicate();
+        
+        // Generate new unique SKU ID
+        $baseSku = $original->sku_id;
+        // Remove trailing numbers if any to get the base
+        $basePrefix = preg_replace('/-\d+$/', '', $baseSku);
+        
+        $count = 1;
+        $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+        
+        while (InventoryVoucher::where('sku_id', $newSku)->exists()) {
+            $count++;
+            $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+        }
+        
+        $new->sku_id = $newSku;
+        $new->quantity = 0; // Reset quantity for duplicate
+        $new->status = 'OUT OF STOCK';
+        $new->save();
+
+        return back()->with('success', 'Voucher duplicated successfully with new SKU: ' . $newSku);
+    }
+
+    public function bulkDuplicate(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No vouchers selected.'], 400);
+        }
+
+        $duplicatedCount = 0;
+        foreach ($ids as $id) {
+            $original = InventoryVoucher::find($id);
+            if ($original) {
+                $new = $original->replicate();
+                
+                $baseSku = $original->sku_id;
+                $basePrefix = preg_replace('/-\d+$/', '', $baseSku);
+                
+                $count = 1;
+                $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+                
+                while (InventoryVoucher::where('sku_id', $newSku)->exists()) {
+                    $count++;
+                    $newSku = $basePrefix . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+                }
+                
+                $new->sku_id = $newSku;
+                $new->quantity = 0;
+                $new->status = 'OUT OF STOCK';
+                $new->save();
+                $duplicatedCount++;
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => "$duplicatedCount vouchers duplicated successfully."]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id',
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|string|max:255',
+            'state' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
             'voucher_variant' => 'nullable|string|max:255',
             'voucher_type' => 'required|string|max:255',
@@ -120,6 +182,7 @@ class InventoryController extends Controller
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id,' . $id,
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|string|max:255',
+            'state' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
             'voucher_variant' => 'nullable|string|max:255',
             'voucher_type' => 'required|string|max:255',

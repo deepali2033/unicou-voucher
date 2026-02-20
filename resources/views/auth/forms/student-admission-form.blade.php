@@ -124,18 +124,18 @@
         </div>
 
         <div class="sat-field">
-          <label>City *</label>
-          <input type="text" name="city" placeholder="e.g. Lahore" required>
+          <label>Country *</label>
+          <select name="country" id="country" required></select>
         </div>
 
         <div class="sat-field">
           <label>State / Province *</label>
-          <input type="text" name="state" placeholder="e.g. Punjab" required>
+          <select name="state" id="state" required></select>
         </div>
 
         <div class="sat-field">
-          <label>Country *</label>
-          <input type="text" name="country" placeholder="e.g. Pakistan" required>
+          <label>City *</label>
+          <select name="city" id="city" required></select>
         </div>
 
         <div class="sat-field">
@@ -372,9 +372,6 @@
     form.querySelector('input[name="email"]').value = "ali.khan-demo@email.com";
     form.querySelector('input[name="whatsapp_number"]').value = "+92 300 1234567";
     form.querySelector('input[name="address"]').value = "House 45, Street 12, DHA Phase 5";
-    form.querySelector('input[name="city"]').value = "Lahore";
-    form.querySelector('input[name="state"]').value = "Punjab";
-    form.querySelector('input[name="country"]').value = "Pakistan";
     form.querySelector('input[name="post_code"]').value = "54000";
     form.querySelector('select[name="exam_purpose"]').value = "Education";
     form.querySelector('input[name="highest_education"]').value = "Bachelor of Science";
@@ -388,6 +385,73 @@
     document.getElementById('consent_policy').checked = true;
     document.getElementById('consent_terms').checked = true;
   }
+</script>
+
+<script type="module">
+  import {
+    Country,
+    State,
+    City
+  } from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const countrySelect = document.getElementById("country");
+    const stateSelect = document.getElementById("state");
+    const citySelect = document.getElementById("city");
+
+    // Set default options
+    countrySelect.innerHTML = '<option value="">Select Country</option>';
+    stateSelect.innerHTML = '<option value="">Select State</option>';
+    citySelect.innerHTML = '<option value="">Select City</option>';
+
+    // Populate Countries
+    const countries = Country.getAllCountries();
+    countries.forEach(country => {
+      const option = document.createElement('option');
+      option.value = country.name;
+      option.textContent = country.name;
+      option.dataset.code = country.isoCode;
+      countrySelect.appendChild(option);
+    });
+
+    // Country Change Event
+    countrySelect.addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      const countryCode = selectedOption.dataset.code;
+
+      stateSelect.innerHTML = '<option value="">Select State</option>';
+      citySelect.innerHTML = '<option value="">Select City</option>';
+
+      if (countryCode) {
+        const states = State.getStatesOfCountry(countryCode);
+        states.forEach(state => {
+          const option = document.createElement('option');
+          option.value = state.name;
+          option.textContent = state.name;
+          option.dataset.code = state.isoCode;
+          stateSelect.appendChild(option);
+        });
+      }
+    });
+
+    // State Change Event
+    stateSelect.addEventListener('change', function() {
+      const countryCode = countrySelect.options[countrySelect.selectedIndex].dataset.code;
+      const stateCode = this.options[this.selectedIndex].dataset.code;
+
+      citySelect.innerHTML = '<option value="">Select City</option>';
+
+      if (countryCode && stateCode) {
+        const cities = City.getCitiesOfState(countryCode, stateCode);
+        cities.forEach(city => {
+          const option = document.createElement('option');
+          option.value = city.name;
+          option.textContent = city.name;
+          citySelect.appendChild(option);
+        });
+      }
+    });
+  });
 </script>
 
 

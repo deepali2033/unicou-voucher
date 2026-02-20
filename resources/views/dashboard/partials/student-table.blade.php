@@ -13,6 +13,7 @@
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Email ID</th>
                 @endif
+                <th>Limit</th>
                 <th>Highest Education</th>
                 <th>Contact No.</th>
                 <th>Vouchers Purchased</th>
@@ -37,6 +38,16 @@
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->email }}</td>
                 @endif
+                <td>
+                    @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
+                    <input type="number" class="form-control form-control-sm update-limit" 
+                           data-user-id="{{ $user->id }}" 
+                           value="{{ $user->voucher_limit }}" 
+                           min="0" style="width: 70px;">
+                    @else
+                    {{ $user->voucher_limit }}
+                    @endif
+                </td>
                 <td>{{ $user->highest_education ?? 'N/A' }}</td>
                 <td>{{ $user->phone }}</td>
                 <td>{{ $user->orders_count ?? 0 }}</td>

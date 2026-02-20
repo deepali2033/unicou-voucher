@@ -6,6 +6,12 @@
             @if(Auth::user()->isAdmin())
             Admin Panel
             @elseif(Auth::user()->account_type === 'reseller_agent')
+            Reseller Agent Dashboard
+            @elseif(Auth::user()->account_type === 'manager')
+            Manager Dashboard
+            @elseif(Auth::user()->account_type === 'support_team')
+            Support Team Dashboard
+            @elseif(Auth::user()->account_type === 'agent')
             Agent Dashboard
             @elseif(Auth::user()->account_type === 'student')
             Student Dashboard

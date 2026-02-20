@@ -52,11 +52,25 @@
                                 <label class="form-label fw-semibold">Country</label>
                                 <select name="country" id="country" class="form-select @error('country') is-invalid @enderror" required>
                                     <option value="" disabled>Select Country</option>
-                                    @foreach(\App\Helpers\CountryHelper::getAllCountries() as $code => $name)
-                                    <option value="{{ $name }}" {{ old('country', $user->country) == $name ? 'selected' : '' }}>{{ $name }}</option>
-                                    @endforeach
                                 </select>
                                 @error('country') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">State</label>
+                                <select name="state" id="state" class="form-select @error('state') is-invalid @enderror" required>
+                                    <option value="" disabled>Select State</option>
+                                </select>
+                                @error('state') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">City</label>
+                                <select name="city" id="city" class="form-select @error('city') is-invalid @enderror" required>
+                                    <option value="" disabled>Select City</option>
+                                </select>
+                                @error('city') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
@@ -96,3 +110,106 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script type="module">
+    import {
+        Country,
+        State,
+        City
+    } from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const countrySelect = document.getElementById("country");
+        const stateSelect = document.getElementById("state");
+        const citySelect = document.getElementById("city");
+
+        const initialCountry = "{{ old('country', $user->country) }}";
+        const initialState = "{{ old('state', $user->state) }}";
+        const initialCity = "{{ old('city', $user->city) }}";
+
+        // Set default options
+        countrySelect.innerHTML = '<option value="">Select Country</option>';
+        stateSelect.innerHTML = '<option value="">Select State</option>';
+        citySelect.innerHTML = '<option value="">Select City</option>';
+
+        // Populate Countries
+        const countries = Country.getAllCountries();
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name;
+            option.textContent = country.name;
+            option.dataset.code = country.isoCode;
+            if (country.name === initialCountry) {
+                option.selected = true;
+            }
+            countrySelect.appendChild(option);
+        });
+
+        function updateStates(countryCode, selectedState = null) {
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            citySelect.innerHTML = '<option value="">Select City</option>';
+
+            if (countryCode) {
+                const states = State.getStatesOfCountry(countryCode);
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.name;
+                    option.textContent = state.name;
+                    option.dataset.code = state.isoCode;
+                    if (state.name === selectedState) {
+                        option.selected = true;
+                    }
+                    stateSelect.appendChild(option);
+                });
+
+                if (selectedState) {
+                    const stateCode = stateSelect.options[stateSelect.selectedIndex]?.dataset.code;
+                    if (stateCode) {
+                        updateCities(countryCode, stateCode, initialCity);
+                    }
+                }
+            }
+        }
+
+        function updateCities(countryCode, stateCode, selectedCity = null) {
+            citySelect.innerHTML = '<option value="">Select City</option>';
+
+            if (countryCode && stateCode) {
+                const cities = City.getCitiesOfState(countryCode, stateCode);
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.name;
+                    option.textContent = city.name;
+                    if (city.name === selectedCity) {
+                        option.selected = true;
+                    }
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Handle initial load
+        if (initialCountry) {
+            const countryCode = countrySelect.options[countrySelect.selectedIndex]?.dataset.code;
+            if (countryCode) {
+                updateStates(countryCode, initialState);
+            }
+        }
+
+        // Country Change Event
+        countrySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const countryCode = selectedOption.dataset.code;
+            updateStates(countryCode);
+        });
+
+        // State Change Event
+        stateSelect.addEventListener('change', function() {
+            const countryCode = countrySelect.options[countrySelect.selectedIndex].dataset.code;
+            const stateCode = this.options[this.selectedIndex].dataset.code;
+            updateCities(countryCode, stateCode);
+        });
+    });
+</script>
+@endpush
