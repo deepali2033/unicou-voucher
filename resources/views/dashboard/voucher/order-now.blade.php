@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Agent Referral Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $rule->inventoryVoucher->agent_referral_points_per_unit }}">{{ $rule->inventoryVoucher->agent_referral_points_per_unit }}</span></h3>
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $voucher->agent_referral_points_per_unit }}">{{ $voucher->agent_referral_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Agent Bonus Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $rule->inventoryVoucher->agent_bonus_points_per_unit }}">{{ $rule->inventoryVoucher->agent_bonus_points_per_unit }}</span></h3>
+                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $voucher->agent_bonus_points_per_unit }}">{{ $voucher->agent_bonus_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Student Referral Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $rule->inventoryVoucher->student_referral_points_per_unit }}">{{ $rule->inventoryVoucher->student_referral_points_per_unit }}</span></h3>
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $voucher->student_referral_points_per_unit }}">{{ $voucher->student_referral_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Student Bonus Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $rule->inventoryVoucher->student_bonus_points_per_unit }}">{{ $rule->inventoryVoucher->student_bonus_points_per_unit }}</span></h3>
+                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $voucher->student_bonus_points_per_unit }}">{{ $voucher->student_bonus_points_per_unit }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Reseller Referral Points </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $rule->inventoryVoucher->referral_points_reseller }}">{{ $rule->inventoryVoucher->referral_points_reseller }}</span></h3>
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $voucher->referral_points_reseller }}">{{ $voucher->referral_points_reseller }}</span></h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -90,14 +90,14 @@
                     <div class="d-flex align-items-center justify-content-between mb-4 pb-4 border-bottom">
                         <div class="d-flex align-items-center">
                             <div class="brand-logo-container me-3">
-                                @if($rule->inventoryVoucher->logo)
-                                <img src="{{ asset($rule->inventoryVoucher->logo) }}" alt="{{ $rule->inventoryVoucher->brand_name }}" class="img-fluid">
+                                @if($rule ->logo)
+                                <img src="{{ asset($rule->logo) }}" alt="{{ $rule->brand_name }}" class="img-fluid">
                                 @else
                                 <i class="fas fa-ticket-alt fa-2x text-primary"></i>
                                 @endif
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-0">{{ $rule->inventoryVoucher->brand_name }}</h5>
+                                <h5 class="fw-bold mb-0">{{ $rule->brand_name }}</h5>
                                 <p class="text-muted small mb-0">Voucher purchase</p>
                             </div>
                         </div>
@@ -105,7 +105,7 @@
                             <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="decrease-qty">
                                 <i class="fas fa-minus small text-muted"></i>
                             </button>
-                            <input type="number" id="voucher-quantity" class="form-control form-control-sm bg-transparent border-0 text-center fw-bold" value="1" min="1" max="{{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->inventoryVoucher->quantity) : $rule->inventoryVoucher->quantity }}" style="width: 50px;">
+                            <input type="number" id="voucher-quantity" class="form-control form-control-sm bg-transparent border-0 text-center fw-bold" value="1" min="1" max="{{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->quantity) : $rule->quantity }}" style="width: 50px;">
                             <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="increase-qty">
                                 <i class="fas fa-plus small text-muted"></i>
                             </button>
@@ -116,7 +116,7 @@
                     <div class="price-details-table mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Price</span>
-                            <span class="fw-bold">{{ $rule->inventoryVoucher->currency }} <span id="unit-price">{{ number_format($rule->final_price, 0) }}</span></span>
+                            <span class="fw-bold">{{ $rule->currency }} <span id="unit-price">{{ number_format($rule->final_price, 0) }}</span></span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Quantity</span>
@@ -124,7 +124,7 @@
                         </div>
                         <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
                             <span class="text-muted">Subtotal</span>
-                            <span class="fw-bold">{{ $rule->inventoryVoucher->currency }} <span id="subtotal">{{ number_format($rule->final_price, 0) }}</span></span>
+                            <span class="fw-bold">{{ $rule->currency }} <span id="subtotal">{{ number_format($rule->final_price, 0) }}</span></span>
                         </div>
 
                         <!-- Payment Method Selection -->
@@ -219,7 +219,7 @@
                                         </div>
                                         <div>
                                             <p class="mb-0 small fw-bold">REQUIRED TRANSFER AMOUNT</p>
-                                            <h4 class="fw-bold mb-0">{{ $rule->inventoryVoucher->currency }} <span class="required-amount-text">0.00</span></h4>
+                                            <h4 class="fw-bold mb-0">{{ $rule->currency }} <span class="required-amount-text">0.00</span></h4>
                                         </div>
                                     </div>
 
@@ -227,7 +227,7 @@
                                         <label class="form-label fw-bold small text-uppercase text-muted">Upload Payment Receipt / Screenshot</label>
                                         <input type="file" id="payment-receipt" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" accept="image/*">
                                         <div class="form-text text-muted">Upload the screenshot of your successful transaction.</div>
-                                        
+
                                         <!-- OCR Progress Bar -->
                                         <div id="ocr-progress" class="mt-3 d-none">
                                             <div class="d-flex justify-content-between mb-1">
@@ -254,7 +254,7 @@
                                             <div class="col-md-12">
                                                 <label class="form-label small fw-bold">Exact Amount Transferred</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text border-0 bg-white shadow-sm" style="border-radius: 10px 0 0 10px;">{{ $rule->inventoryVoucher->currency }}</span>
+                                                    <span class="input-group-text border-0 bg-white shadow-sm" style="border-radius: 10px 0 0 10px;">{{ $rule->currency }}</span>
                                                     <input type="number" id="transfer-amount" class="form-control border-0 p-3 shadow-sm" placeholder="0.00" style="border-radius: 0 10px 10px 0;">
                                                 </div>
                                             </div>
@@ -262,6 +262,13 @@
                                     </div>
                                 </div>
                             </div>
+                            <a href="#"
+                                id="safepay-btn"
+                                class="payment-type-card p-3 border rounded-3 flex-fill text-decoration-none d-flex align-items-center">
+
+                                <i class="fas fa-credit-card me-2 text-warning"></i>
+                                <span class="fw-semibold text-dark">Pay via SafePay (Pakistan)</span>
+                            </a>
                         </div>
                     </div>
 
@@ -269,7 +276,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4 pt-4 border-top">
                         <div>
                             <p class="text-muted small mb-0">Total to pay</p>
-                            <h3 class="fw-bold text-primary mb-0">{{ $rule->inventoryVoucher->currency }} <span id="final-total">{{ number_format($rule->final_price, 0) }}</span></h3>
+                            <h3 class="fw-bold text-primary mb-0">{{ $rule->currency }} <span id="final-total">{{ number_format($rule->final_price, 0) }}</span></h3>
                         </div>
                         <div class="d-flex gap-2">
                             <a href="{{ route('vouchers') }}" class="btn btn-light border-0 px-4 rounded-3 fw-bold">Cancel</a>
@@ -281,7 +288,38 @@
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('safepay-btn').addEventListener('click', function(e) {
+        e.preventDefault();
 
+        let quantity = document.getElementById('voucher-quantity').value;
+
+        fetch("{{ route('safepay.create', $rule->id) }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.error ?? "Something went wrong");
+                }
+
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Payment failed");
+            });
+    });
+</script>
 <style>
     .payment-type-card {
         cursor: pointer;
@@ -304,7 +342,7 @@
         border-color: #2563eb !important;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
     }
-    
+
     .brand-logo-container {
         width: 60px;
         height: 60px;
@@ -315,7 +353,7 @@
         border-radius: 12px;
         padding: 5px;
     }
-    
+
     .brand-logo-container img {
         max-width: 100%;
         max-height: 100%;
@@ -327,8 +365,16 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
     $(document).ready(function() {
-        let finalPrice = {{ $rule->final_price }};
-        let maxQty = {{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->inventoryVoucher->quantity) : $rule->inventoryVoucher->quantity }};
+        let finalPrice = {
+            {
+                $rule - > final_price
+            }
+        };
+        let maxQty = {
+            {
+                $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule - > inventoryVoucher - > quantity) : $rule - > inventoryVoucher - > quantity
+            }
+        };
         let capturedDetails = null;
 
         // Tesseract OCR Logic
@@ -343,31 +389,36 @@
                 img.onload = function() {
                     $('#ocr-progress').removeClass('d-none');
                     $('#ocr-status').text('Scanning receipt...');
-                    
+
                     Tesseract.recognize(
                         img,
-                        'eng',
-                        { logger: m => {
-                            if (m.status === 'recognizing text') {
-                                let prog = Math.round(m.progress * 100);
-                                $('#ocr-bar').css('width', prog + '%');
-                                $('#ocr-percentage').text(prog + '%');
+                        'eng', {
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    let prog = Math.round(m.progress * 100);
+                                    $('#ocr-bar').css('width', prog + '%');
+                                    $('#ocr-percentage').text(prog + '%');
+                                }
                             }
-                        }}
-                    ).then(({ data: { text } }) => {
+                        }
+                    ).then(({
+                        data: {
+                            text
+                        }
+                    }) => {
                         $('#ocr-progress').addClass('d-none');
-                        
+
                         // Simple regex extraction
                         const txIdMatch = text.match(/(?:Txn ID|Transaction ID|Ref No|Reference|TXN)[:\s]*([A-Z0-9]+)/i);
                         const amountMatch = text.match(/(?:Amount|Total|Paid|Sum)[:\s]*[^\d]*([\d,]+\.?\d*)/i);
-                        
+
                         let data = {
                             raw_text: text,
                             extracted_tx_id: txIdMatch ? txIdMatch[1] : null,
                             extracted_amount: amountMatch ? amountMatch[1] : null,
                             captured_at: new Date().toISOString()
                         };
-                        
+
                         capturedDetails = JSON.stringify(data);
 
                         if (data.extracted_tx_id) {
@@ -395,7 +446,7 @@
             $('#subtotal').text(total.toLocaleString());
             $('#final-total').text(total.toLocaleString());
             $('.required-amount-text').text(total.toLocaleString());
-            
+
             // Auto fill transfer amount
             $('#transfer-amount').val(total);
 
@@ -409,7 +460,7 @@
                 $(this).text(base * qty);
             });
         }
-        
+
         // Initial call
         updateTotal();
 
@@ -440,7 +491,7 @@
         $('.payment-type-card').on('click', function(e) {
             $('.payment-type-card').removeClass('active');
             $(this).addClass('active');
-            
+
             let radio = $(this).find('input[type="radio"]');
             radio.prop('checked', true);
 
@@ -451,7 +502,7 @@
             } else {
                 $('#my-banks-section').addClass('d-none');
                 $('#admin-banks-section').removeClass('d-none');
-                
+
                 // Auto select first admin bank if none selected
                 if (!$('#admin-bank-selector').val()) {
                     $('#admin-bank-selector').find('option:eq(1)').prop('selected', true).trigger('change');
@@ -499,9 +550,86 @@
 
         $('#pay-now').click(function() {
             let paymentType = $('input[name="payment_type"]:checked').val();
-            let qty = $('#voucher-quantity').val();
-            let formData = new FormData();
+            let qtyElement = $('#voucher-quantity');
+            let qty = parseInt(qtyElement.val()) || 1;
+            let btn = $(this);
 
+            console.log('🔵 Pay Now clicked');
+            console.log('Payment Type:', paymentType);
+            console.log('Quantity Raw:', qtyElement.val());
+            console.log('Quantity Parsed:', qty);
+            console.log('Quantity Type:', typeof qty);
+
+            if (!paymentType) {
+                toastr.error('Please select a payment method');
+                return;
+            }
+
+            if (qty < 1) {
+                toastr.error('Please enter a valid quantity');
+                return;
+            }
+
+            if (paymentType === 'safepay') {
+                console.log('💳 SafePay selected - initiating payment...');
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Redirecting to SafePay...');
+
+                let safepayUrl = "{{ route('safepay.create', $rule->id) }}";
+                console.log('SafePay URL:', safepayUrl);
+                console.log('Request Method: POST');
+                console.log('CSRF Token:', "{{ csrf_token() }}".substring(0, 10) + '...');
+                console.log('Quantity to send:', qty);
+
+                let postData = {
+                    _token: "{{ csrf_token() }}",
+                    quantity: qty
+                };
+                console.log('Post Data:', postData);
+
+                $.post(safepayUrl, postData, function(response) {
+                    console.log('✅ SafePay Response:', response);
+                    if (response.success && response.redirect_url) {
+                        console.log('🔄 Redirecting to:', response.redirect_url);
+                        window.location.href = response.redirect_url;
+                    } else if (response.redirect_url) {
+                        window.location.href = response.redirect_url;
+                    } else {
+                        console.error('❌ No redirect URL in response');
+                        toastr.error('Payment URL not received');
+                        btn.prop('disabled', false).html('Place Order');
+                    }
+                }).fail(function(xhr, status, error) {
+                    console.error('❌ SafePay Error:');
+                    console.error('Status:', xhr.status);
+                    console.error('StatusText:', xhr.statusText);
+                    console.error('Response:', xhr.responseJSON || xhr.responseText);
+                    console.error('Full Error:', error);
+
+                    let msg = 'Payment gateway error';
+
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.error) {
+                            msg = xhr.responseJSON.error;
+                        } else if (xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+
+                        if (xhr.responseJSON.details) {
+                            console.error('SafePay API Details:', xhr.responseJSON.details);
+                            msg += ' - Check console for details';
+                        }
+                    } else if (xhr.responseText) {
+                        msg = xhr.responseText;
+                    }
+
+                    console.error('Final Error Message:', msg);
+                    toastr.error(msg);
+                    btn.prop('disabled', false).html('Place Order');
+                });
+                return;
+            }
+
+            let formData = new FormData();
             formData.append('_token', '{{ csrf_token() }}');
             formData.append('quantity', qty);
             formData.append('payment_type', paymentType);
@@ -525,7 +653,7 @@
                     toastr.error('Please upload payment receipt screenshot');
                     return;
                 }
-                
+
                 formData.append('admin_bank_id', adminBankId);
                 formData.append('payment_receipt', receiptFile);
                 formData.append('transaction_id', $('#transaction-id').val());
@@ -536,7 +664,6 @@
                 }
             }
 
-            let btn = $(this);
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
 
             $.ajax({
@@ -553,7 +680,7 @@
                 error: function(xhr) {
                     let msg = xhr.responseJSON ? xhr.responseJSON.message : 'Something went wrong';
                     toastr.error(msg);
-                    btn.prop('disabled', false).text('Place Order');
+                    btn.prop('disabled', false).html('Place Order');
                 }
             });
         });

@@ -60,22 +60,12 @@
     </div>
     <!-- Vouchers Grid -->
     <div class="row">
-        @forelse($vouchers as $rule)
+        @forelse($vouchers as $voucher)
         @php
-        $voucher = $rule->inventoryVoucher;
         $user = auth()->user();
-        
-        // Show correct price based on user role
-        if ($user->isStudent()) {
-            $finalPrice = $voucher->student_sale_price;
-            $originalPrice = $rule->sale_price; // Rule sale price as reference
-        } else {
-            // Agent and Reseller see same price
-            $finalPrice = $voucher->agent_sale_price;
-            $originalPrice = $rule->sale_price;
-        }
-        
+        $finalPrice = $voucher->final_price ?? ($user->isStudent() ? $voucher->student_sale_price : $voucher->agent_sale_price);
         $stock = $voucher->quantity ?? 0;
+        $country = $voucher->country_region ?? 'N/A';
         @endphp
         <div class="col-xl-4 col-lg-6 mb-4">
             <div class="gift-voucher-card">
@@ -113,13 +103,13 @@
                             </div>
                             <div class="country-info">
                                 <span class="badge bg-light text-dark border-0 small">
-                                    <i class="fas fa-globe-americas text-primary me-1"></i> {{ $rule->country_name }}
+                                    <i class="fas fa-globe-americas text-primary me-1"></i> {{ $country }}
                                 </span>
                             </div>
-                            @if($rule->remaining_limit >= 0)
+                            @if($voucher->remaining_limit >= 0)
                             <div class="limit-info mt-1">
-                                <span class="badge {{ $rule->is_limited ? 'bg-danger' : 'bg-info' }} text-white border-0 small">
-                                    <i class="fas fa-clock me-1"></i> 24h Limit: {{ $rule->is_limited ? 'Reached' : $rule->remaining_limit . ' left' }}
+                                <span class="badge {{ $voucher->is_limited ? 'bg-danger' : 'bg-info' }} text-white border-0 small">
+                                    <i class="fas fa-clock me-1"></i> 24h Limit: {{ $voucher->is_limited ? 'Reached' : $voucher->remaining_limit . ' left' }}
                                 </span>
                             </div>
                             @endif
@@ -134,20 +124,15 @@
                                 <span class="currency-symbol">{{ $voucher->currency }}</span>
                                 <span class="price-amount">{{ number_format($finalPrice, 0) }}</span>
                             </div>
-                            @if($originalPrice > $finalPrice)
-                            <span class="original-price text-decoration-line-through small text-white-50">
-                                {{ $voucher->currency }}{{ number_format($originalPrice, 0) }}
-                            </span>
-                            @endif
                         </div>
                         <div class="tag-footer">
                             @if($stock > 0)
-                                @if($rule->is_limited)
+                                @if($voucher->is_limited)
                                 <div class="disabled-action" title="24h Limit Reached">
                                     <i class="fas fa-history text-white-50"></i>
                                 </div>
                                 @else
-                                <a href="{{ route('vouchers.order', $rule->id) }}" class="order-action-btn" title="Order Now">
+                                <a href="{{ route('vouchers.order', $voucher->id) }}" class="order-action-btn" title="Order Now">
                                     <i class="fas fa-shopping-cart"></i>
                                 </a>
                                 @endif
