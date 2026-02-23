@@ -5,6 +5,7 @@ use App\Http\Controllers\Dashboard\RefundController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\PaymentController;
 use App\Http\Controllers\Dashboard\BankController;
 use App\Http\Controllers\Dashboard\SalesController;
 use App\Http\Controllers\Dashboard\CustomerController;
@@ -176,6 +177,16 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::delete('/vouchers/{id}/delete', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
     Route::get('/vouchers-export', [VoucherController::class, 'export'])->name('vouchers.export');
     Route::post('/vouchers-import', [VoucherController::class, 'import'])->name('vouchers.import');
+
+
+    Route::post('/safepay/create/{rule}', [PaymentController::class, 'create'])
+        ->name('safepay.create');
+
+    Route::get('/safepay/success', [PaymentController::class, 'success'])
+        ->name('safepay.success');
+
+    Route::post('/safepay/webhook', [PaymentController::class, 'webhook'])
+        ->name('safepay.webhook');
 
     // Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
