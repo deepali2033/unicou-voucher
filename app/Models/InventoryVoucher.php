@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class InventoryVoucher extends Model
 {
@@ -18,6 +19,8 @@ class InventoryVoucher extends Model
         'voucher_type',
         'purchase_invoice_no',
         'purchase_date',
+        'expiry_date',
+        'is_expired',
         'logo',
         'quantity',
         'purchase_value',
@@ -42,6 +45,8 @@ class InventoryVoucher extends Model
 
     protected $casts = [
         'purchase_date' => 'date',
+        'expiry_date' => 'date',
+        'is_expired' => 'boolean',
         'quantity' => 'integer',
         'purchase_value' => 'decimal:2',
         'purchase_value_per_unit' => 'decimal:2',
@@ -56,4 +61,42 @@ class InventoryVoucher extends Model
         'student_sale_price' => 'decimal:2',
         'upload_vouchers' => 'array',
     ];
+
+    public function scopeExpired($query)
+    {
+        return $query->where('is_expired', true);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_expired', false);
+    }
+
+    public function scopeCheckExpiry($query)
+    {
+        return $query->where('expiry_date', '<=', Carbon::now()->toDateString())
+            ->where('is_expired', false);
+    }
+
+    public function isExpired()
+    {
+        return $this->expiry_date && Carbon::parse($this->expiry_date)->isPast();
+    }
+
+    public function updateExpiryStatus()
+    {
+        if ($this->isExpired()) {
+            $this->update(['is_expired' => true]);
+        } else {
+            $this->update(['is_expired' => false]);
+        }
+    }
+
+    public static function updateAllExpiredVouchers()
+    {
+        $expiredVouchers = self::checkExpiry()->get();
+        foreach ($expiredVouchers as $voucher) {
+            $voucher->update(['is_expired' => true]);
+        }
+    }
 }

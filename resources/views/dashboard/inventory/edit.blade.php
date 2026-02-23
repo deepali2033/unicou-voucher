@@ -81,6 +81,15 @@
                         <input type="date" name="purchase_date" class="form-control" value="{{ old('purchase_date', $inventory->purchase_date ? $inventory->purchase_date->format('Y-m-d') : '') }}">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label small fw-bold text-uppercase">Expiry Date</label>
+                        <input type="date" name="expiry_date" class="form-control" value="{{ old('expiry_date', $inventory->expiry_date ? $inventory->expiry_date->format('Y-m-d') : '') }}">
+                        @if($inventory->is_expired)
+                        <small class="text-danger fw-bold mt-2 d-block">
+                            <i class="fas fa-exclamation-circle me-1"></i>This voucher is EXPIRED
+                        </small>
+                        @endif
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Quantity</label>
                         <input type="number" name="quantity" class="form-control bg-light" value="{{ old('quantity', $inventory->quantity) }}" readonly required>
                     </div>

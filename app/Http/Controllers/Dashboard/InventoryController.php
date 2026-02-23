@@ -136,6 +136,7 @@ class InventoryController extends Controller
             'voucher_type' => 'required|string|max:255',
             'purchase_invoice_no' => 'nullable|string|max:255',
             'purchase_date' => 'nullable|date',
+            'expiry_date' => 'nullable|date|after_or_equal:purchase_date',
             'quantity' => 'required|integer|min:0',
             'status' => 'required|string|in:IN STOCK,OUT OF STOCK',
             'purchase_value' => 'required|numeric|min:0',
@@ -164,6 +165,12 @@ class InventoryController extends Controller
             $validated['upload_vouchers'] = array_map('trim', explode(',', $request->upload_vouchers));
         }
 
+        if ($validated['expiry_date'] && \Carbon\Carbon::parse($validated['expiry_date'])->isPast()) {
+            $validated['is_expired'] = true;
+        } else {
+            $validated['is_expired'] = false;
+        }
+
         InventoryVoucher::create($validated);
 
         return redirect()->route('inventory.index')->with('success', 'Inventory added successfully.');
@@ -188,6 +195,7 @@ class InventoryController extends Controller
             'voucher_type' => 'required|string|max:255',
             'purchase_invoice_no' => 'nullable|string|max:255',
             'purchase_date' => 'nullable|date',
+            'expiry_date' => 'nullable|date|after_or_equal:purchase_date',
             'quantity' => 'required|integer|min:0',
             'status' => 'required|string|in:IN STOCK,OUT OF STOCK',
             'purchase_value' => 'required|numeric|min:0',
@@ -219,6 +227,12 @@ class InventoryController extends Controller
 
         if ($request->filled('upload_vouchers')) {
             $validated['upload_vouchers'] = array_map('trim', explode(',', $request->upload_vouchers));
+        }
+
+        if ($validated['expiry_date'] && \Carbon\Carbon::parse($validated['expiry_date'])->isPast()) {
+            $validated['is_expired'] = true;
+        } else {
+            $validated['is_expired'] = false;
         }
 
         $inventory->update($validated);

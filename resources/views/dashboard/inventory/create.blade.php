@@ -66,6 +66,10 @@
                         <input type="date" name="purchase_date" class="form-control" value="{{ old('purchase_date') }}">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label small fw-bold text-uppercase">Expiry Date</label>
+                        <input type="date" name="expiry_date" class="form-control" value="{{ old('expiry_date') }}">
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Quantity</label>
                         <input type="number" name="quantity" class="form-control bg-light" value="{{ old('quantity', 0) }}" readonly required>
                     </div>

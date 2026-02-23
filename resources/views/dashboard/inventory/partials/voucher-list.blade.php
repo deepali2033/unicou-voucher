@@ -176,7 +176,12 @@
         </div>
 
         <div class="v-brand">{{ $v->brand_name }}</div>
-        <h3 class="v-main-title">{{ $v->currency }} {{ number_format($v->agent_sale_price) }} - {{ $v->voucher_variant ?: 'Special' }}</h3>
+        <h3 class="v-main-title">
+            {{ $v->currency }} {{ number_format($v->agent_sale_price) }} - {{ $v->voucher_variant ?: 'Special' }}
+            @if($v->is_expired)
+            <span class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.35rem 0.5rem;">EXPIRED</span>
+            @endif
+        </h3>
         <p class="v-desc">SKU: {{ $v->sku_id }} | {{ $v->country_region }} | Qty: {{ number_format($v->quantity) }}</p>
 
         <div class="v-divider">
