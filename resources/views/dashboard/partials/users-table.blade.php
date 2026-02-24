@@ -6,6 +6,8 @@
                 <th>Role</th>
                 <th>Account Status</th>
                 <th>Verified Status</th>
+                <th>Country</th>
+                <th>State</th>
                 <th>Risk Level</th>
                 <th>Compliance Flags</th>
 
@@ -72,6 +74,16 @@
                     </span>
                 </td>
                 <td>
+                    <div class="fw-bold text-dark">
+                        {{ $user->country }}
+                    </div>
+                </td>
+                <td>
+                    <div class="fw-bold text-dark">
+                        {{ $user->state}}
+                    </div>
+                </td>
+                <td>
                     @php
                     $risk = \App\Models\CountryRiskLevel::where('country_name', $user->country_iso)->first();
                     @endphp
@@ -111,13 +123,13 @@
                     </div>
                 </td>
                 <td>
-                    <div class="small text-muted">
+                    <div class="fw-bold text-dark">
                         {{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}
                     </div>
                 </td>
 
                 {{-- Actions (Clean) --}}
-                <td class="text-end">
+                <td class=" text-end">
                     <div class="d-flex justify-content-end gap-1">
                         @if(auth()->user()->account_type === 'admin' || (auth()->user()->account_type === 'manager' && auth()->user()->can_impersonate_user))
                         <form action="{{ route('users.impersonate', $user->id) }}" method="POST" class="d-inline">

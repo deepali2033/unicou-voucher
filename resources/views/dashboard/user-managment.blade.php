@@ -49,7 +49,7 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">User Management</h5>
+            <h5 class="mb-0 fw-bold">User ManFDGFDGagement</h5>
             <span class="badge bg-primary total-count">{{ $users->total() }} Total Users</span>
         </div>
         <div class="card-body" id="table-container">
@@ -72,7 +72,7 @@
                 }
             });
         }
- 
+
         // Handle Pagination
         $(document).on('click', '.ajax-pagination a', function(e) {
             e.preventDefault();

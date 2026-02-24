@@ -36,7 +36,7 @@
                     <select name="role" class="form-select">
                         <option value="all" {{ request('role') == 'all' ? 'selected' : '' }}>All Roles</option>
                         @if(auth()->user()->account_type === 'admin')
-                            <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
+                        <option value="manager" {{ request('role') == 'manager' ? 'selected' : '' }}>Manager</option>
                         @endif
                         <option value="support_team" {{ request('role') == 'support_team' ? 'selected' : '' }}>Support Team</option>
                         <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
@@ -45,6 +45,23 @@
                     </select>
                 </div>
 
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Frozen</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Country</label>
+                    <select name="country" class="form-select">
+                        <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
+                        @foreach(\App\Models\User::whereNotNull('country')->where('country', '!=', '')->distinct()->orderBy('country')->pluck('country') as $name)
+                        <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="mb-4">
                     <label class="form-label fw-bold">Status</label>
                     <select name="status" class="form-select">
