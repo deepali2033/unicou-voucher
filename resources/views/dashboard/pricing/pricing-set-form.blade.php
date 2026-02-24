@@ -45,7 +45,7 @@
 <div class="container-fluid">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">{{ $isEdit ? 'Edit Pricing & Discount Rule' : 'Set Pricing & Discount Rule' }}</h5>
+            <h5 class="mb-0 fw-bold">{{ $isEdit ? 'Edit Purches Details' : 'Purches Details' }}</h5>
             <a href="{{ route('pricing.index') }}" class="btn btn-light btn-sm">
                 <i class="fas fa-arrow-left me-1"></i> Back to Rules
             </a>
@@ -53,38 +53,45 @@
         <div class="card-body px-4">
             <form id="setPriceForm">
                 @csrf
-                @if($isEdit)
-                <input type="hidden" name="id" value="{{ $rule->id }}">
-                @endif
                 <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <label class="form-label fw-bold text-uppercase small">Select Voucher (Auto-fills details)</label>
-                        <select name="inventory_voucher_id" id="voucherSelect" class="form-select select2" required>
-                            <option value="">Choose a voucher from inventory...</option>
-                            @foreach($vouchers as $v)
-                            <option value="{{ $v->id }}" {{ ($isEdit && $rule->inventory_voucher_id == $v->id) ? 'selected' : '' }}>
-                                {{ $v->brand_name }} ({{ $v->sku_id }})
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Brand Name</label>
-                        <input type="text" name="brand_name" id="brand_name" class="form-control" value="{{ $isEdit ? $rule->brand_name : '' }}">
+                        <input type="text" name="brand_name" id="brand_name" class="form-control" value="{{ $isEdit ? $rule->brand_name : '' }}" required>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Currency</label>
                         <input type="text" name="currency" id="currency" class="form-control" value="{{ $isEdit ? $rule->currency : '' }}">
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">Country/Region</label>
-                        <input type="text" name="country_region" id="country_region" class="form-control" value="{{ $isEdit ? $rule->country_region : '' }}">
+                        <label class="form-label fw-bold text-uppercase small">Country *</label>
+                        @if($isEdit)
+                        <input type="hidden" name="country_code" value="{{ $rule->country_code }}">
+                        <input type="hidden" name="country_name" value="{{ $rule->country_name }}">
+                        <input type="text" class="form-control" value="{{ $rule->country_name }}" disabled>
+                        @else
+                        <select name="country_name" id="country" class="form-select select2" required></select>
+                        <input type="hidden" name="country_code" id="country_code">
+                        @endif
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold text-uppercase small">State / Province</label>
+                        <select name="state" id="state" class="form-select select2" {{ $isEdit ? 'disabled' : '' }}>
+                            @if($isEdit)
+                            <option selected>{{ $rule->state }}</option>
+                            @endif
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold text-uppercase small">City</label>
+                        <select name="city" id="city" class="form-select select2" {{ $isEdit ? 'disabled' : '' }}>
+                            @if($isEdit)
+                            <option selected>{{ $rule->city }}</option>
+                            @endif
+                        </select>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Voucher Variant</label>
@@ -103,7 +110,7 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Purchase Date</label>
-                        <input type="date" name="purchase_date" id="purchase_date" class="form-control" value="{{ $isEdit && $rule->purchase_date ? \Carbon\Carbon::parse($rule->purchase_date)->format('Y-m-d') : '' }}">
+                        <input type="date" name="purchase_date" id="purchase_date" class="form-control" max="{{ date('Y-m-d') }}" value="{{ $isEdit && $rule->purchase_date ? \Carbon\Carbon::parse($rule->purchase_date)->format('Y-m-d') : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Total Quantity</label>
@@ -133,104 +140,17 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Issue Date</label>
-                        <input type="date" name="issue_date" id="issue_date" class="form-control" value="{{ $isEdit && $rule->issue_date ? \Carbon\Carbon::parse($rule->issue_date)->format('Y-m-d') : '' }}">
+                        <input type="date" name="issue_date" id="issue_date" class="form-control" max="{{ date('Y-m-d') }}" value="{{ $isEdit && $rule->issue_date ? \Carbon\Carbon::parse($rule->issue_date)->format('Y-m-d') : '' }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold text-uppercase small">Expiry Date</label>
-                        <input type="date" name="expiry_date" id="expiry_date" class="form-control" value="{{ $isEdit && $rule->expiry_date ? \Carbon\Carbon::parse($rule->expiry_date)->format('Y-m-d') : '' }}">
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <label class="form-label fw-bold text-uppercase small">Select Target {{ $isEdit ? 'Country' : 'Countries (Multiple)' }}</label>
-                        @if($isEdit)
-                        <select name="country_code" id="countries" class="form-select select2" required>
-                            @foreach($allCountries as $code => $name)
-                            <option value="{{ $code }}" {{ $rule->country_code == $code ? 'selected' : '' }}>{{ $name }} ({{ $code }})</option>
-                            @endforeach
-                        </select>
-                        @else
-                        <select name="countries[]" id="countries" class="form-select select2" multiple required>
-                            @foreach($allCountries as $code => $name)
-                            <option value="{{ $code }}">{{ $name }} ({{ $code }})</option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">You can apply this pricing rule to multiple countries at once.</small>
-                        @endif
-                    </div>
-                </div>
-                <hr class="my-4">
-
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <h6 class="fw-bold text-uppercase">24 Hours Purchase Limit Per User Type</h6>
-                        <small class="text-muted">Set maximum vouchers a user can buy within 24 hours.</small>
-                    </div>
-
-                    <!-- Agent Limit -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">
-                            Agent Limit (24 Hours)
-                        </label>
-                        <input type="number"
-                            name="agent_daily_limit"
-                            class="form-control"
-                            min="0"
-                            placeholder="Enter limit"
-                            value="{{ $isEdit ? $rule->agent_daily_limit : '' }}">
-                    </div>
-
-                    <!-- Student Limit -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">
-                            Student Limit (24 Hours)
-                        </label>
-                        <input type="number"
-                            name="student_daily_limit"
-                            class="form-control"
-                            min="0"
-                            placeholder="Enter limit"
-                            value="{{ $isEdit ? $rule->student_daily_limit : '' }}">
-                    </div>
-
-                    <!-- Reseller Agent Limit -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">
-                            Reseller Agent Limit (24 Hours)
-                        </label>
-                        <input type="number"
-                            name="reseller_daily_limit"
-                            class="form-control"
-                            min="0"
-                            placeholder="Enter limit"
-                            value="{{ $isEdit ? $rule->reseller_daily_limit : '' }}">
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">Sale Price ($)</label>
-                        <input type="number" step="0.01" name="sale_price" class="form-control" placeholder="0.00" value="{{ $isEdit ? $rule->sale_price : '' }}" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">Discount Type</label>
-                        <select name="discount_type" class="form-select">
-                            <option value="fixed" {{ ($isEdit && $rule->discount_type == 'fixed') ? 'selected' : '' }}>Fixed Amount ($)</option>
-                            <option value="percentage" {{ ($isEdit && $rule->discount_type == 'percentage') ? 'selected' : '' }}>Percentage (%)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold text-uppercase small">Discount Value</label>
-                        <input type="number" step="0.01" name="discount_value" class="form-control" value="{{ $isEdit ? $rule->discount_value : '0' }}">
+                        <input type="date" name="expiry_date" id="expiry_date" class="form-control" min="{{ date('Y-m-d', strtotime('+1 day')) }}" value="{{ $isEdit && $rule->expiry_date ? \Carbon\Carbon::parse($rule->expiry_date)->format('Y-m-d') : '' }}">
                     </div>
                 </div>
 
                 <div class="mt-4 pb-4 border-top pt-4 text-end">
                     <button type="submit" class="btn btn-primary px-5 shadow-sm" id="submitBtn">
-                        <i class="fas fa-check-circle me-1"></i> {{ $isEdit ? 'Update Pricing Rule' : 'Save Pricing Rule' }}
+                        <i class="fas fa-check-circle me-1"></i> {{ $isEdit ? 'Update Purchase Details' : 'Save Purchase Details' }}
                     </button>
                 </div>
             </form>
@@ -240,53 +160,124 @@
 @endsection
 
 @push('scripts')
+<script type="module">
+    import {
+        Country,
+        State,
+        City
+    } from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
+
+    $(document).ready(function() {
+        const countrySelect = document.getElementById("country");
+        const stateSelect = document.getElementById("state");
+        const citySelect = document.getElementById("city");
+
+        if (countrySelect) {
+            countrySelect.innerHTML = '<option value="">Select Country</option>';
+            const countries = Country.getAllCountries();
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.name;
+                option.textContent = country.name;
+                option.dataset.code = country.isoCode;
+                countrySelect.appendChild(option);
+            });
+
+            $(countrySelect).on('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const countryCode = selectedOption ? selectedOption.dataset.code : '';
+                $('#country_code').val(countryCode);
+
+                stateSelect.innerHTML = '<option value="">Select State</option>';
+                citySelect.innerHTML = '<option value="">Select City</option>';
+
+                if (countryCode) {
+                    const states = State.getStatesOfCountry(countryCode);
+                    states.forEach(state => {
+                        const option = document.createElement('option');
+                        option.value = state.name;
+                        option.textContent = state.name;
+                        option.dataset.code = state.isoCode;
+                        stateSelect.appendChild(option);
+                    });
+                }
+                $(stateSelect).trigger('change');
+            });
+
+            $(stateSelect).on('change', function() {
+                const selectedCountryOption = countrySelect.options[countrySelect.selectedIndex];
+                const countryCode = selectedCountryOption ? selectedCountryOption.dataset.code : '';
+
+                const selectedStateOption = this.options[this.selectedIndex];
+                const stateCode = selectedStateOption ? selectedStateOption.dataset.code : '';
+
+                citySelect.innerHTML = '<option value="">Select City</option>';
+
+                if (countryCode && stateCode) {
+                    const cities = City.getCitiesOfState(countryCode, stateCode);
+                    cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.name;
+                        option.textContent = city.name;
+                        citySelect.appendChild(option);
+                    });
+                }
+                $(citySelect).trigger('change');
+            });
+        }
+    });
+</script>
+
 <script>
     $(document).ready(function() {
-        // Initialize Select2 for all select elements with class 'select2'
-        $('.select2').not('#countries').select2({
-            width: '100%',
-            allowClear: true
+        // Initialize Select2
+        $('.select2').each(function() {
+            $(this).select2({
+                placeholder: $(this).attr('placeholder') || 'Select an option',
+                allowClear: true,
+                width: '100%'
+            });
         });
 
-        $('#countries').select2({
-            width: '100%',
-            allowClear: true,
-            closeOnSelect: false,
-            dropdownAutoWidth: true
-        });
-        $('#voucherSelect').on('change', function() {
-            var voucherId = $(this).val();
-            if (voucherId) {
-                $.ajax({
-                    url: "{{ route('pricing.voucher-details', ':id') }}".replace(':id', voucherId),
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.success) {
-                            var data = response.data;
-                            $('#brand_name').val(data.brand_name);
-                            $('#currency').val(data.currency);
-                            $('#country_region').val(data.country_region);
-                            $('#voucher_variant').val(data.voucher_variant);
-                            $('#voucher_type').val(data.voucher_type);
-                            $('#purchase_invoice_no').val(data.purchase_invoice_no);
-                            $('#purchase_date').val(data.purchase_date ? data.purchase_date.split('T')[0] : '');
-                            $('#total_quantity').val(data.quantity);
-                            $('#purchase_value').val(data.purchase_value);
-                            $('#taxes').val(data.taxes);
-                            $('#per_unit_price').val(data.purchase_value_per_unit);
-
-                            // Auto-fill Sale Price with Agent Sale Price as default
-                            if (data.agent_sale_price) {
-                                $('input[name="sale_price"]').val(data.agent_sale_price);
-                            }
-                        }
-                    }
-                });
+        // Auto calculation: Purchase Value / Total Quantity = Per Unit Price
+        function calculatePerUnit() {
+            var totalQty = parseFloat($('#total_quantity').val()) || 0;
+            var totalVal = parseFloat($('#purchase_value').val()) || 0;
+            if (totalQty > 0) {
+                var perUnit = totalVal / totalQty;
+                $('#per_unit_price').val(perUnit.toFixed(2));
+            } else {
+                $('#per_unit_price').val('0.00');
             }
+        }
+
+        $('#total_quantity, #purchase_value').on('input change', function() {
+            calculatePerUnit();
         });
 
         $('#setPriceForm').on('submit', function(e) {
             e.preventDefault();
+
+            // Date validation
+            var purchaseDate = $('#purchase_date').val();
+            var issueDate = $('#issue_date').val();
+            var expiryDate = $('#expiry_date').val();
+            var today = new Date().toISOString().split('T')[0];
+
+            if (purchaseDate && purchaseDate > today) {
+                toastr.error('Purchase date cannot be in the future.');
+                return;
+            }
+
+            if (issueDate && issueDate > today) {
+                toastr.error('Issue date cannot be in the future.');
+                return;
+            }
+
+            if (expiryDate && expiryDate <= today) {
+                toastr.error('Expiry date must be in the future.');
+                return;
+            }
 
             var btn = $('#submitBtn');
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> {{ $isEdit ? "Updating..." : "Saving..." }}');
@@ -303,7 +294,7 @@
                         }, 1500);
                     } else {
                         toastr.error(response.message);
-                        btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> {{ $isEdit ? "Update Pricing Rule" : "Save Pricing Rule" }}');
+                        btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> {{ $isEdit ? "Update Purchase Details" : "Save Purchase Details" }}');
                     }
                 },
                 error: function(xhr) {
@@ -315,7 +306,7 @@
                     } else {
                         toastr.error('Something went wrong. Please try again.');
                     }
-                    btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> {{ $isEdit ? "Update Pricing Rule" : "Save Pricing Rule" }}');
+                    btn.prop('disabled', false).html('<i class="fas fa-check-circle me-1"></i> {{ $isEdit ? "Update Purchase Details" : "Save Purchase Details" }}');
                 }
             });
         });

@@ -81,6 +81,20 @@
             <div class="card shadow-sm border-0 h-100 hover-shadow transition">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success-soft p-3 rounded-3 me-3">
+                            <i class="fas fa-chart-line text-success fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Purches Report</h5>
+                    </div>
+                    <p class="text-muted small">View detailed reports of purchased vouchers and stock levels for each PID and voucher type.</p>
+                    <a href="{{ route('pricing.index') }}" class="btn btn-success w-100">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100 hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
                         <div class="bg-info-soft p-3 rounded-3 me-3">
                             <i class="fas fa-percentage text-info fa-2x"></i>
                         </div>
@@ -136,14 +150,38 @@
     </div>
 
     <style>
-        .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
-        .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
-        .bg-info-soft { background-color: rgba(13, 202, 240, 0.1); }
-        .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
-        .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
-        .bg-dark-soft { background-color: rgba(33, 37, 41, 0.1); }
-        .transition { transition: all 0.3s ease; }
-        .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
+        .bg-primary-soft {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .bg-success-soft {
+            background-color: rgba(25, 135, 84, 0.1);
+        }
+
+        .bg-info-soft {
+            background-color: rgba(13, 202, 240, 0.1);
+        }
+
+        .bg-warning-soft {
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+
+        .bg-danger-soft {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .bg-dark-soft {
+            background-color: rgba(33, 37, 41, 0.1);
+        }
+
+        .transition {
+            transition: all 0.3s ease;
+        }
+
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        }
     </style>
 
     <div class="row">

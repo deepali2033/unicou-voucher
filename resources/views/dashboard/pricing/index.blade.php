@@ -88,6 +88,8 @@
                             <th class="py-3 border-0">Brand Name</th>
                             <th class="py-3 border-0">Currency</th>
                             <th class="py-3 border-0">Country/Region</th>
+                            <th class="py-3 border-0">State</th>
+                            <th class="py-3 border-0">City</th>
                             <th class="py-3 border-0">Voucher Variant</th>
                             <th class="py-3 border-0">Voucher Type</th>
                             <th class="py-3 border-0">Purchase Invoice No.</th>
@@ -99,8 +101,6 @@
                             <th class="py-3 border-0">Issue Date</th>
                             <th class="py-3 border-0">Expiry Date</th>
                             <th class="py-3 border-0">Credit Limit</th>
-                            <th class="py-3 border-0">Sale Price</th>
-                            <th class="py-3 border-0">Discount</th>
                             <th class="py-3 border-0">Status</th>
                             <th class="px-3 py-3 border-0 text-end">Action</th>
                         </tr>
@@ -115,6 +115,8 @@
                             <td>{{ $rule->brand_name ?? $rule->inventoryVoucher->brand_name ?? 'N/A' }}</td>
                             <td>{{ $rule->currency ?? $rule->inventoryVoucher->currency ?? 'N/A' }}</td>
                             <td>{{ $rule->country_name }}</td>
+                            <td>{{ $rule->state ?? 'N/A' }}</td>
+                            <td>{{ $rule->city ?? 'N/A' }}</td>
                             <td>{{ $rule->voucher_variant ?? $rule->inventoryVoucher->voucher_variant ?? 'N/A' }}</td>
                             <td>{{ $rule->voucher_type ?? $rule->inventoryVoucher->voucher_type ?? 'N/A' }}</td>
                             <td>{{ $rule->purchase_invoice_no ?? $rule->inventoryVoucher->purchase_invoice_no ?? 'N/A' }}</td>
@@ -137,16 +139,6 @@
                                 @endif
                             </td>
                             <td>${{ number_format($rule->credit_limit ?? 0, 2) }}</td>
-                            <td class="fw-bold text-success">${{ number_format($rule->sale_price ?? 0, 2) }}</td>
-                            <td>
-                                @if($rule->discount_value > 0)
-                                <span class="badge bg-soft-warning text-warning">
-                                    {{ $rule->discount_type == 'percentage' ? $rule->discount_value . '%' : '$' . number_format($rule->discount_value, 2) }}
-                                </span>
-                                @else
-                                <span class="text-muted small">No Discount</span>
-                                @endif
-                            </td>
                             <td>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input toggle-status" type="checkbox"
@@ -176,7 +168,13 @@
     </div>
 </div>
 
-
+<form action="{{ url('/api/webhook/wise') }}" method="POST">
+    @csrf
+    <input type="hidden" name="amount" value="10">
+    <input type="hidden" name="currency" value="USD">
+    <input type="hidden" name="reference" value="TEST-USER-1">
+    <button type="submit">Test Wise Webhook</button>
+</form>
 
 @push('scripts')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

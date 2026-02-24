@@ -171,7 +171,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light text-uppercase small fw-bold text-muted">
                         <tr>
-                            <th class="px-4 py-3 border-0">User Info</th>
+                            <th class="px-4 py-3 border-0">User Id</th>
                             <th class="py-3 border-0">Role</th>
                             <th class="py-3 border-0">Topic</th>
                             <th class="py-3 border-0">Issue</th>
@@ -184,8 +184,17 @@
                         @forelse($queries as $query)
                         <tr id="query-row-{{ $query->id }}">
                             <td class="px-4 py-4">
-                                <div class="fw-bold">{{ $query->user->name ?? 'Guest' }}</div>
-                                <small class="text-muted">{{ $query->user->email ?? '' }}</small>
+                                @if(auth()->check() && auth()->user()->account_type === 'admin')
+                                <small class="fw-bold">
+                                    {{ $query->user?->name ?? '' }} <br>
+                                    {{ $query->user?->email ?? '' }}
+                                </small>
+                                @endif
+                                <div class="fw-bold">
+                                    {{ $query->user?->user_id ?? 'Guest' }}
+                                </div>
+
+
                             </td>
                             <td><span class="badge bg-light text-dark">{{ ucfirst($query->user->account_type ?? 'user') }}</span></td>
                             <td>{{ $query->topic }}</td>
@@ -228,59 +237,78 @@
 
 @push('scripts')
 <style>
-    .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
-    .bg-soft-success { background-color: rgba(40, 167, 69, 0.1); }
-    .bg-soft-secondary { background-color: rgba(108, 117, 125, 0.1); }
-    .table thead th { border-bottom: none; }
-    .input-group .form-control:focus { box-shadow: none; border: 1px solid #5e5ce6 !important; }
+    .bg-soft-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .bg-soft-success {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .bg-soft-secondary {
+        background-color: rgba(108, 117, 125, 0.1);
+    }
+
+    .table thead th {
+        border-bottom: none;
+    }
+
+    .input-group .form-control:focus {
+        box-shadow: none;
+        border: 1px solid #5e5ce6 !important;
+    }
 </style>
 <script>
-$(document).ready(function() {
-    // Handle Add Topic/Issue
-    $('#addTopicForm, #addIssueForm').on('submit', function(e) {
-        e.preventDefault();
-        const form = $(this);
-        const btn = form.find('button');
-        const originalText = btn.text();
-        
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
-        
-        $.ajax({
-            url: "{{ route('support.options.store') }}",
-            method: "POST",
-            data: form.serialize(),
-            success: function(response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    location.reload();
-                }
-            },
-            error: function() {
-                toastr.error('Failed to add option');
-                btn.prop('disabled', false).text(originalText);
-            }
-        });
-    });
+    $(document).ready(function() {
+        // Handle Add Topic/Issue
+        $('#addTopicForm, #addIssueForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const btn = form.find('button');
+            const originalText = btn.text();
 
-    // Handle Delete Option
-    $('.delete-option').on('click', function() {
-        if(!confirm('Are you sure?')) return;
-        const id = $(this).data('id');
-        const row = $(`#option-row-${id}`);
-        
-        $.ajax({
-            url: "{{ route('support.options.destroy', ':id') }}".replace(':id', id),
-            method: "DELETE",
-            data: { _token: "{{ csrf_token() }}" },
-            success: function(response) {
-                if (response.success) {
-                    row.fadeOut(300, function() { $(this).remove(); });
-                    toastr.success(response.message);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+            $.ajax({
+                url: "{{ route('support.options.store') }}",
+                method: "POST",
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    toastr.error('Failed to add option');
+                    btn.prop('disabled', false).text(originalText);
                 }
-            }
+            });
+        });
+
+        // Handle Delete Option
+        $('.delete-option').on('click', function() {
+            if (!confirm('Are you sure?')) return;
+            const id = $(this).data('id');
+            const row = $(`#option-row-${id}`);
+
+            $.ajax({
+                url: "{{ route('support.options.destroy', ':id') }}".replace(':id', id),
+                method: "DELETE",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        row.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                        toastr.success(response.message);
+                    }
+                }
+            });
         });
     });
-});
 </script>
 @endpush
 @endsection

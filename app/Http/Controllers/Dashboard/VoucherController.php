@@ -150,15 +150,10 @@ class VoucherController extends Controller
         $voucher = InventoryVoucher::findOrFail($id);
         $request->validate([
             'quantity' => 'required|integer|min:1',
-            'payment_type' => 'required|in:my_bank,admin_bank,safepay',
-            'bank_id' => 'required_if:payment_type,my_bank|exists:bank_accounts,id',
-            'admin_bank_id' => 'required_if:payment_type,admin_bank|exists:admin_payment_methods,id',
+            'payment_type' => 'required|in:card,admin_bank,wise',
+            'admin_bank_id' => 'required_if:payment_type,admin_bank,wise|exists:admin_payment_methods,id',
             'payment_receipt' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        if ($request->payment_type == 'safepay') {
-            return app()->make(\App\Http\Controllers\Dashboard\PaymentController::class)->create($request, $id);
-        }
 
         $user = auth()->user();
 
@@ -188,18 +183,7 @@ class VoucherController extends Controller
         $payment_receipt = null;
         $bank_details = [];
 
-        if ($request->payment_type == 'my_bank') {
-            $bank = BankAccountModel::where('id', $request->bank_id)->where('user_id', $user->id)->firstOrFail();
-            if ($bank->balance < $totalAmount) {
-                return response()->json(['message' => 'Your bank account does not have enough balance.'], 400);
-            }
-            $bank_details = [
-                'bank_name' => $bank->bank_name,
-                'account_number' => $bank->account_number,
-                'ifsc_code' => $bank->ifsc_code,
-            ];
-            $status = 'completed';
-        } else {
+        if ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
             $adminBank = AdminPaymentMethod::findOrFail($request->admin_bank_id);
             if ($request->hasFile('payment_receipt')) {
                 $payment_receipt = $request->file('payment_receipt')->store('receipts', 'public');
@@ -215,6 +199,9 @@ class VoucherController extends Controller
                 'captured_details' => $request->captured_details, // Storing JSON from OCR
             ];
             $status = 'pending';
+        } elseif ($request->payment_type == 'card') {
+            $status = 'pending';
+            $bank_details = ['notes' => 'Card payment initiated'];
         }
 
         $referralPointsPerUnit = 0;
@@ -255,8 +242,7 @@ class VoucherController extends Controller
 
             $order = Order::create($orderData);
 
-            if ($request->payment_type == 'my_bank') {
-                $bank->decrement('balance', $totalAmount);
+            if ($status == 'completed') {
                 $voucher->decrement('quantity', $request->quantity);
             }
 

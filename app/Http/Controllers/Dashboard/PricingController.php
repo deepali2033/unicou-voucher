@@ -169,39 +169,30 @@ class PricingController extends Controller
         $rule = VoucherPriceRule::findOrFail($id);
 
         $request->validate([
-            'inventory_voucher_id' => 'required|exists:inventory_vouchers,id',
             'country_code' => 'required|string',
-            'sale_price' => 'required|numeric|min:0',
-            'student_daily_limit' => 'nullable|integer|min:0',
-            'agent_daily_limit' => 'nullable|integer|min:0',
-            'reseller_daily_limit' => 'nullable|integer|min:0',
-            'discount_type' => 'required|in:fixed,percentage',
-            'discount_value' => 'required|numeric|min:0',
-            'expiry_date' => 'nullable|date',
+            'state' => 'nullable|string',
+            'city' => 'nullable|string',
+            'issue_date' => 'nullable|date|before_or_equal:today',
+            'expiry_date' => 'nullable|date|after:today',
 
-            'brand_name' => 'nullable|string',
+            'brand_name' => 'required|string',
             'currency' => 'nullable|string',
-            'country_region' => 'nullable|string',
+
             'voucher_variant' => 'nullable|string',
             'voucher_type' => 'nullable|string',
             'purchase_invoice_no' => 'nullable|string',
-            'purchase_date' => 'nullable|date',
+            'purchase_date' => 'nullable|date|before_or_equal:today',
             'total_quantity' => 'nullable|integer',
             'purchase_value' => 'nullable|numeric',
             'taxes' => 'nullable|numeric',
             'per_unit_price' => 'nullable|numeric',
-            'issue_date' => 'nullable|date',
             'credit_limit' => 'nullable|numeric',
         ]);
 
-        $allCountries = CountryHelper::getAllCountries();
-        $country_name = $allCountries[$request->country_code] ?? $request->country_code;
-
         $rule->update([
-            'inventory_voucher_id' => $request->inventory_voucher_id,
             'brand_name' => $request->brand_name,
             'currency' => $request->currency,
-            'country_region' => $request->country_region,
+
             'voucher_variant' => $request->voucher_variant,
             'voucher_type' => $request->voucher_type,
             'purchase_invoice_no' => $request->purchase_invoice_no,
@@ -213,87 +204,69 @@ class PricingController extends Controller
             'issue_date' => $request->issue_date,
             'credit_limit' => $request->credit_limit,
             'country_code' => $request->country_code,
-            'country_name' => $country_name,
-            'sale_price' => $request->sale_price,
-            'student_daily_limit' => $request->student_daily_limit ?? 0,
-            'agent_daily_limit' => $request->agent_daily_limit ?? 0,
-            'reseller_daily_limit' => $request->reseller_daily_limit ?? 0,
-            'discount_type' => $request->discount_type,
-            'discount_value' => $request->discount_value,
+            'country_name' => $request->country_name,
+            'state' => $request->state,
+            'city' => $request->city,
             'expiry_date' => $request->expiry_date,
         ]);
 
-        return response()->json(['success' => true, 'message' => 'Price rule updated successfully.']);
+        return response()->json(['success' => true, 'message' => 'Purchase details updated successfully.']);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'inventory_voucher_id' => 'required|exists:inventory_vouchers,id',
-            'countries' => 'required|array',
-            'sale_price' => 'required|numeric|min:0',
-            'student_daily_limit' => 'nullable|integer|min:0',
-            'agent_daily_limit' => 'nullable|integer|min:0',
-            'reseller_daily_limit' => 'nullable|integer|min:0',
-            'discount_type' => 'required|in:fixed,percentage',
-            'discount_value' => 'required|numeric|min:0',
-            'expiry_date' => 'nullable|date',
+            'country_code' => 'required|string',
+            'country_name' => 'required|string',
+            'state' => 'nullable|string',
+            'city' => 'nullable|string',
+            'issue_date' => 'nullable|date|before_or_equal:today',
+            'expiry_date' => 'nullable|date|after:today',
 
-            'brand_name' => 'nullable|string',
+            'brand_name' => 'required|string',
             'currency' => 'nullable|string',
-            'country_region' => 'nullable|string',
+
             'voucher_variant' => 'nullable|string',
             'voucher_type' => 'nullable|string',
             'purchase_invoice_no' => 'nullable|string',
-            'purchase_date' => 'nullable|date',
+            'purchase_date' => 'nullable|date|before_or_equal:today',
             'total_quantity' => 'nullable|integer',
             'purchase_value' => 'nullable|numeric',
             'taxes' => 'nullable|numeric',
             'per_unit_price' => 'nullable|numeric',
-            'issue_date' => 'nullable|date',
             'credit_limit' => 'nullable|numeric',
         ]);
 
-        $allCountries = CountryHelper::getAllCountries();
-        $purchase_id = 'PID-' . time() . rand(100, 999);
+        $country_code = $request->country_code;
+        $purchase_id = 'PID-' . $country_code . '+' . str_replace(' ', '', $request->brand_name) . '-' . rand(100000, 999999);
 
-        foreach ($request->countries as $country_code) {
-            $country_name = $allCountries[$country_code] ?? $country_code;
+        VoucherPriceRule::create([
+            'purchase_id' => $purchase_id,
+            'brand_name' => $request->brand_name,
+            'currency' => $request->currency,
 
-            VoucherPriceRule::updateOrCreate(
-                [
-                    'inventory_voucher_id' => $request->inventory_voucher_id,
-                    'country_code' => $country_code
-                ],
-                [
-                    'purchase_id' => $purchase_id,
-                    'brand_name' => $request->brand_name,
-                    'currency' => $request->currency,
-                    'country_region' => $request->country_region,
-                    'voucher_variant' => $request->voucher_variant,
-                    'voucher_type' => $request->voucher_type,
-                    'purchase_invoice_no' => $request->purchase_invoice_no,
-                    'purchase_date' => $request->purchase_date,
-                    'total_quantity' => $request->total_quantity,
-                    'purchase_value' => $request->purchase_value,
-                    'taxes' => $request->taxes,
-                    'per_unit_price' => $request->per_unit_price,
-                    'issue_date' => $request->issue_date,
-                    'credit_limit' => $request->credit_limit,
-                    'country_name' => $country_name,
-                    'sale_price' => $request->sale_price,
-                    'student_daily_limit' => $request->student_daily_limit ?? 0,
-                    'agent_daily_limit' => $request->agent_daily_limit ?? 0,
-                    'reseller_daily_limit' => $request->reseller_daily_limit ?? 0,
-                    'discount_type' => $request->discount_type,
-                    'discount_value' => $request->discount_value,
-                    'expiry_date' => $request->expiry_date,
-                    'is_active' => true
-                ]
-            );
-        }
+            'voucher_variant' => $request->voucher_variant,
+            'voucher_type' => $request->voucher_type,
+            'purchase_invoice_no' => $request->purchase_invoice_no,
+            'purchase_date' => $request->purchase_date,
+            'total_quantity' => $request->total_quantity,
+            'purchase_value' => $request->purchase_value,
+            'taxes' => $request->taxes,
+            'per_unit_price' => $request->per_unit_price,
+            'issue_date' => $request->issue_date,
+            'credit_limit' => $request->credit_limit,
+            'country_code' => $country_code,
+            'country_name' => $request->country_name,
+            'state' => $request->state,
+            'city' => $request->city,
+            'expiry_date' => $request->expiry_date,
+            'sale_price' => 0,
+            'discount_type' => 'fixed',
+            'discount_value' => 0,
+            'is_active' => true
+        ]);
 
-        return response()->json(['success' => true, 'message' => 'Price rules saved successfully.']);
+        return response()->json(['success' => true, 'message' => 'Purchase details saved successfully.']);
     }
 
     public function destroy($id)

@@ -255,7 +255,8 @@
 
                     <div class="sat-field">
                         <label>Contact Number *</label>
-                        <input type="tel" name="business_contact" placeholder="+CountryCode Business Contact" value="{{ Auth::user()->phone }}" required>
+                        <input type="tel" id="business_contact_input" name="business_contact_dummy" placeholder="Business Contact" value="{{ Auth::user()->phone }}" required>
+                        <input type="hidden" name="business_contact" id="business_contact" value="{{ Auth::user()->phone }}">
                     </div>
 
                     <div class="sat-field">
@@ -373,7 +374,8 @@
 
                     <div class="sat-field sat-full">
                         <label>WhatsApp Number *</label>
-                        <input type="tel" name="whatsapp_number" placeholder="+CountryCode WhatsApp number" required>
+                        <input type="tel" id="whatsapp_number_input" name="whatsapp_number_dummy" placeholder="WhatsApp number" required>
+                        <input type="hidden" name="whatsapp_number" id="whatsapp_number">
                     </div>
                 </div>
 
@@ -420,18 +422,18 @@
 
                 <div class="sat-grid-2">
                     <div class="sat-field sat-full">
-                        <label>Business Registration Document *</label>
-                        <input type="file" name="registration_doc" required>
+                        <label>Business Registration Document * (PDF, JPG, PNG - Max 5MB)</label>
+                        <input type="file" name="registration_doc" accept=".pdf,.jpg,.jpeg,.png" required>
                     </div>
 
                     <div class="sat-field sat-full">
-                        <label>ID Document *</label>
-                        <input type="file" name="id_doc" required>
+                        <label>ID Document * (PDF, JPG, PNG - Max 5MB)</label>
+                        <input type="file" name="id_doc" accept=".pdf,.jpg,.jpeg,.png" required>
                     </div>
 
                     <div class="sat-field sat-full">
-                        <label>Business Logo (Profile Photo)</label>
-                        <input type="file" name="business_logo">
+                        <label>Business Logo (Profile Photo) (JPG, PNG - Max 2MB)</label>
+                        <input type="file" name="business_logo" accept=".jpg,.jpeg,.png">
                     </div>
                 </div>
 
@@ -520,11 +522,163 @@
 </div>
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 <script>
-    document.getElementById('satForm').addEventListener('submit', function() {
-        const btn = this.querySelector('.sat-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> VERIFYING DOCUMENTS... PLEASE WAIT';
+    document.addEventListener('DOMContentLoaded', function() {
+        const businessContactInput = window.intlTelInput(document.querySelector("#business_contact_input"), {
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            separateDialCode: true,
+            initialCountry: "auto",
+            dropdownContainer: document.body,
+            geoIpLookup: function(success, failure) {
+                $.get("https://ipinfo.io", function() {}, "jsonp").always(function(resp) {
+                    var countryCode = (resp && resp.country) ? resp.country : "us";
+                    success(countryCode);
+                });
+            },
+        });
+
+        const whatsappNumberInput = window.intlTelInput(document.querySelector("#whatsapp_number_input"), {
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            separateDialCode: true,
+            initialCountry: "auto",
+            dropdownContainer: document.body,
+            geoIpLookup: function(success, failure) {
+                $.get("https://ipinfo.io", function() {}, "jsonp").always(function(resp) {
+                    var countryCode = (resp && resp.country) ? resp.country : "us";
+                    success(countryCode);
+                });
+            },
+        });
+
+        // Real-time validation
+        function validateField(input) {
+            const $input = $(input);
+            const name = $input.attr('name');
+            let isValid = true;
+            let errorMessage = "";
+
+            if ($input.prop('required') && !$input.val() && $input.attr('type') !== 'file') {
+                isValid = false;
+                errorMessage = "This field is required";
+            } else if ($input.attr('type') === 'email' && $input.val()) {
+                const emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+                if (!emailReg.test($input.val())) {
+                    isValid = false;
+                    errorMessage = "Invalid email format";
+                }
+            } else if ($input.attr('type') === 'url' && $input.val()) {
+                try {
+                    new URL($input.val());
+                } catch (_) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid URL (e.g. https://...)";
+                }
+            } else if ($input.attr('name') === 'dob' && $input.val()) {
+                const dob = new Date($input.val());
+                const today = new Date();
+                let age = today.getFullYear() - dob.getFullYear();
+                const m = today.getMonth() - dob.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                    age--;
+                }
+                if (age < 16) {
+                    isValid = false;
+                    errorMessage = "Must be at least 16 years old.";
+                }
+            } else if ($input.attr('type') === 'file') {
+                const file = input.files[0];
+                if ($input.prop('required') && !file) {
+                    isValid = false;
+                    errorMessage = "File is required";
+                } else if (file) {
+                    const fileSize = file.size / 1024 / 1024; // in MB
+                    const fileName = file.name.toLowerCase();
+                    const ext = fileName.split('.').pop();
+                    
+                    if (name === 'registration_doc' || name === 'id_doc') {
+                        if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext)) {
+                            isValid = false;
+                            errorMessage = "Invalid file type. Allowed: PDF, JPG, PNG";
+                        } else if (fileSize > 5) {
+                            isValid = false;
+                            errorMessage = "File size must be under 5MB";
+                        }
+                    } else if (name === 'business_logo') {
+                        if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext)) {
+                            isValid = false;
+                            errorMessage = "Invalid file type. Allowed: PDF, JPG, PNG";
+                        } else if (fileSize > 2) {
+                            isValid = false;
+                            errorMessage = "File size must be under 2MB";
+                        }
+                    }
+                }
+            } else if ($input.attr('type') === 'tel') {
+                const digitsOnly = /^\d+$/;
+                const val = $input.val().replace(/\s+/g, '').replace('+', '');
+                if (val && !digitsOnly.test(val)) {
+                    isValid = false;
+                    errorMessage = "Only numbers are allowed";
+                }
+            }
+
+            if (!isValid) {
+                $input.addClass('is-invalid');
+                if ($input.closest('.sat-field').find('.invalid-feedback').length === 0) {
+                    $input.after(`<div class="invalid-feedback">${errorMessage}</div>`);
+                } else {
+                    $input.closest('.sat-field').find('.invalid-feedback').text(errorMessage);
+                }
+            } else {
+                $input.removeClass('is-invalid');
+                $input.closest('.sat-field').find('.invalid-feedback').remove();
+            }
+            return isValid;
+        }
+
+        $('#satForm input, #satForm select').on('blur change input', function() {
+            validateField(this);
+        });
+
+        document.getElementById('satForm').addEventListener('submit', function(e) {
+            let isFormValid = true;
+            $('#satForm [required], #satForm input[type="file"], #satForm input[type="tel"]').each(function() {
+                if (!validateField(this)) {
+                    isFormValid = false;
+                }
+            });
+
+            // ITI validation
+            if (!businessContactInput.isValidNumber()) {
+                isFormValid = false;
+                $('#business_contact_input').addClass('is-invalid');
+                if ($('#business_contact_input').closest('.sat-field').find('.invalid-feedback').length === 0) {
+                    $('#business_contact_input').after('<div class="invalid-feedback">Invalid number for selected country</div>');
+                }
+            }
+            if (!whatsappNumberInput.isValidNumber()) {
+                isFormValid = false;
+                $('#whatsapp_number_input').addClass('is-invalid');
+                if ($('#whatsapp_number_input').closest('.sat-field').find('.invalid-feedback').length === 0) {
+                    $('#whatsapp_number_input').after('<div class="invalid-feedback">Invalid number for selected country</div>');
+                }
+            }
+
+            if (!isFormValid) {
+                e.preventDefault();
+                Swal.fire('Error', 'Please fix the errors in the form before submitting.', 'error');
+                return;
+            }
+
+            // Sync full numbers
+            $('#business_contact').val(businessContactInput.getNumber());
+            $('#whatsapp_number').val(whatsappNumberInput.getNumber());
+
+            const btn = this.querySelector('.sat-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> VERIFYING DOCUMENTS... PLEASE WAIT';
+        });
     });
 
     function fillAgentDemoData() {
@@ -533,7 +687,7 @@
         form.querySelector('input[name="business_name"]').value = "UniCou Global Solutions";
         form.querySelector('select[name="business_type"]').value = "Company";
         form.querySelector('input[name="registration_number"]').value = "REG123456789";
-        form.querySelector('input[name="business_contact"]').value = "+44 7700 900000";
+        form.querySelector('input[name="business_contact_dummy"]').value = "7700900000";
 
         form.querySelector('input[name="address"]').value = "123 Business Avenue, Tech City";
 
@@ -545,7 +699,7 @@
         form.querySelector('select[name="id_type"]').value = "Passport";
         form.querySelector('input[name="id_number"]').value = "L87654321";
         form.querySelector('select[name="designation"]').value = "CEO";
-        form.querySelector('input[name="whatsapp_number"]').value = "+44 7700 900000";
+        form.querySelector('input[name="whatsapp_number_dummy"]').value = "7700900000";
         form.querySelector('input[name="bank_name"]').value = "Barclays Bank";
         form.querySelector('input[name="bank_country"]').value = "United Kingdom";
         form.querySelector('input[name="account_number"]').value = "GB12BARC20202012345678";

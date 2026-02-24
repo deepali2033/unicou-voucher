@@ -88,10 +88,22 @@
                                 <div class="text-muted small">{{ $order->created_at->format('d M Y H:i') }}</div>
                                 <div class="text-muted small">{{ $order->voucher->name ?? $order->voucher_type }} (Qty: {{ $order->quantity }})</div>
                             </td>
-                            <td>
+                            <td class="px-4 py-4">
+                                @if(auth()->check() && auth()->user()->account_type === 'admin')
                                 <div class="fw-bold text-dark">{{ $order->user->name ?? 'Unknown' }}</div>
                                 <div class="text-muted small">{{ $order->user->email ?? 'N/A' }}</div>
+
+
+                                @endif
+                                <div class="text-muted small">
+                                    {{ $order->user->user_id ??'Unknown' }}
+                                </div>
                                 <span class="badge rounded-pill bg-light text-dark border px-2 mt-1">{{ ucfirst($order->user_role ?? 'user') }}</span>
+
+
+                            </td>
+                            <td>
+
                             </td>
                             <td>
                                 <div class="small">

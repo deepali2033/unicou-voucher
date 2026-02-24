@@ -209,7 +209,7 @@ class JobController extends Controller
             $validated = $request->validate([
                 'vacancy_id' => 'nullable|exists:job_vacancies,id',
                 'name' => 'required|string|max:255',
-                'dob' => 'required|date',
+                'dob' => 'required|date|before:-16 years',
                 'email' => 'required|email|max:255',
                 'phone' => 'required|string|max:20',
                 'whatsapp_number' => 'required|string|max:20',
@@ -230,8 +230,13 @@ class JobController extends Controller
                 'bank_country' => 'required|string|max:100',
                 'bank_account_number' => 'required|string|max:50',
                 'id_document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-                'photograph' => 'required|file|mimes:jpg,jpeg,png|max:5120',
-                'reference_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                'photograph' => 'required|file|mimes:jpg,jpeg,png|max:2048',
+                'reference_letter' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+            ], [
+                'dob.before' => 'You must be at least 16 years old.',
+                'photograph.max' => 'The photograph may not be greater than 2 MB.',
+                'id_document.max' => 'The ID document may not be greater than 5 MB.',
+                'reference_letter.max' => 'The reference letter may not be greater than 5 MB.',
             ]);
 
             // Handle File Uploads

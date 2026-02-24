@@ -3,45 +3,10 @@
 @section('content')
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar Navigation -->
-        <div class="col-md-2 border-end">
-            <h6 class="fw-bold mb-3 border-bottom pb-2">Reports Navigation</h6>
-            <ul class="nav flex-column gap-2" id="report-nav">
-                <li class="nav-item">
-                    <a href="{{ route('reports.profit-loss') }}" class="nav-link p-2 rounded {{ request()->routeIs('reports.profit-loss') ? 'bg-primary text-white' : 'text-dark hover-bg' }}">
-                        <span class="small fw-bold">Gross Profit & Loss</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('reports.bank') }}" class="nav-link p-2 rounded {{ request()->routeIs('reports.bank') ? 'bg-primary text-white' : 'text-dark hover-bg' }}">
-                        <span class="small fw-bold">Bank Reports</span>
-                    </a>
-                </li>
-                <li class="nav-item ps-3">
-                    <span class="small text-muted">28. Bank-wise Collection</span>
-                </li>
-                <li class="nav-item ps-3">
-                    <span class="small text-muted">29. Gateway Settlement</span>
-                </li>
-                <li class="nav-item ps-3">
-                    <span class="small text-muted">30. Bank Reconciliation</span>
-                </li>
-                <li class="nav-item ps-3">
-                    <span class="small text-muted">31. AR Aging</span>
-                </li>
-                <li class="nav-item ps-3">
-                    <span class="small text-muted">32. AP Aging</span>
-                </li>
-                <li class="nav-item mt-2">
-                    <a href="{{ route('reports.gross-margin') }}" class="nav-link p-2 rounded {{ request()->routeIs('reports.gross-margin') ? 'bg-primary text-white' : 'text-dark hover-bg' }}">
-                        <span class="small fw-bold">Gross Margin by Exam</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
+
 
         <!-- Main Content -->
-        <div class="col-md-10">
+        <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h3 class="fw-bold text-dark mb-0">Gross Profit & Loss</h3>

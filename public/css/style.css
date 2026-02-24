@@ -663,3 +663,44 @@ button.btn.btn-primary.next-btn {
     border-radius: 6px;
 }
 /* dashbord active end */
+
+
+/* Fix for intl-tel-input */
+.iti {
+    width: 100%;
+}
+
+.iti * {
+    box-sizing: border-box;
+}
+
+.iti__country-list {
+    margin: 0 !important;
+    text-align: left;
+    background: #fff;
+    max-width: 400px;
+}
+
+.iti__country {
+    padding: 8px 10px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+}
+
+.iti__flag {
+    margin-right: 6px;
+}
+
+.iti__country-name, .iti__dial-code {
+    margin-right: 6px;
+}
+
+.iti span {
+    background: transparent !important;
+    border-radius: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline-block !important;
+    color: inherit !important;
+}

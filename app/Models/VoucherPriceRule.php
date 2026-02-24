@@ -25,6 +25,8 @@ class VoucherPriceRule extends Model
         'credit_limit',
         'country_code',
         'country_name',
+        'state',
+        'city',
         'sale_price',
         'student_daily_limit',
         'agent_daily_limit',

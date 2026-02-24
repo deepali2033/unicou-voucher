@@ -211,7 +211,7 @@ class AuthController extends Controller
             'website'             => 'nullable|url',
             'social_media'        => 'nullable|url',
             'representative_name' => 'required|string',
-            'dob'                 => 'required|date',
+            'dob'                 => 'required|date|before:-16 years',
             'id_type'             => 'required|string',
             'id_number'           => 'required|string',
             'designation'         => 'required|string',
@@ -221,7 +221,9 @@ class AuthController extends Controller
             'account_number'      => 'required|string',
             'registration_doc'    => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'id_doc'              => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'business_logo'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'business_logo'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ], [
+            'dob.before' => 'Representative must be at least 16 years old.',
         ]);
 
         $data = $validated;
@@ -291,7 +293,7 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'full_name'           => 'required|string|max:255',
-            'dob'                 => 'required|date',
+            'dob'                 => 'required|date|before:-16 years',
             'id_type'             => 'required|string',
             'id_number'           => 'required|string',
             'primary_contact'     => 'required|string',
@@ -311,6 +313,10 @@ class AuthController extends Controller
             'bank_country'        => 'required|string',
             'account_number'      => 'required|string',
             'id_doc_final'        => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'dob.before' => 'Student must be at least 16 years old.',
+            'id_doc.max' => 'Document size may not exceed 5MB.',
+            'id_doc_final.max' => 'Document size may not exceed 5MB.',
         ]);
 
         $data = $validated;
