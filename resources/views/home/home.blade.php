@@ -114,6 +114,11 @@
             background: #eee;
             margin: 8px 0;
         }
+
+        .footer-col.accordion a {
+            color: #fff;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -638,7 +643,7 @@
                 <!-- Logo & About -->
                 <div class="footer-col brand">
                     <h2 class="logo">
-                        <img src="https://tfpadvisory.bkhomesolutionindore.com/wp-content/uploads/2025/12/Untitled-design-2026-01-16T145219.133.png" alt="">
+                        <img src="http://127.0.0.1:8000/images/company_logo.png" alt="">
                     </h2>
                     <p>
                         Secure your University Admission. Master your Exams with our LMS, and
