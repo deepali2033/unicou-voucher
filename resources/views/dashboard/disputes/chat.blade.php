@@ -47,6 +47,12 @@
                     <form id="chat-form" action="{{ route('disputes.send', $dispute->id) }}" method="POST">
                         @csrf
                         <div class="input-group gap-2">
+                            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+                            <button type="button" id="request-review-btn" class="btn btn-outline-warning d-flex align-items-center justify-content-center" 
+                                    style="width: 50px; border-radius: 0.8rem;" title="Request Feedback">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            @endif
                             <input type="text" id="message-input" name="message" class="form-control border-0 bg-light p-3" 
                                    placeholder="Type your message..." style="border-radius: 0.8rem;" autocomplete="off">
                             <button type="submit" class="btn btn-primary d-flex align-items-center justify-content-center" 
@@ -56,13 +62,7 @@
                         </div>
                     </form>
                     
-                    <div class="mt-3 p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-wand-magic-sparkles text-primary me-2"></i>
-                            <span class="small fw-semibold">AI Response Helper</span>
-                        </div>
-                        <button class="btn btn-sm text-primary p-0 fw-bold" style="font-size: 0.8rem;">Get Suggestion</button>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -257,8 +257,21 @@
             const message = messageInput.val().trim();
             if (!message) return;
 
+            sendMessage(message);
+        });
+
+        // Request Review
+        $('#request-review-btn').on('click', function() {
+            if(confirm('Share feedback request with customer?')) {
+                sendMessage('[DISPUTE_FEEDBACK_REQUEST]');
+            }
+        });
+
+        function sendMessage(message) {
             const submitBtn = chatForm.find('button[type="submit"]');
+            const reviewBtn = $('#request-review-btn');
             submitBtn.prop('disabled', true);
+            reviewBtn.prop('disabled', true);
 
             $.ajax({
                 url: chatForm.attr('action'),
@@ -283,9 +296,10 @@
                 },
                 complete: function() {
                     submitBtn.prop('disabled', false);
+                    reviewBtn.prop('disabled', false);
                 }
             });
-        });
+        }
 
         // Polling for new messages
         let isPolling = false;

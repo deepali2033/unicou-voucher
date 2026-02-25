@@ -11,7 +11,24 @@
         <div class="message-box p-3 {{ $isMe ? 'bg-primary text-white' : 'bg-light text-dark' }}" 
              style="border-radius: 1.2rem; {{ $isMe ? 'border-bottom-right-radius: 0.2rem;' : 'border-bottom-left-radius: 0.2rem;' }}">
             <div class="message-content">
-                {{ $message->message }}
+                @if($message->message === '[DISPUTE_FEEDBACK_REQUEST]')
+                    @if(!$isMe)
+                        <div class="text-center py-2">
+                            <h6 class="fw-bold mb-2">Rate our Support</h6>
+                            <p class="small mb-3">Your feedback helps us improve our service.</p>
+                            <button type="button" class="btn btn-warning btn-sm px-4 text-white" data-bs-toggle="modal" data-bs-target="#feedbackModal" style="border-radius: 0.5rem;">
+                                <i class="fas fa-star me-1"></i> Rate Now
+                            </button>
+                        </div>
+                    @else
+                        <div class="text-center py-2">
+                            <i class="fas fa-star mb-1"></i>
+                            <p class="small mb-0">Feedback request sent to customer</p>
+                        </div>
+                    @endif
+                @else
+                    {{ $message->message }}
+                @endif
             </div>
         </div>
         
