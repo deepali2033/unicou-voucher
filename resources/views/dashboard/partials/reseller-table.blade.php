@@ -7,7 +7,7 @@
                 <th>Date of Reg.</th>
                 <th>Last Active date and time</th>
                 <th>Category</th>
-                <th>Limit</th>€
+                <th>Limit</th>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
                 @endif
