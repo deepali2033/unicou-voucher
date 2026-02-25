@@ -123,7 +123,7 @@ class PaymentController extends Controller
             $user = auth()->user();
 
             $order = Order::create([
-                'order_id' => 'ORD-' . strtoupper(\Illuminate\Support\Str::random(10)),
+                'order_id' => 'PUR-' . strtoupper(\Illuminate\Support\Str::random(10)),
                 'user_id' => $user->id,
                 'user_role' => $user->account_type,
                 'voucher_type' => $voucher->voucher_type,

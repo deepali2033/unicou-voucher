@@ -6,9 +6,22 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\InventoryVoucher;
+use App\Models\Order;
 
 class PurchesController extends Controller
 {
+    public function purchaseInvoice($order_id)
+    {
+        $order = Order::with(['inventoryVoucher', 'user'])->where('order_id', $order_id)->firstOrFail();
+        
+        // Ensure user can only view their own invoice
+        if (!auth()->user()->isAdmin() && !auth()->user()->isManager() && $order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('dashboard.purches.invoice', compact('order'));
+    }
+
     public function purchesReport(Request $request)
     {
         $query = InventoryVoucher::query();

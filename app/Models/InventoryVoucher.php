@@ -40,6 +40,9 @@ class InventoryVoucher extends Model
 
 
         'upload_vouchers',
+        'delivered_vouchers',
+        'opening_stock_qty',
+        'purchased_qty',
         'status'
     ];
 
@@ -48,6 +51,8 @@ class InventoryVoucher extends Model
         'expiry_date' => 'date',
         'is_expired' => 'boolean',
         'quantity' => 'integer',
+        'opening_stock_qty' => 'integer',
+        'purchased_qty' => 'integer',
         'purchase_value' => 'decimal:2',
         'purchase_value_per_unit' => 'decimal:2',
         'taxes' => 'decimal:2',
@@ -60,6 +65,7 @@ class InventoryVoucher extends Model
         'student_bonus_points_per_unit' => 'integer',
         'student_sale_price' => 'decimal:2',
         'upload_vouchers' => 'array',
+        'delivered_vouchers' => 'array',
     ];
 
     public function scopeExpired($query)

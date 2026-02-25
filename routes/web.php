@@ -179,15 +179,6 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/vouchers-import', [VoucherController::class, 'import'])->name('vouchers.import');
 
 
-    Route::post('/safepay/create/{rule}', [PaymentController::class, 'create'])
-        ->name('safepay.create');
-
-    Route::get('/safepay/success', [PaymentController::class, 'success'])
-        ->name('safepay.success');
-
-    Route::post('/safepay/webhook', [PaymentController::class, 'webhook'])
-        ->name('safepay.webhook');
-
     // Inventory Management
     Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
@@ -208,7 +199,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
 
     // Purches
-
+    Route::get('/purchase-invoice/{order_id}', [PurchesController::class, 'purchaseInvoice'])->name('purches.invoice');
     Route::get('/purches-report', [PurchesController::class, 'purchesReport'])->name('purches.purches.report');
     Route::get('/purches-report-export', [PurchesController::class, 'export'])->name('purches.export');
     // Order Management
@@ -220,13 +211,17 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
         Route::post('/orders/{id}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     });
     Route::get('/orders/history', [OrderController::class, 'orderHistory'])->name('orders.history');
+    Route::get('/orders/user-export', [OrderController::class, 'userExport'])->name('orders.user_export');
 
 
     // Refund Management
     Route::get('/refunds', [RefundController::class, 'index'])->name('refunds.index');
+    Route::get('/refunds/admin-export', [RefundController::class, 'adminExport'])->name('refunds.admin_export');
     Route::get('/my-refunds', [RefundController::class, 'userRefunds'])->name('refunds.user');
+    Route::get('/my-refunds/export', [RefundController::class, 'userExport'])->name('refunds.user_export');
     Route::post('/refunds/store', [RefundController::class, 'store'])->name('refunds.store');
     Route::post('/refunds/{id}/approve', [RefundController::class, 'approve'])->name('refunds.approve');
+    Route::post('/refunds/{id}/process', [RefundController::class, 'processRefund'])->name('refunds.process');
     Route::post('/refunds/{id}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
 
     // Wallet Management

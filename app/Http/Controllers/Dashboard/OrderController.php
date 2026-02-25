@@ -97,6 +97,22 @@ class OrderController extends Controller
             'delivery_details' => $request->codes
         ]);
 
+        // Update Inventory delivered_vouchers and quantity
+        $voucher = InventoryVoucher::where('sku_id', $order->voucher_id)->first();
+        if ($voucher) {
+            $newDelivered = array_map('trim', explode("\n", str_replace("\r", "", $request->codes)));
+            $existingDelivered = $voucher->delivered_vouchers ?: [];
+            $allDelivered = array_unique(array_merge($existingDelivered, $newDelivered));
+            
+            $voucher->delivered_vouchers = $allDelivered;
+            
+            // Re-calculate quantity
+            $allUploaded = $voucher->upload_vouchers ?: [];
+            $remaining = array_diff($allUploaded, $allDelivered);
+            $voucher->quantity = count($remaining);
+            $voucher->save();
+        }
+
         // Notify User
         try {
             $user = $order->user;
@@ -185,9 +201,127 @@ class OrderController extends Controller
         return back()->with('success', 'Order approved successfully.');
     }
 
-    public function orderHistory()
+    public function orderHistory(Request $request)
     {
-        $orders = Order::where('user_id', auth()->id())->latest()->paginate(10);
+        $query = Order::with(['inventoryVoucher'])->where('user_id', auth()->id());
+
+        // Filters based on User Request
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->filled('currency')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('currency', $request->currency);
+            });
+        }
+        if ($request->filled('brand_name')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('brand_name', 'like', '%' . $request->brand_name . '%');
+            });
+        }
+        if ($request->filled('voucher_variant')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('voucher_variant', 'like', '%' . $request->voucher_variant . '%');
+            });
+        }
+        if ($request->filled('voucher_type')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('voucher_type', $request->voucher_type);
+            });
+        }
+        if ($request->filled('country_region')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('country_region', $request->country_region);
+            });
+        }
+
+        $orders = $query->latest()->paginate(10)->withQueryString();
         return view('dashboard.orders.history', compact('orders'));
+    }
+
+    public function userExport(Request $request)
+    {
+        $query = Order::with(['inventoryVoucher'])->where('user_id', auth()->id());
+
+        // Apply same filters as history
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->filled('currency')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('currency', $request->currency);
+            });
+        }
+        if ($request->filled('brand_name')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('brand_name', 'like', '%' . $request->brand_name . '%');
+            });
+        }
+        if ($request->filled('voucher_variant')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('voucher_variant', 'like', '%' . $request->voucher_variant . '%');
+            });
+        }
+        if ($request->filled('voucher_type')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('voucher_type', $request->voucher_type);
+            });
+        }
+        if ($request->filled('country_region')) {
+            $query->whereHas('inventoryVoucher', function($q) use ($request) {
+                $q->where('country_region', $request->country_region);
+            });
+        }
+
+        $orders = $query->latest()->get();
+        $filename = "purchase_report_" . date('Ymd_His') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $columns = [
+            'Sr. No.', 'P.ID.', 'Date', 'Time', 'Brand Name', 'Currency', 
+            'Country/Region', 'Voucher Variant', 'Voucher Type', 'Purchase Invoice No.', 
+            'Purchase Date', 'Total Quantity', 'Purchase Value', 'Taxes', 
+            'Per Unit Price', 'Issue Date', 'Expiry Date', 'Credit Limit', 'Status'
+        ];
+
+        fputcsv($handle, $columns);
+
+        $user = auth()->user();
+        foreach ($orders as $index => $order) {
+            $v = $order->inventoryVoucher;
+            fputcsv($handle, [
+                $index + 1,
+                $order->order_id,
+                $order->created_at->format('Y-m-d'),
+                $order->created_at->format('H:i:s'),
+                $v->brand_name ?? 'N/A',
+                $v->currency ?? 'N/A',
+                $v->country_region ?? 'N/A',
+                $v->voucher_variant ?? 'N/A',
+                $v->voucher_type ?? 'N/A',
+                $order->order_id,
+                $order->created_at->format('Y-m-d'),
+                $order->quantity,
+                $order->amount,
+                '0.00',
+                number_format($order->amount / $order->quantity, 2, '.', ''),
+                $order->created_at->format('Y-m-d'),
+                $v->expiry_date ? $v->expiry_date->format('Y-m-d') : 'N/A',
+                $user->voucher_limit ?? 'N/A',
+                $order->status
+            ]);
+        }
+
+        fclose($handle);
+        exit;
     }
 }

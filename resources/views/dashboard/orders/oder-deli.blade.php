@@ -6,15 +6,15 @@
     <div class="offcanvas offcanvas-end" tabindex="-1" id="filterOffcanvas" aria-labelledby="filterOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="filterOffcanvasLabel">
-                <i class="fas fa-filter me-2"></i>Filter Orders
+                <i class="fas fa-filter me-2"></i>Filter Purchases
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
             <form id="filter-form" action="{{ route('orders.index') }}" method="GET">
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Order ID</label>
-                    <input type="text" name="order_id" class="form-control" placeholder="Search order ID..." value="{{ request('order_id') }}">
+                    <label class="form-label fw-bold">Purchase ID</label>
+                    <input type="text" name="order_id" class="form-control" placeholder="Search purchase ID..." value="{{ request('order_id') }}">
                 </div>
 
                 <div class="mb-4">
@@ -55,8 +55,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0 fw-bold">Order Deliveries</h5>
-                <small class="text-muted">{{ $orders->total() }} Orders Found</small>
+                <h5 class="mb-0 fw-bold">Purchase Deliveries</h5>
+                <small class="text-muted">{{ $orders->total() }} Purchases Found</small>
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('orders.export', request()->all()) }}" class="btn btn-success btn-sm px-3 shadow-sm">
@@ -72,7 +72,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Order Details</th>
+                            <th class="ps-4">Purchase Details</th>
                             <th>Customer</th>
                             <th>Payment</th>
                             <th>Amount</th>

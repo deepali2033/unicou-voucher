@@ -269,7 +269,7 @@
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('orders.history') ? 'active' : '' }}" href="{{ route('orders.history') }}">
-                    <i class="fas fa-shopping-cart me-2"></i> My Orders
+                    <i class="fas fa-shopping-cart me-2"></i> My Purchases
                 </a>
             </li>
             <li class="nav-item">

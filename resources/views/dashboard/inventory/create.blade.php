@@ -33,7 +33,21 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Country/Region</label>
-                        <input type="text" name="country_region" id="country_region" class="form-control" value="{{ old('country_region') }}" placeholder="e.g. IN" required>
+                        <select name="country_region" id="country" class="form-select" required>
+                            <option value="">Select Country</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-uppercase">State</label>
+                        <select name="state" id="state" class="form-select">
+                            <option value="">Select State</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-uppercase">City</label>
+                        <select name="city" id="city" class="form-select">
+                            <option value="">Select City</option>
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency</label>
@@ -63,11 +77,11 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Purchase Date</label>
-                        <input type="date" name="purchase_date" class="form-control" value="{{ old('purchase_date') }}">
+                        <input type="date" name="purchase_date" class="form-control" value="{{ old('purchase_date', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Expiry Date</label>
-                        <input type="date" name="expiry_date" class="form-control" value="{{ old('expiry_date') }}">
+                        <input type="date" name="expiry_date" class="form-control" value="{{ old('expiry_date') }}" min="{{ date('Y-m-d') }}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Quantity</label>
@@ -167,7 +181,7 @@
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
             let variant = $('#voucher_variant').val().trim();
-            let country = $('#country_region').val().trim();
+            let country = $('#country').val().trim();
 
             if (brand.length >= 1 && country.length >= 1) {
                 // 1. Country Part (First 2-3 characters)
@@ -207,7 +221,7 @@
             }
         }
 
-        $('#brand_name, #voucher_variant, #country_region').on('input', function() {
+        $('#brand_name, #voucher_variant, #country').on('input change', function() {
             generateSKU();
         });
 
@@ -239,6 +253,8 @@
             let codes = cleaned.split(',').filter(code => code.trim().length > 0);
             let count = codes.length;
 
+            $('input[name="quantity"]').val(count).trigger('input');
+
             // For display, use ", " for better readability
             let displayValue = codes.join(', ');
 
@@ -248,23 +264,82 @@
             };
         }
 
-        // Auto-format voucher codes and update quantity
-        $('textarea[name="upload_vouchers"]').on('input change blur', function() {
-            let res = formatVouchers($(this).val());
-            $(this).val(res.display);
-            $('input[name="quantity"]').val(res.count);
-            calculateUnitValue();
-        });
-
         // Better handling for paste
-        $('textarea[name="upload_vouchers"]').on('paste', function(e) {
+        $('textarea[name="upload_vouchers"]').on('input paste', function(e) {
             let self = this;
             setTimeout(function() {
                 let res = formatVouchers($(self).val());
                 $(self).val(res.display);
-                $('input[name="quantity"]').val(res.count);
-                calculateUnitValue();
             }, 100);
+        });
+    });
+</script>
+
+<script type="module">
+    import {
+        Country,
+        State,
+        City
+    } from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const countrySelect = document.getElementById("country");
+        const stateSelect = document.getElementById("state");
+        const citySelect = document.getElementById("city");
+
+        // Populate Countries
+        const countries = Country.getAllCountries();
+        countrySelect.innerHTML = '<option value="">Select Country</option>';
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name;
+            option.textContent = country.name;
+            option.dataset.code = country.isoCode;
+            countrySelect.appendChild(option);
+        });
+
+        function updateStates(countryCode) {
+            stateSelect.innerHTML = '<option value="">Select State</option>';
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            if (countryCode) {
+                const states = State.getStatesOfCountry(countryCode);
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.name;
+                    option.textContent = state.name;
+                    option.dataset.code = state.isoCode;
+                    stateSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateCities(countryCode, stateCode) {
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            if (countryCode && stateCode) {
+                const cities = City.getCitiesOfState(countryCode, stateCode);
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.name;
+                    option.textContent = city.name;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Country Change Event
+        countrySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const countryCode = selectedOption.dataset.code;
+            updateStates(countryCode);
+        });
+
+        // State Change Event
+        stateSelect.addEventListener('change', function() {
+            const countryOption = countrySelect.options[countrySelect.selectedIndex];
+            const countryCode = countryOption.dataset.code;
+            const stateOption = this.options[this.selectedIndex];
+            const stateCode = stateOption.dataset.code;
+            updateCities(countryCode, stateCode);
         });
     });
 </script>

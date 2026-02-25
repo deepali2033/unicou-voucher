@@ -165,8 +165,42 @@
                     </div>
 
                     <div class="col-12 mt-4">
-                        <label class="form-label small fw-bold text-uppercase">Voucher Codes / Upload Info</label>
-                        <textarea name="upload_vouchers" class="form-control" rows="4" placeholder="Enter voucher codes or links here...">{{ old('upload_vouchers', is_array($inventory->upload_vouchers) ? implode(', ', $inventory->upload_vouchers) : $inventory->upload_vouchers) }}</textarea>
+                        @php
+                            $allCodes = is_array($inventory->upload_vouchers) ? $inventory->upload_vouchers : [];
+                            $deliveredCodes = is_array($inventory->delivered_vouchers) ? $inventory->delivered_vouchers : [];
+                            $remainingCodes = array_diff($allCodes, $deliveredCodes);
+                        @endphp
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-uppercase">Voucher Codes (Remaining: {{ count($remainingCodes) }})</label>
+                                <textarea name="upload_vouchers" class="form-control" rows="6" placeholder="Add more voucher codes here (comma separated)..."></textarea>
+                                <div class="form-text">Note: Entered codes will be appended to existing ones.</div>
+                                
+                                <div class="mt-3 p-3 bg-light rounded shadow-sm border" style="max-height: 200px; overflow-y: auto;">
+                                    <h6 class="fw-bold small text-uppercase mb-2 text-success">Available Codes in Database:</h6>
+                                    @forelse($remainingCodes as $code)
+                                        <span class="badge bg-white text-dark border mb-1 me-1">{{ $code }}</span>
+                                    @empty
+                                        <p class="text-muted small mb-0">No available codes.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">Delivered Codes (Used: {{ count($deliveredCodes) }})</label>
+                                <div class="p-3 bg-light rounded shadow-sm border" style="max-height: 350px; overflow-y: auto;">
+                                    @forelse($deliveredCodes as $code)
+                                        <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                                            <span class="small">{{ $code }}</span>
+                                            <span class="badge bg-secondary-soft text-secondary tiny-text">DELIVERED</span>
+                                        </div>
+                                    @empty
+                                        <p class="text-muted small mb-0">No codes delivered yet.</p>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-12 text-end mt-4">
@@ -250,6 +284,8 @@
             calculateUnitValue();
         });
 
+        const initialQty = parseInt($('input[name="quantity"]').val()) || 0;
+
         function formatVouchers(val) {
             // Replace newlines, tabs, and spaces with a comma
             let cleaned = val.replace(/[\n\r\t\s]+/g, ',');
@@ -262,6 +298,10 @@
             let codes = cleaned.split(',').filter(code => code.trim().length > 0);
             let count = codes.length;
 
+            // Update quantity field: initial + new codes
+            $('input[name="quantity"]').val(initialQty + count);
+            calculateUnitValue();
+
             // For display, use ", " for better readability
             let displayValue = codes.join(', ');
             
@@ -271,12 +311,8 @@
             };
         }
 
-        // Auto-format voucher codes and update quantity
-        $('textarea[name="upload_vouchers"]').on('input change blur', function() {
-            let res = formatVouchers($(this).val());
-            $(this).val(res.display);
-            $('input[name="quantity"]').val(res.count);
-            calculateUnitValue();
+        $('textarea[name="upload_vouchers"]').on('input change', function() {
+            formatVouchers($(this).val());
         });
 
         // Better handling for paste
@@ -285,8 +321,6 @@
             setTimeout(function() {
                 let res = formatVouchers($(self).val());
                 $(self).val(res.display);
-                $('input[name="quantity"]').val(res.count);
-                calculateUnitValue();
             }, 100);
         });
     });

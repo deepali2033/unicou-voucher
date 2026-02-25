@@ -72,15 +72,10 @@ class VoucherController extends Controller
                 $voucher->final_price = $voucher->agent_sale_price;
             }
 
-            // Check 24h limit
-            $boughtLast24h = Order::where('user_id', $user->id)
-                ->where('voucher_id', $voucher->sku_id)
-                ->where('created_at', '>=', now()->subHours(24))
-                ->sum('quantity');
-
-            $voucher->is_limited = ($boughtLast24h > 0 || $boughtTotalLast24h >= $userTotalLimit);
+            // Check 24h total limit across all vouchers
+            $voucher->is_limited = ($boughtTotalLast24h >= $userTotalLimit);
             $voucher->remaining_limit = max(0, $userTotalLimit - $boughtTotalLast24h);
-            $voucher->quantity_bought_today = $boughtLast24h;
+            $voucher->quantity_bought_today = $boughtTotalLast24h;
         }
 
         $stats = [
@@ -201,7 +196,10 @@ class VoucherController extends Controller
             $status = 'pending';
         } elseif ($request->payment_type == 'card') {
             $status = 'pending';
-            $bank_details = ['notes' => 'Card payment initiated'];
+            $bank_details = [
+                'notes' => 'Card payment initiated',
+                'captured_details' => $request->captured_details
+            ];
         }
 
         $referralPointsPerUnit = 0;
@@ -224,7 +222,7 @@ class VoucherController extends Controller
         try {
             // Create Order
             $orderData = [
-                'order_id' => 'ORD-' . strtoupper(Str::random(10)),
+                'order_id' => 'PUR-' . strtoupper(Str::random(10)),
                 'user_id' => $user->id,
                 'sub_agent_id' => $user->sub_agent_id, // Store parent ID for referral points
                 'user_role' => $user->account_type,

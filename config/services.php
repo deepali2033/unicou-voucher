@@ -40,10 +40,4 @@ return [
         'secret_key' => env('SHUFTI_SECRET_KEY'),
     ],
 
-    'safepay' => [
-        'public_key' => env('SAFEPAY_PUBLIC_KEY'),
-        'secret_key' => env('SAFEPAY_SECRET_KEY'),
-        'base_url' => env('SAFEPAY_BASE_URL', 'https://api.safepay.pk/v1'),
-    ],
-
 ];

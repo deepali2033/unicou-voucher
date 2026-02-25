@@ -14,6 +14,11 @@ class RefundRequest extends Model
         'status',
         'admin_note',
         'bank_details',
+        'transaction_id',
+        'user_transaction_id',
+        'transaction_slip',
+        'refund_receipt',
+        'processed_at',
     ];
 
     public function user()

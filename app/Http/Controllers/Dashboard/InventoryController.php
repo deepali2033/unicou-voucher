@@ -131,6 +131,7 @@ class InventoryController extends Controller
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|string|max:255',
             'state' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
             'voucher_variant' => 'nullable|string|max:255',
             'voucher_type' => 'required|string|max:255',
@@ -163,9 +164,13 @@ class InventoryController extends Controller
 
         if ($request->filled('upload_vouchers')) {
             $validated['upload_vouchers'] = array_map('trim', explode(',', $request->upload_vouchers));
+            $count = count($validated['upload_vouchers']);
+            $validated['opening_stock_qty'] = $count;
+            $validated['purchased_qty'] = $count;
+            $validated['quantity'] = $count;
         }
 
-        if ($validated['expiry_date'] && \Carbon\Carbon::parse($validated['expiry_date'])->isPast()) {
+        if (isset($validated['expiry_date']) && $validated['expiry_date'] && \Carbon\Carbon::parse($validated['expiry_date'])->isPast()) {
             $validated['is_expired'] = true;
         } else {
             $validated['is_expired'] = false;
@@ -190,6 +195,7 @@ class InventoryController extends Controller
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|string|max:255',
             'state' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
             'voucher_variant' => 'nullable|string|max:255',
             'voucher_type' => 'required|string|max:255',
@@ -226,10 +232,25 @@ class InventoryController extends Controller
         }
 
         if ($request->filled('upload_vouchers')) {
-            $validated['upload_vouchers'] = array_map('trim', explode(',', $request->upload_vouchers));
+            $newCodesString = $request->upload_vouchers;
+            // Support both comma and newline as separator for convenience
+            $newCodes = array_map('trim', preg_split('/[, \n\r]+/', $newCodesString));
+            $newCodes = array_filter($newCodes); // Remove empty values
+            
+            $existingCodes = $inventory->upload_vouchers ?: [];
+            $allCodes = array_unique(array_merge($existingCodes, $newCodes));
+            $validated['upload_vouchers'] = array_values($allCodes);
+            
+            // Quantity should be all codes minus delivered codes
+            $deliveredCodes = $inventory->delivered_vouchers ?: [];
+            $remainingCodes = array_diff($allCodes, $deliveredCodes);
+            $validated['quantity'] = count($remainingCodes);
+
+            // Update purchased_qty: It's basically all unique codes ever added
+            $validated['purchased_qty'] = count($allCodes);
         }
 
-        if ($validated['expiry_date'] && \Carbon\Carbon::parse($validated['expiry_date'])->isPast()) {
+        if (isset($validated['expiry_date']) && $validated['expiry_date'] && \Carbon\Carbon::parse($validated['expiry_date'])->isPast()) {
             $validated['is_expired'] = true;
         } else {
             $validated['is_expired'] = false;
