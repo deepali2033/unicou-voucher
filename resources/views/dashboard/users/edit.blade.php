@@ -24,30 +24,20 @@
                                 <input type="text" name="first_name" class="form-control @error('first_name') is-invalid @enderror" value="{{ old('first_name', $user->first_name) }}" required>
                                 @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <!-- <div class="col-md-6">
-                                <label class="form-label fw-semibold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name', $user->last_name) }}" required>
-                                @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div> -->
-                        </div>
-
-                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Email Address</label>
                                 <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
                                 @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
+                        </div>
 
-
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Phone Number</label>
                                 <input type="text" id="phone" name="phone_dummy" class="form-control intl-phone @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
                                 <input type="hidden" name="phone" id="full_phone">
                                 @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Country</label>
                                 <select name="country" id="country" class="form-select @error('country') is-invalid @enderror" required>
@@ -55,6 +45,9 @@
                                 </select>
                                 @error('country') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">State</label>
                                 <select name="state" id="state" class="form-select @error('state') is-invalid @enderror" required>
@@ -62,9 +55,6 @@
                                 </select>
                                 @error('state') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">City</label>
                                 <select name="city" id="city" class="form-select @error('city') is-invalid @enderror" required>
