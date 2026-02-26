@@ -36,22 +36,22 @@
                 <td>{{ $item->voucher_type }}</td>
                 
                 <td>{{ $item->sold_qty }}</td>
-                <td class="text-end">{{ number_format($item->sold_value, 2) }}</td>
-                <td class="text-end">{{ number_format($item->sold_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->sold_value, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->sold_taxes, 2) }}</td>
                 
                 <td>{{ $item->purchase_qty }}</td>
-                <td class="text-end">{{ number_format($item->purchase_value, 2) }}</td>
-                <td class="text-end">{{ number_format($item->purchase_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->purchase_value_calc, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->purchase_taxes_calc, 2) }}</td>
                 
                 <td>{{ $item->lost_qty }}</td>
-                <td class="text-end">{{ number_format($item->lost_value, 2) }}</td>
-                <td class="text-end">{{ number_format($item->lost_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->lost_value, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->lost_taxes, 2) }}</td>
                 
                 <td>{{ $item->profit_qty }}</td>
                 <td class="text-end fw-bold {{ $item->profit_value >= 0 ? 'text-success' : 'text-danger' }}">
-                    {{ number_format($item->profit_value, 2) }}
+                    {{ $item->local_currency }} {{ number_format($item->profit_value, 2) }}
                 </td>
-                <td class="text-end">{{ number_format($item->profit_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->profit_taxes, 2) }}</td>
             </tr>
             @empty
             <tr>

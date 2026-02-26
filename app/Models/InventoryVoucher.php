@@ -105,4 +105,9 @@ class InventoryVoucher extends Model
             $voucher->update(['is_expired' => true]);
         }
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'voucher_id', 'sku_id');
+    }
 }

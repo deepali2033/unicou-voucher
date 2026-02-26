@@ -78,11 +78,11 @@
                             <td><span class="badge bg-primary-soft text-primary fw-bold">{{ $purchase->order_id }}</span></td>
                             <td>{{ $purchase->created_at->format('d-m-Y') }}</td>
                             <td>{{ $purchase->created_at->format('H:i:s') }}</td>
-                            <td>{{ $purchase->inventoryVoucher->brand_name ?? 'N/A' }}</td>
-                            <td>{{ $purchase->inventoryVoucher->currency ?? 'N/A' }}</td>
-                            <td>{{ $purchase->inventoryVoucher->country_region ?? 'N/A' }}</td>
-                            <td>{{ $purchase->inventoryVoucher->voucher_variant ?? 'N/A' }}</td>
-                            <td>{{ $purchase->inventoryVoucher->voucher_type ?? 'N/A' }}</td>
+                            <td>{{ optional($purchase->inventoryVoucher)->brand_name ?? 'N/A' }}</td>
+                            <td>{{ optional($purchase->inventoryVoucher)->currency ?? 'N/A' }}</td>
+                            <td>{{ optional($purchase->inventoryVoucher)->country_region ?? 'N/A' }}</td>
+                            <td>{{ optional($purchase->inventoryVoucher)->voucher_variant ?? 'N/A' }}</td>
+                            <td>{{ optional($purchase->inventoryVoucher)->voucher_type ?? 'N/A' }}</td>
                             <td>{{ $purchase->order_id }}</td>
                             <td>{{ $purchase->created_at->format('d-m-Y') }}</td>
                             <td class="text-center">{{ $purchase->quantity }}</td>
@@ -90,7 +90,7 @@
                             <td>0.00</td>
                             <td>{{ number_format($purchase->amount / $purchase->quantity, 2) }}</td>
                             <td>{{ $purchase->created_at->format('d-m-Y') }}</td>
-                            <td>{{ $purchase->inventoryVoucher->expiry_date ? $purchase->inventoryVoucher->expiry_date->format('d-m-Y') : 'N/A' }}</td>
+                            <td>{{ optional($purchase->inventoryVoucher)->expiry_date ? $purchase->inventoryVoucher->expiry_date->format('d-m-Y') : 'N/A' }}</td>
                             <td>{{ auth()->user()->voucher_limit ?? 'N/A' }}</td>
                             <td>
                                 <a href="{{ route('purches.invoice', $purchase->order_id) }}" class="btn btn-xs btn-outline-info">Invoice</a>

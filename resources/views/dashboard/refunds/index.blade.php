@@ -35,7 +35,7 @@
                         </option>
 
                         @foreach(
-                        \App\Models\Refund::whereHas('user', function($q){
+                        \App\Models\RefundRequest::whereHas('user', function($q){
                         $q->whereNotNull('country')
                         ->where('country', '!=', '');
                         })

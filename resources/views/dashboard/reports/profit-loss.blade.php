@@ -42,6 +42,39 @@
                 <label class="form-label fw-bold">SKU ID</label>
                 <input type="text" name="sku_id" class="form-control" placeholder="Search SKU" value="{{ request('sku_id') }}">
             </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Voucher Type</label>
+                <select name="voucher_type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="Online" {{ request('voucher_type') == 'Online' ? 'selected' : '' }}>Online</option>
+                    <option value="Center" {{ request('voucher_type') == 'Center' ? 'selected' : '' }}>Center</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Country</label>
+                <select name="country_region" class="form-select">
+                    <option value="">All Countries</option>
+                    @foreach($countries as $country)
+                        <option value="{{ $country }}" {{ request('country_region') == $country ? 'selected' : '' }}>{{ $country }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Period Type</label>
+                <select name="period_type" class="form-select">
+                    <option value="weekly" {{ request('period_type') == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                    <option value="monthly" {{ request('period_type', 'monthly') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Select Date</label>
+                <input type="date" name="filter_date" class="form-control" value="{{ request('filter_date', date('Y-m-d')) }}">
+                <small class="text-muted">Report will be generated for the month or week of this date.</small>
+            </div>
             <div class="d-grid gap-2 pt-3 border-top">
                 <button type="submit" class="btn btn-primary">Apply Filters</button>
                 <a href="{{ route('reports.profit-loss') }}" class="btn btn-light">Reset All</a>

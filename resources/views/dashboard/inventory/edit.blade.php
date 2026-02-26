@@ -123,7 +123,8 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency Conv. @</label>
-                        <input type="number" step="0.000001" name="currency_conversion_rate" class="form-control" value="{{ old('currency_conversion_rate', $inventory->currency_conversion_rate) }}">
+                        <input type="number" step="0.000001" name="currency_conversion_rate" id="conversion_rate" class="form-control" value="{{ old('currency_conversion_rate', $inventory->currency_conversion_rate) }}">
+                        <div id="conversion_explanation" class="small text-muted mt-1 fw-bold">1 <span class="primary_curr_label">{{ $inventory->currency }}</span> = <span class="rate_label">{{ number_format($inventory->currency_conversion_rate, 6) }}</span> <span class="local_curr_label">{{ $inventory->local_currency ?: '---' }}</span></div>
                     </div>
 
                     <!-- Sale & Points Info -->
@@ -322,6 +323,20 @@
                 let res = formatVouchers($(self).val());
                 $(self).val(res.display);
             }, 100);
+        });
+
+        function updateConversionExplanation() {
+            let primary = $('#currency').val() || '---';
+            let local = $('input[name="local_currency"]').val() || '---';
+            let rate = $('#conversion_rate').val() || '1.0';
+
+            $('.primary_curr_label').text(primary);
+            $('.local_curr_label').text(local);
+            $('.rate_label').text(parseFloat(rate).toFixed(6));
+        }
+
+        $('#currency, input[name="local_currency"], #conversion_rate').on('input change', function() {
+            updateConversionExplanation();
         });
     });
 </script>

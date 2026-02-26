@@ -11,6 +11,22 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
+            <form id="search-form">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Search</label>
+                    <div class="input-group ">
+
+                        <input type="text" name="search" class="form-control" placeholder="Search Sale ID, Customer..." value="{{ request('search') }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+
+
             <form id="filter-form" action="{{ route('sales.index') }}" method="GET">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Date Wise Report (From - To)</label>
@@ -81,14 +97,7 @@
                 <h5 class="mb-0 fw-bold text-dark">Sales Report</h5>
             </div>
             <div class="d-flex gap-2">
-                <form id="search-form" class="d-flex gap-2 me-2">
-                    <div class="input-group input-group-sm" style="width: 250px;">
-                        <input type="text" name="search" class="form-control" placeholder="Search Sale ID, Customer..." value="{{ request('search') }}">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </form>
+
                 <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> Export CSV
                 </a>
