@@ -222,7 +222,7 @@ class VoucherController extends Controller
         try {
             // Create Order
             $orderData = [
-                'order_id' => 'PUR-' . strtoupper(Str::random(10)),
+                'order_id' => 'PUR-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT),
                 'user_id' => $user->id,
                 'sub_agent_id' => $user->sub_agent_id, // Store parent ID for referral points
                 'user_role' => $user->account_type,

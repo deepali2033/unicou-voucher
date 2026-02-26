@@ -18,6 +18,34 @@
                     <input type="text" name="order_id" class="form-control" placeholder="Search order ID..." value="{{ request('order_id') }}">
                 </div>
 
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Brand Name</label>
+                    <select name="brand_name" class="form-select">
+                        <option value="">All Brands</option>
+                        @foreach($brands as $brand)
+                        <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Date Range</label>
+                    <div class="d-flex flex-column gap-2">
+                        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    </select>
+                </div>
+
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
                     <a href="{{ route('referral') }}" class="btn btn-light">Reset All</a>
@@ -48,7 +76,7 @@
                 <small class="text-muted">Track your referral earnings from voucher purchases.</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                <a href="{{ route('referral.export', request()->all()) }}" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
@@ -63,9 +91,9 @@
                         <tr>
                             <th class="px-4 py-3 border-0">S.NO</th>
                             <th class="py-3 border-0">ORDER ID</th>
-                            <th class="py-3 border-0">USER</th>
+                            <th class="py-3 border-0">BRAND</th>
                             <th class="py-3 border-0">VOUCHER</th>
-                            <th class="py-3 border-0 text-end">AMOUNT</th>
+                            <th class="py-3 border-0 text-start">AMOUNT</th>
                             <th class="py-3 border-0 text-center">DATE</th>
                             <th class="py-3 border-0 text-center">REFERRAL POINTS</th>
                             <th class="py-3 border-0 text-center">STATUS</th>
@@ -76,9 +104,9 @@
                         <tr>
                             <td class="px-4">{{ $referralHistory->firstItem() + $index }}</td>
                             <td class="fw-bold text-primary">{{ $order->order_id }}</td>
-                            <td>{{ auth()->user()->name }}</td>
+                            <td>{{ $order->v_brand_name ?? 'N/A' }}</td>
                             <td>{{ $order->voucher_type }}</td>
-                            <td class="text-end fw-bold">RS {{ number_format($order->amount) }}</td>
+                            <td class="text-start fw-bold">RS {{ number_format($order->amount) }}</td>
                             <td class="text-center small text-muted">
                                 {{ $order->created_at->format('Y-m-d') }}<br>
                                 {{ $order->created_at->format('H:i') }}
@@ -86,8 +114,8 @@
                             <td class="text-center">
                                 <span class="badge bg-soft-success text-success">+{{ $order->referral_points }}</span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-success">Credited</span>
+                            <td class="text-center text-capitalize">
+                                <span class="badge bg-success">{{ $order->status }}</span>
                             </td>
                         </tr>
                         @empty

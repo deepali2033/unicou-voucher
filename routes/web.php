@@ -286,9 +286,11 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     //Referral Points
     Route::get('/referral', [ReferralController::class, 'referral'])->name('referral');
+    Route::get('/referral/export', [ReferralController::class, 'export'])->name('referral.export');
 
     //Bonus Points
     Route::get('/bonus-point', [BonusController::class, 'bonus'])->name('bonus');
+    Route::get('/bonus-point/export', [BonusController::class, 'export'])->name('bonus.export');
 
     // Dispute Management
     Route::get('/disputes', [DisputeController::class, 'index'])->name('disputes.index');

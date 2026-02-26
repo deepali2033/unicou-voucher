@@ -39,7 +39,7 @@
         @endif
 
         <div class="notification-bell position-relative">
-            <a href="{{ route('notifications.index') }}" class="text-decoration-none">
+            <a href="{{ route('notifications.index') }}" class="text-decoration-none" data-toggle="Notifications" title="Notifications">
                 <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
                 @php
                 $unreadCount = auth()->user()->unreadNotifications->count();
@@ -52,25 +52,11 @@
                 @endif
             </a>
         </div>
-        @php
-        use App\Helpers\LocationHelper;
-
-        if (!session()->has('geo')) {
-        LocationHelper::geo();
-        }
-        @endphp
-
-        @php
-        $countryCode = session('geo.country_code', 'US');
-        $countryName = session('geo.country_name', 'United States');
-        $flagUrl = "https://flagcdn.com/w40/".strtolower($countryCode).".png";
-        @endphp
-
-
-
-        <div class="d-flex align-items-center gap-2" title="{{ $countryName }}" id="header-country-container">
-            <img id="header-country-flag" src="{{ $flagUrl }}" alt="{{ $countryName }}" style="width:30px;border-radius:2px;border:1px solid #eee;">
-            <span id="header-country-code" class="d-none d-md-inline text-muted small fw-bold">{{ $countryCode }}</span>
+        <div class="d-flex align-items-center gap-2" id="header-country-container">
+            <!-- @if(Auth::user()->country_iso)
+            <img src="https://flagsapi.com/{{ strtoupper(Auth::user()->country) }}/flat/64.png" alt="{{ Auth::user()->country }}" style="width:30px;border-radius:2px;">
+            @endif -->
+            <span class="text-muted small fw-bold">{{ Auth::user()->country }}</span>
         </div>
 
 

@@ -5,7 +5,7 @@
       <h4 class="fw-bold mb-0">Main Dashboard</h4>
       <div class="system-status">
          <span class="badge bg-success-subtle text-success p-2">
-         <i class="fas fa-circle me-1 small"></i> System Running
+            <i class="fas fa-circle me-1 small"></i> System Running
          </span>
       </div>
    </div>
@@ -176,15 +176,15 @@
                            type="button"
                            data-bs-toggle="collapse"
                            data-bs-target="#collapseOne">
-                        <i class="fas fa-chart-line me-2 text-primary"></i>
-                        <span>Top</span>
+                           <i class="fas fa-chart-line me-2 text-primary"></i>
+                           <span>Top Brand</span>
                         </button>
                      </h2>
                      <div id="collapseOne"
                         class="accordion-collapse collapse"
                         data-bs-parent="#dashboardAccordion">
-                        <div class="accordion-body">
-                           Top content goes here...
+                        <div class="accordion-body fw-bold text-primary">
+                           {{ $stats['top_brand'] }}
                         </div>
                      </div>
                   </div>
@@ -195,15 +195,15 @@
                            type="button"
                            data-bs-toggle="collapse"
                            data-bs-target="#collapseTwo">
-                        <i class="fas fa-tags me-2 text-success"></i>
-                        <span>Selling Brand</span>
+                           <i class="fas fa-tags me-2 text-success"></i>
+                           <span>Selling Brand</span>
                         </button>
                      </h2>
                      <div id="collapseTwo"
                         class="accordion-collapse collapse"
                         data-bs-parent="#dashboardAccordion">
-                        <div class="accordion-body">
-                           Selling Brand content goes here...
+                        <div class="accordion-body fw-bold text-success">
+                           {{ $stats['top_brand'] }}
                         </div>
                      </div>
                   </div>
@@ -214,15 +214,15 @@
                            type="button"
                            data-bs-toggle="collapse"
                            data-bs-target="#collapseThree">
-                        <i class="fas fa-layer-group me-2 text-warning"></i>
-                        <span>Selling Varient</span>
+                           <i class="fas fa-layer-group me-2 text-warning"></i>
+                           <span>Selling Varient</span>
                         </button>
                      </h2>
                      <div id="collapseThree"
                         class="accordion-collapse collapse"
                         data-bs-parent="#dashboardAccordion">
-                        <div class="accordion-body">
-                           Selling Varient content goes here...
+                        <div class="accordion-body fw-bold text-warning">
+                           {{ $stats['top_variant'] }}
                         </div>
                      </div>
                   </div>
@@ -233,15 +233,15 @@
                            type="button"
                            data-bs-toggle="collapse"
                            data-bs-target="#collapseFour">
-                        <i class="fas fa-user me-2 text-danger"></i>
-                        <span>Buyer</span>
+                           <i class="fas fa-user me-2 text-danger"></i>
+                           <span>Top Buyer</span>
                         </button>
                      </h2>
                      <div id="collapseFour"
                         class="accordion-collapse collapse"
                         data-bs-parent="#dashboardAccordion">
-                        <div class="accordion-body">
-                           Buyer content goes here...
+                        <div class="accordion-body fw-bold text-danger">
+                           {{ $stats['top_buyer'] }}
                         </div>
                      </div>
                   </div>
@@ -252,15 +252,15 @@
                            type="button"
                            data-bs-toggle="collapse"
                            data-bs-target="#collapseFive">
-                        <i class="fas fa-globe me-2 text-info"></i>
-                        <span>Country</span>
+                           <i class="fas fa-globe me-2 text-info"></i>
+                           <span>Top Country</span>
                         </button>
                      </h2>
                      <div id="collapseFive"
                         class="accordion-collapse collapse"
                         data-bs-parent="#dashboardAccordion">
-                        <div class="accordion-body">
-                           Country content goes here...
+                        <div class="accordion-body fw-bold text-info">
+                           {{ $stats['top_country'] }}
                         </div>
                      </div>
                   </div>

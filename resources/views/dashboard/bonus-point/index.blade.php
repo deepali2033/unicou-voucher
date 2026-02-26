@@ -18,6 +18,34 @@
                     <input type="text" name="order_id" class="form-control" placeholder="Search order ID..." value="{{ request('order_id') }}">
                 </div>
 
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Brand Name</label>
+                    <select name="brand_name" class="form-select">
+                        <option value="">All Brands</option>
+                        @foreach($brands as $brand)
+                        <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Date Range</label>
+                    <div class="d-flex flex-column gap-2">
+                        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    </select>
+                </div>
+
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
                     <a href="{{ route('bonus') }}" class="btn btn-light">Reset All</a>
@@ -28,12 +56,12 @@
 
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-info border-4">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
                 <div class="card-body">
                     <div class="text-muted small mb-1">Total Bonus Points</div>
                     <div class="d-flex align-items-center">
                         <h3 class="fw-bold mb-0">{{ number_format($totalBonus) }}</h3>
-                        <span class="ms-auto text-info small fw-bold"><i class="fas fa-gift me-1"></i>Earned</span>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-gift me-1"></i>Earned</span>
                     </div>
                 </div>
             </div>
@@ -44,11 +72,11 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0 fw-bold">Bonus Points History</h5>
+                <h5 class="mb-0 fw-bold">Bonus Pointssds History</h5>
                 <small class="text-muted">Track your bonus points earned from various voucher orders.</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                <a href="{{ route('bonus.export', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
@@ -63,8 +91,9 @@
                         <tr>
                             <th class="px-4 py-3 border-0">S.NO</th>
                             <th class="py-3 border-0">ORDER ID</th>
+                            <th class="py-3 border-0">BRAND</th>
                             <th class="py-3 border-0">VOUCHER</th>
-                            <th class="py-3 border-0 text-end">ORDER AMOUNT</th>
+                            <th class="py-3 border-0 text-start">ORDER AMOUNT</th>
                             <th class="py-3 border-0 text-center">DATE</th>
                             <th class="py-3 border-0 text-center">BONUS POINTS</th>
                             <th class="py-3 border-0 text-center">STATUS</th>
@@ -74,18 +103,19 @@
                         @forelse($bonusHistory as $index => $order)
                         <tr>
                             <td class="px-4">{{ $bonusHistory->firstItem() + $index }}</td>
-                            <td class="fw-bold text-info">{{ $order->order_id }}</td>
+                            <td class="fw-bold text-primary">{{ $order->order_id }}</td>
+                            <td>{{ $order->v_brand_name ?? 'N/A' }}</td>
                             <td>{{ $order->voucher_type }}</td>
-                            <td class="text-end fw-bold">RS {{ number_format($order->amount) }}</td>
+                            <td class="text-start fw-bold">RS {{ number_format($order->amount) }}</td>
                             <td class="text-center small text-muted">
                                 {{ $order->created_at->format('Y-m-d') }}<br>
                                 {{ $order->created_at->format('H:i') }}
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-soft-info text-info">+{{ $order->bonus_amount }}</span>
+                                <span class="badge bg-soft-success text-success">+{{ $order->bonus_amount }}</span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-info text-white">Credited</span>
+                            <td class="text-center text-capitalize">
+                                <span class="badge  bg-success">{{ $order->status }}</span>
                             </td>
                         </tr>
                         @empty

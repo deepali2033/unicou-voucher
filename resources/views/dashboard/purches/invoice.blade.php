@@ -58,8 +58,8 @@
                                     <td class="px-4 py-4">
                                         <h6 class="fw-bold mb-1">{{ $order->inventoryVoucher->brand_name ?? 'Voucher' }}</h6>
                                         <small class="text-muted">
-                                            Variant: {{ $order->inventoryVoucher->voucher_variant ?? 'Standard' }} | 
-                                            Type: {{ $order->inventoryVoucher->voucher_type ?? 'N/A' }} | 
+                                            Variant: {{ $order->inventoryVoucher->voucher_variant ?? 'Standard' }} |
+                                            Type: {{ $order->inventoryVoucher->voucher_type ?? 'N/A' }} |
                                             Region: {{ $order->inventoryVoucher->country_region ?? 'N/A' }}
                                         </small>
                                     </td>
@@ -88,7 +88,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     @if($order->delivery_details)
                     <div class="mt-5 p-4 bg-light rounded">
                         <h6 class="fw-bold mb-3"><i class="fas fa-key me-2"></i>Delivered Voucher Codes:</h6>
@@ -96,10 +96,10 @@
                     </div>
                     @endif
 
-                    <div class="mt-5 pt-5 text-center text-muted border-top">
+                    <!-- <div class="mt-5 pt-5 text-center text-muted border-top">
                         <p class="mb-0 small">This is a computer-generated invoice and does not require a physical signature.</p>
                         <p class="mb-0 small">Thank you for your purchase with UniCou!</p>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="card-footer bg-white border-0 p-5 pt-0 d-print-none text-end">
                     <button onclick="window.print()" class="btn btn-primary px-4 me-2">
@@ -116,12 +116,51 @@
 
 <style>
     @media print {
-        .d-print-none { display: none !important; }
-        body { background: white !important; }
-        .invoice-print { box-shadow: none !important; border: 0 !important; }
-        #sidebar { display: none !important; }
-        .main-content { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
-        .header { display: none !important; }
+
+        .d-print-none,
+        .sidebar,
+        .header,
+        .top-header,
+        .left-sidebar,
+        .main-header,
+        .layout-header,
+        nav,
+        aside,
+        .topbar,
+        .navbar,
+        .page-header,
+        .breadcrumb {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .container-fluid,
+        .content-wrapper,
+        .main-panel,
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+        }
+
+        .invoice-print {
+            box-shadow: none !important;
+            border: 0 !important;
+            width: 100% !important;
+        }
+
+        .card {
+            border: 0 !important;
+        }
     }
 </style>
 @endsection

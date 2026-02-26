@@ -13,6 +13,11 @@
         <div class="offcanvas-body">
             <form id="filter-form" action="{{ route('orders.history') }}" method="GET">
                 <div class="mb-4">
+                    <label class="form-label fw-bold">Search Order ID</label>
+                    <input type="text" name="order_id" class="form-control" placeholder="Enter Order ID" value="{{ request('order_id') }}">
+                </div>
+
+                <div class="mb-4">
                     <label class="form-label fw-bold">Date Wise Report (From - To)</label>
                     <div class="d-flex flex-column gap-2">
                         <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
@@ -20,23 +25,33 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <label class="form-label fw-bold">Voucher Purchases Summary (Currency)</label>
                     <select name="currency" class="form-select">
                         <option value="">All Currencies</option>
                         <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
                         <option value="GBP" {{ request('currency') == 'GBP' ? 'selected' : '' }}>GBP</option>
                     </select>
-                </div>
+                </div> -->
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Brand Purchase Report</label>
-                    <input type="text" name="brand_name" class="form-control" placeholder="Brand Name" value="{{ request('brand_name') }}">
+                    <select name="brand_name" class="form-select">
+                        <option value="">All Brands</option>
+                        @foreach($brands as $brand)
+                            <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Variant Purchase Report</label>
-                    <input type="text" name="voucher_variant" class="form-control" placeholder="Variant" value="{{ request('voucher_variant') }}">
+                    <select name="voucher_variant" class="form-select">
+                        <option value="">All Variants</option>
+                        @foreach($variants as $variant)
+                            <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
@@ -101,7 +116,7 @@
                             <th class="text-nowrap">Taxes</th>
                             <th class="text-nowrap text-end">Per Unit Price</th>
                             <th class="text-nowrap">Issue Date</th>
-                            <!-- <th class="text-nowrap">Expiry Date</th> -->
+                            <th class="text-nowrap">Expiry Date</th>
                             <th class="text-nowrap">Credit Limit</th>
                             <th class="text-nowrap text-center">Status</th>
                             <th class="text-nowrap text-end pe-4">Action</th>
@@ -114,11 +129,11 @@
                             <td class="fw-bold text-primary">{{ $order->order_id }}</td>
                             <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
                             <td class="text-nowrap">{{ $order->created_at->format('H:i:s') }}</td>
-                            <td>{{ $order->inventoryVoucher->brand_name ?? 'N/A' }}</td>
-                            <td>{{ $order->inventoryVoucher->currency ?? 'N/A' }}</td>
-                            <td>{{ $order->inventoryVoucher->country_region ?? 'N/A' }}</td>
-                            <td>{{ $order->inventoryVoucher->voucher_variant ?? 'N/A' }}</td>
-                            <td>{{ $order->inventoryVoucher->voucher_type ?? 'N/A' }}</td>
+                            <td>{{ $order->v_brand_name ?? 'N/A' }}</td>
+                            <td>{{ $order->v_currency ?? 'N/A' }}</td>
+                            <td>{{ $order->v_country_region ?? 'N/A' }}</td>
+                            <td>{{ $order->v_voucher_variant ?? 'N/A' }}</td>
+                            <td>{{ $order->v_voucher_type ?? $order->voucher_type ?? 'N/A' }}</td>
                             <td>{{ $order->order_id }}</td>
                             <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
                             <td class="text-center">{{ $order->quantity }}</td>
@@ -126,7 +141,7 @@
                             <td>0.00</td>
                             <td class="text-end">RS {{ number_format($order->amount / $order->quantity, 2) }}</td>
                             <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                            <!-- <td class="text-nowrap">{{ optional($order->inventoryVoucher)->expiry_date ? $order->inventoryVoucher->expiry_date->format('d-m-Y') : 'N/A' }}</td> -->
+                            <td class="text-nowrap">{{ $order->v_expiry_date ? \Carbon\Carbon::parse($order->v_expiry_date)->format('d-m-Y') : 'N/A' }}</td>
                             <td>{{ auth()->user()->voucher_limit ?? 'N/A' }}</td>
                             <td class="text-center">
                                 @if($order->status == 'delivered')
@@ -161,11 +176,7 @@
                 </table>
             </div>
         </div>
-        @if($orders->hasPages())
-        <div class="card-footer bg-white border-0">
-            {{ $orders->links() }}
-        </div>
-        @endif
+
     </div>
 </div>
 

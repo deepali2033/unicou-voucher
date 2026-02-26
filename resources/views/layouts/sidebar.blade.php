@@ -87,7 +87,12 @@
                     <i class="fas fa-id-card me-2"></i> KYC & Compliance
                 </a>
             </li> -->
-
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('orders.history') ? 'active' : '' }}" href="{{ route('orders.history') }}">
+                    <i class="fas fa-shopping-cart me-2"></i> My Purchases
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('referral') ? 'active' : '' }}" href="{{route('referral')}}">
                     <i class="fas fa-users me-2"></i> Referral Points
@@ -98,6 +103,14 @@
                     <i class="fas fa-calendar-alt me-2"></i> Bonus Point
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('refunds.user') ? 'active' : '' }}" href="{{ route('refunds.user') }}">
+                    <i class="fas fa-undo me-2"></i> My Refunds
+                </a>
+            </li>
+            @endif
+
+
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
             <!-- Voucher Management -->
             <li class="nav-item">
@@ -266,18 +279,7 @@
             </li>
             @endif
 
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('orders.history') ? 'active' : '' }}" href="{{ route('orders.history') }}">
-                    <i class="fas fa-shopping-cart me-2"></i> My Purchases
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('refunds.user') ? 'active' : '' }}" href="{{ route('refunds.user') }}">
-                    <i class="fas fa-undo me-2"></i> My Refunds
-                </a>
-            </li>
-            @endif
+
 
 
 
