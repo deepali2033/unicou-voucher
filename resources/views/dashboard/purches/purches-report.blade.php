@@ -12,7 +12,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="filter-form" action="{{ route('purches.purches.report') }}" method="GET">
+            <form id="filter-form" action="{{ route('purches.user.report') }}" method="GET">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Date Wise Report (From - To)</label>
                     <div class="d-flex flex-column gap-2">
@@ -60,7 +60,7 @@
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{{ route('purches.purches.report') }}" class="btn btn-light">Reset All</a>
+                    <a href="{{ route('purches.user.report') }}" class="btn btn-light">Reset All</a>
                 </div>
             </form>
         </div>

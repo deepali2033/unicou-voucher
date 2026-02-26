@@ -101,7 +101,7 @@
                             <th class="text-nowrap">Taxes</th>
                             <th class="text-nowrap text-end">Per Unit Price</th>
                             <th class="text-nowrap">Issue Date</th>
-                            <th class="text-nowrap">Expiry Date</th>
+                            <!-- <th class="text-nowrap">Expiry Date</th> -->
                             <th class="text-nowrap">Credit Limit</th>
                             <th class="text-nowrap text-center">Status</th>
                             <th class="text-nowrap text-end pe-4">Action</th>
@@ -126,7 +126,7 @@
                             <td>0.00</td>
                             <td class="text-end">RS {{ number_format($order->amount / $order->quantity, 2) }}</td>
                             <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                            <td class="text-nowrap">{{ $order->inventoryVoucher->expiry_date ? $order->inventoryVoucher->expiry_date->format('d-m-Y') : 'N/A' }}</td>
+                            <!-- <td class="text-nowrap">{{ optional($order->inventoryVoucher)->expiry_date ? $order->inventoryVoucher->expiry_date->format('d-m-Y') : 'N/A' }}</td> -->
                             <td>{{ auth()->user()->voucher_limit ?? 'N/A' }}</td>
                             <td class="text-center">
                                 @if($order->status == 'delivered')

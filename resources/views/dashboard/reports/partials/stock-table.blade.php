@@ -9,7 +9,7 @@
                 <th colspan="3" style="background-color: #92d050;">Purchases (Additions)</th>
                 <th colspan="3" style="background-color: #00b0f0;">Stock Available</th>
                 <th colspan="3" style="background-color: #ffc000;">Sold (Delivered)</th>
-                <th colspan="3" style="background-color: #e82020;">Lost/Refund</th>
+                <th colspan="3" style="background-color: #e82020;">Loss/Refund</th>
                 <th colspan="3" style="background-color: #f8cbad;">Closing Stock (Expired)</th>
             </tr>
             <tr>
@@ -47,34 +47,34 @@
 
                 {{-- Opening --}}
                 <td class="text-center">{{ $item->opening_qty }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->opening_value, 2) }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->opening_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->opening_value, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->opening_taxes, 2) }}</td>
 
 
                 {{-- Purchases --}}
                 <td class="text-center">{{ $item->purchase_qty }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->purchase_value, 2) }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->purchase_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->purchase_value_calc, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->purchase_taxes, 2) }}</td>
 
                 {{-- Available --}}
                 <td class="text-center">{{ $item->in_stock_qty }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->in_stock_value, 2) }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->in_stock_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->in_stock_value, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->in_stock_taxes, 2) }}</td>
 
                 {{-- Sold --}}
                 <td class="text-center">{{ $item->sold_qty }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->sold_value, 2) }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->sold_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->currency }} {{ number_format($item->sold_value, 2) }}</td>
+                <td class="text-end">{{ $item->currency }} {{ number_format($item->sold_taxes, 2) }}</td>
 
-                {{-- PROFIT/LOSE (Lost/Refund) --}}
+                {{-- Loss/Refund --}}
                 <td class="text-center">{{ $item->lost_qty }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->lost_value, 2) }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->lost_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->lost_value, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->lost_taxes, 2) }}</td>
 
                 {{-- Closing --}}
                 <td class="text-center">{{ $item->closing_qty }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->closing_value, 2) }}</td>
-                <td class="text-end small">{{ $item->currency }} {{ number_format($item->closing_taxes, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->closing_value, 2) }}</td>
+                <td class="text-end">{{ $item->local_currency }} {{ number_format($item->closing_taxes, 2) }}</td>
             </tr>
             @empty
             <tr>

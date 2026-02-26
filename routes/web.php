@@ -200,7 +200,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     // Purches
     Route::get('/purchase-invoice/{order_id}', [PurchesController::class, 'purchaseInvoice'])->name('purches.invoice');
-    Route::get('/purches-report', [PurchesController::class, 'purchesReport'])->name('purches.purches.report');
+    Route::get('/purches-report', [PurchesController::class, 'purchesReport'])->name('purches.user.report');
     Route::get('/purches-report-export', [PurchesController::class, 'export'])->name('purches.export');
     // Order Management
     Route::middleware(['account_type:admin,manager,support_team'])->group(function () {
