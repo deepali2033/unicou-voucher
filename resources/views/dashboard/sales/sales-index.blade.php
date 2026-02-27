@@ -47,17 +47,43 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Voucher Sales Summary (Currency)</label>
+                    <label class="form-label fw-bold">Country</label>
+                    <select name="user_country" class="form-select">
+                        <option value="">All Countries</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country }}" {{ request('user_country') == $country ? 'selected' : '' }}>{{ $country }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">State</label>
+                    <select name="user_state" class="form-select">
+                        <option value="">All States</option>
+                        @foreach($states as $state)
+                            <option value="{{ $state }}" {{ request('user_state') == $state ? 'selected' : '' }}>{{ $state }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Currency</label>
                     <select name="currency" class="form-select">
                         <option value="">All Currencies</option>
-                        <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
-                        <option value="GBP" {{ request('currency') == 'GBP' ? 'selected' : '' }}>GBP</option>
+                        @foreach($currencies as $currency)
+                            <option value="{{ $currency }}" {{ request('currency') == $currency ? 'selected' : '' }}>{{ $currency }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Brand Sale Report</label>
-                    <input type="text" name="brand_name" class="form-control" placeholder="Brand Name" value="{{ request('brand_name') }}">
+                    <select name="brand_name" class="form-select">
+                        <option value="">All Brands</option>
+                        @foreach($brands as $brand)
+                            <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-4">
@@ -66,20 +92,12 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">Exam Type (Online/Center)</label>
+                    <label class="form-label fw-bold">Voucher Type</label>
                     <select name="voucher_type" class="form-select">
                         <option value="">All Types</option>
-                        <option value="Online" {{ request('voucher_type') == 'Online' ? 'selected' : '' }}>Online</option>
-                        <option value="Center" {{ request('voucher_type') == 'Center' ? 'selected' : '' }}>Center</option>
-                    </select>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Supplier Region (UK/USA)</label>
-                    <select name="country_region" class="form-select">
-                        <option value="">All Regions</option>
-                        <option value="UK" {{ request('country_region') == 'UK' ? 'selected' : '' }}>UK</option>
-                        <option value="USA" {{ request('country_region') == 'USA' ? 'selected' : '' }}>USA</option>
+                        @foreach($voucherTypes as $type)
+                            <option value="{{ $type }}" {{ request('voucher_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                        @endforeach
                     </select>
                 </div>
 
