@@ -122,6 +122,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/notifications/mark-all-read', [DashboardController::class, 'markAllNotificationsAsRead'])->name('notifications.markAllRead');
     Route::post('/notifications/bulk-action', [DashboardController::class, 'notificationsBulkAction'])->name('notifications.bulkAction');
     Route::get('/my-profile', [UserController::class, 'profile'])->name('profile.index');
+    Route::post('/my-profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 
 
 

@@ -61,7 +61,7 @@
 
 
         <div class="user-dropdown d-flex align-items-center gap-2">
-            <img src="{{ asset('images/user.png') }}" class="user-avatar rounded-circle" width="40" height="40">
+            <img src="{{ Auth::user()->profile_photo ? asset('storage/' . Auth::user()->profile_photo) : asset('images/user.png') }}" class="user-avatar rounded-circle" width="40" height="40" style="object-fit: cover;">
             <div class="user-info d-flex flex-column">
                 <span class="user-name fw-bold" style="font-size: 0.9rem; line-height: 1;">{{ Auth::user()->name }}</span>
                 <small class="user-role text-muted" style="font-size: 0.75rem;">

@@ -35,6 +35,17 @@ class VoucherController extends Controller
             $query->where('brand_name', 'like', "%$search%");
         }
 
+        // Add New Filters
+        if ($request->filled('brand_name')) {
+            $query->where('brand_name', $request->brand_name);
+        }
+        if ($request->filled('voucher_variant')) {
+            $query->where('voucher_variant', $request->voucher_variant);
+        }
+        if ($request->filled('voucher_type')) {
+            $query->where('voucher_type', $request->voucher_type);
+        }
+
         // Filter by Date
         if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
@@ -85,7 +96,13 @@ class VoucherController extends Controller
             'active_brands' => InventoryVoucher::distinct('brand_name')->count('brand_name'),
         ];
 
-        return view('dashboard.voucher.index', compact('vouchers', 'stats'));
+        $filterOptions = [
+            'brands' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('brand_name')->orderBy('brand_name')->pluck('brand_name'),
+            'variants' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('voucher_variant')->orderBy('voucher_variant')->pluck('voucher_variant'),
+            'types' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('voucher_type')->orderBy('voucher_type')->pluck('voucher_type'),
+        ];
+
+        return view('dashboard.voucher.index', compact('vouchers', 'stats', 'filterOptions'));
     }
 
     public function showOrder($id)
@@ -329,19 +346,49 @@ class VoucherController extends Controller
         return back()->with('success', 'Voucher deleted successfully.');
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        $vouchers = Vouchar::all();
+        $user = auth()->user();
+        $query = InventoryVoucher::where('is_expired', false)
+            ->where('quantity', '>', 0);
+
+        // Country filtering: match user's country with voucher's country_region
+        if (!in_array($user->account_type, ['admin', 'manager'])) {
+            $query->where('country_region', $user->country);
+        }
+
+        // Apply same filters as index
+        if ($request->filled('brand_name')) {
+            $query->where('brand_name', $request->brand_name);
+        }
+        if ($request->filled('voucher_variant')) {
+            $query->where('voucher_variant', $request->voucher_variant);
+        }
+        if ($request->filled('voucher_type')) {
+            $query->where('voucher_type', $request->voucher_type);
+        }
+
+        $vouchers = $query->latest()->get();
         $filename = "vouchers_" . date('Ymd') . ".csv";
         $handle = fopen('php://output', 'w');
 
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-        fputcsv($handle, ['Voucher ID', 'Name', 'Category', 'Price', 'Stock', 'Status']);
+        fputcsv($handle, ['Sr. No.', 'SKU ID', 'Brand Name', 'Voucher Variant', 'Quantity', 'Purchase Value', 'Stock Status']);
 
-        foreach ($vouchers as $v) {
-            fputcsv($handle, [$v->voucher_id, $v->name, $v->category, $v->price, $v->stock, $v->status]);
+        foreach ($vouchers as $index => $v) {
+            $finalPrice = $user->isStudent() ? $v->student_sale_price : $v->agent_sale_price;
+            $stockStatus = $v->quantity > 0 ? 'In Stock' : 'Out of Stock';
+            fputcsv($handle, [
+                $index + 1,
+                $v->sku_id,
+                $v->brand_name,
+                $v->voucher_variant,
+                $v->quantity,
+                $v->currency . ' ' . number_format($finalPrice, 2),
+                $stockStatus
+            ]);
         }
 
         fclose($handle);

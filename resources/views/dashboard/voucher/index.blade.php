@@ -13,41 +13,58 @@
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
-                <form id="filter-form" action="{{ route('pricing.index') }}" method="GET">
+                <form id="filter-form" action="{{ route('vouchers') }}" method="GET">
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Voucher Name</label>
-                        <select name="voucher_id" class="form-select select2-filter">
-                            <option value="">All Vouchers</option>
-                            @foreach($vouchers as $v)
-                            <option value="{{ $v->id }}" {{ request('voucher_id') == $v->id ? 'selected' : '' }}>
-                                {{ $v->brand_name }} ({{ $v->sku_id }})
+                        <label class="form-label fw-bold">Brand Name</label>
+                        <select name="brand_name" class="form-select select2-filter">
+                            <option value="">All Brands</option>
+                            @foreach($filterOptions['brands'] as $brand)
+                            <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>
+                                {{ $brand }}
                             </option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Country Name</label>
-                        <input type="text" name="country_name" class="form-control" placeholder="Search country..." value="{{ request('country_name') }}">
+                        <label class="form-label fw-bold">Voucher Variant</label>
+                        <select name="voucher_variant" class="form-select select2-filter">
+                            <option value="">All Variants</option>
+                            @foreach($filterOptions['variants'] as $variant)
+                            <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>
+                                {{ $variant }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Voucher Type</label>
+                        <select name="voucher_type" class="form-select select2-filter">
+                            <option value="">All Types</option>
+                            @foreach($filterOptions['types'] as $type)
+                            <option value="{{ $type }}" {{ request('voucher_type') == $type ? 'selected' : '' }}>
+                                {{ $type }}
+                            </option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="d-grid gap-2 pt-3 border-top">
                         <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        <a href="{{ route('pricing.index') }}" class="btn btn-light">Reset All</a>
+                        <a href="{{ route('vouchers') }}" class="btn btn-light">Reset All</a>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-0 fw-bold">Vouchers</h5>
-
+                    <h5 class="mb-0 fw-bold">Vouchers Table</h5>
                 </div>
                 <div class="d-flex gap-2">
-
-                    <a href="#" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
+                    <a href="{{ route('vouchers.export', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                         <i class="fas fa-file-csv me-1"></i> CSV
                     </a>
                     <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
@@ -127,15 +144,15 @@
                         </div>
                         <div class="tag-footer">
                             @if($stock > 0)
-                                @if($voucher->is_limited)
-                                <div class="disabled-action" title="24h Limit Reached">
-                                    <i class="fas fa-history text-white-50"></i>
-                                </div>
-                                @else
-                                <a href="{{ route('vouchers.order', $voucher->id) }}" class="order-action-btn" title="Order Now">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </a>
-                                @endif
+                            @if($voucher->is_limited)
+                            <div class="disabled-action" title="24h Limit Reached">
+                                <i class="fas fa-history text-white-50"></i>
+                            </div>
+                            @else
+                            <a href="{{ route('vouchers.order', $voucher->id) }}" class="order-action-btn" title="Order Now">
+                                <i class="fas fa-shopping-cart"></i>
+                            </a>
+                            @endif
                             @else
                             <div class="disabled-action">
                                 <i class="fas fa-lock"></i>
@@ -156,6 +173,10 @@
             </div>
         </div>
         @endforelse
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        {{ $vouchers->links() }}
     </div>
 
     <style>

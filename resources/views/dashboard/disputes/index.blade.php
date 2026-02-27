@@ -26,19 +26,19 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
                             @php
-                                $statusClass = [
-                                    'open' => 'bg-warning-subtle text-warning',
-                                    'pending' => 'bg-primary-subtle text-primary',
-                                    'resolved' => 'bg-success-subtle text-success',
-                                    'closed' => 'bg-secondary-subtle text-secondary'
-                                ][$dispute->status];
+                            $statusClass = [
+                            'open' => 'bg-warning-subtle text-warning',
+                            'pending' => 'bg-primary-subtle text-primary',
+                            'resolved' => 'bg-success-subtle text-success',
+                            'closed' => 'bg-secondary-subtle text-secondary'
+                            ][$dispute->status];
                             @endphp
                             <span class="badge {{ $statusClass }} text-uppercase px-3 py-2 mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
                                 {{ $dispute->status }}
                             </span>
                             <h5 class="fw-bold mb-1">{{ $dispute->subject }}</h5>
                             <p class="text-muted mb-3 text-truncate-2" style="max-width: 800px;">{{ $dispute->description }}</p>
-                            
+
                             <div class="d-flex align-items-center gap-3">
                                 <div class="d-flex align-items-center">
                                     <img src="{{ asset('images/user.png') }}" class="rounded-circle me-2" width="32" height="32">
@@ -59,7 +59,7 @@
                         <div class="text-end">
                             <div class="text-muted small mb-3">{{ $dispute->created_at->format('n/j/Y') }}</div>
                             @php
-                                $unreadCount = $dispute->messages()->where('user_id', '!=', auth()->id())->where('is_read', false)->count();
+                            $unreadCount = $dispute->messages()->where('user_id', '!=', auth()->id())->where('is_read', false)->count();
                             @endphp
                             @if($unreadCount > 0)
                             <span class="badge bg-primary rounded-pill px-2 py-1">
@@ -109,14 +109,7 @@
                         <label class="form-label fw-semibold">Description</label>
                         <textarea name="description" class="form-control" rows="5" placeholder="Detailed explanation of the problem..." required></textarea>
                     </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Priority</label>
-                        <select name="priority" class="form-select">
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
+
                 </div>
                 <div class="modal-footer border-top p-4">
                     <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
@@ -132,6 +125,7 @@
         transform: translateY(-2px);
         box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
     }
+
     .text-truncate-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;

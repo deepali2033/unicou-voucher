@@ -498,6 +498,84 @@ class UserController extends Controller
         return view('dashboard.my-profile.index', compact('user'));
     }
 
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+
+        $rules = [
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'zip_code' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'id_type' => 'nullable|string|max:255',
+            'id_number' => 'nullable|string|max:255',
+            'primary_contact' => 'nullable|string|max:255',
+            'whatsapp_number' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'post_code' => 'nullable|string|max:255',
+            // Business fields
+            'business_name' => 'nullable|string|max:255',
+            'business_type' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:255',
+            'website' => 'nullable|url|max:255',
+            'representative_name' => 'nullable|string|max:255',
+            'designation' => 'nullable|string|max:255',
+            'social_media' => 'nullable|url|max:255',
+            // Student fields
+            'exam_purpose' => 'nullable|string|max:255',
+            'highest_education' => 'nullable|string|max:255',
+            'passing_year' => 'nullable|integer',
+            'preferred_countries' => 'nullable|array',
+            'bank_name' => 'nullable|string|max:255',
+            'bank_country' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            'bank_account_number' => 'nullable|string|max:255',
+            // Support fields
+            'reference_name' => 'nullable|string|max:255',
+            'organization_name' => 'nullable|string|max:255',
+            'reference_email' => 'nullable|email|max:255',
+            'reference_phone' => 'nullable|string|max:255',
+            'social_link' => 'nullable|url|max:255',
+            // Files
+            'profile_photo' => 'nullable|image|max:2048',
+            'id_doc' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_doc_final' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'registration_doc' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'photograph' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'reference_letter' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+        ];
+
+        $request->validate($rules);
+
+        $data = $request->except(['_token', 'profile_photo', 'id_doc', 'id_doc_final', 'registration_doc', 'id_document', 'photograph', 'reference_letter', 'preferred_countries']);
+
+        if ($request->has('preferred_countries')) {
+            $data['preferred_countries'] = $request->preferred_countries;
+        }
+
+        // Handle File Uploads
+        $fileFields = ['profile_photo', 'id_doc', 'id_doc_final', 'registration_doc', 'id_document', 'photograph', 'reference_letter'];
+        foreach ($fileFields as $field) {
+            if ($request->hasFile($field)) {
+                $path = $request->file($field)->store('users/' . $field, 'public');
+                $data[$field] = $path;
+                
+                // If profile_photo or photograph is uploaded, sync to profile_photo
+                if ($field === 'profile_photo' || $field === 'photograph') {
+                    $data['profile_photo'] = $path;
+                }
+            }
+        }
+
+        $user->update($data);
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
     public function managers(Request $request)
     {
         if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
