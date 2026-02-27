@@ -5,7 +5,8 @@
                 <th>Sr. No.</th>
                 <th>User ID</th>
                 <th>Date of Reg.</th>
-                <th>Last Active date and time</th>
+                <th>Last Login</th>
+                <th>Last Logout</th>
                 <th>Category</th>
                 <th>Limit</th>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
@@ -32,8 +33,9 @@
             <tr>
                 <td>{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                 <td>{{ $user->user_id }}</td>
-                <td>{{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}</td>
-                <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
+                <td>{{ $user->created_at ? $user->created_at->timezone('Asia/Kolkata')->format('d M Y') : 'N/A' }}</td>
+                <td>{{ $user->last_login_at ? $user->last_login_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
+                <td>{{ $user->last_logout_at ? $user->last_logout_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
                 <td>
                     @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
                     <select class="form-select form-select-sm category-select" data-user-id="{{ $user->id }}" style="min-width:140px;">
@@ -102,7 +104,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="18" class="text-center py-5 text-muted">No users found.</td>
+                <td colspan="19" class="text-center py-5 text-muted">No users found.</td>
             </tr>
             @endforelse
         </tbody>

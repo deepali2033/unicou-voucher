@@ -210,8 +210,16 @@
                                 </span>
                             </td>
                             <td class="px-4 text-end">
-                                <button class="btn btn-link text-danger p-0 delete-query" data-id="{{ $query->id }}">
-                                    <i class="fas fa-trash"></i>
+                                <button class="btn btn-link text-primary p-0 view-query" 
+                                    data-user-name="{{ $query->user?->name ?? 'Guest' }}"
+                                    data-user-id="{{ $query->user?->user_id ?? 'N/A' }}"
+                                    data-user-email="{{ $query->user?->email ?? 'N/A' }}"
+                                    data-topic="{{ $query->topic }}"
+                                    data-issue="{{ $query->issue }}"
+                                    data-description="{{ $query->description }}"
+                                    data-status="{{ $query->status }}"
+                                    data-status-class="bg-{{ $query->status == 'pending' ? 'soft-warning text-warning' : ($query->status == 'closed' ? 'soft-success text-success' : 'soft-secondary text-secondary') }}">
+                                    <i class="fas fa-eye"></i>
                                 </button>
                             </td>
                         </tr>
@@ -232,6 +240,56 @@
             {{ $queries->links() }}
         </div>
         @endif
+    </div>
+
+    <!-- Query Details Modal -->
+    <div class="modal fade" id="queryDetailsModal" tabindex="-1" aria-labelledby="queryDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="queryDetailsModalLabel">Query Details</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">User Information</label>
+                            <div class="p-3 bg-light rounded-3">
+                                <div id="modal-user-name" class="fw-bold mb-1"></div>
+                                <div id="modal-user-id" class="small text-muted"></div>
+                                <div id="modal-user-email" class="small text-muted"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Status & Details</label>
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="mb-2">
+                                    <span class="small text-muted">Status:</span>
+                                    <span id="modal-status" class="badge rounded-pill ms-2"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="small text-muted">Topic:</span>
+                                    <span id="modal-topic" class="ms-2 fw-semibold"></span>
+                                </div>
+                                <div>
+                                    <span class="small text-muted">Issue:</span>
+                                    <span id="modal-issue" class="ms-2 fw-semibold"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="small text-muted text-uppercase fw-bold mb-1">Message</label>
+                            <div class="p-3 bg-light rounded-3">
+                                <p id="modal-description" class="mb-0 text-dark" style="white-space: pre-wrap;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -284,6 +342,25 @@
                     btn.prop('disabled', false).text(originalText);
                 }
             });
+        });
+
+        // Handle View Query
+        $('.view-query').on('click', function() {
+            const btn = $(this);
+            $('#modal-user-name').text(btn.data('user-name'));
+            $('#modal-user-id').text('ID: ' + btn.data('user-id'));
+            $('#modal-user-email').text(btn.data('user-email'));
+            $('#modal-topic').text(btn.data('topic'));
+            $('#modal-issue').text(btn.data('issue'));
+            $('#modal-description').text(btn.data('description'));
+            
+            const status = btn.data('status');
+            const statusClass = btn.data('status-class');
+            $('#modal-status').text(status.charAt(0).toUpperCase() + status.slice(1))
+                            .removeClass()
+                            .addClass('badge rounded-pill ms-2 ' + statusClass);
+            
+            $('#queryDetailsModal').modal('show');
         });
 
         // Handle Delete Option

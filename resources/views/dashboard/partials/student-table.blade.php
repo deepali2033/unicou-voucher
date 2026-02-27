@@ -5,7 +5,8 @@
                 <th>Sr. No.</th>
                 <th>User ID</th>
                 <th>Date of Reg.</th>
-                <th>Last Active</th>
+                <th>Last Login</th>
+                <th>Last Logout</th>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
                 @endif
@@ -29,8 +30,9 @@
             <tr>
                 <td>{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                 <td>{{ $user->user_id }}</td>
-                <td>{{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}</td>
-                <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
+                <td>{{ $user->created_at ? $user->created_at->timezone('Asia/Kolkata')->format('d M Y') : 'N/A' }}</td>
+                <td>{{ $user->last_login_at ? $user->last_login_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
+                <td>{{ $user->last_logout_at ? $user->last_logout_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                 @endif
@@ -65,7 +67,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="15" class="text-center py-5 text-muted">No students found.</td>
+                <td colspan="16" class="text-center py-5 text-muted">No students found.</td>
             </tr>
             @endforelse
         </tbody>
