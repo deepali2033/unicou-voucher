@@ -173,7 +173,6 @@
     <input type="hidden" name="amount" value="10">
     <input type="hidden" name="currency" value="USD">
     <input type="hidden" name="reference" value="TEST-USER-1">
-    <button type="submit">Test Wise Webhook</button>
 </form>
 
 @push('scripts')

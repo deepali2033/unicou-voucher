@@ -5,7 +5,8 @@
                 <th>Sr. No.</th>
                 <th>User ID</th>
                 <th>Date of Reg.</th>
-                <th>Last Active date and time</th>
+                <th>Last Login</th>
+                <th>Last Logout</th>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <th>Full Name</th>
                 @endif
