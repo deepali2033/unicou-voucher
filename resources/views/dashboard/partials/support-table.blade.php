@@ -28,7 +28,8 @@
                 <td>{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</td>
                 <td>{{ $user->user_id }}</td>
                 <td>{{ $user->created_at ? $user->created_at->format('d M Y') : 'N/A' }}</td>
-                <td>{{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Never' }}</td>
+                <td>{{ $user->last_login_at ? $user->last_login_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
+                <td>{{ $user->last_logout_at ? $user->last_logout_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                 @endif
