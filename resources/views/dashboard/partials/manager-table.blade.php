@@ -2,20 +2,20 @@
     <table class="table table-hover align-middle">
         <thead class="table-light">
             <tr>
-                <th>Sr. No.</th>
-                <th>Manager ID</th>
-                <th>Date of Reg.</th>
-                <th>Last Active</th>
+                <th class="text-nowrap">Sr. No.</th>
+                <th class="text-nowrap">Manager ID</th>
+                <th class="text-nowrap">Date of Reg.</th>
+                <th class="text-nowrap">Last Login</th>
+                <th class="text-nowrap">Last Logout</th>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
-                <th>Full Name</th>
+                <th class="text-nowrap">Full Name</th>
                 @endif
-                <th>Country</th>
+                <th class="text-nowrap">Country</th>
                 @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_view_user_email_name)
-                <th>Email</th>
+                <th class="text-nowrap">Email</th>
                 @endif
-                <th>Task/Performance</th>
-                <th>Contact</th>
-                <th>Status</th>
+                <th class="text-nowrap">Contact</th>
+                <th class="text-nowrap">Status</th>
                 <!-- <th class="text-end">Actions</th> -->
             </tr>
         </thead>
@@ -28,22 +28,13 @@
                     <div class="small">{{ $user->created_at->format('d M Y') }}</div>
                     <div class="text-muted extra-small">{{ $user->created_at->format('H:i') }}</div>
                 </td>
-                <td>
-                    @if($user->last_login_at)
-                    <div class="small">{{ $user->last_login_at->format('d M Y') }}</div>
-                    <div class="text-muted extra-small">{{ $user->last_login_at->format('H:i') }}</div>
-                    @else
-                    <span class="text-muted small">Never</span>
-                    @endif
-                </td>
+                <td class="small text-nowrap">{{ $user->last_login_at ? $user->last_login_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
+                <td class="small text-nowrap">{{ $user->last_logout_at ? $user->last_logout_at->timezone('Asia/Kolkata')->format('d M Y, h:i A') : 'Never' }}</td>
 
                 <td>{{ $user->first_name }} {{ $user->last_name }}</td>
                 <td><span class="badge bg-light text-dark border">{{ $user->country ?: 'N/A' }}</span></td>
                 <td>
                     <div class="small">{{ $user->email }}</div>
-                </td>
-                <td>
-                    <div class="small"></div>
                 </td>
                 <td>
                     <div class="small">{{ $user->phone }}</div>
@@ -60,29 +51,10 @@
                         </span>
                     </div>
                 </td>
-                <!-- <td class="text-end">
-                    <div class="d-flex justify-content-end gap-1">
-                        <a class="btn btn-sm btn-light" href="{{ route('users.show', $user->id) }}" title="View Profile">
-                            <i class="fas fa-eye text-primary"></i>
-                        </a>
-                        @if(auth()->user()->isAdmin())
-                        <a class="btn btn-sm btn-light" href="{{ route('users.edit', $user->id) }}" title="Edit">
-                            <i class="fas fa-edit text-info"></i>
-                        </a>
-                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="ajax-action d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-light" title="Delete">
-                                <i class="fas fa-trash text-danger"></i>
-                            </button>
-                        </form>
-                        @endif
-                    </div>
-                </td> -->
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="text-center py-5 text-muted">No managers found.</td>
+                <td colspan="11" class="text-center py-5 text-muted">No managers found.</td>
             </tr>
             @endforelse
         </tbody>

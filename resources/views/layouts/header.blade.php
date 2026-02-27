@@ -67,7 +67,7 @@
                 <small class="user-role text-muted" style="font-size: 0.75rem;">
                     @if(Auth::user()->isAdmin())
                     Administrator
-                    @elseif(Auth::user()->account_type === 'reseller_agent' || Auth::user()->account_type === 'student')
+                    @elseif(Auth::user()->account_type === 'reseller_agent' || Auth::user()->account_type === 'student'|| Auth::user()->account_type === 'agent'|| Auth::user()->account_type === 'manager' || Auth::user()->account_type === 'support_team')
                     {{ Auth::user()->user_id }}
                     @else
                     {{ ucfirst(Auth::user()->account_type) }}
