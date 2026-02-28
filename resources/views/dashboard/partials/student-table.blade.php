@@ -22,7 +22,7 @@
                 <th>Disputed Payments</th>
                 <th>Available Referral Points</th>
                 <th>Available Bonus Points</th>
-                <th>Status</th>
+                <!-- <th>Status</th> -->
             </tr>
         </thead>
         <tbody>
@@ -57,13 +57,13 @@
                 <td>{{ $user->disputed_payments ?? 0 }}</td>
                 <td>{{ $user->orders->sum('referral_points') }}</td>
                 <td>{{ number_format($user->orders->sum('bonus_amount'), 2) }}</td>
-                <td>
+                <!-- <td>
                     @php $canFreeze = auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user; @endphp
                     <span class="badge px-3 py-2 {{ $canFreeze ? 'user-status-toggle' : '' }} {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
                         @if($canFreeze) data-id="{{ $user->id }}" style="cursor:pointer;" title="Click to {{ $user->is_active ? 'freeze' : 'unfreeze' }}" @endif>
                         @if($user->is_active) <i class="fas fa-unlock me-1"></i> Active @else <i class="fas fa-lock me-1"></i> Frozen @endif
                     </span>
-                </td>
+                </td> -->
             </tr>
             @empty
             <tr>

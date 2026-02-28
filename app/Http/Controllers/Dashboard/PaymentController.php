@@ -162,6 +162,13 @@ class PaymentController extends Controller
     }
     public function PaymentTable(Request $request)
     {
+        if (auth()->user()->isManager() && !auth()->user()->can_view_sales_report) {
+            abort(403, 'Unauthorized access to sales reports.');
+        }
+        if (auth()->user()->isSupport() && !auth()->user()->can_view_sales_report) {
+            abort(403, 'Unauthorized access to sales reports.');
+        }
+
         $query = Order::with(['user', 'inventoryVoucher']);
 
         // Filter by Date
@@ -242,6 +249,13 @@ class PaymentController extends Controller
 
     public function exportPaymentReport(Request $request)
     {
+        if (auth()->user()->isManager() && !auth()->user()->can_view_sales_report) {
+            abort(403, 'Unauthorized access to sales reports.');
+        }
+        if (auth()->user()->isSupport() && !auth()->user()->can_view_sales_report) {
+            abort(403, 'Unauthorized access to sales reports.');
+        }
+
         $query = Order::with(['user', 'inventoryVoucher']);
 
         // Apply same filters as PaymentTable

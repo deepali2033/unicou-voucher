@@ -227,6 +227,27 @@ class DisputeController extends Controller
         return back()->with('success', 'Dispute transferred successfully.');
     }
 
+    public function ratings(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->isAdmin() && !$user->isManager() && !$user->isSupport()) {
+            abort(403);
+        }
+
+        $query = Dispute::with(['user', 'assignedStaff'])
+            ->whereNotNull('rating')
+            ->latest();
+
+        // If support, they only see their own ratings
+        if ($user->isSupport() && !($user->isAdmin() || $user->isManager())) {
+            $query->where('assigned_to', $user->id);
+        }
+
+        $ratings = $query->paginate(15);
+
+        return view('dashboard.disputes.ratings', compact('ratings'));
+    }
+
     public function submitFeedback(Request $request, $id)
     {
         $request->validate([

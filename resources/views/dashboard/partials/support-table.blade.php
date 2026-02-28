@@ -18,7 +18,7 @@
                 <th>Customer Support</th>
                 <th>Response Time</th>
                 <th>Rating By Customer</th>
-                <th>Status</th>
+                <!-- <th>Status</th> -->
                 <!-- <th class="text-end">Actions</th> -->
             </tr>
         </thead>
@@ -51,13 +51,13 @@
                         </div>
                     </div>
                 </td>
-                <td>
+                <!-- <td>
                     @php $canFreeze = auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user; @endphp
                     <span class="badge px-3 py-2 {{ $canFreeze ? 'user-status-toggle' : '' }} {{ $user->is_active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}"
                         @if($canFreeze) data-id="{{ $user->id }}" style="cursor:pointer;" title="Click to {{ $user->is_active ? 'freeze' : 'unfreeze' }}" @endif>
                         @if($user->is_active) <i class="fas fa-unlock me-1"></i> Active @else <i class="fas fa-lock me-1"></i> Frozen @endif
                     </span>
-                </td>
+                </td> -->
                 <!-- <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
                         @if(auth()->user()->account_type === 'admin')

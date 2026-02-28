@@ -148,6 +148,10 @@
                             <div class="disabled-action" title="24h Limit Reached">
                                 <i class="fas fa-history text-white-50"></i>
                             </div>
+                            @elseif(auth()->user()->isSupport())
+                            <div class="disabled-action" title="Support View Only">
+                                <i class="fas fa-eye text-white"></i>
+                            </div>
                             @else
                             <a href="{{ route('vouchers.order', $voucher->id) }}" class="order-action-btn" title="Order Now">
                                 <i class="fas fa-shopping-cart"></i>

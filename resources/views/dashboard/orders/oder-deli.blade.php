@@ -274,19 +274,36 @@
                                         <h5 class="fw-bold">Delivered Codes: {{ $order->order_id }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
-                                   <div class="modal-body px-4 pb-4">
-    <div class="bg-light p-3 rounded-4 text-center">
-        <div class="bg-white p-3 px-3 rounded border shadow-sm">
-            <i class="fas fa-check-circle text-success me-2"></i>
-            <span class="fw-bold text-success">Codes delivered successfully</span>
-        </div>
-    </div>
-
-    <div class="mt-3 small text-muted text-center">
-        <i class="fas fa-info-circle me-1"></i>
-        Codes were delivered on {{ $order->updated_at->format('d M Y H:i') }}
-    </div>
-</div>
+                                    <div class="modal-body px-4 pb-4">
+                                        <div class="bg-light p-3 rounded-4">
+                                            <div class="d-flex flex-column gap-2">
+                                                @php
+                                                $codes = explode("\n", str_replace("\r", "", $order->delivery_details));
+                                                @endphp
+                                                @if(auth()->user()->account_type === 'admin' || (auth()->user()->account_type === 'manager' && auth()->user()->can_view_voucher_code))
+                                                    @foreach($codes as $code)
+                                                    @if(trim($code))
+                                                    <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
+                                                        <code class="text-primary fw-bold" style="font-size: 1.1rem;">{{ trim($code) }}</code>
+                                                        <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('{{ trim($code) }}')" title="Copy Code">
+                                                            <i class="far fa-copy"></i>
+                                                        </button>
+                                                    </div>
+                                                    @endif
+                                                    @endforeach
+                                                @else
+                                                    <div class="text-center py-3">
+                                                        <i class="fas fa-lock text-muted mb-2 d-block" style="font-size: 2rem;"></i>
+                                                        <div class="fw-bold text-muted">Permission Restricted</div>
+                                                        <small class="text-muted">You do not have permission to view voucher codes.</small>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 small text-muted text-center">
+                                            <i class="fas fa-info-circle me-1"></i> These codes were delivered on {{ $order->updated_at->format('d M Y H:i') }}
+                                        </div>
+                                    </div>
                                     <div class="modal-footer border-0 px-4 pb-4">
                                         <button type="button" class="btn btn-primary w-100 py-2" data-bs-dismiss="modal" style="border-radius: 10px;">Close</button>
                                     </div>

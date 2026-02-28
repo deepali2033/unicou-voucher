@@ -16,6 +16,13 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
+        if (auth()->user()->isManager() && !auth()->user()->can_view_orders) {
+            abort(403, 'Unauthorized access to orders.');
+        }
+        if (auth()->user()->isSupport() && !auth()->user()->can_view_orders) {
+            abort(403, 'Unauthorized access to orders.');
+        }
+
         $query = Order::with(['user', 'voucher', 'inventoryVoucher'])->latest();
 
         if ($request->filled('order_id')) {

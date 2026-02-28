@@ -386,9 +386,13 @@ class UserController extends Controller
             'can_stop_voucher_sales' => $request->has('can_stop_voucher_sales'),
             'can_view_user_email_name' => $request->has('can_view_user_email_name'),
             'has_job_permission' => $request->has('has_job_permission'),
+            'can_view_voucher_code' => $request->has('can_view_voucher_code'),
+            'can_view_orders' => $request->has('can_view_orders'),
+            'can_view_sales_report' => $request->has('can_view_sales_report'),
+            'can_view_disputes' => $request->has('can_view_disputes'),
         ]);
 
-        return back()->with('success', 'Manager permissions updated successfully.');
+        return back()->with('success', 'User permissions updated successfully.');
     }
 
     public function updateCategory(Request $request, User $user)

@@ -178,18 +178,25 @@
                     <i class="fas fa-headset me-2"></i> Customer Query
                 </a>
             </li>
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_sales_report) || (auth()->user()->isSupport() && auth()->user()->can_view_sales_report))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}" href="{{ route('reports.index') }}">
                     <i class="fas fa-headset me-2"></i> Reports
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_disputes) || (auth()->user()->isSupport() && auth()->user()->can_view_disputes))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
                     <i class="fas fa-gavel me-2"></i> Disputes Management
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('disputes.ratings') ? 'active' : '' }}" href="{{ route('disputes.ratings') }}">
+                    <i class="fas fa-star me-2"></i> Staff Ratings
+                </a>
+            </li>
+            @endif
 
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('settings.risk-levels') ? 'active' : '' }}" href="{{ route('settings.risk-levels') }}">
@@ -203,7 +210,7 @@
                     <i class="fas fa-credit-card me-2"></i> Payment Methods
                 </a>
             </li> -->
-            @endif
+         
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager', 'reseller_agent']))
            
             <li class="nav-item">
@@ -230,7 +237,14 @@
             </li>
             @endif
 
-
+            @if(auth()->user()->isSupport())
+            <!-- Linked Banks -->
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('disputes.ratings') ? 'active' : '' }}" href="{{ route('disputes.ratings') }}">
+                    <i class="fas fa-university me-2"></i> Ratings
+                </a>
+            </li>
+            @endif
 
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager']))
            
@@ -266,12 +280,13 @@
             </li>
             @endif -->
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_orders) || (auth()->user()->isSupport() && auth()->user()->can_view_orders))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('orders.index') ? 'active' : '' }}" href="{{ route('orders.index') }}">
                     <i class="fas fa-truck me-2"></i> Orders & Delivery
                 </a>
             </li>
+            @endif
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('refunds.index') ? 'active' : '' }}" href="{{ route('refunds.index') }}">
                     <i class="fas fa-undo me-2"></i> Refund Requests

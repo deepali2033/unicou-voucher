@@ -320,16 +320,20 @@
                         <li class="nav-item">
                             <a class="nav-link active py-3 px-4" id="overview-tab" data-bs-toggle="tab" href="#overview" role="tab">Overview</a>
                         </li>
+                           @if(!Auth::user()->isSupport())
                         <li class="nav-item">
                             <a class="nav-link py-3 px-4" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab">Edit Profile</a>
                         </li>
+                        @endif
                         <li class="nav-item">
                             <a class="nav-link py-3 px-4" id="kyc-tab" data-bs-toggle="tab" href="#kyc" role="tab">KYC & Documents</a>
                         </li>
+                        @if(!Auth::user()->isSupport())
                         <li class="nav-item">
                             <a class="nav-link py-3 px-4" id="security-tab" data-bs-toggle="tab" href="#security" role="tab">Security</a>
                         </li>
-                        @if($user->account_type === 'manager')
+                        @endif
+                        @if(in_array($user->account_type, ['manager', 'support_team']))
                         <li class="nav-item">
                             <a class="nav-link py-3 px-4" id="permissions-tab" data-bs-toggle="tab" href="#permissions" role="tab">Permissions</a>
                         </li>
@@ -690,7 +694,7 @@
                                             @endif
                                         </div>
                                         <div class="doc-footer">
-                                            @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
+                                            @if(!in_array(auth()->user()->account_type, ['manager', 'support_team']) || auth()->user()->can_edit_user)
                                             <form action="{{ route('users.update', $user->id) }}#kyc" method="POST" enctype="multipart/form-data">
                                                 @csrf
                                                 @method('PUT')
@@ -755,10 +759,10 @@
                         </div>
 
                         <!-- Permissions Tab -->
-                        @if($user->account_type === 'manager')
+                        @if(in_array($user->account_type, ['manager', 'support_team']))
                         <div class="tab-pane fade" id="permissions" role="tabpanel">
-                            <h6 class="fw-bold mb-3 text-dark">Managerial Capabilities</h6>
-                            <p class="text-muted small mb-4">Define what administrative actions this manager is authorized to perform across the platform.</p>
+                            <h6 class="fw-bold mb-3 text-dark">{{ ucfirst(str_replace('_', ' ', $user->account_type)) }} Capabilities</h6>
+                            <p class="text-muted small mb-4">Define what administrative actions this {{ str_replace('_', ' ', $user->account_type) }} is authorized to perform across the platform.</p>
 
                             <form action="{{ route('users.permissions.update', $user->id) }}#permissions" method="POST">
                                 @csrf
@@ -777,7 +781,18 @@
                                     ['name' => 'can_stop_voucher_sales', 'label' => 'Stop Voucher Sales', 'desc' => 'Allow manager to restrict sales for specific vouchers'],
                                     ['name' => 'can_view_user_email_name', 'label' => 'View Name & Email', 'desc' => 'Allow manager to see real names and emails of users'],
                                     ['name' => 'has_job_permission', 'label' => 'Job Applications Access', 'desc' => 'Allow manager to view and manage job applications'],
+                                    ['name' => 'can_view_voucher_code', 'label' => 'View Voucher Codes', 'desc' => 'Allow viewing actual voucher codes in orders'],
+                                    ['name' => 'can_view_orders', 'label' => 'View Orders', 'desc' => 'Allow access and view order history'],
+                                    ['name' => 'can_view_sales_report', 'label' => 'View Sales Report', 'desc' => 'Allow view detailed sales and payment reports'],
+                                    ['name' => 'can_view_disputes', 'label' => 'Manage Disputes', 'desc' => 'Allow access and manage customer disputes'],
                                     ];
+
+                                    if ($user->account_type === 'support_team') {
+                                        $supportPerms = ['can_view_voucher_code', 'can_view_orders', 'can_view_sales_report', 'can_view_disputes'];
+                                        $perms = array_filter($perms, function($p) use ($supportPerms) {
+                                            return in_array($p['name'], $supportPerms);
+                                        });
+                                    }
                                     @endphp
 
                                     @foreach($perms as $p)

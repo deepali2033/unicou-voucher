@@ -300,6 +300,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     // Dispute Management
     Route::get('/disputes', [DisputeController::class, 'index'])->name('disputes.index');
+    Route::get('/disputes/ratings', [DisputeController::class, 'ratings'])->name('disputes.ratings');
     Route::post('/disputes/store', [DisputeController::class, 'store'])->name('disputes.store');
     Route::get('/disputes/{id}', [DisputeController::class, 'show'])->name('disputes.show');
     Route::post('/disputes/{id}/send', [DisputeController::class, 'sendMessage'])->name('disputes.send');

@@ -104,6 +104,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_stop_voucher_sales',
         'can_view_user_email_name',
         'has_job_permission',
+        'can_view_voucher_code',
+        'can_view_orders',
+        'can_view_sales_report',
+        'can_view_disputes',
         'category',
         'rating',
         'voucher_limit',
@@ -149,6 +153,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'can_stop_country_sales' => 'boolean',
             'can_stop_voucher_sales' => 'boolean',
             'can_view_user_email_name' => 'boolean',
+            'can_view_voucher_code' => 'boolean',
+            'can_view_orders' => 'boolean',
+            'can_view_sales_report' => 'boolean',
+            'can_view_disputes' => 'boolean',
         ];
     }
 
