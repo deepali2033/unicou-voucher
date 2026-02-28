@@ -20,18 +20,42 @@ class InventoryController extends Controller
             'active_brands' => InventoryVoucher::distinct('brand_name')->count('brand_name'),
         ];
 
-        // Unique countries for filter
-        $countries = InventoryVoucher::distinct('country_region')->pluck('country_region')->filter();
-
         // Filters
-        if ($request->has('countries')) {
-            $query->whereIn('country_region', $request->countries);
+        if ($request->filled('sku_id')) {
+            $query->where('sku_id', 'like', '%' . $request->sku_id . '%');
         }
-        if ($request->has('types')) {
-            $query->whereIn('voucher_type', $request->types);
+        if ($request->filled('countries')) {
+            $countries = is_array($request->countries) ? $request->countries : [$request->countries];
+            $query->whereIn('country_region', $countries);
         }
-        if ($request->has('status')) {
-            $query->whereIn('status', $request->status);
+        if ($request->filled('states')) {
+            $states = is_array($request->states) ? $request->states : [$request->states];
+            $query->whereIn('state', $states);
+        }
+        if ($request->filled('brands')) {
+            $brands = is_array($request->brands) ? $request->brands : [$request->brands];
+            $query->whereIn('brand_name', $brands);
+        }
+        if ($request->filled('types')) {
+            $types = is_array($request->types) ? $request->types : [$request->types];
+            $query->whereIn('voucher_type', $types);
+        }
+        if ($request->filled('variants')) {
+            $variants = is_array($request->variants) ? $request->variants : [$request->variants];
+            $query->whereIn('voucher_variant', $variants);
+        }
+        if ($request->filled('status')) {
+            $status = is_array($request->status) ? $request->status : [$request->status];
+            $query->whereIn('status', $status);
+        }
+        if ($request->filled('expiry_date')) {
+            $query->whereDate('expiry_date', $request->expiry_date);
+        }
+        if ($request->filled('from_date')) {
+            $query->whereDate('purchase_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('purchase_date', '<=', $request->to_date);
         }
 
         // Sorting
@@ -42,13 +66,20 @@ class InventoryController extends Controller
             $query->latest();
         }
 
-        $inventory = $query->paginate(10);
+        $inventory = $query->paginate(15)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.inventory.partials.voucher-list', compact('inventory'))->render();
         }
 
-        return view('dashboard.inventory.index', compact('inventory', 'stats', 'countries'));
+        // Dynamic filter options from current inventory
+        $countries = InventoryVoucher::whereNotNull('country_region')->distinct()->pluck('country_region')->sort();
+        $states = InventoryVoucher::whereNotNull('state')->distinct()->pluck('state')->sort();
+        $brands = InventoryVoucher::whereNotNull('brand_name')->distinct()->pluck('brand_name')->sort();
+        $voucherTypes = InventoryVoucher::whereNotNull('voucher_type')->distinct()->pluck('voucher_type')->sort();
+        $voucherVariants = InventoryVoucher::whereNotNull('voucher_variant')->distinct()->pluck('voucher_variant')->sort();
+
+        return view('dashboard.inventory.index', compact('inventory', 'stats', 'countries', 'states', 'brands', 'voucherTypes', 'voucherVariants'));
     }
 
     public function create()
@@ -281,20 +312,47 @@ class InventoryController extends Controller
     {
         $query = InventoryVoucher::query();
 
-        // Apply same filters as index
-        if ($request->has('countries')) {
-            $query->whereIn('country_region', $request->countries);
+        // Apply filters
+        if ($request->filled('sku_id')) {
+            $query->where('sku_id', 'like', '%' . $request->sku_id . '%');
         }
-        if ($request->has('types')) {
-            $query->whereIn('voucher_type', $request->types);
+        if ($request->filled('countries')) {
+            $countries = is_array($request->countries) ? $request->countries : [$request->countries];
+            $query->whereIn('country_region', $countries);
         }
-        if ($request->has('status')) {
-            $query->whereIn('status', $request->status);
+        if ($request->filled('states')) {
+            $states = is_array($request->states) ? $request->states : [$request->states];
+            $query->whereIn('state', $states);
+        }
+        if ($request->filled('brands')) {
+            $brands = is_array($request->brands) ? $request->brands : [$request->brands];
+            $query->whereIn('brand_name', $brands);
+        }
+        if ($request->filled('types')) {
+            $types = is_array($request->types) ? $request->types : [$request->types];
+            $query->whereIn('voucher_type', $types);
+        }
+        if ($request->filled('variants')) {
+            $variants = is_array($request->variants) ? $request->variants : [$request->variants];
+            $query->whereIn('voucher_variant', $variants);
+        }
+        if ($request->filled('status')) {
+            $status = is_array($request->status) ? $request->status : [$request->status];
+            $query->whereIn('status', $status);
+        }
+        if ($request->filled('expiry_date')) {
+            $query->whereDate('expiry_date', $request->expiry_date);
+        }
+        if ($request->filled('from_date')) {
+            $query->whereDate('purchase_date', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('purchase_date', '<=', $request->to_date);
         }
 
         $records = $query->latest()->get();
 
-        $filename = "inventory_" . date('Ymd_His') . ".csv";
+        $filename = "inventory_report_" . date('Ymd_His') . ".csv";
         $headers = [
             "Content-type"        => "text/csv",
             "Content-Disposition" => "attachment; filename=$filename",
@@ -303,42 +361,56 @@ class InventoryController extends Controller
             "Expires"             => "0"
         ];
 
+        // All columns from inventory_vouchers
         $columns = [
-            'Sr No.',
-            'SKU ID',
-            'Brand Name',
-            'Country/Region',
-            'Currency',
-            'Voucher Variant',
-            'Voucher Type',
-            'Quantity',
-            'Status',
-            'Purchase Value',
-            'Agent Sale Price',
-            'Student Sale Price'
+            'ID', 'SKU ID', 'Brand Name', 'Country/Region', 'State', 'City', 'Currency',
+            'Voucher Variant', 'Voucher Type', 'Purchase Invoice No.', 'Purchase Date',
+            'Expiry Date', 'Is Expired', 'Quantity', 'Purchase Value', 'Purchase Value Per Unit',
+            'Taxes', 'Local Currency', 'Bank', 'Currency Conversion Rate', 'Referral Points Reseller',
+            'Agent Referral Points/Unit', 'Agent Bonus Points/Unit', 'Agent Sale Price',
+            'Student Referral Points/Unit', 'Student Bonus Points/Unit', 'Student Sale Price',
+            'Opening Stock Qty', 'Purchased Qty', 'Status', 'Created At'
         ];
 
         $callback = function () use ($records, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-            $serial = 1;
+
             foreach ($records as $record) {
                 fputcsv($file, [
-                    $serial++,
+                    $record->id,
                     $record->sku_id,
                     $record->brand_name,
                     $record->country_region,
+                    $record->state,
+                    $record->city,
                     $record->currency,
                     $record->voucher_variant,
                     $record->voucher_type,
+                    $record->purchase_invoice_no,
+                    $record->purchase_date ? $record->purchase_date->format('Y-m-d') : '',
+                    $record->expiry_date ? $record->expiry_date->format('Y-m-d') : '',
+                    $record->is_expired ? 'Yes' : 'No',
                     $record->quantity,
-                    $record->status,
                     $record->purchase_value,
+                    $record->purchase_value_per_unit,
+                    $record->taxes,
+                    $record->local_currency,
+                    $record->bank,
+                    $record->currency_conversion_rate,
+                    $record->referral_points_reseller,
+                    $record->agent_referral_points_per_unit,
+                    $record->agent_bonus_points_per_unit,
                     $record->agent_sale_price,
+                    $record->student_referral_points_per_unit,
+                    $record->student_bonus_points_per_unit,
                     $record->student_sale_price,
+                    $record->opening_stock_qty,
+                    $record->purchased_qty,
+                    $record->status,
+                    $record->created_at->format('Y-m-d H:i:s')
                 ]);
             }
-
             fclose($file);
         };
 

@@ -73,7 +73,7 @@
                         <h5 class="fw-bold mb-0">Sales Report</h5>
                     </div>
                     <p class="text-muted small">View detailed reports of sales transactions, revenue, and voucher performance by PID and voucher type.</p>
-                    <a href="{{ route('pricing.index') }}" class="btn btn-primary w-100">View Report</a>
+                    <a href="{{ route('sales.index') }}" class="btn btn-primary w-100">View Report</a>
                 </div>
             </div>
         </div>
@@ -101,7 +101,7 @@
                         <h5 class="fw-bold mb-0">Payments Report</h5>
                     </div>
                     <p class="text-muted small">Access comprehensive payment insights with transaction summaries, processing status, and method-wise breakdown.</p>
-                    <a href="{{ route('reports.stock') }}" class="btn btn-primary w-100">View Report</a>
+                    <a href="{{ route('reports.payments') }}" class="btn btn-primary w-100">View Report</a>
                 </div>
             </div>
         </div>
@@ -115,7 +115,7 @@
                         <h5 class="fw-bold mb-0">Vouchers Report</h5>
                     </div>
                     <p class="text-muted small">View detailed voucher reports, including generated, used, and remaining vouchers by PID and voucher type.</p>
-                    <a href="{{ route('reports.stock') }}" class="btn btn-primary w-100">View Report</a>
+                    <a href="{{ route('inventory.index') }}" class="btn btn-primary w-100">View Report</a>
                 </div>
             </div>
         </div>
@@ -129,7 +129,7 @@
                         <h5 class="fw-bold mb-0">Banks Reports</h5>
                     </div>
                     <p class="text-muted small">View detailed bank reports, including transaction summaries, deposits, withdrawals, and balance records.</p>
-                    <a href="{{ route('reports.stock') }}" class="btn btn-primary w-100">View Report</a>
+                    <a href="{{ route('banks.bank-table') }}" class="btn btn-primary w-100">View Report</a>
                 </div>
             </div>
         </div>

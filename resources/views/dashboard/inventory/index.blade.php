@@ -144,49 +144,95 @@
         </div>
         <div class="offcanvas-body">
             <form id="inventory-filter-form">
-                <!-- <div class="mb-4">
-                    <label class="form-label fw-bold">Country</label>
-                    <div style="max-height: 200px; overflow-y: auto;" class="border rounded p-2 bg-light">
-                        @foreach($countries as $country)
-                        <div class="form-check mb-1">
-                            <input class="form-check-input filter-input" type="checkbox" name="countries[]" value="{{ $country }}" id="country-{{ Str::slug($country) }}">
-                            <label class="form-check-label small" for="country-{{ Str::slug($country) }}">{{ $country }}</label>
-                        </div>
-                        @endforeach
-                    </div>
-                </div> -->
-
-                <!-- <div class="mb-4">
-                    <label class="form-label fw-bold">Voucher Type</label>
-                    <div class="d-flex gap-3">
-                        <div class="form-check">
-                            <input class="form-check-input filter-input" type="checkbox" name="types[]" value="Digital" id="type-digital">
-                            <label class="form-check-label" for="type-digital">Digital</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input filter-input" type="checkbox" name="types[]" value="Physical" id="type-physical">
-                            <label class="form-check-label" for="type-physical">Physical</label>
-                        </div>
-                    </div>
-                </div> -->
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Status</label>
-                    @foreach(['IN STOCK', 'OUT OF STOCK'] as $st)
-                    <div class="form-check mb-1">
-                        <input class="form-check-input filter-input" type="checkbox" name="status[]" value="{{ $st }}" id="status-{{ Str::slug($st) }}">
-                        <label class="form-check-label" for="status-{{ Str::slug($st) }}">{{ $st }}</label>
-                    </div>
-                    @endforeach
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">SKU ID</label>
+                    <input type="text" name="sku_id" class="form-control" placeholder="Search SKU ID..." value="{{ request('sku_id') }}">
                 </div>
-                <!-- 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Sort By</label>
-                    <select name="sort" class="form-select filter-input" id="sort-input">
-                        <option value="latest">Latest First</option>
-                        <option value="oldest">Oldest First</option>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Purchase Date Range</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                        </div>
+                        <div class="col-6">
+                            <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Expiry Date</label>
+                    <input type="date" name="expiry_date" class="form-control" value="{{ request('expiry_date') }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Country</label>
+                    <select name="countries" class="form-select">
+                        <option value="">All Countries</option>
+                        @foreach($countries as $country)
+                        <option value="{{ $country }}" {{ request('countries') == $country ? 'selected' : '' }}>{{ $country }}</option>
+                        @endforeach
                     </select>
-                </div> -->
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">State</label>
+                    <select name="states" class="form-select">
+                        <option value="">All States</option>
+                        @foreach($states as $state)
+                        <option value="{{ $state }}" {{ request('states') == $state ? 'selected' : '' }}>{{ $state }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Brand Name</label>
+                    <select name="brands" class="form-select">
+                        <option value="">All Brands</option>
+                        @foreach($brands as $brand)
+                        <option value="{{ $brand }}" {{ request('brands') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Voucher Type</label>
+                    <select name="types" class="form-select">
+                        <option value="">All Types</option>
+                        @foreach($voucherTypes as $type)
+                        <option value="{{ $type }}" {{ request('types') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Voucher Variant</label>
+                    <select name="variants" class="form-select">
+                        <option value="">All Variants</option>
+                        @foreach($voucherVariants as $variant)
+                        <option value="{{ $variant }}" {{ request('variants') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        @foreach(['IN STOCK', 'OUT OF STOCK'] as $st)
+                        <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Sort By</label>
+                    <select name="sort" class="form-select" id="sort-input">
+                        <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Latest First</option>
+                        <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                    </select>
+                </div>
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>

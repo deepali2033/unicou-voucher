@@ -212,7 +212,7 @@
                 </a>
             </li>
             @endif -->
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            @if(auth()->user()->isSupport() || auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <!-- Wallet / Store Credit -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('profile.index') ? 'active' : '' }}" href="{{ route('profile.index') }}">

@@ -61,12 +61,12 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="mb-0 fw-bold">Pricing & Discount Rules</h5>
-                <small class="text-muted">Set specific prices and discounts for vouchers by country.</small>
-            </div>
+    <h5 class="mb-0 fw-bold">Purchase Stock</h5>
+    <small class="text-muted">Add and manage stock details for purchased items.</small>
+</div>
             <div class="d-flex gap-2">
                 <a href="{{ route('pricing.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm">
-                    <i class="fas fa-plus me-1"></i> Set Price Rule
+                    <i class="fas fa-plus me-1"></i> Add Stock
                 </a>
                 <a href="{{ route('pricing.export', request()->all()) }}" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV

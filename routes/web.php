@@ -197,6 +197,11 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/sales', [SalesController::class, 'SalesReport'])->name('sales.index');
     Route::get('/sales-export', [SalesController::class, 'export'])->name('sales.export');
 
+    // Payment
+    Route::get('/reports/payments', [PaymentController::class, 'PaymentTable'])->name('reports.payments');
+    Route::get('/reports/payments/export', [PaymentController::class, 'exportPaymentReport'])->name('reports.payments.export');
+
+
 
 
     // Purches

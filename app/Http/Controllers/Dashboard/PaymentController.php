@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InventoryVoucher;
 use App\Models\VoucherPriceRule;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -158,5 +159,192 @@ class PaymentController extends Controller
         }
 
         return response()->json(['status' => 'ok']);
+    }
+    public function PaymentTable(Request $request)
+    {
+        $query = Order::with(['user', 'inventoryVoucher']);
+
+        // Filter by Date
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // Filter by Transaction ID
+        if ($request->filled('transaction_id')) {
+            $query->where('transaction_id', 'like', "%{$request->transaction_id}%");
+        }
+
+        // Filter by Country & State
+        if ($request->anyFilled(['country', 'state'])) {
+            $query->whereHas('user', function ($q) use ($request) {
+                if ($request->filled('country')) {
+                    $q->where('country', $request->country);
+                }
+                if ($request->filled('state')) {
+                    $q->where('state', $request->state);
+                }
+            });
+        }
+
+        // Filter by Brand Name
+        if ($request->filled('brand_name')) {
+            $query->whereHas('inventoryVoucher', function ($q) use ($request) {
+                $q->where('brand_name', 'like', "%{$request->brand_name}%");
+            });
+        }
+
+        // Filter by Voucher Type
+        if ($request->filled('voucher_type')) {
+            $query->where('voucher_type', $request->voucher_type);
+        }
+
+        // Filter by Currency
+        if ($request->filled('currency')) {
+            $query->whereHas('inventoryVoucher', function ($q) use ($request) {
+                $q->where('currency', $request->currency);
+            });
+        }
+
+        $payments = $query->latest()->paginate(15)->withQueryString();
+
+        // Fetch unique values for filters specifically from existing orders
+        $countries = Order::join('users', 'orders.user_id', '=', 'users.id')
+            ->whereNotNull('users.country')
+            ->distinct()
+            ->pluck('users.country')
+            ->sort();
+
+        $states = Order::join('users', 'orders.user_id', '=', 'users.id')
+            ->whereNotNull('users.state')
+            ->distinct()
+            ->pluck('users.state')
+            ->sort();
+
+        $brands = Order::join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+            ->distinct()
+            ->pluck('inventory_vouchers.brand_name')
+            ->sort();
+
+        $voucherTypes = Order::distinct()
+            ->pluck('voucher_type')
+            ->sort();
+
+        $currencies = Order::join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+            ->distinct()
+            ->pluck('inventory_vouchers.currency')
+            ->sort();
+
+        return view('dashboard.reports.payments', compact('payments', 'countries', 'states', 'brands', 'voucherTypes', 'currencies'));
+    }
+
+    public function exportPaymentReport(Request $request)
+    {
+        $query = Order::with(['user', 'inventoryVoucher']);
+
+        // Apply same filters as PaymentTable
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->filled('transaction_id')) {
+            $query->where('transaction_id', 'like', "%{$request->transaction_id}%");
+        }
+        if ($request->anyFilled(['country', 'state'])) {
+            $query->whereHas('user', function ($q) use ($request) {
+                if ($request->filled('country')) {
+                    $q->where('country', $request->country);
+                }
+                if ($request->filled('state')) {
+                    $q->where('state', $request->state);
+                }
+            });
+        }
+        if ($request->filled('brand_name')) {
+            $query->whereHas('inventoryVoucher', function ($q) use ($request) {
+                $q->where('brand_name', 'like', "%{$request->brand_name}%");
+            });
+        }
+        if ($request->filled('voucher_type')) {
+            $query->where('voucher_type', $request->voucher_type);
+        }
+        if ($request->filled('currency')) {
+            $query->whereHas('inventoryVoucher', function ($q) use ($request) {
+                $q->where('currency', $request->currency);
+            });
+        }
+
+        $records = $query->latest()->get();
+
+        $filename = "payments_report_" . date('Ymd_His') . ".csv";
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $columns = [
+            'Sr. No.',
+            'Payment ID',
+            'Transaction ID',
+            'Date',
+            'Time',
+            'Buyer Name',
+            'Buyer Type',
+            'Local Currency',
+            'Country',
+            'State',
+            'Brand Name',
+            'Voucher Variant',
+            'Voucher Type',
+            'Sale Invoice No.',
+            'Quantity',
+            'Sales Value',
+            'Payment Receive Bank',
+            'Currency Conversion',
+            'FX Gain/Loss',
+            'Referral Points',
+            'Bonus Points'
+        ];
+
+        fputcsv($handle, $columns);
+
+        foreach ($records as $index => $payment) {
+            $localCurrency = optional($payment->inventoryVoucher)->local_currency ?? 'PKR';
+            $conversionRate = optional($payment->inventoryVoucher)->currency_conversion_rate ?? 1.0;
+            $purchaseValuePerUnit = optional($payment->inventoryVoucher)->purchase_value_per_unit ?? 0;
+            $totalPurchaseValue = $purchaseValuePerUnit * $payment->quantity;
+            $fxGainLoss = $payment->amount - $totalPurchaseValue;
+
+            fputcsv($handle, [
+                $index + 1,
+                $payment->order_id,
+                $payment->transaction_id ?? 'N/A',
+                $payment->created_at->format('Y-m-d'),
+                $payment->created_at->format('H:i:s'),
+                $payment->user->name ?? 'N/A',
+                ucfirst(str_replace('_', ' ', $payment->user_role)),
+                $localCurrency,
+                $payment->user->country ?? 'N/A',
+                $payment->user->state ?? 'N/A',
+                optional($payment->inventoryVoucher)->brand_name ?? 'N/A',
+                optional($payment->inventoryVoucher)->voucher_variant ?? 'N/A',
+                $payment->voucher_type,
+                $payment->order_id,
+                $payment->quantity,
+                number_format($payment->amount, 2),
+                $payment->bank_name ?? $payment->payment_method,
+                number_format($conversionRate, 4),
+                number_format($fxGainLoss, 2),
+                $payment->referral_points,
+                $payment->bonus_amount
+            ]);
+        }
+
+        fclose($handle);
+        exit;
     }
 }
