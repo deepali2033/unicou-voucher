@@ -121,6 +121,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::get('/notifications/unread-count', [DashboardController::class, 'getUnreadNotificationsCount'])->name('notifications.unreadCount');
     Route::post('/notifications/mark-all-read', [DashboardController::class, 'markAllNotificationsAsRead'])->name('notifications.markAllRead');
     Route::post('/notifications/bulk-action', [DashboardController::class, 'notificationsBulkAction'])->name('notifications.bulkAction');
+    Route::get('/trend-data', [DashboardController::class, 'getTrendData'])->name('dashboard.trendData');
     Route::get('/my-profile', [UserController::class, 'profile'])->name('profile.index');
     Route::post('/my-profile/update', [UserController::class, 'updateProfile'])->name('profile.update');
 

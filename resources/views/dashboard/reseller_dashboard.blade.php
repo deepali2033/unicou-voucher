@@ -1,7 +1,15 @@
 @extends('layouts.master')
-
 @section('content')
 <div class="container-fluid">
+   <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4 class="fw-bold mb-0">Reseller Agent Dashboard</h4>
+      <div class="system-status">
+         <span class="badge bg-success-subtle text-success p-2">
+            <i class="fas fa-circle me-1 small"></i> System Operational
+         </span>
+      </div>
+   </div>
+
    <div class="row g-3 mb-4">
       <div class="col-md-6">
          <div class="card shadow-sm border-0 border-start border-primary border-4">
@@ -25,8 +33,8 @@
             </div>
          </div>
       </div>
-
    </div>
+
    <!-- Charts & Alerts -->
    <div class="row g-4">
       <div class="col-lg-8">
@@ -96,15 +104,13 @@
                         </div>
                      </div>
                   </div>
-
                </div>
             </div>
          </div>
-
-
       </div>
    </div>
 </div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

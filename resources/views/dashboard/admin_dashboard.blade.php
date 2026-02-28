@@ -125,12 +125,7 @@
                </div>
             </div>
             <div class="card-body">
-               <div class="chart-placeholder bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px; border: 2px dashed #ddd;">
-                  <div class="text-center text-muted">
-                     <i class="fas fa-chart-line fa-3x mb-3"></i>
-                     <p>Revenue & Voucher Graph Will Appear Here</p>
-                  </div>
-               </div>
+               <canvas id="revenueChart" style="height: 300px; width: 100%;"></canvas>
             </div>
          </div>
       </div>
@@ -269,7 +264,7 @@
             </div>
          </div>
          <!-- System Stats -->
-         <div class="card shadow-sm border-0">
+         <!-- <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3">
                <h6 class="mb-0 fw-bold">Revenue Overview</h6>
             </div>
@@ -289,8 +284,138 @@
                   <div class="progress-bar bg-primary" role="progressbar" style="width: 60%"></div>
                </div>
             </div>
-         </div>
+         </div> -->
       </div>
    </div>
 </div>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      let currentChart;
+
+      function fetchTrendData(type) {
+         $.ajax({
+            url: "{{ route('dashboard.trendData') }}",
+            type: 'GET',
+            data: {
+               type: type
+            },
+            success: function(data) {
+               const labels = data.map(d => d.label);
+               const revenue = data.map(d => d.revenue);
+               const vouchers = data.map(d => d.vouchers);
+               renderChart(labels, revenue, vouchers, type + ' Trends');
+            },
+            error: function(err) {
+               console.error('Error fetching trend data:', err);
+            }
+         });
+      }
+
+      function renderChart(labels, revenueData, voucherData, title) {
+         if (currentChart) {
+            currentChart.destroy();
+         }
+
+         currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                        label: 'Revenue',
+                        data: revenueData,
+                        borderColor: '#23AAE2',
+                        backgroundColor: 'rgba(35, 170, 226, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Vouchers',
+                        data: voucherData,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.dataset.yAxisID === 'y') {
+                                    label += 'RS ' + new Intl.NumberFormat().format(context.parsed.y);
+                                } else {
+                                    label += new Intl.NumberFormat().format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (RS)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Vouchers'
+                        }
+                    }
+                }
+            }
+         });
+      }
+
+      // Initial load
+      fetchTrendData('Daily');
+
+      // Button Toggles
+      document.querySelectorAll('.btn-group button').forEach(btn => {
+         btn.addEventListener('click', function() {
+            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const type = this.textContent.trim();
+            fetchTrendData(type);
+         });
+      });
+   });
+</script>
+@endpush
 @endsection
