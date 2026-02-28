@@ -65,18 +65,108 @@ class DashboardController extends Controller
         }
 
         if ($user->isManager()) {
+            $topBrand = Order::where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.brand_name', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.brand_name')
+                ->orderBy('total', 'desc')
+                ->first();
+
+            $topVariant = Order::where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.voucher_variant', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.voucher_variant')
+                ->orderBy('total', 'desc')
+                ->first();
+
+            $topCountry = Order::where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.country_region', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.country_region')
+                ->orderBy('total', 'desc')
+                ->first();
+
+            $topBuyer = Order::where('orders.status', 'delivered')
+                ->join('users', 'orders.user_id', '=', 'users.id')
+                ->select('users.name', \DB::raw('count(*) as total'))
+                ->groupBy('users.id', 'users.name')
+                ->orderBy('total', 'desc')
+                ->first();
+
             $stats = [
                 'total_users' => User::count(),
+                'agents' => User::where('account_type', 'reseller_agent')->count(),
+                'students' => User::where('account_type', 'student')->count(),
                 'pending_approvals' => User::where('profile_verification_status', 'pending')->count(),
-                'active_vouchers' => InventoryVoucher::sum('quantity'),
-                'low_stock_alerts' => InventoryVoucher::where('quantity', '<', 10)->count(),
+                'total_vouchers' => InventoryVoucher::sum('quantity'),
+                'total_sales' => Order::where('status', 'delivered')->count(),
+                'total_revenue' => Order::where('status', 'delivered')->sum('amount'),
+                'total_referral_points' => Order::sum('referral_points'),
+                'total_bonus_points' => Order::sum('bonus_amount'),
+                'top_brand' => $topBrand ? $topBrand->brand_name : 'N/A',
+                'top_variant' => $topVariant ? $topVariant->voucher_variant : 'N/A',
+                'top_country' => $topCountry ? $topCountry->country_region : 'N/A',
+                'top_buyer' => $topBuyer ? $topBuyer->name : 'N/A',
             ];
             return view('dashboard.manager_dashboard', compact('stats'));
         }
 
-        if ($user->isAgent()) {
-            $currentTime = now()->timezone(session('user_timezone', 'UTC'))->format('l d F Y, h:i A');
-            return view('dashboard.agent_dashboard', compact('currentTime'));
+        if ($user->isResellerAgent()) {
+            $topSellingBrands = Order::where('orders.user_id', $user->id)
+                ->where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.brand_name', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.brand_name')
+                ->orderBy('total', 'desc')
+                ->limit(3)
+                ->get();
+                
+            $topSellingVariant = Order::where('orders.user_id', $user->id)
+                ->where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.voucher_variant', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.voucher_variant')
+                ->orderBy('total', 'desc')
+                ->first();
+
+            $totalPurchaseAmount = Order::where('user_id', $user->id)
+                ->where('status', 'delivered')
+                ->sum('amount');
+            
+            $totalVouchersPurchased = Order::where('user_id', $user->id)
+                ->where('status', 'delivered')
+                ->sum('quantity');
+
+            return view('dashboard.reseller_dashboard', compact('topSellingBrands', 'topSellingVariant', 'totalPurchaseAmount', 'totalVouchersPurchased'));
+        }
+
+        if ($user->isRegularAgent()) {
+            $topSellingBrands = Order::where('orders.user_id', $user->id)
+                ->where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.brand_name', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.brand_name')
+                ->orderBy('total', 'desc')
+                ->limit(3)
+                ->get();
+                
+            $topSellingVariant = Order::where('orders.user_id', $user->id)
+                ->where('orders.status', 'delivered')
+                ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
+                ->select('inventory_vouchers.voucher_variant', \DB::raw('count(*) as total'))
+                ->groupBy('inventory_vouchers.voucher_variant')
+                ->orderBy('total', 'desc')
+                ->first();
+
+            $totalPurchaseAmount = Order::where('user_id', $user->id)
+                ->where('status', 'delivered')
+                ->sum('amount');
+            
+            $totalVouchersPurchased = Order::where('user_id', $user->id)
+                ->where('status', 'delivered')
+                ->sum('quantity');
+
+            return view('dashboard.agent_dashboard', compact('topSellingBrands', 'topSellingVariant', 'totalPurchaseAmount', 'totalVouchersPurchased'));
         }
 
         if ($user->isStudent()) {
@@ -118,7 +208,7 @@ class DashboardController extends Controller
                 ->where('status', 'delivered')
                 ->sum('quantity');
 
-            return view('dashboard.student_dashboard', compact('topSellingBrands', 'topSellingVariant', 'dailyPurchases', 'monthlyPurchases', 'totalPurchaseAmount', 'totalVouchersPurchased'));
+            return view('dashboard.student_dashboard', compact('topSellingBrands', 'topSellingVariant', 'totalPurchaseAmount', 'totalVouchersPurchased'));
         }
 
         if ($user->isSupport()) {
@@ -208,5 +298,52 @@ class DashboardController extends Controller
         $user->update($request->only('first_name', 'last_name', 'email'));
 
         return back()->with('success', 'Account updated successfully.');
+    }
+
+    public function getTrendData(Request $request)
+    {
+        $type = $request->get('type', 'Daily');
+        $user = auth()->user();
+        $query = Order::where('status', 'delivered');
+
+        // If not admin/manager, only show their own data
+        if (!$user->isAdmin() && !$user->isManager()) {
+            $query->where('user_id', $user->id);
+        }
+
+        switch ($type) {
+            case 'Daily':
+                $data = $query->where('created_at', '>=', now()->subDays(30))
+                    ->select(\DB::raw('DATE(created_at) as label'), \DB::raw('SUM(amount) as revenue'), \DB::raw('SUM(quantity) as vouchers'))
+                    ->groupBy('label')
+                    ->orderBy('label')
+                    ->get();
+                break;
+            case 'Weekly':
+                $data = $query->where('created_at', '>=', now()->subWeeks(12))
+                    ->select(\DB::raw('YEARWEEK(created_at) as label'), \DB::raw('SUM(amount) as revenue'), \DB::raw('SUM(quantity) as vouchers'))
+                    ->groupBy('label')
+                    ->orderBy('label')
+                    ->get();
+                break;
+            case 'Monthly':
+                $data = $query->where('created_at', '>=', now()->subMonths(12))
+                    ->select(\DB::raw('DATE_FORMAT(created_at, "%b %Y") as label'), \DB::raw('SUM(amount) as revenue'), \DB::raw('SUM(quantity) as vouchers'))
+                    ->groupBy(\DB::raw('YEAR(created_at), MONTH(created_at), label'))
+                    ->orderBy(\DB::raw('YEAR(created_at), MONTH(created_at)'))
+                    ->get();
+                break;
+            case 'Yearly':
+                $data = $query->where('created_at', '>=', now()->subYears(5))
+                    ->select(\DB::raw('YEAR(created_at) as label'), \DB::raw('SUM(amount) as revenue'), \DB::raw('SUM(quantity) as vouchers'))
+                    ->groupBy('label')
+                    ->orderBy('label')
+                    ->get();
+                break;
+            default:
+                return response()->json(['error' => 'Invalid type'], 400);
+        }
+
+        return response()->json($data);
     }
 }
