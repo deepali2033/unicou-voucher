@@ -24,7 +24,7 @@
                 <th>Disputed Payments</th>
                 <th>Available Referral Points</th>
                 <th>Available Bonus Points</th>
-                <th>Status</th>
+                <!-- <th>Status</th> -->
                 <!-- <th class="text-end">Actions</th> -->
             </tr>
         </thead>

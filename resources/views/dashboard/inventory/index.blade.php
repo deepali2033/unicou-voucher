@@ -104,9 +104,11 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="cp-title mb-0">Stocks</h2>
         <div class="d-flex gap-2">
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_voucher_stock))
             <button id="bulk-duplicate-btn" class="btn btn-outline-info btn-sm px-3 shadow-sm d-flex align-items-center">
                 <i class="fas fa-copy me-1"></i> Bulk Duplicate
             </button>
+            @endif
             <a href="{{ route('inventory.export') }}" id="inventory-export-btn" class="btn btn-success btn-sm px-3 shadow-sm d-flex align-items-center">
                 <i class="fas fa-file-csv me-1"></i> CSV
             </a>
@@ -116,9 +118,11 @@
             <!-- <button class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#importInventoryModal">
                 <i class="fas fa-file-import me-1"></i> Import
             </button> -->
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_voucher_stock))
             <a href="{{ route('inventory.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center">
                 <i class="fas fa-plus me-1"></i> Add Voucher
             </a>
+            @endif
         </div>
     </div>
 

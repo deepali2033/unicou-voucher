@@ -170,7 +170,9 @@
                 @endif
             </div>
             <div class="v-category-badge">
+                @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_voucher_stock))
                 <input type="checkbox" class="voucher-checkbox me-2" value="{{ $v->id }}">
+                @endif
                 {{ $v->voucher_type }}
             </div>
         </div>
@@ -190,6 +192,7 @@
                 CREATED: {{ $v->created_at->format('M Y') }}
             </div>
             
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_voucher_stock))
             <div class="v-actions-overlay">
                 <a href="{{ route('inventory.edit', $v->id) }}" class="action-btn" title="Edit">
                     <i class="fas fa-edit fa-xs"></i>
@@ -204,6 +207,7 @@
                     <i class="fas fa-trash-alt fa-xs"></i>
                 </button>
             </div>
+            @endif
         </div>
     </div>
     @empty

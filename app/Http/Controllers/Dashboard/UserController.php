@@ -390,6 +390,9 @@ class UserController extends Controller
             'can_view_orders' => $request->has('can_view_orders'),
             'can_view_sales_report' => $request->has('can_view_sales_report'),
             'can_view_disputes' => $request->has('can_view_disputes'),
+            'can_view_voucher_stock' => $request->has('can_view_voucher_stock'),
+            'can_edit_voucher_stock' => $request->has('can_edit_voucher_stock'),
+            'can_view_reports_page' => $request->has('can_view_reports_page'),
         ]);
 
         return back()->with('success', 'User permissions updated successfully.');

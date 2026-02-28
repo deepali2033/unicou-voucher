@@ -63,7 +63,7 @@
             </li>
 
             @endif
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() )
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_voucher_stock) )
             <!-- Pricing -->
             <!-- Inventory -->
             <li class="nav-item">
@@ -178,7 +178,7 @@
                     <i class="fas fa-headset me-2"></i> Customer Query
                 </a>
             </li>
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_sales_report) || (auth()->user()->isSupport() && auth()->user()->can_view_sales_report))
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_reports_page) || (auth()->user()->isSupport() && auth()->user()->can_view_sales_report))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}" href="{{ route('reports.index') }}">
                     <i class="fas fa-headset me-2"></i> Reports

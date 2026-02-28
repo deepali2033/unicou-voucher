@@ -785,6 +785,9 @@
                                     ['name' => 'can_view_orders', 'label' => 'View Orders', 'desc' => 'Allow access and view order history'],
                                     ['name' => 'can_view_sales_report', 'label' => 'View Sales Report', 'desc' => 'Allow view detailed sales and payment reports'],
                                     ['name' => 'can_view_disputes', 'label' => 'Manage Disputes', 'desc' => 'Allow access and manage customer disputes'],
+                                    ['name' => 'can_view_voucher_stock', 'label' => 'View Voucher Stock', 'desc' => 'Allow manager to view voucher inventory/stock'],
+                                    ['name' => 'can_edit_voucher_stock', 'label' => 'Edit Voucher Stock', 'desc' => 'Allow manager to edit/update voucher inventory/stock'],
+                                    ['name' => 'can_view_reports_page', 'label' => 'View Reports Page', 'desc' => 'Allow manager to access the reports dashboard page'],
                                     ];
 
                                     if ($user->account_type === 'support_team') {
