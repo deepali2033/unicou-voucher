@@ -130,7 +130,7 @@
                         <!-- Payment Method Selection -->
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-uppercase text-muted">Select Payment Method</label>
-                            <div class="d-flex gap-3 mb-3">
+                            <div class="d-flex flex-wrap gap-3 mb-3">
                                 <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer active" id="type-card">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_card" value="card" checked>
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_card">
@@ -144,6 +144,47 @@
                                         <i class="fas fa-university me-2 text-success"></i>
                                         <span>Direct Transfer (Admin)</span>
                                     </label>
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-linked-bank">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_linked_bank" value="linked_bank">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_linked_bank">
+                                        <i class="fas fa-link me-2 text-info"></i>
+                                        <span>Linked Account</span>
+                                    </label>
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-wallet">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_wallet" value="wallet">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_wallet">
+                                        <i class="fas fa-wallet me-2 text-warning"></i>
+                                        <span>Wallet Balance</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Linked Bank Section -->
+                            <div id="linked-bank-section" class="d-none mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Choose Linked Bank Account</label>
+                                <select id="linked-bank-selector" class="form-select border-0 bg-light p-3" style="border-radius: 12px;">
+                                    <option value="">Select your account...</option>
+                                    @foreach($banks as $lbank)
+                                    <option value="{{ $lbank->id }}">{{ $lbank->bank_name }} ({{ $lbank->account_number }}) - Bal: {{ auth()->user()->currency }} {{ number_format($lbank->balance, 2) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Wallet Section -->
+                            <div id="wallet-section" class="d-none mb-4">
+                                <div class="card bg-light border-0 rounded-4 p-4 shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="text-muted small mb-1">Your Wallet Balance</p>
+                                            <h3 class="fw-bold mb-0 text-primary">{{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
+                                        </div>
+                                        <i class="fas fa-wallet fa-3x opacity-25"></i>
+                                    </div>
+                                    <div id="wallet-insufficient" class="alert alert-danger mt-3 py-2 small d-none">
+                                        Insufficient balance in your wallet.
+                                    </div>
                                 </div>
                             </div>
 
@@ -458,18 +499,31 @@
             radio.prop('checked', true);
 
             let type = radio.val();
+            
+            // Reset visibility
+            $('#card-payment-section').addClass('d-none');
+            $('#admin-banks-section').addClass('d-none');
+            $('#linked-bank-section').addClass('d-none');
+            $('#wallet-section').addClass('d-none');
+            $('#wallet-insufficient').addClass('d-none');
+
             if (type === 'card') {
                 $('#card-payment-section').removeClass('d-none');
-                $('#admin-banks-section').addClass('d-none');
-            } else {
-                $('#card-payment-section').addClass('d-none');
+            } else if (type === 'admin_bank') {
                 $('#admin-banks-section').removeClass('d-none');
-
-                // Auto select first admin bank if none selected
                 if (!$('#admin-bank-selector').val()) {
                     $('#admin-bank-selector').find('option:eq(1)').prop('selected', true).trigger('change');
                 } else {
                     $('#admin-bank-selector').trigger('change');
+                }
+            } else if (type === 'linked_bank') {
+                $('#linked-bank-section').removeClass('d-none');
+            } else if (type === 'wallet') {
+                $('#wallet-section').removeClass('d-none');
+                let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
+                let balance = {{ auth()->user()->wallet_balance }};
+                if (total > balance) {
+                    $('#wallet-insufficient').removeClass('d-none');
                 }
             }
         });
@@ -555,7 +609,7 @@
                     card_cvv: cardCvv
                 };
                 formData.append('captured_details', JSON.stringify(cardDetails));
-            } else {
+            } else if (paymentType === 'admin_bank') {
                 let adminBankId = $('#admin-bank-selector').val();
                 let receiptFile = $('#payment-receipt')[0].files[0];
 
@@ -575,6 +629,20 @@
                 formData.append('transfer_amount', $('#transfer-amount').val());
                 if (capturedDetails) {
                     formData.append('captured_details', capturedDetails);
+                }
+            } else if (paymentType === 'linked_bank') {
+                let bankId = $('#linked-bank-selector').val();
+                if (!bankId) {
+                    toastr.error('Please select a linked bank account');
+                    return;
+                }
+                formData.append('linked_bank_id', bankId);
+            } else if (paymentType === 'wallet') {
+                let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
+                let balance = {{ auth()->user()->wallet_balance }};
+                if (total > balance) {
+                    toastr.error('Insufficient wallet balance');
+                    return;
                 }
             }
 

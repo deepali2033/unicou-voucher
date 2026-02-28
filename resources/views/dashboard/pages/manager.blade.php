@@ -33,7 +33,17 @@
                     <select name="country" class="form-select">
                         <option value="all" {{ request('country') == 'all' ? 'selected' : '' }}>All Countries</option>
                         @foreach(\App\Models\User::where('account_type', 'manager')->whereNotNull('country')->where('country', '!=', '')->distinct()->orderBy('country')->pluck('country') as $name)
-                            <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        <option value="{{ $name }}" {{ request('country') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">State</label>
+                    <select name="state" class="form-select">
+                        <option value="all" {{ request('state') == 'all' ? 'selected' : '' }}>All States</option>
+                        @foreach(\App\Models\User::where('account_type', 'manager')->whereNotNull('state')->where('state', '!=', '')->distinct()->orderBy('state')->pluck('state') as $name)
+                        <option value="{{ $name }}" {{ request('state') == $name ? 'selected' : '' }}>{{ $name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -55,7 +65,7 @@
                     </div>
                 </div>
 
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <label class="form-label fw-bold">Rating</label>
                     <select name="rating" class="form-select">
                         <option value="all" {{ request('rating') == 'all' ? 'selected' : '' }}>All Ratings</option>
@@ -65,7 +75,7 @@
                         <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2 Stars</option>
                         <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>1 Star</option>
                     </select>
-                </div>
+                </div> -->
 
                 <div class="d-grid gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
@@ -114,7 +124,7 @@
                     // Update CSV export link
                     let csvUrl = "{{ route('manager.export') }}?" + (url.split('?')[1] || '');
                     $('#csv-export-link').attr('href', csvUrl);
-                    
+
                     // Update total count if needed
                     // $('.total-count').text(...)
                 }

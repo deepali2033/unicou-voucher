@@ -13,6 +13,9 @@
                 <th>Voucher Type</th>
                 <th>Sales Invoice No.</th>
                 <th>Quantity</th>
+                <th>Sales Value in Local Currency</th>
+                <th>Sale Value per Unit</th>
+                <th>Taxes</th>
                 <th>Bank</th>
                 <th>Currency Conversion @</th>
                 <th>FX Gain/Loss</th>
@@ -33,15 +36,43 @@
                         {{ ucfirst(str_replace('_', ' ', $sale->user_role)) }}
                     </span>
                 </td>
-                <td>{{ $sale->inventoryVoucher->currency ?? 'N/A' }}</td>
+                <td>{{ $sale->inventoryVoucher->local_currency ?? 'N/A' }}</td>
                 <td>{{ $sale->inventoryVoucher->country_region ?? 'N/A' }}</td>
                 <td>{{ $sale->inventoryVoucher->voucher_variant ?? 'N/A' }}</td>
                 <td>{{ $sale->voucher_type }}</td>
                 <td>{{ $sale->order_id }}</td> {{-- Using Order ID as Invoice No --}}
                 <td>{{ $sale->quantity }}</td>
-                <td>{{ $sale->inventoryVoucher->bank ?? 'N/A' }}</td>
+                <td>
+                    @php
+                    $localValue = 0;
+                    $currencyCode = $sale->inventoryVoucher->local_currency ?? '';
+                    if ($sale->inventoryVoucher) {
+                    $localValue = $sale->inventoryVoucher->purchase_value_per_unit * $sale->quantity;
+                    }
+                    @endphp
+                    {{ $currencyCode }} {{ number_format($localValue, 2) }}
+                </td>
+                <td>
+                    @php
+                    $unitValue = $sale->quantity > 0 ? $localValue / $sale->quantity : 0;
+                    @endphp
+                    {{ $currencyCode }} {{ number_format($unitValue, 2) }}
+                </td>
+                <td>{{ $sale->inventoryVoucher->taxes ?? 'N/A' }} </td>
+                <td>{{ $sale->bank_name}}</td>
                 <td>{{ number_format($sale->inventoryVoucher->currency_conversion_rate ?? 0, 4) }}</td>
-                <td>0.00</td> {{-- Placeholder for FX Gain/Loss --}}
+                <td>
+                    @php
+                    $fxGainLoss = 0;
+                    if ($sale->inventoryVoucher) {
+                    $totalPurchaseValue = $sale->inventoryVoucher->purchase_value_per_unit * $sale->quantity;
+                    $fxGainLoss = $sale->amount - $totalPurchaseValue;
+                    }
+                    @endphp
+                    <span class="{{ $fxGainLoss >= 0 ? 'text-success' : 'text-danger' }} fw-bold">
+                        {{ $currencyCode }} {{ number_format($fxGainLoss, 2) }}
+                    </span>
+                </td>
                 <td class="text-success fw-bold">{{ $sale->referral_points ?? 0 }}</td>
                 <td class="text-danger fw-bold">{{ $sale->points_redeemed ?? 0 }}</td>
                 <td class="text-primary fw-bold">{{ number_format($sale->bonus_amount ?? 0, 2) }}</td>

@@ -39,6 +39,16 @@
                 </div>
 
                 <div class="mb-4">
+                    <label class="form-label fw-bold">State</label>
+                    <select name="state" class="form-select">
+                        <option value="all" {{ request('state') == 'all' ? 'selected' : '' }}>All States</option>
+                        @foreach(\App\Models\User::where('account_type', 'agent')->whereNotNull('state')->where('state', '!=', '')->distinct()->orderBy('state')->pluck('state') as $name)
+                        <option value="{{ $name }}" {{ request('state') == $name ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
                     <label class="form-label fw-bold">Status</label>
                     <select name="status" class="form-select">
                         <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>

@@ -44,6 +44,9 @@ class UserController extends Controller
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
         }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
+        }
 
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
@@ -447,6 +450,9 @@ class UserController extends Controller
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
         }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
+        }
 
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
@@ -591,6 +597,9 @@ class UserController extends Controller
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
         }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
+        }
 
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
@@ -672,6 +681,9 @@ class UserController extends Controller
 
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
+        }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
         }
 
         if ($request->has('from_date') && $request->from_date != '') {
@@ -788,6 +800,9 @@ class UserController extends Controller
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
         }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
+        }
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
         }
@@ -844,6 +859,9 @@ class UserController extends Controller
         }
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
+        }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
         }
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
@@ -907,6 +925,9 @@ class UserController extends Controller
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
         }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
+        }
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);
         }
@@ -968,6 +989,9 @@ class UserController extends Controller
         }
         if ($request->has('country') && $request->country != 'all' && $request->country != '') {
             $query->where('country', $request->country);
+        }
+        if ($request->has('state') && $request->state != 'all' && $request->state != '') {
+            $query->where('state', $request->state);
         }
         if ($request->has('from_date') && $request->from_date != '') {
             $query->whereDate('created_at', '>=', $request->from_date);

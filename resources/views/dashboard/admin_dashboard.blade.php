@@ -254,8 +254,9 @@
                      <div id="collapseFive"
                         class="accordion-collapse collapse"
                         data-bs-parent="#dashboardAccordion">
-                        <div class="accordion-body fw-bold text-info">
-                           {{ $stats['top_country'] }}
+                        <div class="accordion-body d-flex align-items-center gap-2">
+
+                           <span class="fw-bold text-info">{{ $stats['top_country'] }}</span>
                         </div>
                      </div>
                   </div>
