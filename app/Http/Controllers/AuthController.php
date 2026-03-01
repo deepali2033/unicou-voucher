@@ -380,32 +380,36 @@ class AuthController extends Controller
 
 
 
-    private function startShuftiVerification($user, $reference)
-    {
-        $payload = [
-            "reference" => $reference,
-            "country" => $user->country_iso ?? "GB",
-            "language" => "EN",
-            "email" => $user->email,
+  private function startShuftiVerification($user, $reference)
+{
+    $payload = [
+        "reference" => $reference,
+        "country" => $user->country ?? "GB",
+        "language" => "EN",
+        "email" => $user->email,
 
-            "callback_url" => "https://unicouuk.janshaurya.org/shufti/callback",
+        // server callback
+        "callback_url" => route('shufti.callback'),
 
-            "verification_mode" => "any",
+        // 🔥 THIS IS IMPORTANT - user redirect back to your site
+        "redirect_url" => route('shufti.redirect'),
 
-            "document" => [
-                "supported_types" => ["passport", "id_card", "driving_license"]
-            ],
+        "verification_mode" => "any",
 
-            "face" => new \stdClass(),
-        ];
+        "document" => [
+            "supported_types" => ["passport", "id_card", "driving_license"]
+        ],
 
-        $response = Http::withBasicAuth(
-            env('SHUFTI_CLIENT_ID'),
-            env('SHUFTI_SECRET_KEY')
-        )->post('https://api.shuftipro.com/', $payload);
+        "face" => new \stdClass(),
+    ];
 
-        return $response->json();
-    }
+    $response = Http::withBasicAuth(
+        env('SHUFTI_CLIENT_ID'),
+        env('SHUFTI_SECRET_KEY')
+    )->post('https://api.shuftipro.com/', $payload);
+
+    return $response->json();
+}
 
 
     public function test()

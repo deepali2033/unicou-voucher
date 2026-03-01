@@ -15,7 +15,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
 
@@ -77,7 +77,7 @@ class UserController extends Controller
 
     public function create()
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_create_user) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_create_user) || auth()->user()->account_type === 'reseller_agent')) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         return view('dashboard.users.create');
@@ -85,7 +85,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_create_user) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_create_user) || auth()->user()->account_type === 'reseller_agent')) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
 
@@ -165,12 +165,15 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || (auth()->user()->isResellerAgent() && $user->sub_agent_id === auth()->id()))) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
         return view('dashboard.users.show', compact('user'));
     }
 
     public function edit(User $user)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_user) || (auth()->user()->isResellerAgent() && $user->sub_agent_id === auth()->id()))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         return view('dashboard.users.edit', compact('user'));
@@ -178,7 +181,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_user) || (auth()->user()->isResellerAgent() && $user->sub_agent_id === auth()->id()))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
 
@@ -272,11 +275,11 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        if (auth()->user()->account_type === 'manager') {
+        if (!auth()->user()->isAdmin()) {
             if (request()->ajax()) {
-                return response()->json(['error' => 'Managers are not allowed to delete users.'], 403);
+                return response()->json(['error' => 'Unauthorized action.'], 403);
             }
-            return redirect()->route('users.management')->with('error', 'Managers are not allowed to delete users.');
+            return redirect()->route('users.management')->with('error', 'Unauthorized action.');
         }
 
         $user->delete();
@@ -292,13 +295,12 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (auth()->user()->account_type === 'manager') {
-            if (!auth()->user()->can_freeze_user) {
-                return response()->json(['status' => 'error', 'message' => 'Unauthorized action.'], 403);
-            }
-            if (in_array($user->account_type, ['admin', 'manager'])) {
-                return response()->json(['status' => 'error', 'message' => 'You cannot freeze admin or manager accounts.'], 403);
-            }
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_freeze_user))) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized action.'], 403);
+        }
+
+        if (auth()->user()->account_type === 'manager' && in_array($user->account_type, ['admin', 'manager'])) {
+            return response()->json(['status' => 'error', 'message' => 'You cannot freeze admin or manager accounts.'], 403);
         }
 
         if ($user->id === auth()->id()) {
@@ -327,13 +329,12 @@ class UserController extends Controller
 
     public function suspend(User $user)
     {
-        if (auth()->user()->account_type === 'manager') {
-            if (!auth()->user()->can_freeze_user) {
-                return back()->with('error', 'Unauthorized action.');
-            }
-            if (in_array($user->account_type, ['admin', 'manager'])) {
-                return back()->with('error', 'You cannot suspend admin or manager accounts.');
-            }
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_freeze_user))) {
+            return back()->with('error', 'Unauthorized action.');
+        }
+
+        if (auth()->user()->account_type === 'manager' && in_array($user->account_type, ['admin', 'manager'])) {
+            return back()->with('error', 'You cannot suspend admin or manager accounts.');
         }
 
         $newStatus = $user->profile_verification_status === 'suspended' ? 'verified' : 'suspended';
@@ -400,7 +401,7 @@ class UserController extends Controller
 
     public function updateCategory(Request $request, User $user)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_user))) {
             return response()->json(['error' => 'Unauthorized action.'], 403);
         }
 
@@ -417,7 +418,7 @@ class UserController extends Controller
 
     public function updateLimit(Request $request, User $user)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_edit_user) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_edit_user))) {
             return response()->json(['error' => 'Unauthorized action.'], 403);
         }
 
@@ -434,12 +435,14 @@ class UserController extends Controller
 
     public function downloadPDF(Request $request)
     {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
+        }
+
         $query = User::where('id', '!=', auth()->id());
 
-        if (auth()->user()->account_type === 'manager') {
+        if (auth()->user()->isManager()) {
             $query->whereNotIn('account_type', ['admin', 'manager']);
-        } elseif (auth()->user()->account_type !== 'admin') {
-            $query->where('account_type', '!=', 'admin');
         }
 
         if ($request->has('role') && $request->role != 'all' && $request->role != '') {
@@ -591,7 +594,7 @@ class UserController extends Controller
 
     public function managers(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
 
@@ -796,7 +799,7 @@ class UserController extends Controller
 
     public function ResellerAgent(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'reseller_agent');
@@ -856,7 +859,7 @@ class UserController extends Controller
 
     public function SupportTeam(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'support_team');
@@ -916,7 +919,7 @@ class UserController extends Controller
 
     public function RegularAgent(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent())) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'agent');
@@ -981,7 +984,7 @@ class UserController extends Controller
 
     public function Student(Request $request)
     {
-        if (auth()->user()->account_type === 'manager' && !auth()->user()->can_view_users) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent())) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'student');

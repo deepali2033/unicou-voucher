@@ -21,7 +21,7 @@
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || (auth()->user()->isManager() && auth()->user()->can_view_users))
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- User Management -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('users.management') ? 'active' : '' }}" href="{{ route('users.management') }}">
@@ -37,8 +37,13 @@
                     <i class="fas fa-user-tie me-2"></i>Manager
                 </a>
             </li>
+              <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('banks.bank-table') ? 'active' : '' }}" href="{{ route('banks.bank-table') }}">
+                    <i class="fas fa-university me-2"></i> Banks
+                </a>
+            </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || (auth()->user()->isManager() && auth()->user()->can_view_users))
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('support.team') ? 'active' : '' }}" href="{{ route('support.team') }}">
                     <i class="fas fa-tools me-2"></i>Support Team
@@ -108,7 +113,28 @@
                     <i class="fas fa-undo me-2"></i> My Refunds
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('bank.link') ? 'active' : '' }}" href="{{ route('bank.link') }}">
+                    <i class="fas fa-university me-2"></i> Linked Banks
+                </a>
+            </li>
+           
+            <!-- Voucher Management -->
+         
+            
             @endif
+   @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() || auth()->user()->isSupport())
+      <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('vouchers') ? 'active' : '' }}" href="{{ route('vouchers') }}">
+                    <i class="fas fa-ticket-alt me-2"></i> Voucher
+                </a>
+            </li>
+             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('profile.index') ? 'active' : '' }}" href="{{ route('profile.index') }}">
+                    <i class="fas fa-wallet me-2"></i> My Profile
+                </a>
+            </li>
+   @endif
 
 
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
@@ -136,15 +162,7 @@
             </li>
             @endif
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
-            <!-- Linked Banks -->
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('banks.bank-table') ? 'active' : '' }}" href="{{ route('banks.bank-table') }}">
-                    <i class="fas fa-university me-2"></i> Banks
-                </a>
-            </li>
-
-            @if(auth()->user()->isAdmin() ||auth()->user()->isAgent() ||auth()->user()->isManager()|| auth()->user()->isStudent() || auth()->user()->isResellerAgent())
+            @if(auth()->user()->isAdmin() ||auth()->user()->isManager())
             <!-- System Control -->
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('system.control') ? 'active' : '' }}" href="{{ route('system.control') }}">
@@ -196,14 +214,15 @@
                     <i class="fas fa-star me-2"></i> Staff Ratings
                 </a>
             </li>
-            @endif
-
+            
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('settings.risk-levels') ? 'active' : '' }}" href="{{ route('settings.risk-levels') }}">
                     <i class="fas fa-globe me-2"></i> Country Risk Levels
                 </a>
             </li>
             @endif
+
+            
             <!-- Admin Payment Methods -->
             <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('payment-methods.index') }}">
@@ -219,23 +238,7 @@
                 </a>
             </li>
             @endif -->
-            @if(auth()->user()->isSupport() || auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
-            <!-- Wallet / Store Credit -->
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('profile.index') ? 'active' : '' }}" href="{{ route('profile.index') }}">
-                    <i class="fas fa-wallet me-2"></i> My Profile
-                </a>
-            </li>
-            @endif
-
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
-            <!-- Linked Banks -->
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('bank.link') ? 'active' : '' }}" href="{{ route('bank.link') }}">
-                    <i class="fas fa-university me-2"></i> Linked Banks
-                </a>
-            </li>
-            @endif
+   
 
             @if(auth()->user()->isSupport())
             <!-- Linked Banks -->
@@ -255,14 +258,7 @@
             </li>
             @endif -->
 
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
-            <!-- Voucher Management -->
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('vouchers') ? 'active' : '' }}" href="{{ route('vouchers') }}">
-                    <i class="fas fa-ticket-alt me-2"></i> Voucher
-                </a>
-            </li>
-            @endif
+           
 
 
 

@@ -171,6 +171,22 @@
         </div>
         @endif
 
+        @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire('Success', "{{ session('success') }}", 'success');
+            });
+        </script>
+        @endif
+
+        @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire('Error', "{{ session('error') }}", 'error');
+            });
+        </script>
+        @endif
+
         <div class="wizard-steps mb-4">
             <div class="wizard-step active" data-step="1">
                 <span>✓</span>
@@ -435,17 +451,7 @@
                         <label>Business Logo (Profile Photo) (JPG, PNG - Max 2MB)</label>
                         <input type="file" name="business_logo" accept=".jpg,.jpeg,.png">
                     </div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="button" class="btn btn-light prev-btn">← Back</button>
-                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
-                </div>
-
-            </section>
-
-            <!-- ================= CONSENTS ================= -->
-            <div class="sat-consent form-step" data-step="8">
+                     <div class="sat-consent form-step" data-step="8">
                 <input type="checkbox" required id="consent_policy">
                 <p>
                     I agree to the <a href="javascript:void(0)" class="text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#termsModal">Non-Refundable & Undisclosed Voucher Policy</a>.
@@ -459,6 +465,17 @@
                 </p>
             </div>
 
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-light prev-btn">← Back</button>
+                    <button type="button" class="btn btn-primary next-btn">Continue →</button>
+                </div>
+
+            </section>
+
+            <!-- ================= CONSENTS ================= -->
+           
             <button type="submit" class="sat-btn">
                 REGISTER AS B2B AGENT →
             </button>

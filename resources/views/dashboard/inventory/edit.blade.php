@@ -170,6 +170,8 @@
                             $allCodes = is_array($inventory->upload_vouchers) ? $inventory->upload_vouchers : [];
                             $deliveredCodes = is_array($inventory->delivered_vouchers) ? $inventory->delivered_vouchers : [];
                             $remainingCodes = array_diff($allCodes, $deliveredCodes);
+                            
+                            $canViewCodes = auth()->user()->isAdmin() || auth()->user()->can_view_voucher_code;
                         @endphp
                         
                         <div class="row">
@@ -180,25 +182,33 @@
                                 
                                 <div class="mt-3 p-3 bg-light rounded shadow-sm border" style="max-height: 200px; overflow-y: auto;">
                                     <h6 class="fw-bold small text-uppercase mb-2 text-success">Available Codes in Database:</h6>
-                                    @forelse($remainingCodes as $code)
-                                        <span class="badge bg-white text-dark border mb-1 me-1">{{ $code }}</span>
-                                    @empty
-                                        <p class="text-muted small mb-0">No available codes.</p>
-                                    @endforelse
+                                    @if($canViewCodes)
+                                        @forelse($remainingCodes as $code)
+                                            <span class="badge bg-white text-dark border mb-1 me-1">{{ $code }}</span>
+                                        @empty
+                                            <p class="text-muted small mb-0">No available codes.</p>
+                                        @endforelse
+                                    @else
+                                        <p class="text-danger small mb-0"><i class="fas fa-lock me-1"></i> You don't have permission to view voucher codes.</p>
+                                    @endif
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-uppercase text-muted">Delivered Codes (Used: {{ count($deliveredCodes) }})</label>
                                 <div class="p-3 bg-light rounded shadow-sm border" style="max-height: 350px; overflow-y: auto;">
-                                    @forelse($deliveredCodes as $code)
-                                        <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
-                                            <span class="small">{{ $code }}</span>
-                                            <span class="badge bg-secondary-soft text-secondary tiny-text">DELIVERED</span>
-                                        </div>
-                                    @empty
-                                        <p class="text-muted small mb-0">No codes delivered yet.</p>
-                                    @endforelse
+                                    @if($canViewCodes)
+                                        @forelse($deliveredCodes as $code)
+                                            <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                                                <span class="small">{{ $code }}</span>
+                                                <span class="badge bg-secondary-soft text-secondary tiny-text">DELIVERED</span>
+                                            </div>
+                                        @empty
+                                            <p class="text-muted small mb-0">No codes delivered yet.</p>
+                                        @endforelse
+                                    @else
+                                        <p class="text-danger small mb-0"><i class="fas fa-lock me-1"></i> You don't have permission to view voucher codes.</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>

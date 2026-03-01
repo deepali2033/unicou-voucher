@@ -1,14 +1,14 @@
 @extends('layouts.master')
 @section('content')
 <div class="container-fluid">
-   <div class="d-flex justify-content-between align-items-center mb-4">
+   <!-- <div class="d-flex justify-content-between align-items-center mb-4">
       <h4 class="fw-bold mb-0">Manager Dashboard</h4>
       <div class="system-status">
          <span class="badge bg-success-subtle text-success p-2">
             <i class="fas fa-circle me-1 small"></i> System Operational
          </span>
       </div>
-   </div>
+   </div> -->
    <!-- Stats Cards -->
    <div class="row g-3 mb-4">
       <div class="col-md-3">

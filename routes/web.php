@@ -108,6 +108,11 @@ Route::get('/register/support-team-details', [AuthController::class, 'showSuppor
 
 Route::post('/job-applications/apply', [JobController::class, 'submitApplication'])->name('job.apply');
 Route::get('/job-applications', [JobController::class, 'jobApplication'])->name('jobApplication');
+Route::get('/shufti/redirect', function () {
+
+    return redirect('/dashboard')->with('success', 'Verification completed successfully');
+
+})->name('shufti.redirect');
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
@@ -153,11 +158,15 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
     Route::post('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
-    Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
-    Route::post('/users/{user}/limit', [UserController::class, 'updateLimit'])->name('users.limit.update');
+   
     Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
-    Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
-    Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
+  Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
+ Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
+
+  Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
+    Route::post('/users/{user}/limit', [UserController::class, 'updateLimit'])->name('users.limit.update');
+
+//pages
     Route::get('/mangers', [UserController::class, 'managers'])->name('manager.page');
     Route::get('/mangers-export', [UserController::class, 'managersDownloadCSV'])->name('manager.export');
     Route::get('/support-team', [UserController::class, 'SupportTeam'])->name('support.team');

@@ -218,6 +218,15 @@ class DashboardController extends Controller
                 'students' => User::where('account_type', 'student')->count(),
                 'active_vouchers' => InventoryVoucher::sum('quantity'),
             ];
+              // Rating stats from disputes assigned to this support person
+            $disputeStats = \App\Models\Dispute::where('assigned_to', $user->id)
+                ->whereNotNull('rating')
+                ->select(\DB::raw('count(*) as count'), \DB::raw('avg(rating) as avg_rating'))
+                ->first();
+
+            $stats['rating_count'] = $disputeStats->count ?? 0;
+            $stats['rating_percentage'] = $disputeStats->avg_rating ? round(($disputeStats->avg_rating / 5) * 100) : 0;
+
             return view('dashboard.support_dashboard', compact('stats'));
         }
 
@@ -307,7 +316,7 @@ class DashboardController extends Controller
         $query = Order::where('status', 'delivered');
 
         // If not admin/manager, only show their own data
-        if (!$user->isAdmin() && !$user->isManager()) {
+        if (!$user->isAdmin() && !$user->isManager() && !$user->isSupport()) {
             $query->where('user_id', $user->id);
         }
 

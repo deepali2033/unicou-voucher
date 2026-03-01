@@ -190,7 +190,6 @@ class InventoryController extends Controller
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('inventory_logos', 'public');
-            $validated['logo'] = Storage::url($validated['logo']);
         }
 
         if ($request->filled('upload_vouchers')) {
@@ -255,11 +254,9 @@ class InventoryController extends Controller
         if ($request->hasFile('logo')) {
             // Delete old logo if exists
             if ($inventory->logo) {
-                $oldPath = str_replace('/storage/', '', $inventory->logo);
-                Storage::disk('public')->delete($oldPath);
+                Storage::disk('public')->delete($inventory->logo);
             }
             $validated['logo'] = $request->file('logo')->store('inventory_logos', 'public');
-            $validated['logo'] = Storage::url($validated['logo']);
         }
 
         if ($request->filled('upload_vouchers')) {
@@ -296,8 +293,7 @@ class InventoryController extends Controller
     {
         $inventory = InventoryVoucher::findOrFail($id);
         if ($inventory->logo) {
-            $oldPath = str_replace('/storage/', '', $inventory->logo);
-            Storage::disk('public')->delete($oldPath);
+            Storage::disk('public')->delete($inventory->logo);
         }
         $inventory->delete();
 

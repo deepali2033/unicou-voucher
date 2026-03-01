@@ -68,6 +68,13 @@ class InventoryVoucher extends Model
         'delivered_vouchers' => 'array',
     ];
 
+    public function getLogoAttribute($value)
+    {
+        if (!$value) return null;
+        if (filter_var($value, FILTER_VALIDATE_URL)) return $value;
+        return \Illuminate\Support\Facades\Storage::url($value);
+    }
+
     public function scopeExpired($query)
     {
         return $query->where('is_expired', true);
