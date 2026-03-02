@@ -1,3 +1,6 @@
+@php
+    $isNotifications = request()->routeIs('notifications.*');
+@endphp
 <!-- Sidebar -->
 <nav id="sidebar" class="col-md-3 col-lg-3 sidebar sidebar-hidden">
     <div class="position-sticky pt-3">
@@ -335,8 +338,8 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('notifications.index') ? 'active' : '' }}" href="{{ route('notifications.index') }}">
-                    <i class="fas fa-bell me-2"></i>
+                <a class="nav-link {{ $isNotifications ? 'active' : '' }}" href="{{ route('notifications.index') }}">
+                    <i class="{{ $isNotifications ? 'fas' : 'far' }} fa-bell me-2" style="{{ $isNotifications ? 'color: #23AAE2;' : '' }}"></i>
                     Notifications
                 </a>
             </li>

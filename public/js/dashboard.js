@@ -4,32 +4,29 @@ document.addEventListener("DOMContentLoaded", function () {
     const currentPath = window.location.pathname;
 
     navLinks.forEach(link => {
-        // Remove old active
-        link.classList.remove("active");
-
-        // URL match (refresh ke baad)
-        if (link.getAttribute("href") === currentPath) {
-            link.classList.add("active");
+        const href = link.getAttribute('href');
+        if (href === '#' || href === '' || href === 'javascript:void(0)') {
+            return;
         }
 
-        // Click par active + save
-        link.addEventListener("click", function () {
-            localStorage.setItem("activeSidebarLink", this.getAttribute("href"));
+        // Link's own path
+        const linkPath = new URL(link.href, window.location.origin).pathname;
 
+        // If current path matches link path, ensure it's active
+        if (linkPath === currentPath) {
+            link.classList.add("active");
+        } else {
+            // Otherwise, if this link was marked active by localStorage or leftover, remove it
+            // Blade already handles correct server-side active state, so we just cleanup mismatches
+            link.classList.remove("active");
+        }
+
+        // Click handler
+        link.addEventListener("click", function () {
             navLinks.forEach(l => l.classList.remove("active"));
             this.classList.add("active");
         });
     });
-
-    // LocalStorage se restore
-    const savedLink = localStorage.getItem("activeSidebarLink");
-    if (savedLink) {
-        navLinks.forEach(link => {
-            if (link.getAttribute("href") === savedLink) {
-                link.classList.add("active");
-            }
-        });
-    }
 });
 // dashbord click active end
 

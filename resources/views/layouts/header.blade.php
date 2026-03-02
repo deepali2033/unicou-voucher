@@ -1,3 +1,7 @@
+@php
+$isNotifications = request()->routeIs('notifications.*');
+@endphp
+
 <header class="main-header mb-4 d-flex justify-content-between align-items-center py-3 border-bottom">
     <div class="header-left">
         @yield('header_left')
@@ -39,8 +43,8 @@
         @endif
 
         <div class="notification-bell position-relative">
-            <a href="{{ route('notifications.index') }}" class="text-decoration-none" data-toggle="Notifications" title="Notifications">
-                <i class="far fa-bell" style="font-size: 1.2rem; color: #666; cursor: pointer;"></i>
+            <a href="{{ route('notifications.index') }}" class="text-decoration-none nav-link {{ $isNotifications ? 'active' : '' }}" data-toggle="Notifications" title="Notifications">
+                <i class="{{ $isNotifications ? 'fas' : 'far' }} fa-bell" style="font-size: 1.2rem; color: {{ $isNotifications ? '#23AAE2' : '#666' }}; cursor: pointer;"></i>
                 @php
                 $unreadCount = auth()->user()->unreadNotifications->count();
                 @endphp
@@ -52,6 +56,7 @@
                 @endif
             </a>
         </div>
+
         <div class="d-flex align-items-center gap-2" id="header-country-container">
             <!-- @if(Auth::user()->country_iso)
             <img src="https://flagsapi.com/{{ strtoupper(Auth::user()->country) }}/flat/64.png" alt="{{ Auth::user()->country }}" style="width:30px;border-radius:2px;">
