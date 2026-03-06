@@ -2,6 +2,11 @@
     <table class="table table-hover align-middle" style="white-space: nowrap;">
         <thead class="table-light">
             <tr>
+                <th>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="selectAll">
+                    </div>
+                </th>
                 <th>User Info</th>
                 <th>Role</th>
                 <th>Account Status</th>
@@ -19,6 +24,11 @@
         <tbody>
             @forelse($users as $user)
             <tr>
+                <td>
+                    <div class="form-check">
+                        <input class="form-check-input user-checkbox" type="checkbox" value="{{ $user->id }}">
+                    </div>
+                </td>
                 <td>
                     <div class="d-flex align-items-center">
                         <img src="{{ $user->profile_photo ? asset('storage/' . $user->profile_photo) : asset('images/user.png') }}"
@@ -169,7 +179,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" class="text-center py-5 text-muted">
+                <td colspan="10" class="text-center py-5 text-muted">
                     No users found.
                 </td>
             </tr>

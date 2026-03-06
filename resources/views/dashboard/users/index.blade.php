@@ -104,6 +104,11 @@
                 <small class="text-muted total-count">{{ $users->total() }} Users Found</small>
             </div>
             <div class="d-flex gap-2">
+                @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_approve_user))
+                <button id="bulk-verify-btn" class="btn btn-primary btn-sm px-3 shadow-sm d-none">
+                    <i class="fas fa-sync me-1"></i> Toggle Status
+                </button>
+                @endif
                 <a href="{{ route('users.pdf', request()->all()) }}" id="csv-export-link" class="btn btn-success btn-sm px-3 shadow-sm">
                     <i class="fas fa-file-csv me-1"></i> CSV
                 </a>
@@ -167,6 +172,64 @@
             $('.btn-group a').removeClass('active');
             $(this).addClass('active');
             updateTable($(this).attr('href'));
+        });
+
+        // Bulk Selection and Button Visibility
+        $(document).on('change', '#selectAll', function() {
+            $('.user-checkbox').prop('checked', $(this).prop('checked'));
+            toggleBulkButton();
+        });
+
+        $(document).on('change', '.user-checkbox', function() {
+            if ($('.user-checkbox:checked').length === $('.user-checkbox').length) {
+                $('#selectAll').prop('checked', true);
+            } else {
+                $('#selectAll').prop('checked', false);
+            }
+            toggleBulkButton();
+        });
+
+        function toggleBulkButton() {
+            if ($('.user-checkbox:checked').length > 0) {
+                $('#bulk-verify-btn').removeClass('d-none');
+            } else {
+                $('#bulk-verify-btn').addClass('d-none');
+            }
+        }
+
+        // Handle Bulk Verification
+        $(document).on('click', '#bulk-verify-btn', function() {
+            let selectedIds = $('.user-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (selectedIds.length === 0) return;
+
+            if (!confirm('Are you sure you want to toggle the status for ' + selectedIds.length + ' selected users?')) {
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('users.bulk-verify') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    ids: selectedIds
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.success);
+                        $('#selectAll').prop('checked', false);
+                        $('#bulk-verify-btn').addClass('d-none');
+                        updateTable(window.location.href);
+                    } else {
+                        toastr.error(response.error || 'Something went wrong');
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Something went wrong. Please try again.');
+                }
+            });
         });
 
         // Handle AJAX Actions (Suspend, Delete)
