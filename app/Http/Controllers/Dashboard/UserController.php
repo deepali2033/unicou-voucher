@@ -1061,6 +1061,34 @@ class UserController extends Controller
         return view('dashboard.pages.student', compact('users'));
     }
 
+    public function bulkVerify(Request $request)
+    {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_approve_user))) {
+            return response()->json(['error' => 'Unauthorized action.'], 403);
+        }
+
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return response()->json(['error' => 'No users selected.'], 400);
+        }
+
+        $users = User::whereIn('id', $ids)->get();
+        $count = 0;
+        foreach ($users as $user) {
+            $isCurrentlyVerified = in_array($user->profile_verification_status, ['verified', 'approved']);
+            $newStatus = $isCurrentlyVerified ? 'pending' : 'verified';
+
+            $user->update([
+                'profile_verification_status' => $newStatus,
+                'verified_at' => $newStatus === 'verified' ? now() : $user->verified_at,
+                'verified_by' => $newStatus === 'verified' ? auth()->id() : $user->verified_by,
+            ]);
+            $count++;
+        }
+
+        return response()->json(['success' => $count . ' users status updated successfully.']);
+    }
+
     public function impersonate(User $user)
     {
         // Only admin/manager can impersonate
