@@ -113,6 +113,8 @@ Route::get('/shufti/redirect', function () {
     return redirect('/dashboard')->with('success', 'Verification completed successfully');
 
 })->name('shufti.redirect');
+
+Route::post('/shufti/callback', [AuthController::class, 'shuftiCallback'])->name('shufti.callback');
 // Dashboard Routes (Unified Prefix)
 Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 

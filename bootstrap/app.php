@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetUserLocation::class,
             \App\Http\Middleware\EnsureProfileIsCompleted::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            '/shufti/callback',
+        ]);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -201,7 +201,6 @@ class AuthController extends Controller
      */
     public function storeAgentDetails(Request $request)
     {
-
         $validated = $request->validate([
             'agentType'           => 'required|string',
             'business_name'       => 'required|string|max:255',
@@ -233,11 +232,9 @@ class AuthController extends Controller
         ]);
 
         $data = $validated;
-        // Do NOT set $data['user_id'] = Auth::id(); because it overwrites the custom user_id string
         $data['agent_type'] = $validated['agentType'];
         unset($data['agentType']);
 
-        // Handle File Uploads
         if ($request->hasFile('registration_doc')) {
             $data['registration_doc'] = $request->file('registration_doc')->store('agent_docs', 'public');
         }
@@ -248,45 +245,31 @@ class AuthController extends Controller
             $data['business_logo'] = $request->file('business_logo')->store('agent_logos', 'public');
         }
 
-        // 🔑 Mark verification pending
         $data['kyc_status'] = 'pending';
 
+        // 🔹 Save User Details first
         Auth::user()->update($data);
 
-        // 🔑 Unique reference for Shufti
         $reference = 'user_' . Auth::id() . '_' . time();
-
-        // 🔑 START Shufti verification (NOT result)
         $shuftiResponse = $this->startShuftiVerification(Auth::user(), $reference);
 
-        if (!isset($shuftiResponse['verification_url'])) {
-
-            $error = $shuftiResponse['error'] ?? null;
-
+        if (isset($shuftiResponse['verification_url'])) {
             Auth::user()->update([
-                'shufti_status' => 'failed',
-                'shufti_error'  => $error ? json_encode($error) : null
+                'shufti_reference' => $reference,
+                'shufti_status'    => 'pending',
+                'shufti_error'     => null
             ]);
-
-            $errorMessage = is_array($error)
-                ? ($error['message'] ?? 'Unknown error')
-                : ($error ?? 'Unknown error');
-
-            return back()->with(
-                'error',
-                'Shufti verification start nahi ho paayi: ' . $errorMessage
-            );
+            return redirect($shuftiResponse['verification_url']);
         }
 
-        // Save reference
+        // Failure: Error log karo aur Dashboard par bhej do
+        $error = $shuftiResponse['error'] ?? null;
         Auth::user()->update([
-            'shufti_reference' => $reference,
-            'shufti_status' => 'pending',
-            'shufti_error' => null
+            'shufti_status' => 'failed',
+            'shufti_error'  => $error ? json_encode($error) : 'API Error or Unauthorized'
         ]);
 
-        // 🔥 Redirect user to Shufti
-        return redirect($shuftiResponse['verification_url']);
+        return redirect()->route('dashboard')->with('warning', 'Profile saved. Verification currently unavailable.');
     }
 
     /**
@@ -294,9 +277,6 @@ class AuthController extends Controller
      */
     public function storeStudentDetails(Request $request)
     {
-
-
-
         $validated = $request->validate([
             'full_name'           => 'required|string|max:255',
             'dob'                 => 'required|date|before:-16 years',
@@ -326,90 +306,109 @@ class AuthController extends Controller
         ]);
 
         $data = $validated;
-        // Do NOT set $data['user_id'] = Auth::id(); because it overwrites the custom user_id string
 
-        // Handle File Uploads
         if ($request->hasFile('id_doc')) {
             $data['id_doc'] = $request->file('id_doc')->store('student_docs', 'public');
         }
         if ($request->hasFile('id_doc_final')) {
-            // Overwrite or store as final
             $data['id_doc_final'] = $request->file('id_doc_final')->store('student_docs', 'public');
         }
 
-        // 🔑 Mark verification pending
         $data['kyc_status'] = 'pending';
 
+        // 🔹 Save Student Details first
         Auth::user()->update($data);
 
-        // 🔑 Unique reference for Shufti
         $reference = 'user_' . Auth::id() . '_' . time();
-
-        // 🔑 START Shufti verification (NOT result)
         $shuftiResponse = $this->startShuftiVerification(Auth::user(), $reference);
 
-        if (!isset($shuftiResponse['verification_url'])) {
-
-            $error = $shuftiResponse['error'] ?? null;
-
+        if (isset($shuftiResponse['verification_url'])) {
             Auth::user()->update([
-                'shufti_status' => 'failed',
-                'shufti_error'  => $error ? json_encode($error) : null
+                'shufti_reference' => $reference,
+                'shufti_status'    => 'pending',
+                'shufti_error'     => null
             ]);
-
-            $errorMessage = is_array($error)
-                ? ($error['message'] ?? 'Unknown error')
-                : ($error ?? 'Unknown error');
-
-            return back()->with(
-                'error',
-                'Shufti verification start nahi ho paayi: ' . $errorMessage
-            );
+            return redirect($shuftiResponse['verification_url']);
         }
 
-        // Save reference
+        // Failure: Dashboard par bhej do
+        $error = $shuftiResponse['error'] ?? null;
         Auth::user()->update([
-            'shufti_reference' => $reference,
-            'shufti_status' => 'pending',
-            'shufti_error' => null
+            'shufti_status' => 'failed',
+            'shufti_error'  => $error ? json_encode($error) : 'API Error or Unauthorized'
         ]);
 
-        // 🔥 Redirect user to Shufti
-        return redirect($shuftiResponse['verification_url']);
+        return redirect()->route('dashboard')->with('warning', 'Details saved. Verification currently unavailable.');
     }
 
+    public function shuftiCallback(Request $request)
+    {
+        \Log::info('Shufti Callback received:', $request->all());
+        
+        $reference = $request->input('reference');
+        $event = $request->input('event');
+        
+        $user = User::where('shufti_reference', $reference)->first();
+        
+        if ($user) {
+            if ($event === 'verification.accepted') {
+                $user->update([
+                    'shufti_status' => 'verified',
+                    'profile_verification_status' => 'verified',
+                    'verified_at' => now()
+                ]);
+            } elseif ($event === 'verification.declined') {
+                $user->update([
+                    'shufti_status' => 'failed',
+                    'shufti_error' => $request->input('declined_reason')
+                ]);
+            }
+        }
+        
+        return response()->json(['status' => 'success']);
+    }
 
+    private function startShuftiVerification($user, $reference)
+    {
+        $payload = [
+            "reference" => $reference,
+            "country" => $user->country ?? "GB",
+            "language" => "EN",
+            "email" => $user->email,
+            "callback_url" => route('shufti.callback'),
+            "redirect_url" => route('shufti.redirect'),
+            "verification_mode" => "any",
+            "document" => [
+                "supported_types" => ["passport", "id_card", "driving_license"]
+            ],
+            "face" => new \stdClass(),
+        ];
 
-  private function startShuftiVerification($user, $reference)
-{
-    $payload = [
-        "reference" => $reference,
-        "country" => $user->country ?? "GB",
-        "language" => "EN",
-        "email" => $user->email,
+        try {
+            $response = Http::withBasicAuth(
+                config('services.shuftipro.client_id'),
+                config('services.shuftipro.secret_key')
+            )->post('https://api.shuftipro.com/', $payload);
 
-        // server callback
-        "callback_url" => route('shufti.callback'),
+            $result = $response->json();
 
-        // 🔥 THIS IS IMPORTANT - user redirect back to your site
-        "redirect_url" => route('shufti.redirect'),
+            if (!$response->successful() || !isset($result['verification_url'])) {
+                \Log::error('Shufti API Error Response:', [
+                    'status' => $response->status(),
+                    'body' => $result,
+                    'payload_sent' => $payload
+                ]);
+            }
 
-        "verification_mode" => "any",
-
-        "document" => [
-            "supported_types" => ["passport", "id_card", "driving_license"]
-        ],
-
-        "face" => new \stdClass(),
-    ];
-
-    $response = Http::withBasicAuth(
-        env('SHUFTI_CLIENT_ID'),
-        env('SHUFTI_SECRET_KEY')
-    )->post('https://api.shuftipro.com/', $payload);
-
-    return $response->json();
-}
+            return $result;
+        } catch (\Exception $e) {
+            \Log::error('Shufti API Connection Exception:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return ['error' => ['message' => $e->getMessage()]];
+        }
+    }
 
 
     public function test()
