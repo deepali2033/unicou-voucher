@@ -84,10 +84,14 @@
                         @forelse($orders as $order)
                         <tr>
                             <td class="ps-4">
-                                <div class="fw-bold text-dark">{{ $order->order_id }}</div>
+                                <div class="fw-bold text-dark align-items-center gap-2">
+                                    {{ $order->order_id }}<br>
+                                    <!-- <span class="badge bg-light text-primary border border-primary-subtle tiny-text" style="font-size: 0.65rem;">{{ $order->voucher_id }}</span> -->
+                                    <div class="text-muted small ">SKU ID: {{ $order->voucher_id }}</div>
+                                </div>
+
                                 <div class="text-muted small">{{ $order->created_at->format('d M Y H:i') }}</div>
-                                <div class="text-muted small">{{ $order->voucher->name ?? $order->sku_id }}</div>
-                                <div class="text-muted small">{{ $order->voucher->name ?? $order->voucher_type }} (Qty: {{ $order->quantity }})</div>
+                                <div class="text-muted small fw-bold mt-1 text-uppercase">{{ $order->voucher->brand_name ?? $order->voucher_type }} (Qty: {{ $order->quantity }})</div>
                             </td>
                             <td class="px-4 py-4">
                                 @if(auth()->check() && auth()->user()->account_type === 'admin')
