@@ -925,8 +925,7 @@ class UserController extends Controller
         $query = User::where('account_type', 'agent');
 
         if (auth()->user()->account_type === 'reseller_agent') {
-            $query->where('country', auth()->user()->country)
-                  ->where('state', auth()->user()->state);
+            $query->where('sub_agent_id', auth()->id());
         }
 
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {

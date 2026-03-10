@@ -1,3 +1,6 @@
+@php
+$isNotifications = request()->routeIs('notifications.*');
+@endphp
 <!-- Sidebar -->
 <nav id="sidebar" class="col-md-3 col-lg-3 sidebar sidebar-hidden">
     <div class="position-sticky pt-3">
@@ -37,7 +40,7 @@
                     <i class="fas fa-user-tie me-2"></i>Manager
                 </a>
             </li>
-              <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('banks.bank-table') ? 'active' : '' }}" href="{{ route('banks.bank-table') }}">
                     <i class="fas fa-university me-2"></i> Banks
                 </a>
@@ -118,23 +121,23 @@
                     <i class="fas fa-university me-2"></i> Linked Banks
                 </a>
             </li>
-           
+
             <!-- Voucher Management -->
-         
-            
+
+
             @endif
-   @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() || auth()->user()->isSupport())
-      <li class="nav-item">
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() || auth()->user()->isSupport())
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('vouchers') ? 'active' : '' }}" href="{{ route('vouchers') }}">
                     <i class="fas fa-ticket-alt me-2"></i> Voucher
                 </a>
             </li>
-             <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('profile.index') ? 'active' : '' }}" href="{{ route('profile.index') }}">
                     <i class="fas fa-wallet me-2"></i> My Profile
                 </a>
             </li>
-   @endif
+            @endif
 
 
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isSupport())
@@ -214,7 +217,7 @@
                     <i class="fas fa-star me-2"></i> Staff Ratings
                 </a>
             </li>
-            
+
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('settings.risk-levels') ? 'active' : '' }}" href="{{ route('settings.risk-levels') }}">
                     <i class="fas fa-globe me-2"></i> Country Risk Levels
@@ -222,14 +225,14 @@
             </li>
             @endif
 
-            
+
             <!-- Admin Payment Methods -->
             <!-- <li class="nav-item">
                 <a class="nav-link" href="{{ route('payment-methods.index') }}">
                     <i class="fas fa-credit-card me-2"></i> Payment Methods
                 </a>
             </li> -->
-         
+
             <!-- @if(in_array(auth()->user()->account_type, ['admin', 'manager', 'reseller_agent']))
            
             <li class="nav-item">
@@ -238,7 +241,7 @@
                 </a>
             </li>
             @endif -->
-   
+
 
             @if(auth()->user()->isSupport())
             <!-- Linked Banks -->
@@ -258,7 +261,7 @@
             </li>
             @endif -->
 
-           
+
 
 
 
@@ -335,8 +338,8 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('notifications.index') ? 'active' : '' }}" href="{{ route('notifications.index') }}">
-                    <i class="fas fa-bell me-2"></i>
+                <a class="nav-link {{ $isNotifications ? 'active' : '' }}" href="{{ route('notifications.index') }}">
+                    <i class="{{ $isNotifications ? 'fas' : 'far' }} fa-bell me-2" style="{{ $isNotifications ? 'color: #23AAE2;' : '' }}"></i>
                     Notifications
                 </a>
             </li>

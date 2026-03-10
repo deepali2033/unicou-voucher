@@ -39,7 +39,7 @@
                     <select name="brand_name" class="form-select">
                         <option value="">All Brands</option>
                         @foreach($brands as $brand)
-                            <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -49,7 +49,7 @@
                     <select name="voucher_variant" class="form-select">
                         <option value="">All Variants</option>
                         @foreach($variants as $variant)
-                            <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
+                        <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -233,6 +233,7 @@
 <script>
     $(document).ready(function() {
         $('.view-order-btn').on('click', function() {
+
             const order = $(this).data('order');
 
             $('#m-order-id').text(order.order_id);
@@ -241,14 +242,35 @@
             $('#m-quantity').text(order.quantity);
             $('#m-amount').text('RS ' + parseFloat(order.amount).toLocaleString());
             $('#m-date').text(new Date(order.created_at).toLocaleDateString());
+
             let statusBadge = '';
-            if (order.status === 'delivered') statusBadge = '<span class="badge bg-success">DELIVERED</span>';
-            else if (order.status === 'completed') statusBadge = '<span class="badge bg-info">COMPLETED</span>';
-            else if (order.status === 'pending') statusBadge = '<span class="badge bg-warning text-dark">PENDING</span>';
-            else statusBadge = '<span class="badge bg-danger">' + order.status.toUpperCase() + '</span>';
+
+            if (order.status === 'delivered')
+                statusBadge = '<span class="badge bg-success">DELIVERED</span>';
+            else if (order.status === 'completed')
+                statusBadge = '<span class="badge bg-info">COMPLETED</span>';
+            else if (order.status === 'pending')
+                statusBadge = '<span class="badge bg-warning text-dark">PENDING</span>';
+            else
+                statusBadge = '<span class="badge bg-danger">' + order.status.toUpperCase() + '</span>';
 
             $('#m-status').html(statusBadge);
-            $('#m-delivery').text(order.delivery_details || 'Pending delivery...');
+
+            // Delivered Codes Message
+            let deliveryText = '';
+
+            if (order.status === 'delivered') {
+                deliveryText = order.delivery_details ? order.delivery_details : 'Voucher code delivered.';
+            } else if (order.status === 'completed') {
+                deliveryText = 'Your order has been approved. Waiting for voucher code delivery.';
+            } else if (order.status === 'pending') {
+                deliveryText = 'Waiting for order approval.';
+            } else {
+                deliveryText = 'Processing...';
+            }
+
+            // ⚠️ Ye line missing thi
+            $('#m-delivery').text(deliveryText);
 
             $('#orderDetailModal').modal('show');
         });

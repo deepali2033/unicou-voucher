@@ -86,6 +86,7 @@
                             <td class="ps-4">
                                 <div class="fw-bold text-dark">{{ $order->order_id }}</div>
                                 <div class="text-muted small">{{ $order->created_at->format('d M Y H:i') }}</div>
+                                <div class="text-muted small">{{ $order->voucher->name ?? $order->sku_id }}</div>
                                 <div class="text-muted small">{{ $order->voucher->name ?? $order->voucher_type }} (Qty: {{ $order->quantity }})</div>
                             </td>
                             <td class="px-4 py-4">
@@ -102,7 +103,7 @@
 
 
                             </td>
-                           
+
                             <td>
                                 <div class="small">
                                     <span class="text-muted d-block">Method: <span class="text-dark fw-bold text-capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</span></span>
@@ -281,22 +282,22 @@
                                                 $codes = explode("\n", str_replace("\r", "", $order->delivery_details));
                                                 @endphp
                                                 @if(auth()->user()->account_type === 'admin' || (auth()->user()->account_type === 'manager' && auth()->user()->can_view_voucher_code))
-                                                    @foreach($codes as $code)
-                                                    @if(trim($code))
-                                                    <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
-                                                        <code class="text-primary fw-bold" style="font-size: 1.1rem;">{{ trim($code) }}</code>
-                                                        <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('{{ trim($code) }}')" title="Copy Code">
-                                                            <i class="far fa-copy"></i>
-                                                        </button>
-                                                    </div>
-                                                    @endif
-                                                    @endforeach
+                                                @foreach($codes as $code)
+                                                @if(trim($code))
+                                                <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
+                                                    <code class="text-primary fw-bold" style="font-size: 1.1rem;">{{ trim($code) }}</code>
+                                                    <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('{{ trim($code) }}')" title="Copy Code">
+                                                        <i class="far fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                @endif
+                                                @endforeach
                                                 @else
-                                                    <div class="text-center py-3">
-                                                        <i class="fas fa-lock text-muted mb-2 d-block" style="font-size: 2rem;"></i>
-                                                        <div class="fw-bold text-muted">Permission Restricted</div>
-                                                        <small class="text-muted">You do not have permission to view voucher codes.</small>
-                                                    </div>
+                                                <div class="text-center py-3">
+                                                    <i class="fas fa-lock text-muted mb-2 d-block" style="font-size: 2rem;"></i>
+                                                    <div class="fw-bold text-muted">Permission Restricted</div>
+                                                    <small class="text-muted">You do not have permission to view voucher codes.</small>
+                                                </div>
                                                 @endif
                                             </div>
                                         </div>

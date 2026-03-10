@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Order;
+
 use App\Models\BankAccountModel;
 use App\Models\AdminPaymentMethod;
 use App\Models\User;
@@ -263,11 +264,11 @@ class VoucherController extends Controller
 
             // Notify Admins and Managers
             $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
-            $adminMsg = "Voucher order kiya he by " . $user->name . " (Order ID: " . $order->order_id . ")";
+            $adminMsg = "A voucher order has been placed by " . $user->name . " (Order ID: " . $order->order_id . ")";
             Notification::send($adminsAndManagers, new OrderPlacedNotification($order, $adminMsg, 'order_placed'));
 
             // Notify the User
-            $userMsg = "Aapne jo order kiya uska order ho gaya he. Voucher: " . $order->voucher_type . ", Amount: " . $order->amount . ", Order ID: " . $order->order_id;
+            $userMsg = "Your order has been successfully placed. Voucher: " . $order->voucher_type . ", Amount: " . $order->amount . ", Order ID: " . $order->order_id;
             $user->notify(new OrderPlacedNotification($order, $userMsg, 'order_placed'));
 
             DB::commit();

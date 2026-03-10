@@ -93,7 +93,8 @@
       <div class="sat-grid-2">
         <div class="sat-field">
           <label>Primary Contact No *</label>
-          <input type="tel" name="primary_contact" placeholder="+92 3XX XXX XXXX" value="{{ Auth::user()->phone }}" required>
+          <input type="tel" id="primary_contact_input" name="primary_contact_dummy" placeholder="+92 3XX XXX XXXX" value="{{ Auth::user()->phone }}" required>
+          <input type="hidden" name="primary_contact" id="primary_contact" value="{{ Auth::user()->phone }}">
         </div>
 
         <div class="sat-field">
@@ -103,7 +104,8 @@
 
         <div class="sat-field">
           <label>WhatsApp No *</label>
-          <input type="tel" name="whatsapp_number" placeholder="+92 3XX XXX XXXX" required>
+          <input type="tel" id="whatsapp_number_input" name="whatsapp_number_dummy" placeholder="+92 3XX XXX XXXX" required>
+          <input type="hidden" name="whatsapp_number" id="whatsapp_number">
         </div>
       </div>
 
@@ -355,6 +357,7 @@
 
 
 @push('scripts')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
