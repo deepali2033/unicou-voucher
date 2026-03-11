@@ -234,12 +234,16 @@
             align-items: flex-start;
             line-height: 1;
             margin: 5px 0;
+            gap: 6px;
+            flex-direction: column;
         }
 
         .currency-symbol {
             font-size: 1.2rem;
             font-weight: 700;
             /* margin-top: 5px; */
+            width: 100%;
+            text-align: center;
         }
 
         .price-amount {
@@ -278,13 +282,19 @@
         }
 
         .price-display span {
-            font-size: 20px;
+            font-size: 16px;
         }
 
         .voucher-footer-info.d-flex.justify-content-between.align-items-center {
             display: grid !important;
             margin-top: 20px;
             gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+        .price-display {
+            flex-direction: row;
+        }    
         }
 
         @media (max-width: 576px) {
