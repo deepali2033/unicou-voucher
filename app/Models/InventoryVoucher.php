@@ -65,6 +65,7 @@ class InventoryVoucher extends Model
         'student_bonus_points_per_unit' => 'integer',
         'student_sale_price' => 'decimal:2',
         'country_region' => 'array',
+        'state' => 'array',
         'upload_vouchers' => 'array',
         'delivered_vouchers' => 'array',
     ];

@@ -39,8 +39,8 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">State</label>
-                        <select name="state" id="state" class="form-select">
-                            <option value="{{ $inventory->state }}" selected>{{ $inventory->state ?: 'Select State' }}</option>
+                        <select name="state[]" id="state" class="form-select select2-state" multiple required>
+                            <option value="all" {{ (is_array($inventory->state) && in_array('all', $inventory->state)) ? 'selected' : '' }}>All States</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -234,6 +234,11 @@
             allowClear: true
         });
 
+        $('.select2-state').select2({
+            placeholder: "Select State",
+            allowClear: true
+        });
+
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
             let variant = $('#voucher_variant').val().trim();
@@ -371,9 +376,9 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         const countrySelect = $("#country");
-        const stateSelect = document.getElementById("state");
+        const stateSelect = $("#state");
         const initialCountries = {!! json_encode($inventory->country_region ?? []) !!};
-        const initialState = "{{ $inventory->state }}";
+        const initialState = {!! json_encode($inventory->state ?? []) !!};
 
         // Populate Countries
         const countries = Country.getAllCountries();
@@ -384,21 +389,18 @@
             countrySelect.append(option);
         });
 
-        function updateStates(countryCode, selectedState = null) {
-            stateSelect.innerHTML = '<option value="">Select State</option>';
+        function updateStates(countryCode, selectedStates = []) {
+            stateSelect.empty().append('<option value="all">All States</option>');
             if (countryCode) {
                 const states = State.getStatesOfCountry(countryCode);
                 states.forEach(state => {
-                    const option = document.createElement('option');
-                    option.value = state.name;
-                    option.textContent = state.name;
-                    if (state.name === selectedState) {
-                        option.selected = true;
-                    }
+                    const isSelected = selectedStates.includes(state.name);
+                    const option = new Option(state.name, state.name, isSelected, isSelected);
                     option.dataset.code = state.isoCode;
-                    stateSelect.appendChild(option);
+                    stateSelect.append(option);
                 });
             }
+            stateSelect.trigger('change.select2');
         }
 
         // Country Change Event
@@ -414,10 +416,10 @@
             }
 
             if (!selectedValues || selectedValues.length !== 1 || selectedValues.includes('all')) {
-                stateSelect.disabled = true;
-                stateSelect.innerHTML = '<option value="">State Disabled (Multi/All)</option>';
+                stateSelect.prop('disabled', true).trigger('change.select2');
+                stateSelect.html('<option value="">State Disabled (Multi/All)</option>');
             } else {
-                stateSelect.disabled = false;
+                stateSelect.prop('disabled', false).trigger('change.select2');
                 const countryCode = $(this).find('option:selected').data('code');
                 updateStates(countryCode, initialState);
             }
@@ -425,6 +427,19 @@
 
         // Trigger initial state
         countrySelect.trigger('change');
+
+        // State Change Event
+        stateSelect.on('change', function() {
+            const selectedStates = $(this).val();
+
+            // Handle All States logic
+            if (selectedStates && selectedStates.includes('all')) {
+                if (selectedStates.length > 1) {
+                    $(this).val(['all']).trigger('change.select2');
+                    return;
+                }
+            }
+        });
     });
 </script>
 @endpush

@@ -39,16 +39,16 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">State</label>
-                        <select name="state" id="state" class="form-select">
-                            <option value="">Select State</option>
+                        <select name="state[]" id="state" class="form-select select2-state" multiple required>
+                            <option value="all">All States</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <!-- <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">City</label>
                         <select name="city" id="city" class="form-select">
                             <option value="">Select City</option>
                         </select>
-                    </div>
+                    </div> -->
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Currency</label>
                         <input type="text" name="currency" id="currency" class="form-control" value="{{ old('currency', 'PKR') }}" required>
@@ -178,9 +178,14 @@
 <script>
     $(document).ready(function() {
         const nextId = "{{ $next_id }}";
-        
+
         $('.select2').select2({
             placeholder: "Select Country/Region",
+            allowClear: true
+        });
+
+        $('.select2-state').select2({
+            placeholder: "Select State",
             allowClear: true
         });
 
@@ -191,7 +196,7 @@
 
             if (brand.length >= 1 && country && country.length >= 1) {
                 let countryPart = "";
-                
+
                 if (country.includes('all')) {
                     countryPart = "GLB";
                 } else if (country.length > 1) {
@@ -313,7 +318,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         const countrySelect = $("#country");
-        const stateSelect = document.getElementById("state");
+        const stateSelect = $("#state");
         const citySelect = document.getElementById("city");
 
         // Populate Countries
@@ -327,18 +332,17 @@
         countrySelect.trigger('change');
 
         function updateStates(countryCode) {
-            stateSelect.innerHTML = '<option value="">Select State</option>';
+            stateSelect.empty().append('<option value="all">All States</option>');
             citySelect.innerHTML = '<option value="">Select City</option>';
             if (countryCode) {
                 const states = State.getStatesOfCountry(countryCode);
                 states.forEach(state => {
-                    const option = document.createElement('option');
-                    option.value = state.name;
-                    option.textContent = state.name;
+                    const option = new Option(state.name, state.name, false, false);
                     option.dataset.code = state.isoCode;
-                    stateSelect.appendChild(option);
+                    stateSelect.append(option);
                 });
             }
+            stateSelect.trigger('change.select2');
         }
 
         function updateCities(countryCode, stateCode) {
@@ -357,7 +361,7 @@
         // Country Change Event
         countrySelect.on('change', function() {
             const selectedValues = $(this).val();
-            
+
             // Handle All Countries logic
             if (selectedValues && selectedValues.includes('all')) {
                 if (selectedValues.length > 1) {
@@ -369,12 +373,12 @@
 
             if (!selectedValues || selectedValues.length !== 1 || selectedValues.includes('all')) {
                 // Disable state and city if multiple countries or all countries or no country selected
-                stateSelect.disabled = true;
+                stateSelect.prop('disabled', true).trigger('change.select2');
                 citySelect.disabled = true;
-                stateSelect.innerHTML = '<option value="">State Disabled (Multi/All)</option>';
+                stateSelect.html('<option value="">State Disabled (Multi/All)</option>');
                 citySelect.innerHTML = '<option value="">City Disabled (Multi/All)</option>';
             } else {
-                stateSelect.disabled = false;
+                stateSelect.prop('disabled', false).trigger('change.select2');
                 citySelect.disabled = false;
                 const countryCode = $(this).find('option:selected').data('code');
                 updateStates(countryCode);
@@ -382,12 +386,33 @@
         });
 
         // State Change Event
-        stateSelect.addEventListener('change', function() {
+        stateSelect.on('change', function() {
+            const selectedStates = $(this).val();
+
+            // Handle All States logic
+            if (selectedStates && selectedStates.includes('all')) {
+                if (selectedStates.length > 1) {
+                    // If 'all' is selected along with others, just keep 'all'
+                    $(this).val(['all']).trigger('change.select2');
+                    return;
+                }
+            }
+
             const countryOption = countrySelect.find('option:selected')[0];
-            const countryCode = countryOption.dataset.code;
-            const stateOption = this.options[this.selectedIndex];
-            const stateCode = stateOption.dataset.code;
-            updateCities(countryCode, stateCode);
+            const countryCode = countryOption ? countryOption.dataset.code : null;
+
+            if (!selectedStates || selectedStates.length !== 1 || selectedStates.includes('all')) {
+                // Disable city if multiple states or all states or no state selected
+                citySelect.disabled = true;
+                citySelect.innerHTML = '<option value="">City Disabled (Multi/All)</option>';
+            } else {
+                citySelect.disabled = false;
+                const stateOption = $(this).find('option:selected')[0];
+                const stateCode = stateOption ? stateOption.dataset.code : null;
+                if (countryCode && stateCode) {
+                    updateCities(countryCode, stateCode);
+                }
+            }
         });
     });
 </script>

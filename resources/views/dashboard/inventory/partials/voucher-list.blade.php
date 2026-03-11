@@ -190,6 +190,12 @@
             @else
                 {{ $v->country_region }}
             @endif
+             | 
+            @if(is_array($v->state))
+                {{ in_array('all', $v->state) ? 'All States' : (count($v->state) > 1 ? 'MULTY' : ($v->state[0] ?? 'N/A')) }}
+            @else
+                {{ $v->state ?: 'N/A' }}
+            @endif
              | Qty: {{ number_format($v->quantity) }}</p>
 
         <div class="v-divider">

@@ -111,7 +111,6 @@ Route::get('/job-applications', [JobController::class, 'jobApplication'])->name(
 Route::get('/shufti/redirect', function () {
 
     return redirect('/dashboard')->with('success', 'Verification completed successfully');
-
 })->name('shufti.redirect');
 
 Route::post('/shufti/callback', [AuthController::class, 'shuftiCallback'])->name('shufti.callback');
@@ -148,8 +147,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/pricing/{id}/update', [PricingController::class, 'update'])->name('pricing.update');
     Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
-      Route::post('/users/bulk-verify', [UserController::class, 'bulkVerify'])->name('users.bulk-verify');
-    // User Management
+    Route::post('/users/bulk-verify', [UserController::class, 'bulkVerify'])->name('users.bulk-verify');
     Route::get('/users', [UserController::class, 'index'])->name('users.management');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
@@ -161,15 +159,15 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
     Route::post('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
-   
-    Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
-  Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
- Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
 
-  Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
+    Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
+    Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
+
+    Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
     Route::post('/users/{user}/limit', [UserController::class, 'updateLimit'])->name('users.limit.update');
 
-//pages
+    //pages
     Route::get('/mangers', [UserController::class, 'managers'])->name('manager.page');
     Route::get('/mangers-export', [UserController::class, 'managersDownloadCSV'])->name('manager.export');
     Route::get('/support-team', [UserController::class, 'SupportTeam'])->name('support.team');
