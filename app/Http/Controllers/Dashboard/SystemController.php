@@ -70,9 +70,10 @@ class SystemController extends Controller
         return back()->with('success', 'System settings updated.');
     }
 
-    public function auditLogs()
+    public function auditLogs(Request $request)
     {
-        $logs = AuditLog::with('user')->latest()->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $logs = AuditLog::with('user')->latest()->paginate($perPage)->withQueryString();
         return view('dashboard.audit.index', compact('logs'));
     }
 

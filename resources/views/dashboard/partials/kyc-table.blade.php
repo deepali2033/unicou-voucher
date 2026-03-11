@@ -73,6 +73,4 @@
         </tbody>
     </table>
 </div>
-<div class="mt-4 ajax-pagination px-4 pb-4">
-    {{ $pendingUsers->links() }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $pendingUsers])

@@ -67,7 +67,8 @@ class VoucherController extends Controller
             }
         }
 
-        $vouchers = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $vouchers = $query->latest()->paginate($perPage)->withQueryString();
 
         // Calculate limits and pricing for each voucher
         $userTotalLimit = $user->voucher_limit;
@@ -87,6 +88,10 @@ class VoucherController extends Controller
             $voucher->is_limited = ($boughtTotalLast24h >= $userTotalLimit);
             $voucher->remaining_limit = max(0, $userTotalLimit - $boughtTotalLast24h);
             $voucher->quantity_bought_today = $boughtTotalLast24h;
+        }
+
+        if ($request->ajax()) {
+            return view('dashboard.voucher.voucher-grid', compact('vouchers'))->render();
         }
 
         $stats = [

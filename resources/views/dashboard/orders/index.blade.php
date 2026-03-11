@@ -125,14 +125,7 @@
         </div>
         <!-- Pagination Footer -->
         <div class="card-footer bg-white border-0 py-4 px-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="text-muted small">
-                    Showing {{ $orders->firstItem() ?? 0 }} to {{ $orders->lastItem() ?? 0 }} of {{ $orders->total() }} results
-                </div>
-                <div class="pagination-container">
-                    {{ $orders->links('pagination::bootstrap-4') }}
-                </div>
-            </div>
+            @include('dashboard.partials.custom-pagination', ['items' => $orders])
         </div>
     </div>
 </div>

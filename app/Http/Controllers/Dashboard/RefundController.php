@@ -47,7 +47,13 @@ class RefundController extends Controller
             });
         }
 
-        $refunds = $query->paginate(10)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $refunds = $query->paginate($perPage)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('dashboard.refunds.refunds-table', compact('refunds'))->render();
+        }
+
         return view('dashboard.refunds.index', compact('refunds'));
     }
 
@@ -119,7 +125,8 @@ class RefundController extends Controller
             $query->where('status', $request->status);
         }
 
-        $refunds = $query->paginate(10)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $refunds = $query->paginate($perPage)->withQueryString();
 
         // Fetch orders where voucher codes are NOT received (status != delivered)
         $eligibleOrders = Order::where('user_id', Auth::id())

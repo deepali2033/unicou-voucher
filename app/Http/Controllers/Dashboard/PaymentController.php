@@ -215,7 +215,8 @@ class PaymentController extends Controller
             });
         }
 
-        $payments = $query->latest()->paginate(15)->withQueryString();
+        $perPage = $request->get('per_page', 15);
+        $payments = $query->latest()->paginate($perPage)->withQueryString();
 
         // Fetch unique values for filters specifically from existing orders
         $countries = Order::join('users', 'orders.user_id', '=', 'users.id')

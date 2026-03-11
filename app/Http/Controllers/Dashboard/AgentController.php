@@ -70,7 +70,8 @@ class AgentController extends Controller
             $query->where('sub_agent_id', $request->sub_agent);
         }
 
-        $orders = $query->latest()->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
 
         // Stats for the top cards
         $stats = [

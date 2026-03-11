@@ -86,7 +86,7 @@
     </div>
 
     <div class="mt-4">
-        {{ $disputes->links() }}
+        @include('dashboard.partials.custom-pagination', ['items' => $disputes])
     </div>
 </div>
 

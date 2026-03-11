@@ -220,6 +220,4 @@
     @endforelse
 </div>
 
-<div class="mt-4 ajax-pagination">
-    {{ $inventory->links() }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $inventory])

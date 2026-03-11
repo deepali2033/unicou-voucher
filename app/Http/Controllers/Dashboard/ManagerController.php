@@ -27,16 +27,18 @@ class ManagerController extends Controller
         return view('dashboard.manager_dashboard', compact('stats'));
     }
 
-    public function auditTransactions()
+    public function auditTransactions(Request $request)
     {
-        $logs = AuditLog::with('user')->latest()->paginate(20);
+        $perPage = $request->get('per_page', 20);
+        $logs = AuditLog::with('user')->latest()->paginate($perPage)->withQueryString();
         return view('dashboard.audit.index', compact('logs'));
     }
 
     public function manageUsers(Request $request)
     {
         $query = User::where('account_type', '!=', 'admin');
-        $users = $query->latest()->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $users = $query->latest()->paginate($perPage)->withQueryString();
         return view('dashboard.users.index', compact('users'));
     }
 

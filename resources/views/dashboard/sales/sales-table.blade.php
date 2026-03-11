@@ -85,6 +85,4 @@
         </tbody>
     </table>
 </div>
-<div class="mt-4 d-flex justify-content-center ajax-pagination">
-    {{ $sales->links('pagination::bootstrap-5') }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $sales])

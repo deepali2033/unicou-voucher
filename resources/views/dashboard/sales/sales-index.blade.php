@@ -133,47 +133,21 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        function updateTable(url) {
-            $.ajax({
-                url: url,
-                success: function(data) {
-                    $('#table-container').html(data);
-                    window.history.pushState({}, '', url);
-
-                    // Update CSV export link
-                    let csvUrl = "{{ route('sales.export') }}?" + (url.split('?')[1] || '');
-                    $('#csv-export-link').attr('href', csvUrl);
-                }
-            });
-        }
-
         // Initialize CSV export link
         let initialUrl = window.location.href;
         let initialCsvUrl = "{{ route('sales.export') }}?" + (initialUrl.split('?')[1] || '');
         $('#csv-export-link').attr('href', initialCsvUrl);
 
-        // Handle Pagination
-        $(document).on('click', '.ajax-pagination a', function(e) {
-            e.preventDefault();
-            updateTable($(this).attr('href'));
-        });
-
         // Handle Search Form
         $(document).on('submit', '#search-form', function(e) {
             e.preventDefault();
-            let url = "{{ route('sales.index') }}?" + $(this).serialize() + '&' + $('#filter-form').serialize();
-            updateTable(url);
+            handleAjaxFilter(this, e);
         });
 
         // Handle Filters
         $(document).on('submit', '#filter-form', function(e) {
             e.preventDefault();
-            let url = $(this).attr('action') + '?' + $(this).serialize() + '&' + $('#search-form').serialize();
-            updateTable(url);
-
-            var offcanvasElement = document.getElementById('filterOffcanvas');
-            var offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
-            if (offcanvas) offcanvas.hide();
+            handleAjaxFilter(this, e);
         });
     });
 </script>

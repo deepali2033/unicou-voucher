@@ -53,7 +53,7 @@
             <span class="badge bg-primary total-count">{{ $users->total() }} Total Users</span>
         </div>
         <div class="card-body" id="table-container">
-            @include('admin.partials.users-table')
+            @include('dashboard.partials.users-table')
         </div>
 
     </div>
@@ -62,35 +62,16 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        function updateTable(url) {
-            $.ajax({
-                url: url,
-                success: function(data) {
-                    $('#table-container').html(data);
-                    // Update URL without reload
-                    window.history.pushState({}, '', url);
-                }
-            });
-        }
-
-        // Handle Pagination
-        $(document).on('click', '.ajax-pagination a', function(e) {
-            e.preventDefault();
-            updateTable($(this).attr('href'));
-        });
-
-        // Handle Filters & Search
-        $('#filter-form').on('submit', function(e) {
-            e.preventDefault();
-            let url = $(this).attr('action') + '?' + $(this).serialize();
-            updateTable(url);
+        // Handle Search Form
+        $(document).on('submit', '#filter-form', function(e) {
+            handleAjaxFilter(this, e);
         });
 
         $('.btn-group a').on('click', function(e) {
             e.preventDefault();
             $('.btn-group a').removeClass('active');
             $(this).addClass('active');
-            updateTable($(this).attr('href'));
+            fetchCustomPage($(this).attr('href'));
         });
 
         // Handle AJAX Actions (Suspend, Delete)
@@ -112,7 +93,7 @@
                     if (response.success) {
                         toastr.success(response.success);
                         // Refresh table with current filters
-                        updateTable(window.location.href);
+                        fetchCustomPage(window.location.href);
                     }
                 },
                 error: function(xhr) {

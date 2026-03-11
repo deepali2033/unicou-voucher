@@ -37,18 +37,14 @@ class OrderController extends Controller
             $query->where('user_role', $request->role);
         }
 
-        $orders = $query->paginate(10)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $orders = $query->paginate($perPage)->withQueryString();
 
-        // Get delivered codes across all orders to identify used codes
-        $deliveredCodes = Order::whereNotNull('delivery_details')
-            ->pluck('delivery_details')
-            ->flatMap(function ($details) {
-                return array_map('trim', explode("\n", str_replace("\r", "", $details)));
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+        if ($request->ajax()) {
+            // Need to determine which partial to return based on context
+            // oder-deli uses its own table structure
+            return view('dashboard.orders.oder-deli-table', compact('orders', 'deliveredCodes'))->render();
+        }
 
         return view('dashboard.orders.oder-deli', compact('orders', 'deliveredCodes'));
     }
@@ -250,7 +246,12 @@ class OrderController extends Controller
             $query->where('inventory_vouchers.country_region', $request->country_region);
         }
 
-        $orders = $query->latest('orders.created_at')->paginate(10)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $orders = $query->latest('orders.created_at')->paginate($perPage)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('dashboard.orders.history-table', compact('orders'))->render();
+        }
 
         // Get dynamic brands and variants from the user's orders for filter options
         $brands = Order::where('user_id', auth()->id())

@@ -46,9 +46,10 @@ class CustomerController extends Controller
         return redirect()->back()->with('success', 'Your query has been submitted successfully. Our team will get back to you soon.');
     }
 
-    public function CustomerQuery()
+    public function CustomerQuery(Request $request)
     {
-        $queries = SupportQuery::with('user')->latest()->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $queries = SupportQuery::with('user')->latest()->paginate($perPage)->withQueryString();
         $topics = SupportOption::where('type', 'topic')->get();
         $issues = SupportOption::where('type', 'issue')->with('parent')->get();
         

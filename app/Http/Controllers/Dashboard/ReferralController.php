@@ -42,7 +42,12 @@ class ReferralController extends Controller
             $query->where('orders.status', $request->status);
         }
 
-        $referralHistory = $query->latest('orders.created_at')->paginate(15)->withQueryString();
+        $perPage = $request->get('per_page', 15);
+        $referralHistory = $query->latest('orders.created_at')->paginate($perPage)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('dashboard.referral-point.referral-table', compact('referralHistory'))->render();
+        }
 
         $totalPoints = Order::where('user_id', $user->id)->sum('referral_points') + 
                       Order::where('sub_agent_id', $user->id)->sum('referral_points');
