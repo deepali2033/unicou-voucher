@@ -116,9 +116,7 @@
                 </table>
             </div>
             <div class="card-footer bg-white border-0 py-4">
-                <div class="d-flex justify-content-center">
-                    {{ $refunds->links('pagination::bootstrap-5') }}
-                </div>
+                @include('dashboard.partials.custom-pagination', ['items' => $refunds])
             </div>
         </div>
     </div>

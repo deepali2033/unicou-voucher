@@ -53,6 +53,4 @@
         </tbody>
     </table>
 </div>
-<div class="mt-4 d-flex justify-content-center ajax-pagination">
-    {{ $purchases->appends(request()->all())->links('pagination::bootstrap-5') }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $purchases])

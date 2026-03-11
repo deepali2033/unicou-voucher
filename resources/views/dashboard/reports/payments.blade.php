@@ -88,7 +88,7 @@
                 </table>
             </div>
             <div class="p-4 border-top">
-                {{ $payments->links() }}
+                @include('dashboard.partials.custom-pagination', ['items' => $payments])
             </div>
         </div>
     </div>

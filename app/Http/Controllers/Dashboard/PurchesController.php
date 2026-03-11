@@ -59,7 +59,8 @@ class PurchesController extends Controller
             $query->where('country_region', $request->country_region);
         }
 
-        $purchases = $query->latest()->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $purchases = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.purches.partials.purches-table', compact('purchases'))->render();

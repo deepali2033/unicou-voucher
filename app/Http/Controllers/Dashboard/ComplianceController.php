@@ -32,7 +32,8 @@ class ComplianceController extends Controller
             });
         }
 
-        $pendingUsers = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->input('per_page', 10);
+        $pendingUsers = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.kyc-table', compact('pendingUsers'))->render();

@@ -84,59 +84,22 @@
                 </button>
             </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="px-4 py-3 border-0">S.NO</th>
-                            <th class="py-3 border-0">ORDER ID</th>
-                            <th class="py-3 border-0">BRAND</th>
-                            <th class="py-3 border-0">VOUCHER</th>
-                            <th class="py-3 border-0 text-start">ORDER AMOUNT</th>
-                            <th class="py-3 border-0 text-center">DATE</th>
-                            <th class="py-3 border-0 text-center">BONUS POINTS</th>
-                            <th class="py-3 border-0 text-center">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($bonusHistory as $index => $order)
-                        <tr>
-                            <td class="px-4">{{ $bonusHistory->firstItem() + $index }}</td>
-                            <td class="fw-bold text-primary">{{ $order->order_id }}</td>
-                            <td>{{ $order->v_brand_name ?? 'N/A' }}</td>
-                            <td>{{ $order->voucher_type }}</td>
-                            <td class="text-start fw-bold">RS {{ number_format($order->amount) }}</td>
-                            <td class="text-center small text-muted">
-                                {{ $order->created_at->format('Y-m-d') }}<br>
-                                {{ $order->created_at->format('H:i') }}
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-soft-success text-success">+{{ $order->bonus_amount }}</span>
-                            </td>
-                            <td class="text-center text-capitalize">
-                                <span class="badge  bg-success">{{ $order->status }}</span>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">No bonus history found.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+        <div class="card-body p-0" id="table-container">
+            @include('dashboard.bonus-point.bonus-table')
         </div>
-        @if($bonusHistory->hasPages())
-        <div class="card-footer bg-white border-0 py-3">
-            {{ $bonusHistory->links() }}
-        </div>
-        @endif
     </div>
     @endif
 </div>
 
 @push('scripts')
+<script>
+    $(document).ready(function() {
+        // Handle Filter Form
+        $(document).on('submit', '#filter-form', function(e) {
+            handleAjaxFilter(this, e);
+        });
+    });
+</script>
 <style>
     .bg-soft-info {
         background-color: rgba(13, 202, 240, 0.1);

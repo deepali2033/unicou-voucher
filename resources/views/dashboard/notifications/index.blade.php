@@ -87,7 +87,7 @@
                 @endforelse
             </div>
             <div class="card-footer bg-white py-4 d-flex justify-content-center border-top">
-                {{ $notifications->links() }}
+                @include('dashboard.partials.custom-pagination', ['items' => $notifications])
             </div>
         </div>
     </div>

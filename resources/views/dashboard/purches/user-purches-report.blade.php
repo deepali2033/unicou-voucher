@@ -105,7 +105,7 @@
                 </table>
             </div>
             <div class="mt-4">
-                {{ $purchases->links() }}
+                @include('dashboard.partials.custom-pagination', ['items' => $purchases])
             </div>
         </div>
     </div>

@@ -63,7 +63,8 @@ class ReportController extends Controller
             }
         }
 
-        $stock_data = $query->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $stock_data = $query->paginate($perPage)->withQueryString();
 
         foreach ($stock_data as $item) {
             $unit_cost = (float) $item->purchase_value_per_unit;
@@ -172,7 +173,8 @@ class ReportController extends Controller
             }
         }
 
-        $pl_data = $query->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $pl_data = $query->paginate($perPage)->withQueryString();
 
         foreach ($pl_data as $item) {
             $unit_cost = (float) $item->purchase_value_per_unit;

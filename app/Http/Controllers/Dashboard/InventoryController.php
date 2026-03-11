@@ -66,7 +66,8 @@ class InventoryController extends Controller
             $query->latest();
         }
 
-        $inventory = $query->paginate(15)->withQueryString();
+        $perPage = $request->get('per_page', 15);
+        $inventory = $query->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.inventory.partials.voucher-list', compact('inventory'))->render();

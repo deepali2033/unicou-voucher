@@ -25,21 +25,12 @@
                     </div>
                 </div>
 
-                <!-- <div class="mb-4">
-                    <label class="form-label fw-bold">Voucher Purchases Summary (Currency)</label>
-                    <select name="currency" class="form-select">
-                        <option value="">All Currencies</option>
-                        <option value="USD" {{ request('currency') == 'USD' ? 'selected' : '' }}>USD</option>
-                        <option value="GBP" {{ request('currency') == 'GBP' ? 'selected' : '' }}>GBP</option>
-                    </select>
-                </div> -->
-
                 <div class="mb-4">
                     <label class="form-label fw-bold">Brand Purchase Report</label>
                     <select name="brand_name" class="form-select">
                         <option value="">All Brands</option>
                         @foreach($brands as $brand)
-                            <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -49,7 +40,7 @@
                     <select name="voucher_variant" class="form-select">
                         <option value="">All Variants</option>
                         @foreach($variants as $variant)
-                            <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
+                        <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -95,88 +86,9 @@
                 </a>
             </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="text-nowrap ps-4">Sr. No.</th>
-                            <th class="text-nowrap">Purchase ID</th>
-                            <th class="text-nowrap">Date</th>
-                            <th class="text-nowrap">Time</th>
-                            <th class="text-nowrap">Brand Name</th>
-                            <th class="text-nowrap">Currency</th>
-                            <th class="text-nowrap">Country/Region</th>
-                            <th class="text-nowrap">Voucher Variant</th>
-                            <th class="text-nowrap">Voucher Type</th>
-                            <th class="text-nowrap">Purchase Invoice No.</th>
-                            <th class="text-nowrap">Purchase Date</th>
-                            <th class="text-nowrap">Total Quantity</th>
-                            <th class="text-nowrap text-end">Purchase Value</th>
-                            <th class="text-nowrap">Taxes</th>
-                            <th class="text-nowrap text-end">Per Unit Price</th>
-                            <th class="text-nowrap">Issue Date</th>
-                            <th class="text-nowrap">Expiry Date</th>
-                            <th class="text-nowrap">Credit Limit</th>
-                            <th class="text-nowrap text-center">Status</th>
-                            <th class="text-nowrap text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($orders as $order)
-                        <tr>
-                            <td class="ps-4">{{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
-                            <td class="fw-bold text-primary">{{ $order->order_id }}</td>
-                            <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                            <td class="text-nowrap">{{ $order->created_at->format('H:i:s') }}</td>
-                            <td>{{ $order->v_brand_name ?? 'N/A' }}</td>
-                            <td>{{ $order->v_currency ?? 'N/A' }}</td>
-                            <td>{{ $order->v_country_region ?? 'N/A' }}</td>
-                            <td>{{ $order->v_voucher_variant ?? 'N/A' }}</td>
-                            <td>{{ $order->v_voucher_type ?? $order->voucher_type ?? 'N/A' }}</td>
-                            <td>{{ $order->order_id }}</td>
-                            <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                            <td class="text-center">{{ $order->quantity }}</td>
-                            <td class="text-end fw-bold text-dark">RS {{ number_format($order->amount, 2) }}</td>
-                            <td>0.00</td>
-                            <td class="text-end">RS {{ number_format($order->amount / $order->quantity, 2) }}</td>
-                            <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                            <td class="text-nowrap">{{ $order->v_expiry_date ? \Carbon\Carbon::parse($order->v_expiry_date)->format('d-m-Y') : 'N/A' }}</td>
-                            <td>{{ auth()->user()->voucher_limit ?? 'N/A' }}</td>
-                            <td class="text-center">
-                                @if($order->status == 'delivered')
-                                <span class="badge bg-success">Delivered</span>
-                                @elseif($order->status == 'completed')
-                                <span class="badge bg-info">Completed</span>
-                                @elseif($order->status == 'pending')
-                                <span class="badge bg-warning text-dark">Pending</span>
-                                @else
-                                <span class="badge bg-danger">{{ ucfirst($order->status) }}</span>
-                                @endif
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="d-flex justify-content-end gap-1">
-                                    <a href="{{ route('purches.invoice', $order->order_id) }}" class="btn btn-sm btn-light border" title="Invoice">
-                                        <i class="fas fa-file-invoice text-info"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-light border view-order-btn"
-                                        data-order="{{ json_encode($order->load('inventoryVoucher')) }}"
-                                        title="View Details">
-                                        <i class="fas fa-eye text-primary"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="20" class="text-center py-5 text-muted">No purchases found.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+        <div class="card-body p-0" id="table-container">
+            @include('dashboard.orders.history-table')
         </div>
-
     </div>
 </div>
 
@@ -273,6 +185,11 @@
             $('#m-delivery').text(deliveryText);
 
             $('#orderDetailModal').modal('show');
+        });
+
+        // Handle Filter Form
+        $(document).on('submit', '#filter-form', function(e) {
+            handleAjaxFilter(this, e);
         });
     });
 </script>

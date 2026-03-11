@@ -11,12 +11,13 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = auth()->user();
         
         if ($user->isAdmin()) {
-            $users = User::latest()->paginate(10);
+            $perPage = $request->get('per_page', 10);
+            $users = User::latest()->paginate($perPage)->withQueryString();
             
             $topBrand = Order::where('orders.status', 'delivered')
                 ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
@@ -266,9 +267,10 @@ class DashboardController extends Controller
         return redirect('/');
     }
 
-    public function notifications()
+    public function notifications(Request $request)
     {
-        $notifications = auth()->user()->notifications()->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $notifications = auth()->user()->notifications()->paginate($perPage)->withQueryString();
         return view('dashboard.notifications.index', compact('notifications'));
     }
 

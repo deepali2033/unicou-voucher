@@ -85,6 +85,4 @@
     </table>
 </div>
 
-<div class="card-footer bg-white border-top-0 ajax-pagination">
-    {{ $stock_data->links() }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $stock_data])

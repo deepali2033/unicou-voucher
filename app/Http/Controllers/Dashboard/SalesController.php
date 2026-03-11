@@ -74,7 +74,8 @@ class SalesController extends Controller
             });
         }
 
-        $sales = $query->latest()->paginate(10);
+        $perPage = $request->get('per_page', 10);
+        $sales = $query->latest()->paginate($perPage)->withQueryString();
 
         // Fetch unique values for filters from delivered orders
         $filterData = Order::where('status', 'delivered')

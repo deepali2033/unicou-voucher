@@ -45,7 +45,8 @@ class DisputeController extends Controller
             });
         }
 
-        $disputes = $query->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $disputes = $query->paginate($perPage)->withQueryString();
         
         return view('dashboard.disputes.index', compact('disputes'));
     }
@@ -243,7 +244,8 @@ class DisputeController extends Controller
             $query->where('assigned_to', $user->id);
         }
 
-        $ratings = $query->paginate(15);
+        $perPage = $request->get('per_page', 15);
+        $ratings = $query->paginate($perPage)->withQueryString();
 
         return view('dashboard.disputes.ratings', compact('ratings'));
     }

@@ -62,6 +62,4 @@
     </table>
 </div>
 
-<div class="card-footer bg-white border-top-0 ajax-pagination">
-    {{ $pl_data->links() }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $pl_data])

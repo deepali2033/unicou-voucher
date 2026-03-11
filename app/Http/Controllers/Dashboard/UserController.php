@@ -66,7 +66,8 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $users = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.users-table', compact('users'))->render();
@@ -647,7 +648,8 @@ class UserController extends Controller
             $query->where('category', $request->category);
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->input('per_page', 10);
+        $users = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.manager-table', compact('users'))->render();
@@ -848,7 +850,8 @@ class UserController extends Controller
             $query->where('category', $request->category);
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->input('per_page', 10);
+        $users = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.reseller-table', compact('users'))->render();
@@ -908,7 +911,8 @@ class UserController extends Controller
             $query->where('category', $request->category);
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->input('per_page', 10);
+        $users = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.support-table', compact('users'))->render();
@@ -972,7 +976,8 @@ class UserController extends Controller
             $query->where('category', $request->category);
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        $perPage = $request->input('per_page', 10);
+        $users = $query->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.regularAgent-table', compact('users'))->render();
@@ -1046,12 +1051,13 @@ class UserController extends Controller
             $query->where('category', $request->category);
         }
 
+        $perPage = $request->input('per_page', 10);
         $users = $query->withCount(['orders as orders_count' => function ($q) {
             $q->where('status', 'delivered');
         }])->withSum(['orders as total_revenue' => function ($q) {
             $q->where('status', 'delivered');
         }], 'total_amount')
-            ->latest()->paginate(10)->withQueryString();
+            ->latest()->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
             return view('dashboard.partials.student-table', compact('users'))->render();

@@ -40,7 +40,8 @@ class BonusController extends Controller
             $query->where('orders.status', $request->status);
         }
 
-        $bonusHistory = $query->latest('orders.created_at')->paginate(15)->withQueryString();
+        $perPage = $request->get('per_page', 15);
+        $bonusHistory = $query->latest('orders.created_at')->paginate($perPage)->withQueryString();
 
         $totalBonus = Order::where('user_id', $user->id)->sum('bonus_amount');
 

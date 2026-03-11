@@ -188,6 +188,4 @@
     </table>
 </div>
 
-<div class="mt-4 d-flex justify-content-center ajax-pagination">
-    {{ $users->links('pagination::bootstrap-5') }}
-</div>
+@include('dashboard.partials.custom-pagination', ['items' => $users])
