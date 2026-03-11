@@ -113,11 +113,6 @@ class OrderController extends Controller
             $allDelivered = array_unique(array_merge($existingDelivered, $newDelivered));
 
             $voucher->delivered_vouchers = $allDelivered;
-
-            // Re-calculate quantity
-            $allUploaded = $voucher->upload_vouchers ?: [];
-            $remaining = array_diff($allUploaded, $allDelivered);
-            $voucher->quantity = count($remaining);
             $voucher->save();
         }
 
@@ -158,9 +153,21 @@ class OrderController extends Controller
     public function cancel(Request $request, $id)
     {
         $order = Order::findOrFail($id);
+
+        if ($order->status === 'cancelled') {
+            return back()->with('error', 'Order already cancelled.');
+        }
+
         $reason = $request->reason ?? 'Order cancelled by administrator.';
+        $oldStatus = $order->status;
 
         $order->update(['status' => 'cancelled']);
+
+        // Restore stock if not already delivered
+        $voucher = InventoryVoucher::where('sku_id', $order->voucher_id)->first();
+        if ($voucher && $oldStatus !== 'delivered') {
+            $voucher->increment('quantity', $order->quantity);
+        }
 
         // Send Email to User
         try {
@@ -182,15 +189,6 @@ class OrderController extends Controller
 
         if ($order->status !== 'pending') {
             return back()->with('error', 'Only pending orders can be approved.');
-        }
-
-        // Deduct Inventory here if not already deducted (manual transfer cases)
-        $voucher = InventoryVoucher::where('sku_id', $order->voucher_id)->first();
-        if ($voucher) {
-            if ($voucher->quantity < $order->quantity) {
-                return back()->with('error', 'Insufficient stock to approve this order.');
-            }
-            $voucher->decrement('quantity', $order->quantity);
         }
 
         $order->update(['status' => 'completed']);
@@ -258,7 +256,7 @@ class OrderController extends Controller
             ->distinct()
             ->pluck('inventory_vouchers.brand_name')
             ->filter();
-            
+
         $variants = Order::where('user_id', auth()->id())
             ->join('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
             ->distinct()

@@ -2,7 +2,7 @@
     <table class="table table-hover align-middle" style="white-space: nowrap;">
         <thead class="table-light">
             <tr>
-                <th>
+                  <th>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="selectAll">
                     </div>

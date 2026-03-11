@@ -264,15 +264,20 @@ class InventoryController extends Controller
             // Support both comma and newline as separator for convenience
             $newCodes = array_map('trim', preg_split('/[, \n\r]+/', $newCodesString));
             $newCodes = array_filter($newCodes); // Remove empty values
-            
+
             $existingCodes = $inventory->upload_vouchers ?: [];
             $allCodes = array_unique(array_merge($existingCodes, $newCodes));
             $validated['upload_vouchers'] = array_values($allCodes);
-            
-            // Quantity should be all codes minus delivered codes
+
+            // Quantity should be all codes minus delivered codes and non-cancelled orders
             $deliveredCodes = $inventory->delivered_vouchers ?: [];
             $remainingCodes = array_diff($allCodes, $deliveredCodes);
-            $validated['quantity'] = count($remainingCodes);
+
+            $pendingOrdersQty = \App\Models\Order::where('voucher_id', $inventory->sku_id)
+                ->whereIn('status', ['pending', 'completed'])
+                ->sum('quantity');
+
+            $validated['quantity'] = max(0, count($remainingCodes) - $pendingOrdersQty);
 
             // Update purchased_qty: It's basically all unique codes ever added
             $validated['purchased_qty'] = count($allCodes);
@@ -359,13 +364,37 @@ class InventoryController extends Controller
 
         // All columns from inventory_vouchers
         $columns = [
-            'ID', 'SKU ID', 'Brand Name', 'Country/Region', 'State', 'City', 'Currency',
-            'Voucher Variant', 'Voucher Type', 'Purchase Invoice No.', 'Purchase Date',
-            'Expiry Date', 'Is Expired', 'Quantity', 'Purchase Value', 'Purchase Value Per Unit',
-            'Taxes', 'Local Currency', 'Bank', 'Currency Conversion Rate', 'Referral Points Reseller',
-            'Agent Referral Points/Unit', 'Agent Bonus Points/Unit', 'Agent Sale Price',
-            'Student Referral Points/Unit', 'Student Bonus Points/Unit', 'Student Sale Price',
-            'Opening Stock Qty', 'Purchased Qty', 'Status', 'Created At'
+            'ID',
+            'SKU ID',
+            'Brand Name',
+            'Country/Region',
+            'State',
+            'City',
+            'Currency',
+            'Voucher Variant',
+            'Voucher Type',
+            'Purchase Invoice No.',
+            'Purchase Date',
+            'Expiry Date',
+            'Is Expired',
+            'Quantity',
+            'Purchase Value',
+            'Purchase Value Per Unit',
+            'Taxes',
+            'Local Currency',
+            'Bank',
+            'Currency Conversion Rate',
+            'Referral Points Reseller',
+            'Agent Referral Points/Unit',
+            'Agent Bonus Points/Unit',
+            'Agent Sale Price',
+            'Student Referral Points/Unit',
+            'Student Bonus Points/Unit',
+            'Student Sale Price',
+            'Opening Stock Qty',
+            'Purchased Qty',
+            'Status',
+            'Created At'
         ];
 
         $callback = function () use ($records, $columns) {

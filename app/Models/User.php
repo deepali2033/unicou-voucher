@@ -487,23 +487,22 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return $prefix . $newNumber;
     }
-
-    public function getTotalReferralPointsAttribute()
+ public function getTotalReferralPointsAttribute()
     {
-        return Order::where(function ($q) {
-            $q->where('user_id', $this->id)
-                ->orWhere('sub_agent_id', $this->id);
-        })
+        return Order::where(function($q) {
+                $q->where('user_id', $this->id)
+                  ->orWhere('sub_agent_id', $this->id);
+            })
             ->where('status', 'delivered')
             ->sum('referral_points');
     }
 
     public function getTotalBonusPointsAttribute()
     {
-        return Order::where(function ($q) {
-            $q->where('user_id', $this->id)
-                ->orWhere('sub_agent_id', $this->id);
-        })
+        return Order::where(function($q) {
+                $q->where('user_id', $this->id)
+                  ->orWhere('sub_agent_id', $this->id);
+            })
             ->where('status', 'delivered')
             ->sum('bonus_amount');
     }

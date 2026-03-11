@@ -160,7 +160,7 @@ class AuthController extends Controller
                 'last_logout_at' => now()
             ]);
         }
-
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -344,12 +344,12 @@ class AuthController extends Controller
     public function shuftiCallback(Request $request)
     {
         \Log::info('Shufti Callback received:', $request->all());
-
+        
         $reference = $request->input('reference');
         $event = $request->input('event');
-
+        
         $user = User::where('shufti_reference', $reference)->first();
-
+        
         if ($user) {
             if ($event === 'verification.accepted') {
                 $user->update([
@@ -364,7 +364,7 @@ class AuthController extends Controller
                 ]);
             }
         }
-
+        
         return response()->json(['status' => 'success']);
     }
 

@@ -104,7 +104,7 @@
                 <small class="text-muted total-count">{{ $users->total() }} Users Found</small>
             </div>
             <div class="d-flex gap-2">
-                @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_approve_user))
+                 @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_approve_user))
                 <button id="bulk-verify-btn" class="btn btn-primary btn-sm px-3 shadow-sm d-none">
                     <i class="fas fa-sync me-1"></i> Toggle Status
                 </button>
@@ -174,7 +174,8 @@
             updateTable($(this).attr('href'));
         });
 
-        // Bulk Selection and Button Visibility
+
+ // Bulk Selection and Button Visibility
         $(document).on('change', '#selectAll', function() {
             $('.user-checkbox').prop('checked', $(this).prop('checked'));
             toggleBulkButton();
@@ -231,7 +232,6 @@
                 }
             });
         });
-
         // Handle AJAX Actions (Suspend, Delete)
         $(document).on('submit', '.ajax-action', function(e) {
             e.preventDefault();

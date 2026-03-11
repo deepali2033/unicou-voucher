@@ -1,423 +1,672 @@
-<?php
+@extends('layouts.master')
+@section('content')
+<div class="container-fluid py-4">
 
-namespace App\Http\Controllers\Dashboard;
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Available Store Credit </div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ number_format($userPoints['store_credit'], 0) }}</h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-use App\Http\Controllers\Controller;
-use App\Models\VoucherPriceRule;
-use App\Models\InventoryVoucher;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
+        @if(auth()->user()->isRegularAgent() )
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Agent Referral Points </div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $voucher->agent_referral_points_per_unit }}">{{ $voucher->agent_referral_points_per_unit }}</span></h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Agent Bonus Points </div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $voucher->agent_bonus_points_per_unit }}">{{ $voucher->agent_bonus_points_per_unit }}</span></h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        @if( auth()->user()->isStudent())
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Student Referral Points </div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $voucher->student_referral_points_per_unit }}">{{ $voucher->student_referral_points_per_unit }}</span></h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Student Bonus Points </div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0"><span class="bonus-points-display" data-base="{{ $voucher->student_bonus_points_per_unit }}">{{ $voucher->student_bonus_points_per_unit }}</span></h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        @if( auth()->user()->isResellerAgent())
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Reseller Referral Points </div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0"><span class="referral-points-display" data-base="{{ $voucher->referral_points_reseller }}">{{ $voucher->referral_points_reseller }}</span></h3>
+                        <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-use App\Models\Order;
-use App\Models\BankAccountModel;
-use App\Models\AdminPaymentMethod;
-use App\Models\User;
-use App\Notifications\OrderPlacedNotification;
-use Illuminate\Support\Facades\Notification;
+        @endif
+    </div>
+    <div class="row">
+        <!-- Left Column: Order Summary -->
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <p class="text-muted small text-uppercase fw-bold mb-1">ORDER SUMMARY</p>
+                    <h4 class="fw-bold mb-4">Review & Pay For Your Voucher</h4>
 
-class VoucherController extends Controller
-{
-    public function index(Request $request)
-    {
-        $user = auth()->user();
-        $query = InventoryVoucher::where('is_expired', false)
-            ->where('quantity', '>', 0);
+                    <!-- Voucher Details Header -->
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-4 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="brand-logo-container me-3">
+                                @if($rule ->logo)
+                                <img src="{{ asset($rule->logo) }}" alt="{{ $rule->brand_name }}" class="img-fluid">
+                                @else
+                                <i class="fas fa-ticket-alt fa-2x text-primary"></i>
+                                @endif
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-0">{{ $rule->brand_name }}</h5>
+                                <p class="text-muted small mb-0">Voucher purchase</p>
+                            </div>
+                        </div>
+                        <div class="quantity-selector d-flex align-items-center bg-light rounded-pill px-2 py-1">
+                            <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="decrease-qty">
+                                <i class="fas fa-minus small text-muted"></i>
+                            </button>
+                            <input type="number" id="voucher-quantity" class="form-control form-control-sm bg-transparent border-0 text-center fw-bold" value="1" min="1" max="{{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->quantity) : $rule->quantity }}" style="width: 50px;">
+                            <button class="btn btn-sm btn-light rounded-circle shadow-none border-0" id="increase-qty">
+                                <i class="fas fa-plus small text-muted"></i>
+                            </button>
+                        </div>
+                    </div>
 
-        // Country filtering: match user's country with voucher's country_region
-        if (!in_array($user->account_type, ['admin', 'manager'])) {
-            $query->where('country_region', $user->country);
+                    <!-- Price Details Table -->
+                    <div class="price-details-table mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Price</span>
+                            <span class="fw-bold">{{ $rule->currency }} <span id="unit-price">{{ number_format($rule->final_price, 0) }}</span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Quantity</span>
+                            <span class="fw-bold" id="display-qty">1</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                            <span class="text-muted">Subtotal</span>
+                            <span class="fw-bold">{{ $rule->currency }} <span id="subtotal">{{ number_format($rule->final_price, 0) }}</span></span>
+                        </div>
+
+                        <!-- Payment Method Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Select Payment Method</label>
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer active" id="type-card">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_card" value="card" checked>
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_card">
+                                        <i class="fas fa-credit-card me-2 text-primary"></i>
+                                        <span>Card Payment</span>
+                                    </label>
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-admin-bank">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_admin_bank" value="admin_bank">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_admin_bank">
+                                        <i class="fas fa-university me-2 text-success"></i>
+                                        <span>Direct Transfer (Admin)</span>
+                                    </label>
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-linked-bank">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_linked_bank" value="linked_bank">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_linked_bank">
+                                        <i class="fas fa-link me-2 text-info"></i>
+                                        <span>Linked Account</span>
+                                    </label>
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-wallet">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_wallet" value="wallet">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_wallet">
+                                        <i class="fas fa-wallet me-2 text-warning"></i>
+                                        <span>Wallet Balance</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Linked Bank Section -->
+                            <div id="linked-bank-section" class="d-none mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Choose Linked Bank Account</label>
+                                <select id="linked-bank-selector" class="form-select border-0 bg-light p-3" style="border-radius: 12px;">
+                                    <option value="">Select your account...</option>
+                                    @foreach($banks as $lbank)
+                                    <option value="{{ $lbank->id }}">{{ $lbank->bank_name }} ({{ $lbank->account_number }}) - Bal: {{ auth()->user()->currency }} {{ number_format($lbank->balance, 2) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Wallet Section -->
+                            <div id="wallet-section" class="d-none mb-4">
+                                <div class="card bg-light border-0 rounded-4 p-4 shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="text-muted small mb-1">Your Wallet Balance</p>
+                                            <h3 class="fw-bold mb-0 text-primary">{{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
+                                        </div>
+                                        <i class="fas fa-wallet fa-3x opacity-25"></i>
+                                    </div>
+                                    <div id="wallet-insufficient" class="alert alert-danger mt-3 py-2 small d-none">
+                                        Insufficient balance in your wallet.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Payment Section -->
+                            <div id="card-payment-section">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Card Details</label>
+                                <div class="card border-0 bg-light rounded-4 p-4 shadow-sm">
+                                    <div class="row g-3">
+                                        <div class="col-md-12">
+                                            <label class="form-label small fw-bold">Card Number</label>
+                                            <input type="text" id="card-number" class="form-control border-0 p-3 shadow-sm" placeholder="0000 0000 0000 0000" style="border-radius: 10px;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Expiry Date</label>
+                                            <input type="text" id="card-expiry" class="form-control border-0 p-3 shadow-sm" placeholder="MM/YY" style="border-radius: 10px;">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">CVV</label>
+                                            <input type="text" id="card-cvv" class="form-control border-0 p-3 shadow-sm" placeholder="123" style="border-radius: 10px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Admin Banks Section -->
+                            <div id="admin-banks-section" class="d-none">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Select Admin Bank To Pay</label>
+                                <select id="admin-bank-selector" class="form-select border-0 bg-light p-3 mb-3" style="border-radius: 12px;">
+                                    <option value="">Choose admin's bank account...</option>
+                                    @foreach($adminBanks as $abank)
+                                    <option value="{{ $abank->id }}"
+                                        data-name="{{ $abank->bank_name }}"
+                                        data-holder="{{ $abank->account_holder_name }}"
+                                        data-number="{{ $abank->account_number }}"
+                                        data-ifsc="{{ $abank->ifsc_code }}"
+                                        data-swift="{{ $abank->swift_code }}"
+                                        data-routing="{{ $abank->routing_number }}"
+                                        data-upi="{{ $abank->upi_id }}"
+                                        data-qr="{{ $abank->qr_code ? asset('storage/'.$abank->qr_code) : '' }}"
+                                        data-notes="{{ $abank->notes }}">
+                                        {{ $abank->bank_name }} ({{ $abank->country ?: 'Global' }})
+                                    </option>
+                                    @endforeach
+                                </select>
+
+                                <!-- Admin Bank Details Display -->
+                                <div id="admin-bank-details" class="card bg-light border-0 rounded-4 p-3 mb-3 d-none">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <p class="small text-muted mb-0">Bank Name</p>
+                                            <p class="fw-bold mb-2" id="detail-bank-name"></p>
+                                            <p class="small text-muted mb-0">Account Holder</p>
+                                            <p class="fw-bold mb-2" id="detail-holder"></p>
+                                            <p class="small text-muted mb-0">Account Number / IBAN</p>
+                                            <p class="fw-bold mb-2" id="detail-number"></p>
+                                        </div>
+                                        <div class="col-md-6" id="detail-codes">
+                                            <!-- Codes will be injected here -->
+                                        </div>
+                                        <div class="col-12 d-none" id="detail-qr-container">
+                                            <p class="small text-muted mb-0">QR Code</p>
+                                            <img id="detail-qr" src="" class="img-fluid rounded border mt-2" style="max-height: 150px;">
+                                        </div>
+                                        <div class="col-12 d-none" id="detail-notes-container">
+                                            <p class="small text-muted mb-1">Instructions:</p>
+                                            <div class="alert alert-info py-2 px-3 small mb-0" id="detail-notes"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Transaction Submission Form (Initially Hidden) -->
+                                <div id="admin-transfer-form" class="mt-4 d-none">
+                                    <div class="alert alert-primary border-0 shadow-sm mb-4 d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="fas fa-info-circle fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 small fw-bold">REQUIRED TRANSFER AMOUNT</p>
+                                            <h4 class="fw-bold mb-0">{{ $rule->currency }} <span class="required-amount-text">0.00</span></h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold small text-uppercase text-muted">Upload Payment Receipt / Screenshot</label>
+                                        <input type="file" id="payment-receipt" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" accept="image/*">
+                                        <div class="form-text text-muted">Upload the screenshot of your successful transaction.</div>
+
+                                        <!-- OCR Progress Bar -->
+                                        <div id="ocr-progress" class="mt-3 d-none">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <small id="ocr-status" class="text-primary fw-bold">Processing receipt...</small>
+                                                <small id="ocr-percentage" class="text-muted">0%</small>
+                                            </div>
+                                            <div class="progress" style="height: 10px; border-radius: 5px;">
+                                                <div id="ocr-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card border-0 bg-light rounded-4 p-4 shadow-sm">
+                                        <h6 class="fw-bold mb-4 small text-uppercase text-primary"><i class="fas fa-edit me-2"></i>Manual Transaction Details</h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Transaction ID / Reference No.</label>
+                                                <input type="text" id="transaction-id" class="form-control border-0 p-3 shadow-sm" placeholder="Enter transaction ID" style="border-radius: 10px;">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Sender Account Holder Name</label>
+                                                <input type="text" id="account-holder-name" class="form-control border-0 p-3 shadow-sm" placeholder="Name on your bank account" style="border-radius: 10px;">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="form-label small fw-bold">Exact Amount Transferred</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text border-0 bg-white shadow-sm" style="border-radius: 10px 0 0 10px;">{{ $rule->currency }}</span>
+                                                    <input type="number" id="transfer-amount" class="form-control border-0 p-3 shadow-sm" placeholder="0.00" style="border-radius: 0 10px 10px 0;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total & Actions -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 pt-4 border-top">
+                        <div>
+                            <p class="text-muted small mb-0">Total to pay</p>
+                            <h3 class="fw-bold text-primary mb-0">{{ $rule->currency }} <span id="final-total">{{ number_format($rule->final_price, 0) }}</span></h3>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('vouchers') }}" class="btn btn-light border-0 px-4 rounded-3 fw-bold">Cancel</a>
+                            <button class="btn btn-primary px-5 rounded-3 fw-bold shadow-sm" id="pay-now">Place Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .payment-type-card {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid #e2e8f0 !important;
+    }
+
+    .payment-type-card:hover {
+        background-color: #f8fafc;
+        border-color: #2563eb !important;
+    }
+
+    .payment-type-card label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .payment-type-card.active {
+        background-color: #f0f7ff;
+        border-color: #2563eb !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    }
+
+    .brand-logo-container {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 5px;
+    }
+
+    .brand-logo-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+</style>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+    $(document).ready(function() {
+        let finalPrice = {{ $rule->final_price }};
+        let maxQty = {{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->quantity) : $rule->quantity }};
+        let capturedDetails = null;
+
+        // Tesseract OCR Logic
+        $('#payment-receipt').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = function() {
+                    $('#ocr-progress').removeClass('d-none');
+                    $('#ocr-status').text('Scanning receipt...');
+
+                    Tesseract.recognize(
+                        img,
+                        'eng', {
+                            logger: m => {
+                                if (m.status === 'recognizing text') {
+                                    let prog = Math.round(m.progress * 100);
+                                    $('#ocr-bar').css('width', prog + '%');
+                                    $('#ocr-percentage').text(prog + '%');
+                                }
+                            }
+                        }
+                    ).then(({
+                        data: {
+                            text
+                        }
+                    }) => {
+                        $('#ocr-progress').addClass('d-none');
+
+                        // Simple regex extraction
+                        const txIdMatch = text.match(/(?:Txn ID|Transaction ID|Ref No|Reference|TXN)[:\s]*([A-Z0-9]+)/i);
+                        const amountMatch = text.match(/(?:Amount|Total|Paid|Sum)[:\s]*[^\d]*([\d,]+\.?\d*)/i);
+
+                        let data = {
+                            raw_text: text,
+                            extracted_tx_id: txIdMatch ? txIdMatch[1] : null,
+                            extracted_amount: amountMatch ? amountMatch[1] : null,
+                            captured_at: new Date().toISOString()
+                        };
+
+                        capturedDetails = JSON.stringify(data);
+
+                        if (data.extracted_tx_id) {
+                            $('#transaction-id').val(data.extracted_tx_id);
+                            toastr.success('Transaction ID captured!');
+                        }
+                        if (data.extracted_amount) {
+                            $('#transfer-amount').val(data.extracted_amount.replace(/,/g, ''));
+                            toastr.success('Amount captured!');
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                        $('#ocr-progress').addClass('d-none');
+                        toastr.warning('Could not auto-capture details. Please enter manually.');
+                    });
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function updateTotal() {
+            let qty = parseInt($('#voucher-quantity').val()) || 1;
+            let total = finalPrice * qty;
+            $('#display-qty').text(qty);
+            $('#subtotal').text(total.toLocaleString());
+            $('#final-total').text(total.toLocaleString());
+            $('.required-amount-text').text(total.toLocaleString());
+
+            // Auto fill transfer amount
+            $('#transfer-amount').val(total);
+
+            // Update Points Display
+            $('.referral-points-display').each(function() {
+                let base = parseInt($(this).data('base')) || 0;
+                $(this).text(base * qty);
+            });
+            $('.bonus-points-display').each(function() {
+                let base = parseInt($(this).data('base')) || 0;
+                $(this).text(base * qty);
+            });
         }
 
-        // Filter by Voucher Name (Brand Name)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('brand_name', 'like', "%$search%");
-        }
+        // Initial call
+        updateTotal();
 
-        // Add New Filters
-        if ($request->filled('brand_name')) {
-            $query->where('brand_name', $request->brand_name);
-        }
-        if ($request->filled('voucher_variant')) {
-            $query->where('voucher_variant', $request->voucher_variant);
-        }
-        if ($request->filled('voucher_type')) {
-            $query->where('voucher_type', $request->voucher_type);
-        }
-
-        // Filter by Date
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', $request->date);
-        }
-
-        // Filter by Price Range
-        if ($request->filled('min_price')) {
-            if ($user->isStudent()) {
-                $query->where('student_sale_price', '>=', $request->min_price);
+        $('#increase-qty').click(function() {
+            let qty = parseInt($('#voucher-quantity').val());
+            if (qty < maxQty) {
+                $('#voucher-quantity').val(qty + 1);
+                updateTotal();
             } else {
-                $query->where('agent_sale_price', '>=', $request->min_price);
+                if (qty >= {{ $userPoints['max_allowed'] }}) {
+                    toastr.warning('Your 24-hour voucher purchase limit has been reached.');
+                } else {
+                    toastr.warning('Only this many vouchers are available in stock..');
+                }
             }
-        }
-        if ($request->filled('max_price')) {
-            if ($user->isStudent()) {
-                $query->where('student_sale_price', '<=', $request->max_price);
+        });
+
+        $('#decrease-qty').click(function() {
+            let qty = parseInt($('#voucher-quantity').val());
+            if (qty > 1) {
+                $('#voucher-quantity').val(qty - 1);
+                updateTotal();
+            }
+        });
+
+        $('#voucher-quantity').on('change input', function() {
+            let val = parseInt($(this).val());
+            if (isNaN(val) || val < 1) $(this).val(1);
+            if (val > maxQty) $(this).val(maxQty);
+            updateTotal();
+        });
+
+        // Payment Type Toggle
+        $('.payment-type-card').on('click', function(e) {
+            $('.payment-type-card').removeClass('active');
+            $(this).addClass('active');
+
+            let radio = $(this).find('input[type="radio"]');
+            radio.prop('checked', true);
+
+            let type = radio.val();
+            
+            // Reset visibility
+            $('#card-payment-section').addClass('d-none');
+            $('#admin-banks-section').addClass('d-none');
+            $('#linked-bank-section').addClass('d-none');
+            $('#wallet-section').addClass('d-none');
+            $('#wallet-insufficient').addClass('d-none');
+
+            if (type === 'card') {
+                $('#card-payment-section').removeClass('d-none');
+            } else if (type === 'admin_bank') {
+                $('#admin-banks-section').removeClass('d-none');
+                if (!$('#admin-bank-selector').val()) {
+                    $('#admin-bank-selector').find('option:eq(1)').prop('selected', true).trigger('change');
+                } else {
+                    $('#admin-bank-selector').trigger('change');
+                }
+            } else if (type === 'linked_bank') {
+                $('#linked-bank-section').removeClass('d-none');
+            } else if (type === 'wallet') {
+                $('#wallet-section').removeClass('d-none');
+                let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
+                let balance = {{ auth()->user()->wallet_balance }};
+                if (total > balance) {
+                    $('#wallet-insufficient').removeClass('d-none');
+                }
+            }
+        });
+
+        // Admin Bank Detail Update
+        $('#admin-bank-selector').change(function() {
+            let selected = $(this).find(':selected');
+            if (!selected.val()) {
+                $('#admin-bank-details').addClass('d-none');
+                $('#admin-transfer-form').addClass('d-none');
+                return;
+            }
+
+            $('#detail-bank-name').text(selected.data('name'));
+            $('#detail-holder').text(selected.data('holder'));
+            $('#detail-number').text(selected.data('number'));
+
+            let codesHtml = '';
+            if (selected.data('ifsc')) codesHtml += `<p class="small text-muted mb-0">IFSC (India)</p><p class="fw-bold mb-2">${selected.data('ifsc')}</p>`;
+            if (selected.data('swift')) codesHtml += `<p class="small text-muted mb-0">SWIFT/BIC</p><p class="fw-bold mb-2">${selected.data('swift')}</p>`;
+            if (selected.data('routing')) codesHtml += `<p class="small text-muted mb-0">Routing No.</p><p class="fw-bold mb-2">${selected.data('routing')}</p>`;
+            if (selected.data('upi')) codesHtml += `<p class="small text-muted mb-0">UPI ID</p><p class="fw-bold mb-2 text-success">${selected.data('upi')}</p>`;
+            $('#detail-codes').html(codesHtml);
+
+            if (selected.data('qr')) {
+                $('#detail-qr').attr('src', selected.data('qr'));
+                $('#detail-qr-container').removeClass('d-none');
             } else {
-                $query->where('agent_sale_price', '<=', $request->max_price);
+                $('#detail-qr-container').addClass('d-none');
             }
-        }
 
-        $vouchers = $query->latest()->paginate(10)->withQueryString();
-
-        // Calculate limits and pricing for each voucher
-        $userTotalLimit = $user->voucher_limit;
-        $boughtTotalLast24h = Order::where('user_id', $user->id)
-            ->where('created_at', '>=', now()->subHours(24))
-            ->sum('quantity');
-
-        foreach ($vouchers as $voucher) {
-            // Set final price based on user role
-            if ($user->isStudent()) {
-                $voucher->final_price = $voucher->student_sale_price;
+            if (selected.data('notes')) {
+                $('#detail-notes').text(selected.data('notes'));
+                $('#detail-notes-container').removeClass('d-none');
             } else {
-                $voucher->final_price = $voucher->agent_sale_price;
+                $('#detail-notes-container').addClass('d-none');
             }
 
-            // Check 24h total limit across all vouchers
-            $voucher->is_limited = ($boughtTotalLast24h >= $userTotalLimit);
-            $voucher->remaining_limit = max(0, $userTotalLimit - $boughtTotalLast24h);
-            $voucher->quantity_bought_today = $boughtTotalLast24h;
-        }
+            $('#admin-bank-details').removeClass('d-none');
+            $('#admin-transfer-form').removeClass('d-none');
+        });
 
-        $stats = [
-            'total_vouchers' => InventoryVoucher::count(),
-            'total_stock' => InventoryVoucher::sum('quantity'),
-            'total_valuation' => InventoryVoucher::sum(DB::raw('agent_sale_price * quantity')),
-            'active_brands' => InventoryVoucher::distinct('brand_name')->count('brand_name'),
-        ];
+        $('#pay-now').click(function() {
+            let paymentType = $('input[name="payment_type"]:checked').val();
+            let qtyElement = $('#voucher-quantity');
+            let qty = parseInt(qtyElement.val()) || 1;
+            let btn = $(this);
 
-        $filterOptions = [
-            'brands' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('brand_name')->orderBy('brand_name')->pluck('brand_name'),
-            'variants' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('voucher_variant')->orderBy('voucher_variant')->pluck('voucher_variant'),
-            'types' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('voucher_type')->orderBy('voucher_type')->pluck('voucher_type'),
-        ];
+            console.log('🔵 Pay Now clicked');
+            console.log('Payment Type:', paymentType);
+            console.log('Quantity Raw:', qtyElement.val());
+            console.log('Quantity Parsed:', qty);
+            console.log('Quantity Type:', typeof qty);
 
-        return view('dashboard.voucher.index', compact('vouchers', 'stats', 'filterOptions'));
-    }
-
-    public function showOrder($id)
-    {
-        $voucher = InventoryVoucher::findOrFail($id);
-        $user = auth()->user();
-
-        // Check if voucher is available in user's country
-        if (!in_array($user->account_type, ['admin', 'manager'])) {
-            if ($voucher->country_region !== $user->country) {
-                return redirect()->route('vouchers')->with('error', 'This voucher is not available in your country.');
-            }
-        }
-
-        // Calculate correct price based on user role
-        if ($user->isStudent()) {
-            $voucher->final_price = $voucher->student_sale_price;
-        } else {
-            $voucher->final_price = $voucher->agent_sale_price;
-        }
-
-        // Check user total 24h limit
-        $userTotalLimit = $user->voucher_limit;
-        $boughtTotalLast24h = Order::where('user_id', $user->id)
-            ->where('created_at', '>=', now()->subHours(24))
-            ->sum('quantity');
-
-        if ($boughtTotalLast24h >= $userTotalLimit) {
-            return redirect()->route('vouchers')->with('error', 'Aapne pichle 24 ghanto me apni voucher kharidne ki limit puri kar li he.');
-        }
-
-        $maxAllowed = $userTotalLimit - $boughtTotalLast24h;
-
-        // Check quantity availability
-        if ($voucher->quantity <= 0) {
-            return redirect()->route('vouchers')->with('error', 'This voucher is out of stock.');
-        }
-
-        $banks = BankAccountModel::where('user_id', $user->id)->get();
-        $adminBanks = AdminPaymentMethod::where('status', true)->get();
-
-        // Mock data for points and store credit
-        $userPoints = [
-            'quarterly' => 0,
-            'yearly' => 0,
-            'store_credit' => $user->wallet_balance ?? 0,
-            'max_allowed' => $maxAllowed
-        ];
-
-        $rule = $voucher;
-
-        return view('dashboard.voucher.order-now', compact('voucher', 'rule', 'userPoints', 'banks', 'adminBanks'));
-    }
-
-    public function placeOrder(Request $request, $id)
-    {
-        $voucher = InventoryVoucher::findOrFail($id);
-        $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'payment_type' => 'required|in:card,admin_bank,wise',
-            'admin_bank_id' => 'required_if:payment_type,admin_bank,wise|exists:admin_payment_methods,id',
-            'payment_receipt' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $user = auth()->user();
-
-        // Calculate correct price based on user role
-        if ($user->isStudent()) {
-            $totalAmount = $voucher->student_sale_price * $request->quantity;
-        } else {
-            // Agent and Reseller see same price
-            $totalAmount = $voucher->agent_sale_price * $request->quantity;
-        }
-
-        // Check user total 24h limit
-        $userTotalLimit = $user->voucher_limit;
-        $boughtTotalLast24h = Order::where('user_id', $user->id)
-            ->where('created_at', '>=', now()->subHours(24))
-            ->sum('quantity');
-
-        if ($boughtTotalLast24h + $request->quantity > $userTotalLimit) {
-            return response()->json(['message' => 'You have reached your 24-hour purchase limit. Remaining limit: ' . max(0, $userTotalLimit - $boughtTotalLast24h)], 400);
-        }
-
-        if ($voucher->quantity < $request->quantity) {
-            return response()->json(['message' => 'Insufficient stock available.'], 400);
-        }
-
-        $status = 'pending';
-        $payment_receipt = null;
-        $bank_details = [];
-
-        if ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
-            $adminBank = AdminPaymentMethod::findOrFail($request->admin_bank_id);
-            if ($request->hasFile('payment_receipt')) {
-                $payment_receipt = $request->file('payment_receipt')->store('receipts', 'public');
-            }
-            $bank_details = [
-                'admin_payment_method_id' => $adminBank->id,
-                'bank_name' => $adminBank->bank_name,
-                'account_number' => $adminBank->account_number,
-                'ifsc_code' => $adminBank->ifsc_code,
-                'transaction_id' => $request->transaction_id,
-                'account_holder_name' => $request->account_holder_name,
-                'amount_transferred' => $request->transfer_amount,
-                'captured_details' => $request->captured_details, // Storing JSON from OCR
-            ];
-            $status = 'pending';
-        } elseif ($request->payment_type == 'card') {
-            $status = 'pending';
-            $bank_details = [
-                'notes' => 'Card payment initiated',
-                'captured_details' => $request->captured_details
-            ];
-        }
-
-        $referralPointsPerUnit = 0;
-        $bonusPointsPerUnit = 0;
-        if ($user->isStudent()) {
-            $referralPointsPerUnit = $voucher->student_referral_points_per_unit;
-            $bonusPointsPerUnit = $voucher->student_bonus_points_per_unit;
-        } elseif ($user->isResellerAgent()) {
-            $referralPointsPerUnit = $voucher->referral_points_reseller;
-            $bonusPointsPerUnit = 0;
-        } elseif ($user->isRegularAgent()) {
-            $referralPointsPerUnit = $voucher->agent_referral_points_per_unit;
-            $bonusPointsPerUnit = $voucher->agent_bonus_points_per_unit;
-        }
-
-        $totalReferralPoints = $referralPointsPerUnit * $request->quantity;
-        $totalBonusPoints = $bonusPointsPerUnit * $request->quantity;
-
-        DB::beginTransaction();
-        try {
-            // Create Order
-            $orderData = [
-                'order_id' => 'PUR-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT),
-                'user_id' => $user->id,
-                'sub_agent_id' => $user->sub_agent_id, // Store parent ID for referral points
-                'user_role' => $user->account_type,
-                'voucher_type' => $voucher->voucher_type,
-                'voucher_id' => $voucher->sku_id,
-                'quantity' => $request->quantity,
-                'amount' => $totalAmount,
-                'status' => $status,
-                'referral_points' => $totalReferralPoints,
-                'bonus_amount' => $totalBonusPoints,
-                'payment_method' => $request->payment_type,
-                'payment_receipt' => $payment_receipt,
-            ];
-            $orderData = array_merge($orderData, $bank_details);
-
-            $order = Order::create($orderData);
-
-            if ($status == 'completed') {
-                $voucher->decrement('quantity', $request->quantity);
+            if (!paymentType) {
+                toastr.error('Please select a payment method');
+                return;
             }
 
-            // Notify Admins and Managers
-            $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
-            $adminMsg = "A voucher order has been placed by " . $user->name . " (Order ID: " . $order->order_id . ")";
-            Notification::send($adminsAndManagers, new OrderPlacedNotification($order, $adminMsg, 'order_placed'));
+            if (qty < 1) {
+                toastr.error('Please enter a valid quantity');
+                return;
+            }
 
-            // Notify the User
-            $userMsg = "Your order has been successfully placed. Voucher: " . $order->voucher_type . ", Amount: " . $order->amount . ", Order ID: " . $order->order_id;
-            $user->notify(new OrderPlacedNotification($order, $userMsg, 'order_placed'));
+            let formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('quantity', qty);
+            formData.append('payment_type', paymentType);
 
-            DB::commit();
+            if (paymentType === 'card') {
+                let cardNumber = $('#card-number').val();
+                let cardExpiry = $('#card-expiry').val();
+                let cardCvv = $('#card-cvv').val();
 
-            session()->flash('success', $status == 'completed' ? 'Order placed successfully.' : 'Order submitted. Waiting for admin approval.');
+                if (!cardNumber || !cardExpiry || !cardCvv) {
+                    toastr.error('Please enter all card details');
+                    return;
+                }
+                
+                let cardDetails = {
+                    card_number: cardNumber,
+                    card_expiry: cardExpiry,
+                    card_cvv: cardCvv
+                };
+                formData.append('captured_details', JSON.stringify(cardDetails));
+            } else if (paymentType === 'admin_bank') {
+                let adminBankId = $('#admin-bank-selector').val();
+                let receiptFile = $('#payment-receipt')[0].files[0];
 
-            return response()->json([
-                'success' => true,
-                'message' => $status == 'completed' ? 'Order placed successfully.' : 'Order submitted. Waiting for admin approval.',
-                'order_id' => $order->order_id
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'Failed to place order: ' . $e->getMessage()], 500);
-        }
-    }
+                if (!adminBankId) {
+                    toastr.error("Please select admin's bank for payment");
+                    return;
+                }
+                if (!receiptFile) {
+                    toastr.error('Please upload payment receipt screenshot');
+                    return;
+                }
 
-    public function create()
-    {
-        return view('dashboard.voucher.create');
-    }
+                formData.append('admin_bank_id', adminBankId);
+                formData.append('payment_receipt', receiptFile);
+                formData.append('transaction_id', $('#transaction-id').val());
+                formData.append('account_holder_name', $('#account-holder-name').val());
+                formData.append('transfer_amount', $('#transfer-amount').val());
+                if (capturedDetails) {
+                    formData.append('captured_details', capturedDetails);
+                }
+            } else if (paymentType === 'linked_bank') {
+                let bankId = $('#linked-bank-selector').val();
+                if (!bankId) {
+                    toastr.error('Please select a linked bank account');
+                    return;
+                }
+                formData.append('linked_bank_id', bankId);
+            } else if (paymentType === 'wallet') {
+                let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
+                let balance = {{ auth()->user()->wallet_balance }};
+                if (total > balance) {
+                    toastr.error('Insufficient wallet balance');
+                    return;
+                }
+            }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'category' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'original_price' => 'nullable|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'yearly_points' => 'nullable|integer|min:0',
-            'logo' => 'nullable|string',
-            'description' => 'nullable|string',
-        ]);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
 
-        Vouchar::create([
-            'voucher_id' => 'VCH-' . strtoupper(Str::random(6)),
-            'name' => $request->name,
-            'category' => $request->category,
-            'price' => $request->price,
-            'original_price' => $request->original_price,
-            'stock' => $request->stock,
-            'yearly_points' => $request->yearly_points ?? 0,
-            'logo' => $request->logo,
-            'description' => $request->description,
-            'status' => 'active',
-        ]);
-
-        return back()->with('success', 'Voucher added successfully.');
-    }
-
-    public function edit($id)
-    {
-        $voucher = Vouchar::findOrFail($id);
-        return view('dashboard.voucher.edit', compact('voucher'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        Vouchar::where('id', $id)->update([
-            'name' => $request->name,
-            'category' => $request->category,
-            'price' => $request->price,
-            'original_price' => $request->original_price,
-            'stock' => $request->stock,
-            'yearly_points' => $request->yearly_points ?? 0,
-            'status' => $request->status,
-        ]);
-
-        return back()->with('success', 'Voucher updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        Vouchar::where('id', $id)->delete();
-        return back()->with('success', 'Voucher deleted successfully.');
-    }
-
-    public function export(Request $request)
-    {
-        $user = auth()->user();
-        $query = InventoryVoucher::where('is_expired', false)
-            ->where('quantity', '>', 0);
-
-        // Country filtering: match user's country with voucher's country_region
-        if (!in_array($user->account_type, ['admin', 'manager'])) {
-            $query->where('country_region', $user->country);
-        }
-
-        // Apply same filters as index
-        if ($request->filled('brand_name')) {
-            $query->where('brand_name', $request->brand_name);
-        }
-        if ($request->filled('voucher_variant')) {
-            $query->where('voucher_variant', $request->voucher_variant);
-        }
-        if ($request->filled('voucher_type')) {
-            $query->where('voucher_type', $request->voucher_type);
-        }
-
-        $vouchers = $query->latest()->get();
-        $filename = "vouchers_" . date('Ymd') . ".csv";
-        $handle = fopen('php://output', 'w');
-
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-        fputcsv($handle, ['Sr. No.', 'SKU ID', 'Brand Name', 'Voucher Variant', 'Quantity', 'Purchase Value', 'Stock Status']);
-
-        foreach ($vouchers as $index => $v) {
-            $finalPrice = $user->isStudent() ? $v->student_sale_price : $v->agent_sale_price;
-            $stockStatus = $v->quantity > 0 ? 'In Stock' : 'Out of Stock';
-            fputcsv($handle, [
-                $index + 1,
-                $v->sku_id,
-                $v->brand_name,
-                $v->voucher_variant,
-                $v->quantity,
-                $v->currency . ' ' . number_format($finalPrice, 2),
-                $stockStatus
-            ]);
-        }
-
-        fclose($handle);
-        exit;
-    }
-
-    public function import(Request $request)
-    {
-        $request->validate(['csv_file' => 'required|mimes:csv,txt']);
-
-        $file = $request->file('csv_file');
-        $handle = fopen($file->getRealPath(), 'r');
-        fgetcsv($handle); // Skip header
-
-        while (($data = fgetcsv($handle)) !== FALSE) {
-            Vouchar::updateOrInsert(
-                ['voucher_id' => $data[0]],
-                [
-                    'name' => $data[1],
-                    'category' => $data[2],
-                    'price' => $data[3],
-                    'stock' => $data[4],
-                    'status' => $data[5] ?? 'active',
-                    'updated_at' => now(),
-                ]
-            );
-        }
-
-        fclose($handle);
-        return back()->with('success', 'Vouchers imported successfully.');
-    }
-}
+            $.ajax({
+                url: "{{ route('vouchers.order.post', $rule->id) }}",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = "{{ route('orders.history') }}";
+                    }
+                },
+                error: function(xhr) {
+                    let msg = xhr.responseJSON ? xhr.responseJSON.message : 'Something went wrong';
+                    toastr.error(msg);
+                    btn.prop('disabled', false).html('Place Order');
+                }
+            });
+        });
+    });
+</script>
+@endpush
+@endsection

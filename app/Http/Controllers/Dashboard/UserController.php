@@ -925,7 +925,7 @@ class UserController extends Controller
         $query = User::where('account_type', 'agent');
 
         if (auth()->user()->account_type === 'reseller_agent') {
-            $query->where('sub_agent_id', auth()->id());
+             $query->where('sub_agent_id', auth()->id());
         }
 
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {
@@ -1059,8 +1059,8 @@ class UserController extends Controller
 
         return view('dashboard.pages.student', compact('users'));
     }
-
-    public function bulkVerify(Request $request)
+    
+        public function bulkVerify(Request $request)
     {
         if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_approve_user))) {
             return response()->json(['error' => 'Unauthorized action.'], 403);
@@ -1087,6 +1087,8 @@ class UserController extends Controller
 
         return response()->json(['success' => $count . ' users status updated successfully.']);
     }
+
+    
 
     public function impersonate(User $user)
     {

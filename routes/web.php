@@ -148,7 +148,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/pricing/{id}/update', [PricingController::class, 'update'])->name('pricing.update');
     Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
-    Route::post('/users/bulk-verify', [UserController::class, 'bulkVerify'])->name('users.bulk-verify');
+      Route::post('/users/bulk-verify', [UserController::class, 'bulkVerify'])->name('users.bulk-verify');
+    // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.management');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users/store', [UserController::class, 'store'])->name('users.store');

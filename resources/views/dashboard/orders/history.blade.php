@@ -39,7 +39,7 @@
                     <select name="brand_name" class="form-select">
                         <option value="">All Brands</option>
                         @foreach($brands as $brand)
-                        <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                            <option value="{{ $brand }}" {{ request('brand_name') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -49,7 +49,7 @@
                     <select name="voucher_variant" class="form-select">
                         <option value="">All Variants</option>
                         @foreach($variants as $variant)
-                        <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
+                            <option value="{{ $variant }}" {{ request('voucher_variant') == $variant ? 'selected' : '' }}>{{ $variant }}</option>
                         @endforeach
                     </select>
                 </div>

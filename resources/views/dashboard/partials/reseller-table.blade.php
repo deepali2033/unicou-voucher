@@ -49,10 +49,10 @@
                 </td>
                 <td>
                     @if(auth()->user()->account_type !== 'manager' || auth()->user()->can_edit_user)
-                    <input type="number" class="form-control form-control-sm update-limit"
-                        data-user-id="{{ $user->id }}"
-                        value="{{ $user->voucher_limit }}"
-                        min="0" style="width: 70px;">
+                    <input type="number" class="form-control form-control-sm update-limit" 
+                           data-user-id="{{ $user->id }}" 
+                           value="{{ $user->voucher_limit }}" 
+                           min="0" style="width: 70px;">
                     @else
                     {{ $user->voucher_limit }}
                     @endif
@@ -66,11 +66,11 @@
                 <td>{{ $user->email }}</td>
                 @endif
                 <td>{{ $user->phone }}</td>
-                <td>{{ $user->subAgents->count() }}</td>
-                <td>{{ $user->orders->where('status', 'delivered')->sum('quantity') }}</td>
+             <td>{{ $user->subAgents->count() }}</td>
+                <td>{{ $user->orders->where('status', 'delivered')->count() }}</td>
                 <td>{{ number_format($user->orders->where('status', 'delivered')->sum('amount'), 2) }}</td>
                 <td>{{ $user->orders->where('status', 'disputed')->count() }}</td>
-                <td>{{ number_format($user->total_referral_points, 0) }}</td>
+              <td>{{ number_format($user->total_referral_points, 0) }}</td>
                 <td>{{ number_format($user->total_bonus_points, 2) }}</td>
                 <!-- <td>
                     @php $canFreeze = auth()->user()->account_type !== 'manager' || auth()->user()->can_freeze_user; @endphp

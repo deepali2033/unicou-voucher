@@ -22,8 +22,7 @@ class VoucherController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = InventoryVoucher::where('is_expired', false)
-            ->where('quantity', '>', 0);
+        $query = InventoryVoucher::where('is_expired', false);
 
         // Country filtering: match user's country with voucher's country_region
         if (!in_array($user->account_type, ['admin', 'manager'])) {
@@ -98,9 +97,9 @@ class VoucherController extends Controller
         ];
 
         $filterOptions = [
-            'brands' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('brand_name')->orderBy('brand_name')->pluck('brand_name'),
-            'variants' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('voucher_variant')->orderBy('voucher_variant')->pluck('voucher_variant'),
-            'types' => InventoryVoucher::where('is_expired', false)->where('quantity', '>', 0)->distinct('voucher_type')->orderBy('voucher_type')->pluck('voucher_type'),
+            'brands' => InventoryVoucher::where('is_expired', false)->distinct('brand_name')->orderBy('brand_name')->pluck('brand_name'),
+            'variants' => InventoryVoucher::where('is_expired', false)->distinct('voucher_variant')->orderBy('voucher_variant')->pluck('voucher_variant'),
+            'types' => InventoryVoucher::where('is_expired', false)->distinct('voucher_type')->orderBy('voucher_type')->pluck('voucher_type'),
         ];
 
         return view('dashboard.voucher.index', compact('vouchers', 'stats', 'filterOptions'));
@@ -258,9 +257,8 @@ class VoucherController extends Controller
 
             $order = Order::create($orderData);
 
-            if ($status == 'completed') {
-                $voucher->decrement('quantity', $request->quantity);
-            }
+            // Decrement quantity immediately on purchase
+            $voucher->decrement('quantity', $request->quantity);
 
             // Notify Admins and Managers
             $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
@@ -350,8 +348,7 @@ class VoucherController extends Controller
     public function export(Request $request)
     {
         $user = auth()->user();
-        $query = InventoryVoucher::where('is_expired', false)
-            ->where('quantity', '>', 0);
+        $query = InventoryVoucher::where('is_expired', false);
 
         // Country filtering: match user's country with voucher's country_region
         if (!in_array($user->account_type, ['admin', 'manager'])) {

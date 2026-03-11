@@ -130,116 +130,45 @@
             </div>
          </div>
       </div>
-      <div class="row g-4 mt-4">
-         <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-               <div class="card-header bg-white py-3">
-                  <h6 class="mb-0 fw-bold">Referral Points History (Network)</h6>
-               </div>
-               <div class="card-body">
-                  <div class="table-responsive">
-                     <table class="table table-sm table-hover">
-                        <thead>
-                           <tr>
-                              <th>Date</th>
-                              <th>Order ID</th>
-                              <th>User</th>
-                              <th class="text-end">Points</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           @forelse($referralPointsHistory as $history)
-                           <tr>
-                              <td>{{ $history->created_at->format('d M Y') }}</td>
-                              <td>{{ $history->order_id }}</td>
-                              <td>{{ $history->user->name }}</td>
-                              <td class="text-end text-info fw-bold">+{{ number_format($history->referral_points, 0) }}</td>
-                           </tr>
-                           @empty
-                           <tr>
-                              <td colspan="4" class="text-center py-3 text-muted">No referral points history</td>
-                           </tr>
-                           @endforelse
-                        </tbody>
-                     </table>
-                  </div>
-               </div>
-            </div>
-         </div>
-         <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-               <div class="card-header bg-white py-3">
-                  <h6 class="mb-0 fw-bold">Bonus Points History (Network)</h6>
-               </div>
-               <div class="card-body">
-                  <div class="table-responsive">
-                     <table class="table table-sm table-hover">
-                        <thead>
-                           <tr>
-                              <th>Date</th>
-                              <th>Order ID</th>
-                              <th>User</th>
-                              <th class="text-end">Bonus</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                           @forelse($bonusPointsHistory as $history)
-                           <tr>
-                              <td>{{ $history->created_at->format('d M Y') }}</td>
-                              <td>{{ $history->order_id }}</td>
-                              <td>{{ $history->user->name }}</td>
-                              <td class="text-end text-success fw-bold">+{{ number_format($history->bonus_amount, 2) }}</td>
-                           </tr>
-                           @empty
-                           <tr>
-                              <td colspan="4" class="text-center py-3 text-muted">No bonus points history</td>
-                           </tr>
-                           @endforelse
-                        </tbody>
-                     </table>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
    </div>
+</div>
 
-   @push('scripts')
-   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script>
-      document.addEventListener('DOMContentLoaded', function() {
-         const ctx = document.getElementById('revenueChart').getContext('2d');
-         let currentChart;
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      let currentChart;
 
-         function fetchTrendData(type) {
-            $.ajax({
-               url: "{{ route('dashboard.trendData') }}",
-               type: 'GET',
-               data: {
-                  type: type
-               },
-               success: function(data) {
-                  const labels = data.map(d => d.label);
-                  const revenue = data.map(d => d.revenue);
-                  const vouchers = data.map(d => d.vouchers);
-                  renderChart(labels, revenue, vouchers, type + ' Trends');
-               },
-               error: function(err) {
-                  console.error('Error fetching trend data:', err);
-               }
-            });
+      function fetchTrendData(type) {
+         $.ajax({
+            url: "{{ route('dashboard.trendData') }}",
+            type: 'GET',
+            data: {
+               type: type
+            },
+            success: function(data) {
+               const labels = data.map(d => d.label);
+               const revenue = data.map(d => d.revenue);
+               const vouchers = data.map(d => d.vouchers);
+               renderChart(labels, revenue, vouchers, type + ' Trends');
+            },
+            error: function(err) {
+               console.error('Error fetching trend data:', err);
+            }
+         });
+      }
+
+      function renderChart(labels, revenueData, voucherData, title) {
+         if (currentChart) {
+            currentChart.destroy();
          }
 
-         function renderChart(labels, revenueData, voucherData, title) {
-            if (currentChart) {
-               currentChart.destroy();
-            }
-
-            currentChart = new Chart(ctx, {
-               type: 'line',
-               data: {
-                  labels: labels,
-                  datasets: [{
+         currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
                         label: 'Revenue',
                         data: revenueData,
                         borderColor: '#23AAE2',
@@ -248,8 +177,8 @@
                         fill: true,
                         tension: 0.4,
                         yAxisID: 'y'
-                     },
-                     {
+                    },
+                    {
                         label: 'Vouchers',
                         data: voucherData,
                         borderColor: '#28a745',
@@ -258,80 +187,80 @@
                         fill: true,
                         tension: 0.4,
                         yAxisID: 'y1'
-                     }
-                  ]
-               },
-               options: {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  interaction: {
-                     mode: 'index',
-                     intersect: false,
-                  },
-                  plugins: {
-                     legend: {
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
                         position: 'top',
-                     },
-                     tooltip: {
+                    },
+                    tooltip: {
                         callbacks: {
-                           label: function(context) {
-                              let label = context.dataset.label || '';
-                              if (label) {
-                                 label += ': ';
-                              }
-                              if (context.dataset.yAxisID === 'y') {
-                                 label += 'RS ' + new Intl.NumberFormat().format(context.parsed.y);
-                              } else {
-                                 label += new Intl.NumberFormat().format(context.parsed.y);
-                              }
-                              return label;
-                           }
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.dataset.yAxisID === 'y') {
+                                    label += 'RS ' + new Intl.NumberFormat().format(context.parsed.y);
+                                } else {
+                                    label += new Intl.NumberFormat().format(context.parsed.y);
+                                }
+                                return label;
+                            }
                         }
-                     }
-                  },
-                  scales: {
-                     y: {
+                    }
+                },
+                scales: {
+                    y: {
                         type: 'linear',
                         display: true,
                         position: 'left',
                         beginAtZero: true,
                         title: {
-                           display: true,
-                           text: 'Revenue (RS)'
+                            display: true,
+                            text: 'Revenue (RS)'
                         }
-                     },
-                     y1: {
+                    },
+                    y1: {
                         type: 'linear',
                         display: true,
                         position: 'right',
                         beginAtZero: true,
                         grid: {
-                           drawOnChartArea: false,
+                            drawOnChartArea: false,
                         },
                         title: {
-                           display: true,
-                           text: 'Vouchers'
+                            display: true,
+                            text: 'Vouchers'
                         }
-                     }
-                  }
-               }
-            });
-         }
+                    }
+                }
+            }
+         });
+      }
 
-         // Initial load
-         fetchTrendData('Daily');
+      // Initial load
+      fetchTrendData('Daily');
 
-         // Button Toggles
-         document.querySelectorAll('.btn-group button').forEach(btn => {
-            btn.addEventListener('click', function() {
-               document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
-               this.classList.add('active');
+      // Button Toggles
+      document.querySelectorAll('.btn-group button').forEach(btn => {
+         btn.addEventListener('click', function() {
+            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
 
-               const type = this.textContent.trim();
-               fetchTrendData(type);
-            });
+            const type = this.textContent.trim();
+            fetchTrendData(type);
          });
       });
-   </script>
-   @endpush
-   @endsection
+   });
+</script>
+@endpush
+@endsection
