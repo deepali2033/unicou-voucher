@@ -40,6 +40,8 @@ class OrderController extends Controller
         $perPage = $request->get('per_page', 10);
         $orders = $query->paginate($perPage)->withQueryString();
 
+        $deliveredCodes = InventoryVoucher::pluck('delivered_vouchers')->flatten()->filter()->unique()->toArray();
+
         if ($request->ajax()) {
             // Need to determine which partial to return based on context
             // oder-deli uses its own table structure

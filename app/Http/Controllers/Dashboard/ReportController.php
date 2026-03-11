@@ -43,7 +43,7 @@ class ReportController extends Controller
         }
 
         if ($request->filled('country_region')) {
-            $query->where('country_region', $request->country_region);
+            $query->whereJsonContains('country_region', $request->country_region);
         }
 
         // Date range handling
@@ -137,7 +137,7 @@ class ReportController extends Controller
             return view('dashboard.reports.partials.stock-table', compact('stock_data'))->render();
         }
 
-        $countries = InventoryVoucher::distinct('country_region')->pluck('country_region')->filter();
+        $countries = InventoryVoucher::whereNotNull('country_region')->get()->pluck('country_region')->flatten()->unique()->filter()->sort();
 
         return view('dashboard.reports.stock', compact('stock_data', 'countries'));
     }
@@ -155,7 +155,7 @@ class ReportController extends Controller
         }
 
         if ($request->filled('country_region')) {
-            $query->where('country_region', $request->country_region);
+            $query->whereJsonContains('country_region', $request->country_region);
         }
 
         $startDate = null;
@@ -232,7 +232,7 @@ class ReportController extends Controller
             return view('dashboard.reports.partials.profit-loss-table', compact('pl_data'))->render();
         }
 
-        $countries = InventoryVoucher::distinct('country_region')->pluck('country_region')->filter();
+        $countries = InventoryVoucher::whereNotNull('country_region')->get()->pluck('country_region')->flatten()->unique()->filter()->sort();
 
         return view('dashboard.reports.profit-loss', compact('pl_data', 'countries'));
     }
@@ -264,7 +264,7 @@ class ReportController extends Controller
             $query->where('voucher_type', $request->voucher_type);
         }
         if ($request->filled('country_region')) {
-            $query->where('country_region', $request->country_region);
+            $query->whereJsonContains('country_region', $request->country_region);
         }
 
         // Date range handling
@@ -413,7 +413,7 @@ class ReportController extends Controller
             $query->where('voucher_type', $request->voucher_type);
         }
         if ($request->filled('country_region')) {
-            $query->where('country_region', $request->country_region);
+            $query->whereJsonContains('country_region', $request->country_region);
         }
 
         $startDate = null;

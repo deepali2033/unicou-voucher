@@ -26,7 +26,12 @@ class InventoryController extends Controller
         }
         if ($request->filled('countries')) {
             $countries = is_array($request->countries) ? $request->countries : [$request->countries];
-            $query->whereIn('country_region', $countries);
+            $query->where(function($q) use ($countries) {
+                foreach($countries as $country) {
+                    $q->orWhereJsonContains('country_region', $country);
+                }
+                $q->orWhereJsonContains('country_region', 'all');
+            });
         }
         if ($request->filled('states')) {
             $states = is_array($request->states) ? $request->states : [$request->states];
@@ -74,7 +79,7 @@ class InventoryController extends Controller
         }
 
         // Dynamic filter options from current inventory
-        $countries = InventoryVoucher::whereNotNull('country_region')->distinct()->pluck('country_region')->sort();
+        $countries = InventoryVoucher::whereNotNull('country_region')->get()->pluck('country_region')->flatten()->unique()->sort();
         $states = InventoryVoucher::whereNotNull('state')->distinct()->pluck('state')->sort();
         $brands = InventoryVoucher::whereNotNull('brand_name')->distinct()->pluck('brand_name')->sort();
         $voucherTypes = InventoryVoucher::whereNotNull('voucher_type')->distinct()->pluck('voucher_type')->sort();
@@ -161,7 +166,7 @@ class InventoryController extends Controller
         $validated = $request->validate([
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id',
             'brand_name' => 'required|string|max:255',
-            'country_region' => 'required|string|max:255',
+            'country_region' => 'required|array',
             'state' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
@@ -224,7 +229,7 @@ class InventoryController extends Controller
         $validated = $request->validate([
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id,' . $id,
             'brand_name' => 'required|string|max:255',
-            'country_region' => 'required|string|max:255',
+            'country_region' => 'required|array',
             'state' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',

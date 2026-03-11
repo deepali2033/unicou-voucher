@@ -184,7 +184,13 @@
             <span class="badge bg-danger ms-2" style="font-size: 0.65rem; padding: 0.35rem 0.5rem;">EXPIRED</span>
             @endif
         </h3>
-        <p class="v-desc">SKU: {{ $v->sku_id }} | {{ $v->country_region }} | Qty: {{ number_format($v->quantity) }}</p>
+        <p class="v-desc">SKU: {{ $v->sku_id }} | 
+            @if(is_array($v->country_region))
+                {{ in_array('all', $v->country_region) ? 'GLB' : (count($v->country_region) > 1 ? 'MULTY' : $v->country_region[0]) }}
+            @else
+                {{ $v->country_region }}
+            @endif
+             | Qty: {{ number_format($v->quantity) }}</p>
 
         <div class="v-divider">
             <div class="v-meta">

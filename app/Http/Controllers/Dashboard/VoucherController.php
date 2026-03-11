@@ -26,7 +26,10 @@ class VoucherController extends Controller
 
         // Country filtering: match user's country with voucher's country_region
         if (!in_array($user->account_type, ['admin', 'manager'])) {
-            $query->where('country_region', $user->country);
+            $query->where(function($q) use ($user) {
+                $q->whereJsonContains('country_region', $user->country)
+                  ->orWhereJsonContains('country_region', 'all');
+            });
         }
 
         // Filter by Voucher Name (Brand Name)
@@ -117,7 +120,8 @@ class VoucherController extends Controller
 
         // Check if voucher is available in user's country
         if (!in_array($user->account_type, ['admin', 'manager'])) {
-            if ($voucher->country_region !== $user->country) {
+            $countries = is_array($voucher->country_region) ? $voucher->country_region : [$voucher->country_region];
+            if (!in_array($user->country, $countries) && !in_array('all', $countries)) {
                 return redirect()->route('vouchers')->with('error', 'This voucher is not available in your country.');
             }
         }
@@ -357,7 +361,10 @@ class VoucherController extends Controller
 
         // Country filtering: match user's country with voucher's country_region
         if (!in_array($user->account_type, ['admin', 'manager'])) {
-            $query->where('country_region', $user->country);
+            $query->where(function($q) use ($user) {
+                $q->whereJsonContains('country_region', $user->country)
+                  ->orWhereJsonContains('country_region', 'all');
+            });
         }
 
         // Apply same filters as index

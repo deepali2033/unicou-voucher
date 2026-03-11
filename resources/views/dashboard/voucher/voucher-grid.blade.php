@@ -4,7 +4,18 @@
     $user = auth()->user();
     $finalPrice = $voucher->final_price ?? ($user->isStudent() ? $voucher->student_sale_price : $voucher->agent_sale_price);
     $stock = $voucher->quantity ?? 0;
-    $country = $voucher->country_region ?? 'N/A';
+    $countryDisplay = 'N/A';
+    if (is_array($voucher->country_region)) {
+    if (in_array('all', $voucher->country_region)) {
+    $countryDisplay = 'GLB';
+    } elseif (count($voucher->country_region) > 1) {
+    $countryDisplay = 'MULTY';
+    } elseif (count($voucher->country_region) === 1) {
+    $countryDisplay = $voucher->country_region[0];
+    }
+    } else {
+    $countryDisplay = $voucher->country_region ?? 'N/A';
+    }
     @endphp
     <div class="col-xl-4 col-lg-6 mb-4">
         <div class="gift-voucher-card">
@@ -41,7 +52,7 @@
                         </div>
                         <div class="country-info">
                             <span class="badge bg-light text-dark border-0 small">
-                                <i class="fas fa-globe-americas text-primary me-1"></i> {{ $country }}
+                                <i class="fas fa-globe-americas text-primary me-1"></i> {{ $countryDisplay }}
                             </span>
                         </div>
                         @if($voucher->remaining_limit >= 0)

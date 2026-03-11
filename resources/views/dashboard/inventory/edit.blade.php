@@ -33,8 +33,8 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Country/Region</label>
-                        <select name="country_region" id="country" class="form-select" required>
-                            <option value="{{ $inventory->country_region }}" selected>{{ $inventory->country_region }}</option>
+                        <select name="country_region[]" id="country" class="form-select select2" multiple required>
+                            <option value="all" {{ (is_array($inventory->country_region) && in_array('all', $inventory->country_region)) ? 'selected' : '' }}>All Countries (GLB)</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -228,15 +228,27 @@
 <script>
     $(document).ready(function() {
         const currentId = "{{ $inventory->id }}";
+        
+        $('.select2').select2({
+            placeholder: "Select Country/Region",
+            allowClear: true
+        });
 
         function generateSKU() {
             let brand = $('#brand_name').val().trim();
             let variant = $('#voucher_variant').val().trim();
-            let country = $('#country').val().trim();
+            let country = $('#country').val(); // Array if multiple select
 
-            if (brand.length >= 1 && country.length >= 1) {
-                // 1. Country Part (First 2-3 characters)
-                let countryPart = country.substring(0, 3).toUpperCase();
+            if (brand.length >= 1 && country && country.length >= 1) {
+                let countryPart = "";
+                
+                if (country.includes('all')) {
+                    countryPart = "GLB";
+                } else if (country.length > 1) {
+                    countryPart = "MULTY";
+                } else {
+                    countryPart = country[0].substring(0, 3).toUpperCase();
+                }
 
                 // 2. Brand Part (2 characters)
                 let brandWords = brand.split(/\s+/).filter(w => w.length > 0);
@@ -358,23 +370,18 @@
     } from "https://cdn.jsdelivr.net/npm/country-state-city@3.2.1/+esm";
 
     document.addEventListener("DOMContentLoaded", function() {
-        const countrySelect = document.getElementById("country");
+        const countrySelect = $("#country");
         const stateSelect = document.getElementById("state");
-        const initialCountry = "{{ $inventory->country_region }}";
+        const initialCountries = {!! json_encode($inventory->country_region ?? []) !!};
         const initialState = "{{ $inventory->state }}";
 
         // Populate Countries
         const countries = Country.getAllCountries();
-        countrySelect.innerHTML = '<option value="">Select Country</option>';
         countries.forEach(country => {
-            const option = document.createElement('option');
-            option.value = country.name;
-            option.textContent = country.name;
+            const isSelected = initialCountries.includes(country.name);
+            const option = new Option(country.name, country.name, isSelected, isSelected);
             option.dataset.code = country.isoCode;
-            if (country.name === initialCountry) {
-                option.selected = true;
-            }
-            countrySelect.appendChild(option);
+            countrySelect.append(option);
         });
 
         function updateStates(countryCode, selectedState = null) {
@@ -388,23 +395,36 @@
                     if (state.name === selectedState) {
                         option.selected = true;
                     }
+                    option.dataset.code = state.isoCode;
                     stateSelect.appendChild(option);
                 });
             }
         }
 
-        // Initial states
-        const initialCountryCode = countrySelect.options[countrySelect.selectedIndex]?.dataset.code;
-        if (initialCountryCode) {
-            updateStates(initialCountryCode, initialState);
-        }
-
         // Country Change Event
-        countrySelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const countryCode = selectedOption.dataset.code;
-            updateStates(countryCode);
+        countrySelect.on('change', function() {
+            const selectedValues = $(this).val();
+            
+            // Handle All Countries logic
+            if (selectedValues && selectedValues.includes('all')) {
+                if (selectedValues.length > 1) {
+                    $(this).val(['all']).trigger('change.select2');
+                    return;
+                }
+            }
+
+            if (!selectedValues || selectedValues.length !== 1 || selectedValues.includes('all')) {
+                stateSelect.disabled = true;
+                stateSelect.innerHTML = '<option value="">State Disabled (Multi/All)</option>';
+            } else {
+                stateSelect.disabled = false;
+                const countryCode = $(this).find('option:selected').data('code');
+                updateStates(countryCode, initialState);
+            }
         });
+
+        // Trigger initial state
+        countrySelect.trigger('change');
     });
 </script>
 @endpush
