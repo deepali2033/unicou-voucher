@@ -24,11 +24,21 @@ class VoucherController extends Controller
         $user = auth()->user();
         $query = InventoryVoucher::where('is_expired', false);
 
-        // Country filtering: match user's country with voucher's country_region
+        // Country and State filtering: match user's country and state with voucher's settings
         if (!in_array($user->account_type, ['admin', 'manager'])) {
-            $query->where(function($q) use ($user) {
+            $query->where(function ($q) use ($user) {
                 $q->whereJsonContains('country_region', $user->country)
-                  ->orWhereJsonContains('country_region', 'all');
+                    ->orWhereJsonContains('country_region', 'all');
+            });
+
+            // If voucher has state restrictions, apply them. 
+            // If state is empty or null, it's available to all states in that country.
+            $query->where(function ($q) use ($user) {
+                $q->whereNull('state')
+                    ->orWhere('state', '[]')
+                    ->orWhere('state', 'null')
+                    ->orWhereJsonContains('state', $user->state)
+                    ->orWhereJsonContains('state', 'all');
             });
         }
 
@@ -359,11 +369,21 @@ class VoucherController extends Controller
         $user = auth()->user();
         $query = InventoryVoucher::where('is_expired', false);
 
-        // Country filtering: match user's country with voucher's country_region
+        // Country and State filtering: match user's country and state with voucher's settings
         if (!in_array($user->account_type, ['admin', 'manager'])) {
-            $query->where(function($q) use ($user) {
+            $query->where(function ($q) use ($user) {
                 $q->whereJsonContains('country_region', $user->country)
-                  ->orWhereJsonContains('country_region', 'all');
+                    ->orWhereJsonContains('country_region', 'all');
+            });
+
+            // If voucher has state restrictions, apply them. 
+            // If state is empty or null, it's available to all states in that country.
+            $query->where(function ($q) use ($user) {
+                $q->whereNull('state')
+                    ->orWhere('state', '[]')
+                    ->orWhere('state', 'null')
+                    ->orWhereJsonContains('state', $user->state)
+                    ->orWhereJsonContains('state', 'all');
             });
         }
 

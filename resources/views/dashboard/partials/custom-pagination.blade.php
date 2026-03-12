@@ -57,6 +57,7 @@
         align-items: center;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
+
         padding: 4px;
         background: #fff;
     }
@@ -117,10 +118,10 @@
     if (typeof window.fetchCustomPage !== 'function') {
         window.fetchCustomPage = function(url) {
             if (!url) return;
-            
+
             // Show loading state
             $('.table-responsive').css('opacity', '0.5');
-            
+
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -130,12 +131,12 @@
                     if (!target.length) target = $('#voucher-list-container');
                     if (!target.length) target = $('.ajax-pagination-container');
                     if (!target.length) target = $('.ajax-pagination');
-                    
+
                     if (target.length) {
                         target.html(response);
                         // Update browser URL
                         window.history.pushState({}, '', url);
-                        
+
                         // Update any page-level export links
                         const csvLink = $('#csv-export-link');
                         if (csvLink.length) {
@@ -150,7 +151,7 @@
                                     exportUrl = url.replace('.index', '.export');
                                 }
                                 csvLink.attr('href', exportUrl);
-                            } catch(e) {
+                            } catch (e) {
                                 console.error('Error updating export link:', e);
                             }
                         }
@@ -174,7 +175,7 @@
     if (typeof window.handlePerPageChange !== 'function') {
         window.handlePerPageChange = function(el) {
             const perPage = $(el).val();
-            
+
             // Try to get base URL from existing pagination links to preserve filters
             let baseUrl = window.location.href;
             const $navBtn = $('.pagination-nav-btn[onclick*="fetchCustomPage"]').first();
@@ -185,7 +186,7 @@
                     baseUrl = match[1];
                 }
             }
-            
+
             try {
                 const url = new URL(baseUrl, window.location.origin);
                 url.searchParams.set('per_page', perPage);
@@ -208,7 +209,7 @@
             const $form = $(form);
             const formData = $form.serializeArray();
             const url = new URL($form.attr('action') || window.location.href, window.location.origin);
-            
+
             // Add all form fields to URL
             formData.forEach(field => {
                 if (field.value) {
@@ -217,17 +218,17 @@
                     url.searchParams.delete(field.name);
                 }
             });
-            
+
             // Preserve current per_page if it exists in the URL or the select
             const perPage = $('#perPageSelect').val();
             if (perPage) {
                 url.searchParams.set('per_page', perPage);
             }
-            
+
             url.searchParams.set('page', 1); // Reset to first page on new filter
-            
+
             window.fetchCustomPage(url.toString());
-            
+
             // Hide offcanvas if it exists
             const offcanvasEl = document.querySelector('.offcanvas.show');
             if (offcanvasEl) {
@@ -257,7 +258,7 @@
         <span class="pagination-text">
             Page <span class="page-input-box">{{ $items->currentPage() }}</span> of {{ $items->lastPage() }}
         </span>
-        
+
         <div class="pagination-nav-group">
             <button class="pagination-nav-btn" {{ $items->onFirstPage() ? 'disabled' : '' }} onclick="fetchCustomPage('{{ $items->url(1) }}')" title="First Page">
                 <i class="fas fa-angle-double-left"></i>
@@ -265,9 +266,9 @@
             <button class="pagination-nav-btn" {{ $items->onFirstPage() ? 'disabled' : '' }} onclick="fetchCustomPage('{{ $items->previousPageUrl() }}')" title="Previous Page">
                 <i class="fas fa-angle-left"></i>
             </button>
-            
+
             <div class="pagination-nav-divider"></div>
-            
+
             <button class="pagination-nav-btn" {{ !$items->hasMorePages() ? 'disabled' : '' }} onclick="fetchCustomPage('{{ $items->nextPageUrl() }}')" title="Next Page">
                 <i class="fas fa-angle-right"></i>
             </button>

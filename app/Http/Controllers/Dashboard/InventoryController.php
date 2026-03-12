@@ -26,8 +26,8 @@ class InventoryController extends Controller
         }
         if ($request->filled('countries')) {
             $countries = is_array($request->countries) ? $request->countries : [$request->countries];
-            $query->where(function($q) use ($countries) {
-                foreach($countries as $country) {
+            $query->where(function ($q) use ($countries) {
+                foreach ($countries as $country) {
                     $q->orWhereJsonContains('country_region', $country);
                 }
                 $q->orWhereJsonContains('country_region', 'all');
@@ -35,7 +35,12 @@ class InventoryController extends Controller
         }
         if ($request->filled('states')) {
             $states = is_array($request->states) ? $request->states : [$request->states];
-            $query->whereIn('state', $states);
+            $query->where(function ($q) use ($states) {
+                foreach ($states as $state) {
+                    $q->orWhereJsonContains('state', $state);
+                }
+                $q->orWhereJsonContains('state', 'all');
+            });
         }
         if ($request->filled('brands')) {
             $brands = is_array($request->brands) ? $request->brands : [$request->brands];
@@ -80,7 +85,7 @@ class InventoryController extends Controller
 
         // Dynamic filter options from current inventory
         $countries = InventoryVoucher::whereNotNull('country_region')->get()->pluck('country_region')->flatten()->unique()->sort();
-        $states = InventoryVoucher::whereNotNull('state')->distinct()->pluck('state')->sort();
+        $states = InventoryVoucher::whereNotNull('state')->get()->pluck('state')->flatten()->unique()->sort();
         $brands = InventoryVoucher::whereNotNull('brand_name')->distinct()->pluck('brand_name')->sort();
         $voucherTypes = InventoryVoucher::whereNotNull('voucher_type')->distinct()->pluck('voucher_type')->sort();
         $voucherVariants = InventoryVoucher::whereNotNull('voucher_variant')->distinct()->pluck('voucher_variant')->sort();
@@ -167,7 +172,7 @@ class InventoryController extends Controller
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id',
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|array',
-            'state' => 'nullable|string|max:255',
+            'state' => 'nullable|array',
             'city' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
             'voucher_variant' => 'nullable|string|max:255',
@@ -230,7 +235,7 @@ class InventoryController extends Controller
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id,' . $id,
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|array',
-            'state' => 'nullable|string|max:255',
+            'state' => 'nullable|array',
             'city' => 'nullable|string|max:255',
             'currency' => 'required|string|max:10',
             'voucher_variant' => 'nullable|string|max:255',
@@ -325,11 +330,21 @@ class InventoryController extends Controller
         }
         if ($request->filled('countries')) {
             $countries = is_array($request->countries) ? $request->countries : [$request->countries];
-            $query->whereIn('country_region', $countries);
+            $query->where(function ($q) use ($countries) {
+                foreach ($countries as $country) {
+                    $q->orWhereJsonContains('country_region', $country);
+                }
+                $q->orWhereJsonContains('country_region', 'all');
+            });
         }
         if ($request->filled('states')) {
             $states = is_array($request->states) ? $request->states : [$request->states];
-            $query->whereIn('state', $states);
+            $query->where(function ($q) use ($states) {
+                foreach ($states as $state) {
+                    $q->orWhereJsonContains('state', $state);
+                }
+                $q->orWhereJsonContains('state', 'all');
+            });
         }
         if ($request->filled('brands')) {
             $brands = is_array($request->brands) ? $request->brands : [$request->brands];
