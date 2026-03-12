@@ -181,12 +181,14 @@
 
         $('.select2').select2({
             placeholder: "Select Country/Region",
-            allowClear: true
+            allowClear: true,
+            closeOnSelect: false
         });
 
         $('.select2-state').select2({
             placeholder: "Select State",
-            allowClear: true
+            allowClear: true,
+            closeOnSelect: false
         });
 
         function generateSKU() {
@@ -319,7 +321,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const countrySelect = $("#country");
         const stateSelect = $("#state");
-        const citySelect = document.getElementById("city");
+        const citySelect = $("#city");
 
         // Populate Countries
         const countries = Country.getAllCountries();
@@ -333,7 +335,7 @@
 
         function updateStates(countryCode) {
             stateSelect.empty().append('<option value="all">All States</option>');
-            citySelect.innerHTML = '<option value="">Select City</option>';
+            citySelect.html('<option value="">Select City</option>');
             if (countryCode) {
                 const states = State.getStatesOfCountry(countryCode);
                 states.forEach(state => {
@@ -342,18 +344,18 @@
                     stateSelect.append(option);
                 });
             }
-            stateSelect.trigger('change.select2');
+            stateSelect.trigger('change');
         }
 
         function updateCities(countryCode, stateCode) {
-            citySelect.innerHTML = '<option value="">Select City</option>';
+            citySelect.html('<option value="">Select City</option>');
             if (countryCode && stateCode) {
                 const cities = City.getCitiesOfState(countryCode, stateCode);
                 cities.forEach(city => {
                     const option = document.createElement('option');
                     option.value = city.name;
                     option.textContent = city.name;
-                    citySelect.appendChild(option);
+                    citySelect.append(option);
                 });
             }
         }
