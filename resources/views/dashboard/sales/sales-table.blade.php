@@ -37,7 +37,13 @@
                     </span>
                 </td>
                 <td>{{ $sale->inventoryVoucher->local_currency ?? 'N/A' }}</td>
-                <td>{{ $sale->inventoryVoucher->country_region ?? 'N/A' }}</td>
+                <td>
+                    @if(isset($sale->inventoryVoucher->country_region) && is_array($sale->inventoryVoucher->country_region))
+                        {{ in_array('all', $sale->inventoryVoucher->country_region) ? 'GLB' : (count($sale->inventoryVoucher->country_region) > 1 ? 'MULTY' : $sale->inventoryVoucher->country_region[0]) }}
+                    @else
+                        {{ $sale->inventoryVoucher->country_region ?? 'N/A' }}
+                    @endif
+                </td>
                 <td>{{ $sale->inventoryVoucher->voucher_variant ?? 'N/A' }}</td>
                 <td>{{ $sale->voucher_type }}</td>
                 <td>{{ $sale->order_id }}</td> {{-- Using Order ID as Invoice No --}}
