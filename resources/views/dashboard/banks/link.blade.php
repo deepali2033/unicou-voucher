@@ -254,7 +254,7 @@
 
                     <div class="text-center mb-4">
                         <h5 class="fw-bold mb-1">Accounts Found</h5>
-                        <p class="text-muted small">Aapke accounts dhoondh liye gaye hain.</p>
+                        <p class="text-muted small">Your accounts have been found.</p>
                     </div>
 
                     <div class="mb-4">
@@ -354,10 +354,8 @@
                     <div class="rounded-circle bg-success-subtle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
                         <i class="fas fa-check text-success fs-2"></i>
                     </div>
-
-                    <h3 class="fw-bold mb-2">Mubarak Ho!</h3>
-                    <p class="text-muted mb-5">Aapke accounts securely link ho chuke hain aur dashboard par sync ho rahe hain.</p>
-
+                    <h3 class="fw-bold mb-2">Congratulations!</h3>
+                    <p class="text-muted mb-5">Your accounts have been securely linked and are now syncing on the dashboard.</p>
                     <button class="btn btn-primary w-100 py-3 fw-bold mb-4" style="border-radius: 16px; background-color: #2563eb;" onclick="location.reload()">Show My Dashboard</button>
 
                     <div class="text-center">
