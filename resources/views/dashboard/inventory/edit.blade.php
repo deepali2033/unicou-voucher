@@ -89,9 +89,16 @@
                         </small>
                         @endif
                     </div>
+                    @php
+                        $allCodes = is_array($inventory->upload_vouchers) ? $inventory->upload_vouchers : [];
+                        $deliveredCodes = is_array($inventory->delivered_vouchers) ? $inventory->delivered_vouchers : [];
+                        $remainingCodes = array_diff($allCodes, $deliveredCodes);
+                        $availableCount = count($remainingCodes);
+                        $canViewCodes = auth()->user()->isAdmin() || auth()->user()->can_view_voucher_code;
+                    @endphp
                     <div class="col-md-3">
-                        <label class="form-label small fw-bold text-uppercase">Quantity</label>
-                        <input type="number" name="quantity" class="form-control bg-light" value="{{ old('quantity', $inventory->quantity) }}" readonly required>
+                        <label class="form-label small fw-bold text-uppercase">Quantity (Available)</label>
+                        <input type="number" name="quantity" class="form-control bg-light" value="{{ $availableCount }}" readonly required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-uppercase">Status</label>
@@ -166,14 +173,6 @@
                     </div>
 
                     <div class="col-12 mt-4">
-                        @php
-                            $allCodes = is_array($inventory->upload_vouchers) ? $inventory->upload_vouchers : [];
-                            $deliveredCodes = is_array($inventory->delivered_vouchers) ? $inventory->delivered_vouchers : [];
-                            $remainingCodes = array_diff($allCodes, $deliveredCodes);
-                            
-                            $canViewCodes = auth()->user()->isAdmin() || auth()->user()->can_view_voucher_code;
-                        @endphp
-                        
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-uppercase">Voucher Codes (Remaining: {{ count($remainingCodes) }})</label>
