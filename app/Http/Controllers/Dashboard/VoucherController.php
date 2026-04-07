@@ -165,7 +165,7 @@ class VoucherController extends Controller
         $maxAllowed = $userTotalLimit - $boughtTotalLast24h;
 
         // Check quantity availability
-        if ($voucher->quantity <= 0) {
+        if ($voucher->upload_vouchers <= 0) {
             return redirect()->route('vouchers')->with('error', 'This voucher is out of stock.');
         }
 
