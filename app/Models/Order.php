@@ -8,6 +8,7 @@ class Order extends Model
 {
     protected $fillable = [
         'order_id',
+        'kuickpay_consumer_number',
         'user_id',
         'voucher_type',
         'voucher_id',

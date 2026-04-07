@@ -31,14 +31,11 @@ class DisputeController extends Controller
         }
 
 
- // Apply Country Visibility Restrictions for Managers and Support
+        // Apply Country Visibility Restrictions for Managers and Support
         if (($user->isManager() || $user->isSupport()) && !$user->isAdmin()) {
-            if (!$user->can_view_all_countries) {
-                $permitted = $user->permitted_countries ?? [];
-                $query->whereHas('user', function ($q) use ($permitted) {
-                    $q->whereIn('country', $permitted);
-                });
-            }
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('country', $user->country);
+            });
         }
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -98,13 +95,10 @@ class DisputeController extends Controller
             abort(403);
         }
 
- // Apply Country Visibility Restrictions for Managers and Support in show page
+        // Apply Country Visibility Restrictions for Managers and Support in show page
         if (($user->isManager() || $user->isSupport()) && !$user->isAdmin() && $dispute->user_id !== $user->id) {
-            if (!$user->can_view_all_countries) {
-                $permitted = $user->permitted_countries ?? [];
-                if (!in_array($dispute->user->country, $permitted)) {
-                    abort(403, 'Unauthorized access to this country\'s disputes.');
-                }
+            if ($dispute->user->country !== $user->country) {
+                abort(403, 'Unauthorized access to this country\'s disputes.');
             }
         }
 
@@ -262,6 +256,13 @@ class DisputeController extends Controller
         // If support, they only see their own ratings
         if ($user->isSupport() && !($user->isAdmin() || $user->isManager())) {
             $query->where('assigned_to', $user->id);
+        }
+
+        // Apply Country Visibility Restrictions for Managers and Support
+        if (($user->isManager() || $user->isSupport()) && !$user->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('country', $user->country);
+            });
         }
 
         $perPage = $request->get('per_page', 15);

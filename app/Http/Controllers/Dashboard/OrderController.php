@@ -25,8 +25,25 @@ class OrderController extends Controller
 
         $query = Order::with(['user', 'voucher', 'inventoryVoucher'])->latest();
 
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
+
         if ($request->filled('order_id')) {
             $query->where('order_id', 'like', '%' . $request->order_id . '%');
+        }
+
+        if ($request->filled('sku_id')) {
+            $query->where('voucher_id', 'like', '%' . $request->sku_id . '%');
+        }
+
+        if ($request->filled('country')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('country', $request->country);
+            });
         }
 
         if ($request->filled('status')) {
@@ -41,22 +58,45 @@ class OrderController extends Controller
         $orders = $query->paginate($perPage)->withQueryString();
 
         $deliveredCodes = InventoryVoucher::pluck('delivered_vouchers')->flatten()->filter()->unique()->toArray();
+        
+        $countriesQuery = User::whereHas('orders')->whereNotNull('country');
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $countriesQuery->where('country', $authUser->country);
+        }
+        $countries = $countriesQuery->distinct()->pluck('country');
 
         if ($request->ajax()) {
             // Need to determine which partial to return based on context
             // oder-deli uses its own table structure
-            return view('dashboard.orders.oder-deli-table', compact('orders', 'deliveredCodes'))->render();
+            return view('dashboard.orders.oder-deli-table', compact('orders', 'deliveredCodes', 'countries'))->render();
         }
 
-        return view('dashboard.orders.oder-deli', compact('orders', 'deliveredCodes'));
+        return view('dashboard.orders.oder-deli', compact('orders', 'deliveredCodes', 'countries'));
     }
 
     public function export(Request $request)
     {
         $query = Order::with(['user', 'voucher'])->latest();
 
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
+
         if ($request->filled('order_id')) {
             $query->where('order_id', 'like', '%' . $request->order_id . '%');
+        }
+
+        if ($request->filled('sku_id')) {
+            $query->where('voucher_id', 'like', '%' . $request->sku_id . '%');
+        }
+
+        if ($request->filled('country')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('country', $request->country);
+            });
         }
 
         if ($request->filled('status')) {

@@ -13,7 +13,7 @@
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
-         <div class="col-md-3">
+        <div class="col-md-3">
             <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
                 <div class="card-body">
                     <div class="text-muted small mb-1">My Performance Rating</div>
@@ -63,23 +63,23 @@
 
     <!-- Support Quick Actions -->
     <div class="row g-4">
-          <div class="col-lg-8">
-         <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-               <h6 class="mb-0 fw-bold">Voucher & Revenue Trends</h6>
-               <div class="btn-group btn-group-sm">
-                  <button class="btn btn-outline-secondary active">Daily</button>
-                  <button class="btn btn-outline-secondary ">Weekly</button>
-                  <button class="btn btn-outline-secondary">Monthly</button>
-                  <button class="btn btn-outline-secondary">Yearly</button>
-               </div>
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">Voucher & Revenue Trends</h6>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active">Daily</button>
+                        <button class="btn btn-outline-secondary ">Weekly</button>
+                        <button class="btn btn-outline-secondary">Monthly</button>
+                        <button class="btn btn-outline-secondary">Yearly</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" style="height: 300px; width: 100%;"></canvas>
+                </div>
             </div>
-            <div class="card-body">
-               <canvas id="revenueChart" style="height: 300px; width: 100%;"></canvas>
-            </div>
-         </div>
-      </div>
-        <div class="col-lg-4">
+        </div>
+        <!-- <div class="col-lg-4">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold">Support Overview</h5>
@@ -110,137 +110,137 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
-      const ctx = document.getElementById('revenueChart').getContext('2d');
-      let currentChart;
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        let currentChart;
 
-      function fetchTrendData(type) {
-         $.ajax({
-            url: "{{ route('dashboard.trendData') }}",
-            type: 'GET',
-            data: {
-               type: type
-            },
-            success: function(data) {
-               const labels = data.map(d => d.label);
-               const revenue = data.map(d => d.revenue);
-               const vouchers = data.map(d => d.vouchers);
-               renderChart(labels, revenue, vouchers, type + ' Trends');
-            },
-            error: function(err) {
-               console.error('Error fetching trend data:', err);
-            }
-         });
-      }
-
-      function renderChart(labels, revenueData, voucherData, title) {
-         if (currentChart) {
-            currentChart.destroy();
-         }
-
-         currentChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                        label: 'Revenue',
-                        data: revenueData,
-                        borderColor: '#23AAE2',
-                        backgroundColor: 'rgba(35, 170, 226, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Vouchers',
-                        data: voucherData,
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
+        function fetchTrendData(type) {
+            $.ajax({
+                url: "{{ route('dashboard.trendData') }}",
+                type: 'GET',
+                data: {
+                    type: type
                 },
-                plugins: {
-                    legend: {
-                        position: 'top',
+                success: function(data) {
+                    const labels = data.map(d => d.label);
+                    const revenue = data.map(d => d.revenue);
+                    const vouchers = data.map(d => d.vouchers);
+                    renderChart(labels, revenue, vouchers, type + ' Trends');
+                },
+                error: function(err) {
+                    console.error('Error fetching trend data:', err);
+                }
+            });
+        }
+
+        function renderChart(labels, revenueData, voucherData, title) {
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                            label: 'Revenue',
+                            data: revenueData,
+                            borderColor: '#23AAE2',
+                            backgroundColor: 'rgba(35, 170, 226, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Vouchers',
+                            data: voucherData,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.yAxisID === 'y') {
+                                        label += 'RS ' + new Intl.NumberFormat().format(context.parsed.y);
+                                    } else {
+                                        label += new Intl.NumberFormat().format(context.parsed.y);
+                                    }
+                                    return label;
                                 }
-                                if (context.dataset.yAxisID === 'y') {
-                                    label += 'RS ' + new Intl.NumberFormat().format(context.parsed.y);
-                                } else {
-                                    label += new Intl.NumberFormat().format(context.parsed.y);
-                                }
-                                return label;
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue (RS)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            title: {
+                                display: true,
+                                text: 'Vouchers'
                             }
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Revenue (RS)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        beginAtZero: true,
-                        grid: {
-                            drawOnChartArea: false,
-                        },
-                        title: {
-                            display: true,
-                            text: 'Vouchers'
-                        }
-                    }
                 }
-            }
-         });
-      }
+            });
+        }
 
-      // Initial load
-      fetchTrendData('Daily');
+        // Initial load
+        fetchTrendData('Daily');
 
-      // Button Toggles
-      document.querySelectorAll('.btn-group button').forEach(btn => {
-         btn.addEventListener('click', function() {
-            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+        // Button Toggles
+        document.querySelectorAll('.btn-group button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
-            const type = this.textContent.trim();
-            fetchTrendData(type);
-         });
-      });
-   });
+                const type = this.textContent.trim();
+                fetchTrendData(type);
+            });
+        });
+    });
 </script>
 @endpush
 @endsection

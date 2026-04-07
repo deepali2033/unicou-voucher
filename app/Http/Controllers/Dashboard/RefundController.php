@@ -15,6 +15,13 @@ class RefundController extends Controller
     {
         $query = RefundRequest::with('user')->latest();
 
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -60,6 +67,13 @@ class RefundController extends Controller
     public function adminExport(Request $request)
     {
         $query = RefundRequest::with('user')->latest();
+
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);

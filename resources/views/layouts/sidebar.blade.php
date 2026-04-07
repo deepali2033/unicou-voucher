@@ -63,7 +63,7 @@
                 </a>
             </li>
             @endif -->
-            @if(auth()->user()->isAdmin() || auth()->user()->isManager() ||auth()->user()->isResellerAgent() )
+            @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isResellerAgent() || (auth()->user()->isSupport() && auth()->user()->can_view_sales_report))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('sales.index') ? 'active' : '' }}" href="{{ route('sales.index') }}">
                     <i class="fas fa-tags me-2"></i> Sales

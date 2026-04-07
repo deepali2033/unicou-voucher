@@ -15,6 +15,10 @@
             <div class="offcanvas-body">
                 <form id="filter-form" action="{{ route('vouchers') }}" method="GET">
                     <div class="mb-4">
+                        <label class="form-label fw-bold">SKU ID</label>
+                        <input type="text" name="sku_id" class="form-control" placeholder="Search SKU ID..." value="{{ request('sku_id') }}">
+                    </div>
+                    <div class="mb-4">
                         <label class="form-label fw-bold">Brand Name</label>
                         <select name="brand_name" class="form-select select2-filter">
                             <option value="">All Brands</option>
