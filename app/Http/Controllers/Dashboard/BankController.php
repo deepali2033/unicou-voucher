@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\AdminPaymentMethod;
+use App\Models\BankAccountModel;
+use App\Models\WalletLedger;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BankController extends Controller
 {
@@ -92,23 +96,81 @@ class BankController extends Controller
 
     public function bankLink()
     {
-        return view('dashboard.banks.link');
+        $user = auth()->user();
+        $banks = BankAccountModel::where('user_id', $user->id)->get();
+        $totalBalance = $banks->sum('balance');
+        $transactions = WalletLedger::where('user_id', $user->id)->latest()->paginate(10);
+        
+        return view('dashboard.banks.link', compact('banks', 'totalBalance', 'transactions'));
     }
 
-    public function storeBank(Request $request)
+    public function linkBank(Request $request)
     {
-        return $this->store($request);
-    }
-    public function bankreport()
-    {
-        $methods = AdminPaymentMethod::all();
-        return view('dashboard.banks.bank-table', compact('methods'));
+        $request->validate([
+            'bank_name' => 'required|string',
+            'account_holder_name' => 'required|string',
+            'account_number' => 'required|string',
+            'ifsc_code' => 'nullable|string',
+            'account_type' => 'nullable|string',
+            'balance' => 'nullable|numeric|min:0',
+        ]);
+
+        BankAccountModel::create([
+            'user_id' => auth()->id(),
+            'bank_name' => $request->bank_name,
+            'account_holder_name' => $request->account_holder_name,
+            'account_number' => $request->account_number,
+            'ifsc_code' => $request->ifsc_code,
+            'account_type' => $request->account_type ?? 'Savings',
+            'balance' => $request->balance ?? 0,
+            'is_verified' => true,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Bank account linked successfully.']);
     }
 
+    public function addMoneyToWallet(Request $request)
+    {
+        $request->validate([
+            'bank_id' => 'required|exists:bank_accounts,id',
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        $bank = BankAccountModel::where('id', $request->bank_id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        if ($bank->balance < $request->amount) {
+            return response()->json(['success' => false, 'message' => 'Insufficient bank balance.'], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Deduct from bank
+            $bank->decrement('balance', $request->amount);
+
+            // Add to wallet
+            $user = User::findOrFail(auth()->id());
+            $user->increment('wallet_balance', $request->amount);
+
+            // Create ledger entry
+            WalletLedger::create([
+                'user_id' => $user->id,
+                'type' => 'credit',
+                'amount' => $request->amount,
+                'description' => "Wallet top-up from {$bank->bank_name} account ({$bank->account_number})"
+            ]);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Wallet balance added successfully.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to add money: ' . $e->getMessage()], 500);
+        }
+    }
     public function exportBankReport()
     {
-        $records = AdminPaymentMethod::all();
-
+        $reportData = $this->getReportData();
         $filename = "bank_report_" . date('Ymd_His') . ".csv";
         $headers = [
             "Content-type"        => "text/csv",
@@ -133,29 +195,100 @@ class BankController extends Controller
             'Created At'
         ];
 
-        $callback = function () use ($records, $columns) {
+        $callback = function () use ($reportData, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
-            foreach ($records as $index => $record) {
+            foreach ($reportData as $index => $data) {
                 fputcsv($file, [
                     $index + 1,
-                    $record->bank_name ?? 'BNK-' . ($index + 100),
-                    'USD',
-                    $record->country ?? 'N/A',
-                    0,
-                    0.00,
-                    0.00,
-                    0.00,
-                    '1.00',
-                    0.00,
+                    $data['bank_name'],
+                    $data['currency'],
+                    $data['country'],
+                    $data['vouchers_sold'],
+                    number_format($data['sale_value'], 2, '.', ''),
+                    number_format($data['refunds'], 2, '.', ''),
+                    $data['disputes'],
+                    $data['conversion_rate'],
+                    number_format($data['sale_value'], 2, '.', ''),
                     '0.00',
-                    $record->created_at->format('Y-m-d')
+                    is_string($data['created_at']) ? $data['created_at'] : $data['created_at']->format('Y-m-d')
                 ]);
             }
             fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    private function getReportData()
+    {
+        $methods = AdminPaymentMethod::all();
+        $reportData = collect();
+
+        foreach ($methods as $method) {
+            $sold = \App\Models\Order::where('admin_payment_method_id', $method->id)->where('status', 'delivered')->sum('quantity');
+            $value = \App\Models\Order::where('admin_payment_method_id', $method->id)->where('status', 'delivered')->sum('amount');
+            $refunds = \App\Models\RefundRequest::whereHas('order', function($q) use ($method) {
+                $q->where('admin_payment_method_id', $method->id);
+            })->where('status', 'approved')->sum('amount');
+            
+            $disputesCount = \App\Models\Dispute::whereHas('user.orders', function($q) use ($method) {
+                $q->where('admin_payment_method_id', $method->id);
+            })->count();
+
+            $reportData->push([
+                'id' => $method->id,
+                'bank_name' => $method->bank_name,
+                'currency' => 'PKR',
+                'country' => $method->country ?? 'N/A',
+                'vouchers_sold' => $sold,
+                'sale_value' => $value,
+                'refunds' => $refunds,
+                'disputes' => $disputesCount,
+                'conversion_rate' => '1.00',
+                'created_at' => $method->created_at
+            ]);
+        }
+
+        $stripeSold = \App\Models\Order::where('payment_method', 'stripe')->where('status', 'delivered')->sum('quantity');
+        $stripeValue = \App\Models\Order::where('payment_method', 'stripe')->where('status', 'delivered')->sum('amount');
+        $stripeRefunds = \App\Models\RefundRequest::whereHas('order', function($q) {
+            $q->where('payment_method', 'stripe');
+        })->where('status', 'approved')->sum('amount');
+        $stripeDisputes = \App\Models\Dispute::whereHas('user.orders', function($q) {
+            $q->where('payment_method', 'stripe');
+        })->count();
+
+        $reportData->push([
+            'id' => 'stripe',
+            'bank_name' => 'Stripe (Global)',
+            'currency' => 'USD/PKR',
+            'country' => 'GLB',
+            'vouchers_sold' => $stripeSold,
+            'sale_value' => $stripeValue,
+            'refunds' => $stripeRefunds,
+            'disputes' => $stripeDisputes,
+            'conversion_rate' => 'Dynamic',
+            'created_at' => now()
+        ]);
+
+        return $reportData;
+    }
+
+    public function bankreport()
+    {
+        $methods = AdminPaymentMethod::all();
+        $reportData = $this->getReportData();
+        
+        // Fetch recent stripe transactions (credits)
+        $stripeTransactions = \App\Models\Order::where('payment_method', 'stripe')
+            ->whereIn('status', ['completed', 'delivered'])
+            ->with('user')
+            ->latest()
+            ->limit(20)
+            ->get();
+
+        return view('dashboard.banks.bank-table', compact('methods', 'reportData', 'stripeTransactions'));
     }
 }

@@ -1,152 +1,219 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="container-fluid py-4" style="background-color: #f8fafc; min-height: 100vh;">
+<div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-1">Linked Banks</h2>
-            <p class="text-muted">Manage all your bank accounts in one place.</p>
+            <h4 class="fw-bold mb-0">Linked Banks & Wallet</h4>
+            <p class="text-muted small mb-0">Manage your linked bank accounts and wallet credit.</p>
         </div>
-        <button class="btn btn-primary px-4 py-2 fw-bold" style="border-radius: 10px; background-color: #2563eb;" data-bs-toggle="modal" data-bs-target="#linkBankModal">
-            <i class="fas fa-plus me-2"></i> Add New Bank
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
+                <i class="fas fa-plus-circle me-1"></i> Add Wallet Credit
+            </button>
+            <button class="btn btn-outline-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
+                <i class="fas fa-link me-1"></i> Link New Bank
+            </button>
+        </div>
     </div>
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3" style="border-radius: 16px; background-color: #0f172a; color: white;">
-                <p class="small text-uppercase fw-bold opacity-75 mb-1">Total Net Worth</p>
-                <h3 class="fw-bold mb-1">₹ 1035650.5, 1</h3>
-                <p class="small text-success fw-bold mb-0">
-                    <i class="fas fa-arrow-up me-1"></i> +2.5% this month
-                </p>
+            <div class="card shadow-sm border-0 border-start border-primary border-4 h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1 text-uppercase fw-bold">Wallet Balance</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
+                        <span class="ms-auto text-primary fw-bold small"><i class="fas fa-wallet me-1"></i>Available</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3" style="border-radius: 16px; background: white;">
-                <p class="small text-uppercase fw-bold text-muted mb-1">Total Accounts</p>
-                <h3 class="fw-bold mb-1" $banks->count() </h3>
-                <p class="small text-muted mb-0">All systems active</p>
+            <div class="card shadow-sm border-0 border-start border-info border-4 h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1 text-uppercase fw-bold">Total Bank Balance</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ auth()->user()->currency }} {{ number_format($totalBalance, 2) }}</h3>
+                        <span class="ms-auto text-info fw-bold small"><i class="fas fa-university me-1"></i>{{ $banks->count() }} Accounts</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-3" style="border-radius: 16px; background: white;">
-                <p class="small text-uppercase fw-bold text-muted mb-1">Monthly Saving</p>
-                <h3 class="fw-bold mb-1">₹45,000</h3>
-                <p class="small text-primary fw-bold mb-0">Saving Goal: 80%</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Banks Grid -->
-    <div class="row g-4 mb-5">
-
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm p-4 position-relative" style="border-radius: 20px; border-left: 5px solid  !important;">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-muted bg-light" style="width: 45px; height: 45px; border: 1px solid #e2e8f0;">
-                            0, 1
-                        </div>
-                        <div>
-                            <h5 class="fw-bold mb-0"></h5>
-                            <span class="small text-muted text-uppercase"></span>
-                        </div>
+            <div class="card shadow-sm border-0 border-start border-success border-4 h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1 text-uppercase fw-bold">Total Net Worth</div>
+                    <div class="d-flex align-items-center">
+                        <h3 class="fw-bold mb-0">{{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance + $totalBalance, 2) }}</h3>
+                        <span class="ms-auto text-success fw-bold small"><i class="fas fa-chart-pie me-1"></i>Combined</span>
                     </div>
-                    <span class="badge bg-success-subtle text-success fw-bold px-3 py-2 rounded-pill small">ACTIVE</span>
-                </div>
-                <div class="mb-4">
-                    <p class="small text-muted mb-1">Current Balance</p>
-                    <h3 class="fw-bold">₹ </h3>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="small text-muted mb-0">•••• </p>
-                    <p class="small text-muted mb-0">Sync: 2 mins ago</p>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Add Another Bank Placeholder -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm d-flex align-items-center justify-content-center cursor-pointer"
-                style="border-radius: 20px; min-height: 220px; border: 2px dashed #cbd5e1 !important; background: transparent;"
-                data-bs-toggle="modal" data-bs-target="#linkBankModal">
-                <div class="text-center">
-                    <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 50px; height: 50px;">
-                        <i class="fas fa-plus text-muted"></i>
-                    </div>
-                    <p class="fw-bold text-muted mb-0">Add another bank</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Transactions -->
-    <div class="card border-0 shadow-sm p-4" style="border-radius: 20px;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="fw-bold mb-0">Recent Transactions</h5>
-            <a href="#" class="text-primary fw-bold text-decoration-none small">View All</a>
+    <div class="row g-4">
+        <!-- Banks Grid -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold">My Linked Bank Accounts</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @forelse($banks as $bank)
+                        <div class="col-md-4">
+                            <div class="card border shadow-none h-100" style="border-radius: 12px; transition: all 0.2s;">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-primary bg-opacity-10 p-2 rounded text-primary fw-bold" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                                {{ substr($bank->bank_name, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-bold">{{ $bank->bank_name }}</h6>
+                                                <small class="text-muted">{{ $bank->account_type }}</small>
+                                            </div>
+                                        </div>
+                                        <span class="badge {{ $bank->is_verified ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }} rounded-pill align-self-start">
+                                            {{ $bank->is_verified ? 'Verified' : 'Pending' }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Current Balance</div>
+                                        <h5 class="fw-bold mb-0 text-dark">{{ auth()->user()->currency }} {{ number_format($bank->balance, 2) }}</h5>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                                        <span class="text-muted small font-monospace">•••• {{ substr($bank->account_number, -4) }}</span>
+                                        <span class="text-muted small">{{ $bank->account_holder_name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="col-12 text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-university fa-3x mb-2 opacity-25"></i>
+                                <p>No bank accounts linked yet.</p>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#linkBankModal">Link Now</button>
+                            </div>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-borderless align-middle">
-                <thead>
-                    <tr class="text-muted small text-uppercase">
-                        <th>Entity</th>
-                        <th>Category</th>
-                        <th>Date</th>
-                        <th class="text-end">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded bg-light p-2"><i class="fas fa-coffee text-muted"></i></div>
-                                <span class="fw-bold">Starbucks Coffee</span>
-                            </div>
-                        </td>
-                        <td class="text-muted">Food & Drink</td>
-                        <td class="text-muted">2023-10-24</td>
-                        <td class="text-end fw-bold">-₹450</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded bg-light p-2"><i class="fas fa-laptop text-muted"></i></div>
-                                <span class="fw-bold">Apple Store</span>
-                            </div>
-                        </td>
-                        <td class="text-muted">Electronics</td>
-                        <td class="text-muted">2023-10-23</td>
-                        <td class="text-end fw-bold">-₹12,500</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded bg-light p-2"><i class="fas fa-wallet text-muted"></i></div>
-                                <span class="fw-bold">Salary Credit</span>
-                            </div>
-                        </td>
-                        <td class="text-muted">Income</td>
-                        <td class="text-muted">2023-10-22</td>
-                        <td class="text-end fw-bold text-success">+₹50,000</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded bg-light p-2"><i class="fas fa-shopping-bag text-muted"></i></div>
-                                <span class="fw-bold">Amazon India</span>
-                            </div>
-                        </td>
-                        <td class="text-muted">Shopping</td>
-                        <td class="text-muted">2023-10-21</td>
-                        <td class="text-end fw-bold">-₹1,200</td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <!-- Transactions Table -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">Recent Wallet Transactions</h6>
+                    <span class="badge bg-primary-subtle text-primary fw-bold">Ledger</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-muted small text-uppercase">
+                                <th class="ps-4">Description</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th class="text-end pe-4">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($transactions as $trx)
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="p-2 rounded bg-light">
+                                            @if($trx->type == 'credit')
+                                            <i class="fas fa-arrow-alt-circle-down text-success"></i>
+                                            @else
+                                            <i class="fas fa-arrow-alt-circle-up text-danger"></i>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark small">{{ $trx->description }}</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">REF: #WLT-{{ $trx->id }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($trx->type == 'credit')
+                                    <span class="badge bg-success-subtle text-success px-2 py-1">Credit</span>
+                                    @else
+                                    <span class="badge bg-danger-subtle text-danger px-2 py-1">Debit</span>
+                                    @endif
+                                </td>
+                                <td class="text-muted small">
+                                    {{ $trx->created_at->format('d M Y') }}
+                                    <div class="small opacity-75">{{ $trx->created_at->format('h:i A') }}</div>
+                                </td>
+                                <td class="text-end pe-4 fw-bold {{ $trx->type == 'credit' ? 'text-success' : 'text-danger' }}">
+                                    {{ $trx->type == 'credit' ? '+' : '-' }}{{ auth()->user()->currency }} {{ number_format($trx->amount, 2) }}
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    No wallet transactions found.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if($transactions->hasPages())
+                <div class="card-footer bg-white py-3">
+                    <div class="d-flex justify-content-center">
+                        @include('dashboard.partials.custom-pagination', ['items' => $transactions])
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Money Modal -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+            <div class="modal-header border-bottom py-3">
+                <h5 class="modal-title fw-bold">Add Wallet Credit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addMoneyForm">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">SOURCE BANK ACCOUNT</label>
+                        <select name="bank_id" class="form-select border shadow-none p-2" required>
+                            <option value="">Select your account...</option>
+                            @foreach($banks as $bank)
+                            <option value="{{ $bank->id }}">{{ $bank->bank_name }} (•••• {{ substr($bank->account_number, -4) }}) - Bal: {{ auth()->user()->currency }} {{ number_format($bank->balance, 2) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">TRANSFER AMOUNT</label>
+                        <div class="input-group border rounded p-1 bg-light">
+                            <span class="input-group-text bg-transparent border-0 fw-bold text-primary">{{ auth()->user()->currency }}</span>
+                            <input type="number" name="amount" class="form-control bg-transparent border-0 shadow-none fw-bold" placeholder="0.00" min="1" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="alert bg-primary-subtle border-0 small text-primary p-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i> Funds will be credited to your UniCou wallet instantly.
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Process Transfer</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -154,296 +221,172 @@
 <!-- Link Bank Modal -->
 <div class="modal fade" id="linkBankModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow" style="border-radius: 24px; overflow: hidden;">
-            <div class="modal-body p-0">
-                <!-- Step 1: Select Bank -->
-                <div id="step-1" class="modal-step p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Link New Bank</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                 <p class="text-muted small mb-4">Select the bank you want to link.</p>
-                    <div class="input-group mb-4 bg-light rounded-3 p-1">
-                        <span class="input-group-text bg-transparent border-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control bg-transparent border-0" placeholder="Search your bank (e.g. SBI, HDFC)">
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        @php $popularBanks = ['HDFC Bank', 'SBI Bank', 'ICICI Bank', 'Kotak Bank', 'Axis Bank', 'Yes Bank']; @endphp
-                        @foreach($popularBanks as $b)
-                        <div class="col-6">
-                            <div class="card border-1 p-3 text-center cursor-pointer bank-select-card" style="border-radius: 16px; transition: all 0.2s;" onclick="goToStep(2, '{{ $b }}')">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-muted bg-light mx-auto mb-2" style="width: 40px; height: 40px; border: 1px solid #e2e8f0;">
-                                    {{ substr($b, 0, 1) }}
-                                </div>
-                                <span class="small fw-bold">{{ $b }}</span>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                    <div class="text-center">
-                        <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> End-to-end encrypted under AA Framework.</p>
-                    </div>
-                </div>
-
-                <!-- Step 2: Authenticate (Mobile Number) -->
-                <div id="step-2" class="modal-step p-4 d-none">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <button type="button" class="btn btn-link text-muted p-0" onclick="goToStep(1)"><i class="fas fa-chevron-left"></i></button>
-                        <h4 class="fw-bold mb-0">Authenticate</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="bg-light rounded-4 p-4 mb-4 text-center">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-muted bg-white mx-auto mb-2 shadow-sm" style="width: 50px; height: 50px;" id="selected-bank-logo">
-                            H
-                        </div>
-                        <p class="small text-muted text-uppercase mb-1">Connecting to</p>
-                        <h5 class="fw-bold mb-0" id="selected-bank-name-display">HDFC Bank</h5>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small">Mobile Number</label>
-                        <div class="input-group border rounded-3 p-1">
-                            <span class="input-group-text bg-transparent border-0 text-muted">+91</span>
-                            <input type="text" class="form-control border-0" placeholder="Enter registered mobile" id="mobile-number">
-                        </div>
-                        <p class="small text-muted mt-2">Ensure this mobile number is linked with your <span class="bank-name-span">HDFC Bank</span> account.</p>
-                    </div>
-
-                    <button class="btn btn-primary w-100 py-3 fw-bold mb-4" style="border-radius: 16px; background-color: #93c5fd; border: none;" onclick="goToStep(3)">Request OTP</button>
-
-                    <div class="text-center">
-                        <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> End-to-end encrypted under AA Framework.</p>
-                    </div>
-                </div>
-
-                <!-- Step 3: Enter OTP -->
-                <div id="step-3" class="modal-step p-4 d-none">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <button type="button" class="btn btn-link text-muted p-0" onclick="goToStep(2)"><i class="fas fa-chevron-left"></i></button>
-                        <h4 class="fw-bold mb-0">Enter OTP</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <p class="text-muted small mb-4">We've sent a 6-digit verification code to your mobile number.</p>
-
-                    <div class="d-flex gap-2 mb-4 justify-content-between">
-                        <input type="text" class="form-control text-center py-3 fw-bold" style="border-radius: 12px; font-size: 1.2rem;" maxlength="1">
-                        <input type="text" class="form-control text-center py-3 fw-bold" style="border-radius: 12px; font-size: 1.2rem;" maxlength="1">
-                        <input type="text" class="form-control text-center py-3 fw-bold" style="border-radius: 12px; font-size: 1.2rem;" maxlength="1">
-                        <input type="text" class="form-control text-center py-3 fw-bold" style="border-radius: 12px; font-size: 1.2rem;" maxlength="1">
-                        <input type="text" class="form-control text-center py-3 fw-bold" style="border-radius: 12px; font-size: 1.2rem;" maxlength="1">
-                        <input type="text" class="form-control text-center py-3 fw-bold" style="border-radius: 12px; font-size: 1.2rem;" maxlength="1">
-                    </div>
-
-                    <button class="btn btn-primary w-100 py-3 fw-bold mb-4" style="border-radius: 16px; background-color: #2563eb;" onclick="goToStep(4)">Verify & Proceed</button>
-
-                    <div class="text-center">
-                        <p class="small text-muted mb-0">Didn't receive code? <a href="#" class="text-primary text-decoration-none fw-bold">Resend OTP</a></p>
-                    </div>
-                </div>
-
-                <!-- Step 4: Choose Account -->
-                <div id="step-4" class="modal-step p-4 d-none">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Choose Accounts</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="text-center mb-4">
-                        <h5 class="fw-bold mb-1">Accounts Found</h5>
-                        <p class="text-muted small">Your accounts have been found.</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="card border-primary p-3 mb-3 d-flex flex-row align-items-center justify-content-between" style="border-radius: 16px; background-color: #f0f7ff;">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
-                                    <i class="fas fa-university"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-bold mb-0">HDFC Bank Savings</p>
-                                    <p class="small text-muted mb-0">XXXX 8822</p>
-                                </div>
-                            </div>
-                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 24px; height: 24px;">
-                                <i class="fas fa-check small"></i>
-                            </div>
-                        </div>
-                        <div class="card border-1 p-3 d-flex flex-row align-items-center justify-content-between opacity-50" style="border-radius: 16px;">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted border" style="width: 40px; height: 40px;">
-                                    <i class="fas fa-university"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-bold mb-0">HDFC Bank Current</p>
-                                    <p class="small text-muted mb-0">XXXX 1144</p>
-                                </div>
-                            </div>
-                            <div class="rounded-circle border d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary w-100 py-3 fw-bold mb-4" style="border-radius: 16px; background-color: #2563eb;" onclick="goToStep(5)">Confirm & Proceed</button>
-
-                    <div class="text-center">
-                        <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> RBI regulated AA encryption applied.</p>
-                    </div>
-                </div>
-
-                <!-- Step 5: Data Consent -->
-                <div id="step-5" class="modal-step p-4 d-none">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">Data Consent</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="bg-light rounded-4 p-4 mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="small text-uppercase fw-bold text-muted">Data Sharing Consent</span>
-                            <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded small">SECURE</span>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <p class="small text-muted mb-0">Validity</p>
-                                <p class="fw-bold mb-0">12 Months</p>
-                            </div>
-                            <div class="col-6">
-                                <p class="small text-muted mb-0">Frequency</p>
-                                <p class="fw-bold mb-0">Daily</p>
-                            </div>
-                            <div class="col-6">
-                                <p class="small text-muted mb-0">Data Type</p>
-                                <p class="fw-bold mb-0">Transactions</p>
-                            </div>
-                            <div class="col-6">
-                                <p class="small text-muted mb-0">Framework</p>
-                                <p class="fw-bold mb-0">AA (RBI)</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p class="small text-muted text-center mb-4">By clicking Approve, you agree to share your financial data with FinPulse via the Account Aggregator framework.</p>
-
-                    <form id="link-bank-form" action="{{ route('agent.bank.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="bank_name" id="final-bank-name">
-                        <input type="hidden" name="account_number" id="final-account-number" value="XXXX 8822">
-                        <input type="hidden" name="id_number" value="12345-6789012-3"> <!-- Placeholder for cnic requirement -->
-
-                        <button type="button" class="btn btn-dark w-100 py-3 fw-bold mb-3" style="border-radius: 16px; background-color: #1e293b;" onclick="submitBankForm()">Approve & Link Now</button>
-                    </form>
-                    <button class="btn btn-link w-100 text-muted text-decoration-none fw-bold small" data-bs-dismiss="modal">Deny Consent</button>
-
-                    <div class="text-center mt-3">
-                        <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> RBI regulated AA encryption applied.</p>
-                    </div>
-                </div>
-
-                <!-- Step 6: Success -->
-                <div id="step-6" class="modal-step p-4 d-none text-center">
-                    <div class="d-flex justify-content-end mb-2">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <h4 class="fw-bold mb-4">Success</h4>
-
-                    <div class="rounded-circle bg-success-subtle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
-                        <i class="fas fa-check text-success fs-2"></i>
-                    </div>
-                    <h3 class="fw-bold mb-2">Congratulations!</h3>
-                    <p class="text-muted mb-5">Your accounts have been securely linked and are now syncing on the dashboard.</p>
-                    <button class="btn btn-primary w-100 py-3 fw-bold mb-4" style="border-radius: 16px; background-color: #2563eb;" onclick="location.reload()">Show My Dashboard</button>
-
-                    <div class="text-center">
-                        <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> RBI regulated AA encryption applied.</p>
-                    </div>
-                </div>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+            <div class="modal-header border-bottom py-3 bg-light">
+                <h5 class="modal-title fw-bold">Link New Bank Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <form id="linkBankForm">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">BANK NAME</label>
+                        <input type="text" name="bank_name" class="form-control border p-2 shadow-none" placeholder="e.g. HDFC, SBI, Standard Chartered" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">ACCOUNT HOLDER NAME</label>
+                        <input type="text" name="account_holder_name" class="form-control border p-2 shadow-none" placeholder="Exact name as per bank" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">ACCOUNT NUMBER</label>
+                        <input type="text" name="account_number" class="form-control border p-2 shadow-none" placeholder="Enter complete number" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-muted">IFSC / ROUTING</label>
+                            <input type="text" name="ifsc_code" class="form-control border p-2 shadow-none" placeholder="Optional">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold small text-muted">CURRENT BAL</label>
+                            <input type="number" name="balance" class="form-control border p-2 shadow-none" placeholder="0.00" min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-bold small text-muted">ACCOUNT TYPE</label>
+                        <select name="account_type" class="form-select border p-2 shadow-none">
+                            <option value="Savings">Savings Account</option>
+                            <option value="Current">Current Account</option>
+                            <option value="Business">Business Account</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">Confirm Account Link</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
+@push('css')
 <style>
-    .cursor-pointer {
-        cursor: pointer;
+    .bg-success-subtle {
+        background-color: #ecfdf5 !important;
     }
 
-    .bank-select-card:hover {
-        border-color: #2563eb !important;
-        background-color: #f0f7ff;
-        transform: translateY(-2px);
+    .bg-warning-subtle {
+        background-color: #fffbeb !important;
     }
 
-    .modal-step {
-        animation: fadeIn 0.3s ease-in-out;
+    .bg-danger-subtle {
+        background-color: #fef2f2 !important;
     }
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
+    .bg-primary-subtle {
+        background-color: #eff6ff !important;
+    }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .text-success {
+        color: #10b981 !important;
+    }
+
+    .text-warning {
+        color: #f59e0b !important;
+    }
+
+    .text-danger {
+        color: #ef4444 !important;
+    }
+
+    .text-primary {
+        color: #2563eb !important;
+    }
+
+    .table thead th {
+        font-weight: 700;
+        background-color: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .btn {
+        border-radius: 8px;
     }
 </style>
+@endpush
 
+@push('scripts')
 <script>
-    function goToStep(step, bankName = null) {
-        // Hide all steps
-        document.querySelectorAll('.modal-step').forEach(el => el.classList.add('d-none'));
+    $(document).ready(function() {
+        // Add Money Form Submit
+        $('#addMoneyForm').on('submit', function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            const originalText = btn.html();
 
-        // Show target step
-        document.getElementById('step-' + step).classList.remove('d-none');
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
 
-        if (bankName) {
-            document.getElementById('selected-bank-name-display').innerText = bankName;
-            document.getElementById('selected-bank-logo').innerText = bankName.charAt(0);
-            document.querySelectorAll('.bank-name-span').forEach(el => el.innerText = bankName);
-            document.getElementById('final-bank-name').value = bankName;
-        }
-    }
-
-    function submitBankForm() {
-        // Show success step first for UI feel
-        goToStep(6);
-
-        // Delay submission to let user see success message or just submit directly
-        // Given user wants "Mubarak Ho" screen, maybe stay there and refresh?
-        // Let's stay on step 6 and then reload which would fetch from DB if we submitted.
-
-        const form = document.getElementById('link-bank-form');
-        const formData = new FormData(form);
-
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        }).then(response => {
-            // Success handled by UI showing Step 6
-        }).catch(error => console.error('Error:', error));
-    }
-
-    // Auto-focus OTP inputs
-    document.querySelectorAll('#step-3 input').forEach((input, index, inputs) => {
-        input.addEventListener('input', () => {
-            if (input.value && index < inputs.length - 1) {
-                inputs[index + 1].focus();
-            }
+            $.ajax({
+                url: "{{ route('wallet.add-money') }}",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#addMoneyModal').modal('hide');
+                        toastr.success(response.message);
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Transfer failed';
+                    toastr.error(msg);
+                    btn.prop('disabled', false).html(originalText);
+                }
+            });
         });
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !input.value && index > 0) {
-                inputs[index - 1].focus();
-            }
+
+        // Link Bank Form Submit
+        $('#linkBankForm').on('submit', function(e) {
+            e.preventDefault();
+            const btn = $(this).find('button[type="submit"]');
+            const originalText = btn.html();
+
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Linking...');
+
+            $.ajax({
+                url: "{{ route('bank.store') }}",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#linkBankModal').modal('hide');
+                        toastr.success(response.message);
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                },
+                error: function(xhr) {
+                    console.log(xhr); // full object
+                    console.log(xhr.responseText); // real error
+
+                    let msg = 'Linking failed';
+
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON.errors) {
+                            msg = Object.values(xhr.responseJSON.errors).join(', ');
+                        }
+                    }
+
+                    toastr.error(msg);
+                }
+            });
         });
     });
 </script>
+@endpush
+
 @endsection

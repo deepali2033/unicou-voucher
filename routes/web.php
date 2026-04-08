@@ -298,7 +298,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     // BANK
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
-    Route::post('/bank-link', [BankController::class, 'storeBank'])->name('bank.store');
+    Route::post('/bank-link', [BankController::class, 'linkBank'])->name('bank.store');
+    Route::post('/wallet/add-money', [BankController::class, 'addMoneyToWallet'])->name('wallet.add-money');
     Route::get('/banks', [BankController::class, 'bankreport'])->name('banks.bank-table');
     Route::get('/banks-export', [BankController::class, 'exportBankReport'])->name('banks.bank-table.export');
     Route::post('/webhook/save', [WebhookController::class, 'save'])->name('webhook.save');
