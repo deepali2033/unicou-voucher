@@ -406,8 +406,16 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
     $(document).ready(function() {
-        let finalPrice = {{ $rule->final_price }};
-        let maxQty = {{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->quantity) : $rule->quantity }};
+        let finalPrice = {
+            {
+                $rule - > final_price
+            }
+        };
+        let maxQty = {
+            {
+                $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule - > quantity) : $rule - > quantity
+            }
+        };
         let capturedDetails = null;
 
         // Stripe Integration
@@ -526,7 +534,11 @@
                 $('#voucher-quantity').val(qty + 1);
                 updateTotal();
             } else {
-                if (qty >= {{ $userPoints['max_allowed'] }}) {
+                if (qty >= {
+                        {
+                            $userPoints['max_allowed']
+                        }
+                    }) {
                     toastr.warning('Your 24-hour voucher purchase limit has been reached.');
                 } else {
                     toastr.warning('Only this many vouchers are available in stock..');
@@ -582,7 +594,11 @@
             } else if (type === 'wallet') {
                 $('#wallet-section').removeClass('d-none');
                 let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
-                let balance = {{ auth()->user()->wallet_balance }};
+                let balance = {
+                    {
+                        auth() - > user() - > wallet_balance
+                    }
+                };
                 if (total > balance) {
                     $('#wallet-insufficient').removeClass('d-none');
                 }
@@ -633,7 +649,7 @@
 
         $('#pay-now').click(function() {
             let paymentType = $('input[name="payment_type"]:checked').val();
-            let qtyElement = $('#voucher-quantity');
+            let qtyElement = $('#voucher-upload_vouchers');
             let qty = parseInt(qtyElement.val()) || 1;
             let btn = $(this);
 
@@ -704,7 +720,11 @@
                 formData.append('linked_bank_id', bankId);
             } else if (paymentType === 'wallet') {
                 let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
-                let balance = {{ auth()->user()->wallet_balance }};
+                let balance = {
+                    {
+                        auth() - > user() - > wallet_balance
+                    }
+                };
                 if (total > balance) {
                     toastr.error('Insufficient wallet balance');
                     return;
