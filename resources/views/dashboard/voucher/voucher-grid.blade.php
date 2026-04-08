@@ -3,19 +3,22 @@
     @php
     $user = auth()->user();
     $finalPrice = $voucher->final_price ?? ($user->isStudent() ? $voucher->student_sale_price : $voucher->agent_sale_price);
-    $stock = $voucher->quantity ?? 0;
-    
+
+    $allCodes = is_array($voucher->upload_vouchers) ? $voucher->upload_vouchers : [];
+    $deliveredCodes = is_array($voucher->delivered_vouchers) ? $voucher->delivered_vouchers : [];
+    $stock = count(array_diff($allCodes, $deliveredCodes));
+
     $countryDisplay = 'N/A';
     if (is_array($voucher->country_region)) {
-        if (in_array('all', $voucher->country_region)) {
-            $countryDisplay = 'GLB';
-        } elseif (count($voucher->country_region) > 1) {
-            $countryDisplay = 'MULTY';
-        } elseif (count($voucher->country_region) === 1) {
-            $countryDisplay = $voucher->country_region[0];
-        }
+    if (in_array('all', $voucher->country_region)) {
+    $countryDisplay = 'GLB';
+    } elseif (count($voucher->country_region) > 1) {
+    $countryDisplay = 'MULTY';
+    } elseif (count($voucher->country_region) === 1) {
+    $countryDisplay = $voucher->country_region[0];
+    }
     } else {
-        $countryDisplay = $voucher->country_region ?? 'N/A';
+    $countryDisplay = $voucher->country_region ?? 'N/A';
     }
     @endphp
     <div class="col-xl-4 col-lg-6 mb-4">
@@ -61,8 +64,14 @@
                             <span class="badge {{ $voucher->is_limited ? 'bg-danger' : 'bg-info' }} text-white border-0 small">
                                 <i class="fas fa-clock me-1"></i> 24h Limit: {{ $voucher->is_limited ? 'Reached' : $voucher->remaining_limit . ' left' }}
                             </span>
+                            @if($voucher->expiry_date)
+                            <span class="badge bg-warning text-dark border-0 small">
+                                <i class="fas fa-calendar-times me-1"></i> Exp: {{ $voucher->expiry_date->format('d M Y') }}
+                            </span>
+                            @endif
                         </div>
                         @endif
+
                     </div>
                 </div>
 
