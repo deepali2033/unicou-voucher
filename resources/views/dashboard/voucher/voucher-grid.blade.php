@@ -3,7 +3,11 @@
     @php
     $user = auth()->user();
     $finalPrice = $voucher->final_price ?? ($user->isStudent() ? $voucher->student_sale_price : $voucher->agent_sale_price);
-    $stock = $voucher->quantity ?? 0;
+
+    $allCodes = is_array($voucher->upload_vouchers) ? $voucher->upload_vouchers : [];
+    $deliveredCodes = is_array($voucher->delivered_vouchers) ? $voucher->delivered_vouchers : [];
+    $stock = count(array_diff($allCodes, $deliveredCodes));
+
     $countryDisplay = 'N/A';
     if (is_array($voucher->country_region)) {
     if (in_array('all', $voucher->country_region)) {
@@ -60,8 +64,14 @@
                             <span class="badge {{ $voucher->is_limited ? 'bg-danger' : 'bg-info' }} text-white border-0 small">
                                 <i class="fas fa-clock me-1"></i> 24h Limit: {{ $voucher->is_limited ? 'Reached' : $voucher->remaining_limit . ' left' }}
                             </span>
+                            @if($voucher->expiry_date)
+                            <span class="badge bg-warning text-dark border-0 small">
+                                <i class="fas fa-calendar-times me-1"></i> Exp: {{ $voucher->expiry_date->format('d M Y') }}
+                            </span>
+                            @endif
                         </div>
                         @endif
+
                     </div>
                 </div>
 

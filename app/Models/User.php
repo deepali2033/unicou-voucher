@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerifyEmail;
+use App\Mail\ResetPassword;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -56,6 +57,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_updated_at',
         'pending_profile_data',
         'wallet_balance',
+        'withdrawable_balance',
+        'currency',
         'latitude',
         'longitude',
         'last_login_at',
@@ -111,6 +114,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'can_view_voucher_stock',
         'can_edit_voucher_stock',
         'can_view_reports_page',
+         'can_view_all_countries',
+        'permitted_countries',
         'category',
         'rating',
         'voucher_limit',
@@ -163,6 +168,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'can_view_voucher_stock' => 'boolean',
             'can_edit_voucher_stock' => 'boolean',
             'can_view_reports_page' => 'boolean',
+             'can_view_all_countries' => 'boolean',
+            'permitted_countries' => 'array',
         ];
     }
 
@@ -552,4 +559,14 @@ class User extends Authenticatable implements MustVerifyEmail
 
         \Illuminate\Support\Facades\Mail::to($this->email)->send(new \App\Mail\VerifyEmail($this, $verificationUrl));
     }
+     public function sendPasswordResetNotification($token)
+    {
+        $url = route('password.reset', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ]);
+
+        \Illuminate\Support\Facades\Mail::to($this->email)->send(new \App\Mail\ResetPassword($this, $url));
+    }
+    
 }

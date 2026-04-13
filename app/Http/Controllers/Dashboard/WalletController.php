@@ -21,7 +21,7 @@ class WalletController extends Controller
         }
 
         $users = $query->get();
-        
+
         // Use a separate query for stats to ensure it matches the visible users
         $stats = [
             'total_balance' => $query->sum('wallet_balance'),
@@ -45,28 +45,19 @@ class WalletController extends Controller
 
     public function credit(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'amount' => 'required|numeric|min:0.01',
-            'note' => 'nullable|string'
-        ]);
+        $user = auth()->user();
 
-        $user = User::findOrFail($request->user_id);
-        $newBalance = $user->wallet_balance + $request->amount;
-        $user->update(['wallet_balance' => $newBalance]);
+        $user->wallet_balance += $request->amount;
+        $user->save();
 
         WalletLedger::create([
             'user_id' => $user->id,
-            'type' => 'credit',
             'amount' => $request->amount,
-            'description' => $request->note ?? 'Manual Credit',
+            'type' => 'credit',
+            'description' => 'Stripe Payment',
         ]);
 
-        if ($request->ajax()) {
-            return response()->json(['success' => 'Wallet credited successfully.']);
-        }
-
-        return back()->with('success', 'Wallet credited successfully.');
+        return response()->json(['success' => true]);
     }
 
     public function debit(Request $request)
@@ -78,7 +69,7 @@ class WalletController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        
+
         if ($user->wallet_balance < $request->amount) {
             if ($request->ajax()) {
                 return response()->json(['error' => 'Insufficient balance.'], 422);

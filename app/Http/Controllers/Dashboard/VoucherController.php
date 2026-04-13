@@ -10,12 +10,14 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Order;
+use App\Services\WalletService;
 
 use App\Models\BankAccountModel;
 use App\Models\AdminPaymentMethod;
 use App\Models\User;
 use App\Notifications\OrderPlacedNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Http;
 
 class VoucherController extends Controller
 {
@@ -28,7 +30,10 @@ class VoucherController extends Controller
         if (!in_array($user->account_type, ['admin', 'manager'])) {
             $query->where(function ($q) use ($user) {
                 $q->whereJsonContains('country_region', $user->country)
-                    ->orWhereJsonContains('country_region', 'all');
+                    ->orWhereJsonContains('country_region', 'all')
+                    ->orWhereJsonContains('country_region', 'GLB')
+                    ->orWhere('country_region', 'like', '%all%')
+                    ->orWhere('country_region', 'like', '%GLB%');
             });
 
             // If voucher has state restrictions, apply them. 
@@ -40,6 +45,11 @@ class VoucherController extends Controller
                     ->orWhereJsonContains('state', $user->state)
                     ->orWhereJsonContains('state', 'all');
             });
+        }
+
+        // Filter by SKU ID
+        if ($request->filled('sku_id')) {
+            $query->where('sku_id', 'like', "%{$request->sku_id}%");
         }
 
         // Filter by Voucher Name (Brand Name)
@@ -131,7 +141,7 @@ class VoucherController extends Controller
         // Check if voucher is available in user's country
         if (!in_array($user->account_type, ['admin', 'manager'])) {
             $countries = is_array($voucher->country_region) ? $voucher->country_region : [$voucher->country_region];
-            if (!in_array($user->country, $countries) && !in_array('all', $countries)) {
+            if (!in_array($user->country, $countries) && !in_array('all', $countries) && !in_array('GLB', $countries)) {
                 return redirect()->route('vouchers')->with('error', 'This voucher is not available in your country.');
             }
         }
@@ -156,7 +166,7 @@ class VoucherController extends Controller
         $maxAllowed = $userTotalLimit - $boughtTotalLast24h;
 
         // Check quantity availability
-        if ($voucher->quantity <= 0) {
+        if ($voucher->upload_vouchers <= 0) {
             return redirect()->route('vouchers')->with('error', 'This voucher is out of stock.');
         }
 
@@ -181,9 +191,10 @@ class VoucherController extends Controller
         $voucher = InventoryVoucher::findOrFail($id);
         $request->validate([
             'quantity' => 'required|integer|min:1',
-            'payment_type' => 'required|in:card,admin_bank,wise',
+            'payment_type' => 'required|in:card,admin_bank,wise,kuickpay,stripe,wallet',
             'admin_bank_id' => 'required_if:payment_type,admin_bank,wise|exists:admin_payment_methods,id',
             'payment_receipt' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'stripeToken' => 'required_if:payment_type,stripe',
         ]);
 
         $user = auth()->user();
@@ -214,7 +225,13 @@ class VoucherController extends Controller
         $payment_receipt = null;
         $bank_details = [];
 
-        if ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
+        if ($request->payment_type == 'wallet') {
+            if ($user->wallet_balance < $totalAmount) {
+                return response()->json(['message' => 'Insufficient wallet balance.'], 400);
+            }
+            $status = 'completed'; // Wallet payment is instant
+            $bank_details = ['notes' => 'Paid via Wallet'];
+        } elseif ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
             $adminBank = AdminPaymentMethod::findOrFail($request->admin_bank_id);
             if ($request->hasFile('payment_receipt')) {
                 $payment_receipt = $request->file('payment_receipt')->store('receipts', 'public');
@@ -236,6 +253,54 @@ class VoucherController extends Controller
                 'notes' => 'Card payment initiated',
                 'captured_details' => $request->captured_details
             ];
+        } elseif ($request->payment_type == 'kuickpay') {
+            $status = 'pending';
+            // Generating a unique consumer number: Prefix (01520) + Timestamp + OrderCount
+            $prefix = config('services.kuickpay.prefix', '01520');
+            $orderCount = Order::whereDate('created_at', now())->count() + 1;
+            $consumerNumber = $prefix . date('ymd') . str_pad($orderCount, 5, '0', STR_PAD_LEFT);
+            $bank_details = [
+                'kuickpay_consumer_number' => $consumerNumber,
+                'notes' => 'Kuickpay BPS payment initiated'
+            ];
+        } elseif ($request->payment_type == 'stripe') {
+            // Process Stripe Payment using API directly
+            $stripeSecret = config('services.stripe.secret');
+
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $stripeSecret,
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                ])->asForm()->post('https://api.stripe.com/v1/charges', [
+                    'amount' => (int)($totalAmount * 100), // in cents
+                    'currency' => strtolower($voucher->currency ?: 'PKR'),
+                    'source' => $request->stripeToken,
+                    'description' => 'Voucher Purchase: ' . $voucher->brand_name,
+                    'metadata' => [
+                        'user_id' => $user->id,
+                        'voucher_id' => $voucher->sku_id,
+                        'quantity' => $request->quantity,
+                    ],
+                ]);
+
+                if ($response->failed()) {
+                    $error = $response->json()['error']['message'] ?? 'Stripe payment failed';
+                    return response()->json(['message' => $error], 400);
+                }
+
+                $charge = $response->json();
+                $status = 'completed'; // Payment successful
+                $bank_details = [
+                    'transaction_id' => $charge['id'],
+                    'notes' => 'Stripe payment successful'
+                ];
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Stripe integration error: ' . $e->getMessage()], 500);
+            }
+        }
+
+        if ($request->payment_type == 'stripe' && $totalAmount < 150) {
+            return response()->json(['message' => 'Stripe payment ke liye minimum amount 150 PKR honi chahiye.'], 400);
         }
 
         $referralPointsPerUnit = 0;
@@ -256,6 +321,29 @@ class VoucherController extends Controller
 
         DB::beginTransaction();
         try {
+            // Process Wallet Payment Logic
+            if ($request->payment_type == 'wallet') {
+                // Debit User
+                WalletService::debit(
+                    $user,
+                    $totalAmount,
+                    'order_purchase',
+                    "Payment for Voucher Order: {$voucher->brand_name} (Qty: {$request->quantity})"
+                );
+
+                // Credit Admin (First admin found)
+                $admin = User::where('account_type', 'admin')->first();
+                if ($admin) {
+                    WalletService::credit(
+                        $admin,
+                        $totalAmount,
+                        'order_revenue',
+                        "Revenue from User {$user->name} for Order of {$voucher->brand_name}",
+                        true // Admin can withdraw revenue
+                    );
+                }
+            }
+
             // Create Order
             $orderData = [
                 'order_id' => 'PUR-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT),
@@ -295,7 +383,8 @@ class VoucherController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $status == 'completed' ? 'Order placed successfully.' : 'Order submitted. Waiting for admin approval.',
-                'order_id' => $order->order_id
+                'order_id' => $order->order_id,
+                'consumer_number' => $order->kuickpay_consumer_number
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

@@ -1,5 +1,36 @@
 @extends('layouts.master')
+@push('css')
+<style>
+    .payment-type-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #eee !important;
+    }
+
+    .payment-type-card.active {
+        border-color: #0d6efd !important;
+        background-color: #f8f9ff;
+    }
+
+    .payment-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .brand-logo-container {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+</style>
+@endpush
 @section('content')
+<script src="https://js.stripe.com/v3/"></script>
 <div class="container-fluid py-4">
 
     <div class="row g-3 mb-4">
@@ -90,7 +121,7 @@
                     <div class="d-flex align-items-center justify-content-between mb-4 pb-4 border-bottom">
                         <div class="d-flex align-items-center">
                             <div class="brand-logo-container me-3">
-                                @if($rule ->logo)
+                                @if($rule->logo)
                                 <img src="{{ asset($rule->logo) }}" alt="{{ $rule->brand_name }}" class="img-fluid">
                                 @else
                                 <i class="fas fa-ticket-alt fa-2x text-primary"></i>
@@ -159,6 +190,50 @@
                                         <span>Wallet Balance</span>
                                     </label>
                                 </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-kuickpay">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_kuickpay" value="kuickpay">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_kuickpay">
+                                        <i class="fas fa-mobile-alt me-2 text-danger"></i>
+                                        <span>Kuickpay (Bank/App)</span>
+                                    </label>
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-stripe">
+                                    <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_stripe" value="stripe">
+                                    <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_stripe">
+                                        <i class="fab fa-stripe me-2 text-primary"></i>
+                                        <span>Stripe (Credit Card)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Kuickpay Section -->
+                            <div id="kuickpay-section" class="d-none mb-4">
+                                <div class="card bg-light border-0 rounded-4 p-4 shadow-sm border-start border-danger border-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-danger text-white rounded-circle p-2 me-3">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <h5 class="fw-bold mb-0">Pay via Kuickpay</h5>
+                                    </div>
+                                    <p class="text-muted small">You will receive a unique consumer number after placing the order. You can pay this through any Bank App, ATM, or Retailer.</p>
+                                    <ul class="text-muted small ps-3">
+                                        <li>Login to your Bank App</li>
+                                        <li>Go to Bill Payments -> Kuickpay</li>
+                                        <li>Enter the Consumer Number (provided after clicking Place Order)</li>
+                                        <li>Your order will be automatically confirmed once paid</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Stripe Section -->
+                            <div id="stripe-section" class="d-none mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Secure Card Payment</label>
+                                <div class="card border-0 bg-light rounded-4 p-4 shadow-sm">
+                                    <div id="card-element" class="p-3 bg-white rounded-3 shadow-sm">
+                                        <!-- Stripe Elements will be injected here -->
+                                    </div>
+                                    <div id="card-errors" role="alert" class="text-danger small mt-2"></div>
+                                </div>
                             </div>
 
                             <!-- Linked Bank Section -->
@@ -189,7 +264,7 @@
                             </div>
 
                             <!-- Card Payment Section -->
-                            <div id="card-payment-section">
+                            <div id="card-payment-section" class="d-none">
                                 <label class="form-label fw-bold small text-uppercase text-muted">Card Details</label>
                                 <div class="card border-0 bg-light rounded-4 p-4 shadow-sm">
                                     <div class="row g-3">
@@ -325,54 +400,45 @@
         </div>
     </div>
 </div>
-<style>
-    .payment-type-card {
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 2px solid #e2e8f0 !important;
-    }
 
-    .payment-type-card:hover {
-        background-color: #f8fafc;
-        border-color: #2563eb !important;
-    }
-
-    .payment-type-card label {
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .payment-type-card.active {
-        background-color: #f0f7ff;
-        border-color: #2563eb !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-    }
-
-    .brand-logo-container {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 5px;
-    }
-
-    .brand-logo-container img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-</style>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
     $(document).ready(function() {
-        let finalPrice = {{ $rule->final_price }};
-        let maxQty = {{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->quantity) : $rule->quantity }};
+        let finalPrice = {
+            {
+                $rule - > final_price
+            }
+        };
+        let maxQty = {
+            {
+                $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule - > quantity) : $rule - > quantity
+            }
+        };
         let capturedDetails = null;
+
+        // Stripe Integration
+        const stripe = Stripe('{{ config("services.stripe.key") }}');
+        const elements = stripe.elements();
+        const card = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#32325d',
+                },
+            },
+        });
+        card.mount('#card-element');
+
+        card.on('change', function(event) {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
 
         // Tesseract OCR Logic
         $('#payment-receipt').on('change', function(e) {
@@ -460,6 +526,7 @@
 
         // Initial call
         updateTotal();
+        $('.payment-type-card.active').trigger('click');
 
         $('#increase-qty').click(function() {
             let qty = parseInt($('#voucher-quantity').val());
@@ -467,7 +534,11 @@
                 $('#voucher-quantity').val(qty + 1);
                 updateTotal();
             } else {
-                if (qty >= {{ $userPoints['max_allowed'] }}) {
+                if (qty >= {
+                        {
+                            $userPoints['max_allowed']
+                        }
+                    }) {
                     toastr.warning('Your 24-hour voucher purchase limit has been reached.');
                 } else {
                     toastr.warning('Only this many vouchers are available in stock..');
@@ -499,13 +570,15 @@
             radio.prop('checked', true);
 
             let type = radio.val();
-            
+
             // Reset visibility
             $('#card-payment-section').addClass('d-none');
             $('#admin-banks-section').addClass('d-none');
             $('#linked-bank-section').addClass('d-none');
             $('#wallet-section').addClass('d-none');
             $('#wallet-insufficient').addClass('d-none');
+            $('#kuickpay-section').addClass('d-none');
+            $('#stripe-section').addClass('d-none');
 
             if (type === 'card') {
                 $('#card-payment-section').removeClass('d-none');
@@ -521,10 +594,18 @@
             } else if (type === 'wallet') {
                 $('#wallet-section').removeClass('d-none');
                 let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
-                let balance = {{ auth()->user()->wallet_balance }};
+                let balance = {
+                    {
+                        auth() - > user() - > wallet_balance
+                    }
+                };
                 if (total > balance) {
                     $('#wallet-insufficient').removeClass('d-none');
                 }
+            } else if (type === 'kuickpay') {
+                $('#kuickpay-section').removeClass('d-none');
+            } else if (type === 'stripe') {
+                $('#stripe-section').removeClass('d-none');
             }
         });
 
@@ -568,13 +649,11 @@
 
         $('#pay-now').click(function() {
             let paymentType = $('input[name="payment_type"]:checked').val();
-            let qtyElement = $('#voucher-quantity');
-            let qty = parseInt(qtyElement.val()) || 1;
+            let qty = parseInt($('#voucher-quantity').val()) || 1;
             let btn = $(this);
 
-            console.log('🔵 Pay Now clicked');
+            console.log('ðŸ”µ Pay Now clicked');
             console.log('Payment Type:', paymentType);
-            console.log('Quantity Raw:', qtyElement.val());
             console.log('Quantity Parsed:', qty);
             console.log('Quantity Type:', typeof qty);
 
@@ -602,7 +681,7 @@
                     toastr.error('Please enter all card details');
                     return;
                 }
-                
+
                 let cardDetails = {
                     card_number: cardNumber,
                     card_expiry: cardExpiry,
@@ -639,15 +718,35 @@
                 formData.append('linked_bank_id', bankId);
             } else if (paymentType === 'wallet') {
                 let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
-                let balance = {{ auth()->user()->wallet_balance }};
+                let balance = {
+                    {
+                        auth() - > user() - > wallet_balance
+                    }
+                };
                 if (total > balance) {
                     toastr.error('Insufficient wallet balance');
                     return;
                 }
+            } else if (paymentType === 'stripe') {
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
+
+                stripe.createToken(card).then(function(result) {
+                    if (result.error) {
+                        btn.prop('disabled', false).html('Place Order');
+                        $('#card-errors').text(result.error.message);
+                    } else {
+                        formData.append('stripeToken', result.token.id);
+                        submitOrder(formData, btn);
+                    }
+                });
+                return; // Exit here as submitOrder will be called asynchronously
             }
 
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
+            submitOrder(formData, btn);
+        });
 
+        function submitOrder(formData, btn) {
             $.ajax({
                 url: "{{ route('vouchers.order.post', $rule->id) }}",
                 type: "POST",
@@ -656,7 +755,12 @@
                 contentType: false,
                 success: function(response) {
                     if (response.success) {
-                        window.location.href = "{{ route('orders.history') }}";
+                        if (formData.get('payment_type') === 'kuickpay') {
+                            $('#kp-consumer-number').text(response.consumer_number);
+                            $('#kuickpaySuccessModal').modal('show');
+                        } else {
+                            window.location.href = "{{ route('orders.history') }}";
+                        }
                     }
                 },
                 error: function(xhr) {
@@ -665,8 +769,43 @@
                     btn.prop('disabled', false).html('Place Order');
                 }
             });
-        });
+        }
     });
 </script>
 @endpush
+
+<!-- Kuickpay Success Modal -->
+<div class="modal fade" id="kuickpaySuccessModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body p-5 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success fa-5x"></i>
+                </div>
+                <h3 class="fw-bold mb-3">Order Placed!</h3>
+                <p class="text-muted mb-4">Please pay the following amount using Kuickpay to confirm your order.</p>
+
+                <div class="bg-light p-4 rounded-4 mb-4 border-dashed border-2 border-primary">
+                    <p class="text-muted small text-uppercase fw-bold mb-2">Kuickpay Consumer Number</p>
+                    <h2 class="fw-bold text-primary mb-0" id="kp-consumer-number">---</h2>
+                </div>
+
+                <div class="alert alert-info small text-start mb-4">
+                    <strong>Instructions:</strong>
+                    <ol class="mb-0 mt-2">
+                        <li>Login to any Bank App or visit an ATM.</li>
+                        <li>Select <strong>Bill Payments</strong> and then <strong>Kuickpay</strong>.</li>
+                        <li>Enter the <strong>Consumer Number</strong> above.</li>
+                        <li>Pay the total amount and your order will be activated instantly.</li>
+                    </ol>
+                </div>
+
+                <button type="button" class="btn btn-primary w-100 py-3 rounded-pill fw-bold" onclick="window.location.href='{{ route('orders.history') }}'">
+                    Go to Order History
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection

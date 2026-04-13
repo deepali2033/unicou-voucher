@@ -28,6 +28,14 @@ class UserController extends Controller
             $query->where('account_type', '!=', 'admin');
         }
 
+   // Apply Country Visibility Restrictions
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            if (!$authUser->can_view_all_countries) {
+                $permitted = $authUser->permitted_countries ?? [];
+                $query->whereIn('country', $permitted);
+            }
+        }
 
         if ($request->has('role') && $request->role != 'all' && $request->role != '') {
             $query->where('account_type', $request->role);
@@ -395,6 +403,8 @@ class UserController extends Controller
             'can_view_voucher_stock' => $request->has('can_view_voucher_stock'),
             'can_edit_voucher_stock' => $request->has('can_edit_voucher_stock'),
             'can_view_reports_page' => $request->has('can_view_reports_page'),
+             'can_view_all_countries' => $request->has('can_view_all_countries'),
+            'permitted_countries' => $request->input('permitted_countries', []),
         ]);
 
         return back()->with('success', 'User permissions updated successfully.');
@@ -801,7 +811,9 @@ class UserController extends Controller
 
     public function ResellerAgent(Request $request)
     {
-        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))) {
+        if (!(auth()->user()->isAdmin() ||
+        (auth()->user()->isSupport() && auth()->user()->can_view_users) || 
+        (auth()->user()->isManager() && auth()->user()->can_view_users))) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'reseller_agent');
@@ -923,7 +935,7 @@ class UserController extends Controller
 
     public function RegularAgent(Request $request)
     {
-        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent())) {
+        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || (auth()->user()->isSupport() && auth()->user()->can_view_users) ||  auth()->user()->isResellerAgent())) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'agent');
@@ -988,7 +1000,8 @@ class UserController extends Controller
 
     public function Student(Request $request)
     {
-        if (!(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent())) {
+        if (!(auth()->user()->isAdmin() ||
+        (auth()->user()->isSupport() && auth()->user()->can_view_users) || (auth()->user()->isManager() && auth()->user()->can_view_users) || auth()->user()->isResellerAgent())) {
             return redirect()->route('dashboard')->with('error', 'Unauthorized action.');
         }
         $query = User::where('account_type', 'student');

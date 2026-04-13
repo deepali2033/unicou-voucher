@@ -13,6 +13,14 @@ class SalesController extends Controller
     {
         $query = Order::with(['user', 'voucher', 'inventoryVoucher'])->where('status', 'delivered');
 
+        // Apply Country Visibility Restrictions for Managers and Support
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
+
         // Date Wise Report (From - To)
         if ($request->filled('from_date')) {
             $query->whereDate('created_at', '>=', $request->from_date);
@@ -78,9 +86,17 @@ class SalesController extends Controller
         $sales = $query->latest()->paginate($perPage)->withQueryString();
 
         // Fetch unique values for filters from delivered orders
-        $filterData = Order::where('status', 'delivered')
-            ->with(['user', 'inventoryVoucher'])
-            ->get();
+        $filterQuery = Order::where('status', 'delivered')
+            ->with(['user', 'inventoryVoucher']);
+
+        // Apply same Country Visibility Restrictions for filter data
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $filterQuery->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
+
+        $filterData = $filterQuery->get();
 
         $brands = $filterData->pluck('inventoryVoucher.brand_name')->unique()->filter()->values();
         $countries = $filterData->pluck('user.country')->unique()->filter()->values();
@@ -98,6 +114,14 @@ class SalesController extends Controller
     public function export(Request $request)
     {
         $query = Order::with(['user', 'voucher', 'inventoryVoucher'])->where('status', 'delivered');
+
+        // Apply Country Visibility Restrictions for Managers and Support
+        $authUser = auth()->user();
+        if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('country', $authUser->country);
+            });
+        }
 
         // Date Wise Report (From - To)
         if ($request->filled('from_date')) {

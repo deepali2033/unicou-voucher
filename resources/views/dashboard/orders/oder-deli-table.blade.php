@@ -16,7 +16,8 @@
                 <td class="ps-4">
                     <div class="fw-bold text-dark">{{ $order->order_id }}</div>
                     <div class="text-muted small">{{ $order->created_at->format('d M Y H:i') }}</div>
-                    <div class="text-muted small">SKU: {{ $order->voucher_id }}</div>
+                    <div class="text-muted small">SKU: <span class="fw-bold text-primary">{{ $order->voucher_id }}</span></div>
+                    <div class="text-muted small">Country: <span class="badge bg-light text-dark border">{{ $order->user->country ?? 'N/A' }}</span></div>
                     <div class="text-muted small">{{ $order->voucher->name ?? $order->voucher_type }} (Qty: {{ $order->quantity }})</div>
                 </td>
                 <td class="px-4 py-4">
@@ -54,6 +55,34 @@
                     @else
                     <span class="badge bg-primary-subtle text-primary px-3 py-2">{{ ucfirst($order->status) }}</span>
                     @endif
+
+                    @if($order->status == 'completed')
+                        @php
+                            $availableCount = 0;
+                            $stockReason = '';
+                            if($order->inventoryVoucher) {
+                                if($order->inventoryVoucher->is_expired || ($order->inventoryVoucher->expiry_date && \Carbon\Carbon::parse($order->inventoryVoucher->expiry_date)->isPast())) {
+                                    $stockReason = 'Voucher Expired';
+                                } elseif ($order->inventoryVoucher->upload_vouchers) {
+                                    $availableCount = count(array_diff($order->inventoryVoucher->upload_vouchers, $deliveredCodes));
+                                    if ($availableCount < $order->quantity) {
+                                        $stockReason = "Stock Low: {$availableCount} left";
+                                    }
+                                } else {
+                                    $stockReason = 'No Codes in Inventory';
+                                }
+                            } else {
+                                $stockReason = 'Inventory Record Deleted';
+                            }
+                        @endphp
+                        @if($stockReason)
+                            <div class="mt-2">
+                                <span class="badge bg-danger-subtle text-danger border-0 small" style="font-size: 0.7rem;">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> {{ $stockReason }}
+                                </span>
+                            </div>
+                        @endif
+                    @endif
                 </td>
                 <td class="text-end pe-4">
                     <div class="d-flex justify-content-end gap-1">
@@ -67,21 +96,34 @@
                         @endif
 
                         @if($order->status == 'completed')
-                        <form action="{{ route('orders.deliver', $order->id) }}" method="POST" class="d-inline" id="auto-deliver-{{ $order->id }}">
-                            @csrf
-                            @php
+                        @php
                             $autoCodes = [];
-                            if($order->inventoryVoucher && $order->inventoryVoucher->upload_vouchers) {
-                            $available = array_diff($order->inventoryVoucher->upload_vouchers, $deliveredCodes);
-                            $autoCodes = array_slice($available, 0, $order->quantity);
+                            $deliveryReason = '';
+                            if($order->inventoryVoucher) {
+                                if($order->inventoryVoucher->is_expired || ($order->inventoryVoucher->expiry_date && \Carbon\Carbon::parse($order->inventoryVoucher->expiry_date)->isPast())) {
+                                    $deliveryReason = 'Voucher Expired';
+                                } elseif ($order->inventoryVoucher->upload_vouchers) {
+                                    $available = array_diff($order->inventoryVoucher->upload_vouchers, $deliveredCodes);
+                                    if (count($available) < $order->quantity) {
+                                        $deliveryReason = 'Insufficient inventory (' . count($available) . ' available)';
+                                    } else {
+                                        $autoCodes = array_slice($available, 0, $order->quantity);
+                                    }
+                                } else {
+                                    $deliveryReason = 'No codes in inventory';
+                                }
+                            } else {
+                                $deliveryReason = 'Inventory Record Deleted';
                             }
                             $codesString = implode("\n", $autoCodes);
-                            @endphp
+                        @endphp
+                        <form action="{{ route('orders.deliver', $order->id) }}" method="POST" class="d-inline" id="auto-deliver-{{ $order->id }}">
+                            @csrf
                             <input type="hidden" name="codes" value="{{ $codesString }}">
-                            <button type="button" class="btn btn-sm btn-light" title="Quick Deliver (Auto Pick)"
+                            <button type="button" class="btn btn-sm btn-light" title="{{ $deliveryReason ?: 'Quick Deliver (Auto Pick)' }}"
                                 onclick="if(confirm('Auto-pick and deliver {{ $order->quantity }} codes?')) document.getElementById('auto-deliver-{{ $order->id }}').submit();"
-                                @if(count($autoCodes) < $order->quantity) disabled @endif>
-                                <i class="fas fa-magic text-primary"></i>
+                                @if($deliveryReason) disabled @endif>
+                                <i class="fas fa-magic {{ $deliveryReason ? 'text-muted' : 'text-primary' }}"></i>
                             </button>
                         </form>
                         @endif

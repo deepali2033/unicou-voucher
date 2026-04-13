@@ -11,14 +11,29 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form id="filter-form" action="{{ route('orders.index') }}" method="GET">
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Purchase ID</label>
-                    <input type="text" name="order_id" class="form-control" placeholder="Search purchase ID..." value="{{ request('order_id') }}">
-                </div>
+                <form id="filter-form" action="{{ route('orders.index') }}" method="GET">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Purchase ID</label>
+                        <input type="text" name="order_id" class="form-control" placeholder="Search purchase ID..." value="{{ request('order_id') }}">
+                    </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Status</label>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">SKU ID</label>
+                        <input type="text" name="sku_id" class="form-control" placeholder="Search SKU ID..." value="{{ request('sku_id') }}">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Country</label>
+                        <select name="country" class="form-select">
+                            <option value="">All Countries</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country }}" {{ request('country') == $country ? 'selected' : '' }}>{{ $country }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Status</label>
                     <select name="status" class="form-select">
                         <option value="">All Status</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -33,7 +48,8 @@
                     <select name="role" class="form-select">
                         <option value="">All Roles</option>
                         <option value="student" {{ request('role') == 'student' ? 'selected' : '' }}>Student</option>
-                        <option value="reseller_agent" {{ request('role') == 'reseller_agent' ? 'selected' : '' }}>Agent</option>
+                        <option value="agent" {{ request('role') == 'agent' ? 'selected' : '' }}>Agent</option>
+                        <option value="reseller_agent" {{ request('role') == 'reseller_agent' ? 'selected' : '' }}>Reseller Agent</option>
                     </select>
                 </div>
 

@@ -60,7 +60,8 @@
                                         <small class="text-muted">
                                             Variant: {{ $order->inventoryVoucher->voucher_variant ?? 'Standard' }} |
                                             Type: {{ $order->inventoryVoucher->voucher_type ?? 'N/A' }} |
-                                            Region: {{ $order->inventoryVoucher->country_region ?? 'N/A' }}
+                                              Brand: {{ $order->inventoryVoucher->brand_name ?? 'N/A' }} |
+                                              Region: {{ is_array($order->inventoryVoucher->country_region) ? implode(', ', $order->inventoryVoucher->country_region) : ($order->inventoryVoucher->country_region ?? 'N/A') }}
                                         </small>
                                     </td>
                                     <td class="text-center py-4">{{ $order->quantity }}</td>

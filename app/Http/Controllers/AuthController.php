@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Notifications\UserCreatedNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -571,5 +573,87 @@ class AuthController extends Controller
         $user->save();
 
         return back()->with('success', 'User status updated successfully');
+    }
+
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return $request->ajax() 
+                ? response()->json(['success' => false, 'message' => "We can't find a user with that email address."], 422)
+                : back()->withErrors(['email' => "We can't find a user with that email address."]);
+        }
+
+        try {
+            // Create a token manually
+            $token = Password::broker()->createToken($user);
+            $url = route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+            ]);
+
+            // Direct Mail sending (Identical to your successful test)
+            Mail::to($user->email)->send(new \App\Mail\ResetPassword($user, $url));
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Password reset link sent to your email.']);
+            }
+
+            return back()->with('success', 'Password reset link sent to your email.');
+        } catch (\Exception $e) {
+            \Log::error('Password Reset Error: ' . $e->getMessage());
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mail system error: ' . $e->getMessage()
+                ], 500);
+            }
+            return back()->withErrors(['email' => 'Mail system error. Please contact support.']);
+        }
+    }
+
+
+    public function showResetPassword($token)
+    {
+        return view('auth.reset-password', ['token' => $token, 'email' => request()->email]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+            }
+        );
+
+        if ($request->ajax()) {
+            return $status === Password::PASSWORD_RESET
+                ? response()->json(['success' => true, 'message' => 'Password has been reset successfully.', 'redirect' => route('login')])
+                : response()->json(['success' => false, 'message' => __($status)], 422);
+        }
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('success', 'Password has been reset successfully.')
+            : back()->withErrors(['email' => [__($status)]]);
     }
 }

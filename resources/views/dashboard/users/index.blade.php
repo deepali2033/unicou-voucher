@@ -45,14 +45,7 @@
                     </select>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
-                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Frozen</option>
-                    </select>
-                </div>
+               
                 <div class="mb-4">
                     <label class="form-label fw-bold">Country</label>
                     <select name="country" class="form-select">

@@ -40,4 +40,15 @@ return [
         'secret_key' => env('SHUFTI_SECRET_KEY'),
     ],
 
+    'kuickpay' => [
+        'username' => env('KUICKPAY_USERNAME', 'Kuickpaytest'),
+        'password' => env('KUICKPAY_PASSWORD', 'Kuickpay@test12'),
+        'prefix' => env('KUICKPAY_PREFIX', '01520'),
+    ],
+
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+    ],
+
 ];

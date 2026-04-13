@@ -52,6 +52,35 @@
     </div>
 
     <div class="row g-4 mb-4">
+        @php
+        $totalSold = $reportData->sum('vouchers_sold');
+        $totalValue = $reportData->sum('sale_value');
+        $stripeData = $reportData->firstWhere('id', 'stripe');
+        @endphp
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-primary text-white" style="border-radius: 20px;">
+                <div class="small text-uppercase fw-bold opacity-75 mb-1">Total Sale Value</div>
+                <h3 class="fw-bold mb-0">RS {{ number_format($totalValue, 2) }}</h3>
+                <small class="opacity-75">All payment methods</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-success text-white" style="border-radius: 20px;">
+                <div class="small text-uppercase fw-bold opacity-75 mb-1">Stripe Credit Store</div>
+                <h3 class="fw-bold mb-0">RS {{ number_format($stripeData['sale_value'] ?? 0, 2) }}</h3>
+                <small class="opacity-75">Total credited via Stripe</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-info text-white" style="border-radius: 20px;">
+                <div class="small text-uppercase fw-bold opacity-75 mb-1">Total Vouchers Sold</div>
+                <h3 class="fw-bold mb-0">{{ number_format($totalSold) }}</h3>
+                <small class="opacity-75">Quantity delivered</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
         @foreach($methods as $method)
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 overflow-hidden position-relative hover-card"
@@ -122,7 +151,51 @@
     </div>
 
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold"><i class="fab fa-stripe me-2 text-primary"></i>Recent Stripe Transactions (Credits)</h5>
+            <small class="text-muted">Real-time payments received via Stripe</small>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($stripeTransactions as $tx)
+                        <tr>
+                            <td class="font-monospace small text-primary">{{ $tx->transaction_id }}</td>
+                            <td>
+                                <div class="fw-bold">{{ $tx->user->name ?? 'N/A' }}</div>
+                                <div class="text-muted tiny-text">{{ $tx->user->email ?? 'N/A' }}</div>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-success">+ {{ $tx->user->currency ?? 'RS' }} {{ number_format($tx->amount, 2) }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success">CREDITED</span>
+                            </td>
+                            <td>{{ $tx->created_at->format('d M Y H:i') }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No Stripe transactions found.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="mb-0 fw-bold">Bank Report</h5>
@@ -144,9 +217,7 @@
                 <button class="btn btn-outline-primary btn-sm px-3 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
-                <!-- <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm px-3 shadow-sm">
-                    <i class="fas fa-plus me-1"></i> Add User
-                </a> -->
+                
             </div>
         </div>
         <div class="card-body" id="table-container">
@@ -171,12 +242,27 @@
                     </thead>
 
                     <tbody>
-
+                        @foreach($reportData as $index => $data)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $data['bank_name'] }}</td>
+                            <td>{{ $data['currency'] }}</td>
+                            <td>{{ $data['country'] }}</td>
+                            <td>{{ $data['vouchers_sold'] }}</td>
+                            <td>{{ number_format($data['sale_value'], 2) }}</td>
+                            <td>{{ number_format($data['refunds'], 2) }}</td>
+                            <td>{{ $data['disputes'] }}</td>
+                            <td>{{ $data['conversion_rate'] }}</td>
+                            <td>{{ number_format($data['sale_value'], 2) }}</td>
+                            <td>0.00</td>
+                            <td>{{ is_string($data['created_at']) ? $data['created_at'] : $data['created_at']->format('d M Y') }}</td>
+                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 

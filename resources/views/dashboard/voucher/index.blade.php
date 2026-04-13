@@ -15,6 +15,10 @@
             <div class="offcanvas-body">
                 <form id="filter-form" action="{{ route('vouchers') }}" method="GET">
                     <div class="mb-4">
+                        <label class="form-label fw-bold">SKU ID</label>
+                        <input type="text" name="sku_id" class="form-control" placeholder="Search SKU ID..." value="{{ request('sku_id') }}">
+                    </div>
+                    <div class="mb-4">
                         <label class="form-label fw-bold">Brand Name</label>
                         <select name="brand_name" class="form-select select2-filter">
                             <option value="">All Brands</option>
@@ -234,16 +238,12 @@
             align-items: flex-start;
             line-height: 1;
             margin: 5px 0;
-            gap: 6px;
-            flex-direction: column;
         }
 
         .currency-symbol {
             font-size: 1.2rem;
             font-weight: 700;
             /* margin-top: 5px; */
-            width: 100%;
-            text-align: center;
         }
 
         .price-amount {
@@ -282,19 +282,13 @@
         }
 
         .price-display span {
-            font-size: 16px;
+            font-size: 20px;
         }
 
         .voucher-footer-info.d-flex.justify-content-between.align-items-center {
             display: grid !important;
             margin-top: 20px;
             gap: 10px;
-        }
-
-        @media (max-width: 600px) {
-        .price-display {
-            flex-direction: row;
-        }    
         }
 
         @media (max-width: 576px) {

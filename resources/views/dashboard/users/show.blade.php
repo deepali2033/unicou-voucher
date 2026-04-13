@@ -791,7 +791,7 @@
                                     ];
 
                                     if ($user->account_type === 'support_team') {
-                                        $supportPerms = ['can_view_voucher_code', 'can_view_orders', 'can_view_sales_report', 'can_view_disputes'];
+                                        $supportPerms = ['can_view_users','can_view_voucher_code', 'can_view_orders', 'can_view_sales_report', 'can_view_disputes'];
                                         $perms = array_filter($perms, function($p) use ($supportPerms) {
                                             return in_array($p['name'], $supportPerms);
                                         });
@@ -810,6 +810,44 @@
                                     </div>
                                     @endforeach
                                 </div>
+                                
+                                <div class="mt-5 pt-4 border-top">
+                                    <h6 class="fw-bold mb-3 text-dark">Country Visibility Permission</h6>
+                                    <p class="text-muted small mb-4">Control which countries this {{ str_replace('_', ' ', $user->account_type) }} can monitor. If restricted, they will only see data from selected countries.</p>
+                                    
+                                    <div class="card bg-light border-0 shadow-none mb-4">
+                                        <div class="card-body p-3">
+                                            <div class="form-check form-switch mb-0">
+                                                <input class="form-check-input" type="checkbox" name="can_view_all_countries" id="can_view_all_countries" {{ $user->can_view_all_countries ? 'checked' : '' }}>
+                                                <label class="form-check-label fw-bold text-dark" for="can_view_all_countries">
+                                                    Allow Access to All Countries
+                                                </label>
+                                                <div class="small text-muted mt-1">When enabled, the user can see data from every available country regardless of the list below.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="country-selection-container" style="{{ $user->can_view_all_countries ? 'display: none;' : '' }}">
+                                        <label class="form-label fw-bold small text-dark mb-3">Permitted Countries</label>
+                                        <div class="row g-2">
+                                            @php
+                                                $allCountries = \App\Models\User::whereNotNull('country')->where('country', '!=', '')->distinct()->orderBy('country')->pluck('country');
+                                                $permitted = $user->permitted_countries ?? [];
+                                            @endphp
+                                            @foreach($allCountries as $country)
+                                                <div class="col-md-3 col-sm-6">
+                                                    <div class="form-check p-2 border rounded bg-white">
+                                                        <input class="form-check-input ms-0 me-2" type="checkbox" name="permitted_countries[]" value="{{ $country }}" id="country_{{ Str::slug($country) }}" {{ in_array($country, $permitted) ? 'checked' : '' }}>
+                                                        <label class="form-check-label small" for="country_{{ Str::slug($country) }}">
+                                                            {{ $country }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="mt-4 text-end">
                                     <button type="submit" class="btn btn-primary px-5 btn-lg shadow-sm">Apply Permissions</button>
                                 </div>
@@ -898,6 +936,19 @@
                 history.replaceState(null, null, ' ' + e.target.hash);
             });
         });
+        // Country Selection Toggle
+        const toggleAllCountries = document.getElementById('can_view_all_countries');
+        const countrySelectionContainer = document.getElementById('country-selection-container');
+        
+        if (toggleAllCountries && countrySelectionContainer) {
+            toggleAllCountries.addEventListener('change', function() {
+                if (this.checked) {
+                    countrySelectionContainer.style.display = 'none';
+                } else {
+                    countrySelectionContainer.style.display = 'block';
+                }
+            });
+        }
     });
 </script>
 @endsection

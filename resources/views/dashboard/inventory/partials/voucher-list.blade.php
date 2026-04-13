@@ -196,7 +196,13 @@
             @else
                 {{ $v->state ?: 'N/A' }}
             @endif
-             | Qty: {{ number_format($v->quantity) }}</p>
+             | Qty: 
+             @php
+                $allCodes = is_array($v->upload_vouchers) ? $v->upload_vouchers : [];
+                $deliveredCodes = is_array($v->delivered_vouchers) ? $v->delivered_vouchers : [];
+                $availableCount = count(array_diff($allCodes, $deliveredCodes));
+             @endphp
+             {{ number_format($availableCount) }}</p>
 
         <div class="v-divider">
             <div class="v-meta">

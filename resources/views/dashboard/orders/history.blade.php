@@ -133,7 +133,7 @@
                     <hr>
                     <div class="mb-2">
                         <span class="text-muted d-block mb-1">Delivered Codes:</span>
-                        <div class="bg-light p-3 rounded" id="m-delivery"></div>
+                        <div class="bg-light p-3 rounded shadow-sm border" id="m-delivery" style="max-height: 280px; overflow-y: auto;"></div>
                     </div>
                 </div>
             </div>
@@ -169,20 +169,30 @@
             $('#m-status').html(statusBadge);
 
             // Delivered Codes Message
-            let deliveryText = '';
+            let deliveryContent = '';
 
-            if (order.status === 'delivered') {
-                deliveryText = order.delivery_details ? order.delivery_details : 'Voucher code delivered.';
+            if (order.status === 'delivered' && order.delivery_details) {
+                const codes = order.delivery_details.split(/\r?\n/).filter(code => code.trim() !== '');
+                deliveryContent = '<div class="d-flex flex-column gap-2">';
+                codes.forEach(code => {
+                    deliveryContent += `
+                        <div class="d-flex justify-content-between align-items-center bg-white p-2 px-3 rounded border shadow-sm">
+                            <code class="text-primary fw-bold" style="font-size: 1.1rem;">${code.trim()}</code>
+                            <button class="btn btn-sm btn-link text-muted p-0" onclick="copyToClipboard('${code.trim()}')" title="Copy Code">
+                                <i class="far fa-copy"></i>
+                            </button>
+                        </div>`;
+                });
+                deliveryContent += '</div>';
             } else if (order.status === 'completed') {
-                deliveryText = 'Your order has been approved. Waiting for voucher code delivery.';
+                deliveryContent = '<div class="alert alert-info py-2 small mb-0">Your order has been approved. Waiting for voucher code delivery.</div>';
             } else if (order.status === 'pending') {
-                deliveryText = 'Waiting for order approval.';
+                deliveryContent = '<div class="alert alert-warning py-2 small mb-0 text-dark">Waiting for order approval.</div>';
             } else {
-                deliveryText = 'Processing...';
+                deliveryContent = '<div class="text-muted small">Processing...</div>';
             }
 
-            // ⚠️ Ye line missing thi
-            $('#m-delivery').text(deliveryText);
+            $('#m-delivery').html(deliveryContent);
 
             $('#orderDetailModal').modal('show');
         });
@@ -192,6 +202,14 @@
             handleAjaxFilter(this, e);
         });
     });
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Code copied to clipboard: ' + text);
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
 </script>
 
 <style>
