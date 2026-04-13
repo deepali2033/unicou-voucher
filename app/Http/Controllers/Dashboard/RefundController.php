@@ -144,7 +144,7 @@ class RefundController extends Controller
 
         // Fetch orders where voucher codes are NOT received (status != delivered)
         $eligibleOrders = Order::where('user_id', Auth::id())
-            ->whereIn('status', ['delivered'])
+          //  ->whereIn('status', ['delivered'])
             ->latest()
             ->get();
 

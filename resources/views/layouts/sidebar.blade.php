@@ -116,11 +116,13 @@ $isNotifications = request()->routeIs('notifications.*');
                     <i class="fas fa-undo me-2"></i> My Refunds
                 </a>
             </li>
+            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() || auth()->user()->isAdmin() || auth()->user()->isManager())
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('bank.link') ? 'active' : '' }}" href="{{ route('bank.link') }}">
                     <i class="fas fa-university me-2"></i> Linked Banks
                 </a>
             </li>
+            @endif
 
             <!-- Voucher Management -->
 

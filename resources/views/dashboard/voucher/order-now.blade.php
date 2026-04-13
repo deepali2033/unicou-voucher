@@ -649,13 +649,11 @@
 
         $('#pay-now').click(function() {
             let paymentType = $('input[name="payment_type"]:checked').val();
-            let qtyElement = $('#voucher-upload_vouchers');
-            let qty = parseInt(qtyElement.val()) || 1;
+            let qty = parseInt($('#voucher-quantity').val()) || 1;
             let btn = $(this);
 
-            console.log('🔵 Pay Now clicked');
+            console.log('ðŸ”µ Pay Now clicked');
             console.log('Payment Type:', paymentType);
-            console.log('Quantity Raw:', qtyElement.val());
             console.log('Quantity Parsed:', qty);
             console.log('Quantity Type:', typeof qty);
 

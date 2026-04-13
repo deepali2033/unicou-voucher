@@ -1,6 +1,23 @@
 @extends('layouts.master')
 
 @section('content')
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session('success'))
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            title: 'Success!',
+            text: '{{ session('
+            success ') }}',
+        });
+    });
+</script>
+@endif
+
+<script src="https://js.stripe.com/v3/"></script>
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -12,8 +29,11 @@
             <button class="btn btn-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
                 <i class="fas fa-plus-circle me-1"></i> Add Wallet Credit
             </button>
-            <button class="btn btn-outline-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
-                <i class="fas fa-link me-1"></i> Link New Bank
+            <button class="btn btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
+                <i class="fas fa-plus me-1"></i> Manual Link
+            </button>
+            <button id="linkBankBtn" class="btn btn-outline-primary shadow-sm px-3">
+                <i class="fas fa-link me-1"></i> Link Bank (Secure)
             </button>
         </div>
     </div>
@@ -183,210 +203,51 @@
 <div class="modal fade" id="addMoneyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-            <div class="modal-header border-bottom py-3">
-                <h5 class="modal-title fw-bold">Add Wallet Credit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addMoneyForm">
+
+            <!-- ✅ FORM START -->
+            <form method="POST" action="{{ route('stripe.checkout.session') }}">
                 @csrf
+
+                <!-- Header -->
+                <div class="modal-header border-bottom py-3">
+                    <h5 class="modal-title fw-bold">Add Wallet Credit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">SOURCE BANK ACCOUNT</label>
-                        <select name="bank_id" class="form-select border shadow-none p-2" required>
-                            <option value="">Select your account...</option>
-                            @foreach($banks as $bank)
-                            <option value="{{ $bank->id }}">{{ $bank->bank_name }} (•••• {{ substr($bank->account_number, -4) }}) - Bal: {{ auth()->user()->currency }} {{ number_format($bank->balance, 2) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">TRANSFER AMOUNT</label>
-                        <div class="input-group border rounded p-1 bg-light">
-                            <span class="input-group-text bg-transparent border-0 fw-bold text-primary">{{ auth()->user()->currency }}</span>
-                            <input type="number" name="amount" class="form-control bg-transparent border-0 shadow-none fw-bold" placeholder="0.00" min="1" step="0.01" required>
+                        <label class="form-label fw-bold small text-muted">ENTER AMOUNT</label>
+
+                        <div class="input-group border rounded p-2 bg-light">
+                            <span class="input-group-text bg-transparent border-0 fw-bold text-primary">
+                                {{ auth()->user()->currency }}
+                            </span>
+
+                            <input type="number" name="amount"
+                                class="form-control bg-transparent border-0 shadow-none fw-bold"
+                                placeholder="0.00" min="1" required>
                         </div>
                     </div>
+
                     <div class="alert bg-primary-subtle border-0 small text-primary p-3 mb-0">
-                        <i class="fas fa-info-circle me-2"></i> Funds will be credited to your UniCou wallet instantly.
+                        <i class="fas fa-info-circle me-2"></i>
+                        Funds will be credited to your wallet instantly.
                     </div>
                 </div>
+
+                <!-- Footer -->
                 <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">Process Transfer</button>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                        Process Transfer
+                    </button>
                 </div>
+
             </form>
+            <!-- ✅ FORM END -->
+
         </div>
     </div>
 </div>
-
-<!-- Link Bank Modal -->
-<div class="modal fade" id="linkBankModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-            <div class="modal-header border-bottom py-3 bg-light">
-                <h5 class="modal-title fw-bold">Link New Bank Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="linkBankForm">
-                @csrf
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">BANK NAME</label>
-                        <input type="text" name="bank_name" class="form-control border p-2 shadow-none" placeholder="e.g. HDFC, SBI, Standard Chartered" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">ACCOUNT HOLDER NAME</label>
-                        <input type="text" name="account_holder_name" class="form-control border p-2 shadow-none" placeholder="Exact name as per bank" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">ACCOUNT NUMBER</label>
-                        <input type="text" name="account_number" class="form-control border p-2 shadow-none" placeholder="Enter complete number" required>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-muted">IFSC / ROUTING</label>
-                            <input type="text" name="ifsc_code" class="form-control border p-2 shadow-none" placeholder="Optional">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-bold small text-muted">CURRENT BAL</label>
-                            <input type="number" name="balance" class="form-control border p-2 shadow-none" placeholder="0.00" min="0" step="0.01">
-                        </div>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-bold small text-muted">ACCOUNT TYPE</label>
-                        <select name="account_type" class="form-select border p-2 shadow-none">
-                            <option value="Savings">Savings Account</option>
-                            <option value="Current">Current Account</option>
-                            <option value="Business">Business Account</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">Confirm Account Link</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@push('css')
-<style>
-    .bg-success-subtle {
-        background-color: #ecfdf5 !important;
-    }
-
-    .bg-warning-subtle {
-        background-color: #fffbeb !important;
-    }
-
-    .bg-danger-subtle {
-        background-color: #fef2f2 !important;
-    }
-
-    .bg-primary-subtle {
-        background-color: #eff6ff !important;
-    }
-
-    .text-success {
-        color: #10b981 !important;
-    }
-
-    .text-warning {
-        color: #f59e0b !important;
-    }
-
-    .text-danger {
-        color: #ef4444 !important;
-    }
-
-    .text-primary {
-        color: #2563eb !important;
-    }
-
-    .table thead th {
-        font-weight: 700;
-        background-color: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .card {
-        border-radius: 10px;
-    }
-
-    .btn {
-        border-radius: 8px;
-    }
-</style>
-@endpush
-
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        // Add Money Form Submit
-        $('#addMoneyForm').on('submit', function(e) {
-            e.preventDefault();
-            const btn = $(this).find('button[type="submit"]');
-            const originalText = btn.html();
-
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
-
-            $.ajax({
-                url: "{{ route('wallet.add-money') }}",
-                type: "POST",
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        $('#addMoneyModal').modal('hide');
-                        toastr.success(response.message);
-                        setTimeout(() => window.location.reload(), 1500);
-                    }
-                },
-                error: function(xhr) {
-                    const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Transfer failed';
-                    toastr.error(msg);
-                    btn.prop('disabled', false).html(originalText);
-                }
-            });
-        });
-
-        // Link Bank Form Submit
-        $('#linkBankForm').on('submit', function(e) {
-            e.preventDefault();
-            const btn = $(this).find('button[type="submit"]');
-            const originalText = btn.html();
-
-            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i> Linking...');
-
-            $.ajax({
-                url: "{{ route('bank.store') }}",
-                type: "POST",
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        $('#linkBankModal').modal('hide');
-                        toastr.success(response.message);
-                        setTimeout(() => window.location.reload(), 1500);
-                    }
-                },
-                error: function(xhr) {
-                    console.log(xhr); // full object
-                    console.log(xhr.responseText); // real error
-
-                    let msg = 'Linking failed';
-
-                    if (xhr.responseJSON) {
-                        if (xhr.responseJSON.message) {
-                            msg = xhr.responseJSON.message;
-                        } else if (xhr.responseJSON.errors) {
-                            msg = Object.values(xhr.responseJSON.errors).join(', ');
-                        }
-                    }
-
-                    toastr.error(msg);
-                }
-            });
-        });
-    });
-</script>
-@endpush
 
 @endsection

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\Order;
+use App\Services\WalletService;
 
 use App\Models\BankAccountModel;
 use App\Models\AdminPaymentMethod;
@@ -190,7 +191,7 @@ class VoucherController extends Controller
         $voucher = InventoryVoucher::findOrFail($id);
         $request->validate([
             'quantity' => 'required|integer|min:1',
-            'payment_type' => 'required|in:card,admin_bank,wise,kuickpay,stripe',
+            'payment_type' => 'required|in:card,admin_bank,wise,kuickpay,stripe,wallet',
             'admin_bank_id' => 'required_if:payment_type,admin_bank,wise|exists:admin_payment_methods,id',
             'payment_receipt' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'stripeToken' => 'required_if:payment_type,stripe',
@@ -224,7 +225,13 @@ class VoucherController extends Controller
         $payment_receipt = null;
         $bank_details = [];
 
-        if ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
+        if ($request->payment_type == 'wallet') {
+            if ($user->wallet_balance < $totalAmount) {
+                return response()->json(['message' => 'Insufficient wallet balance.'], 400);
+            }
+            $status = 'completed'; // Wallet payment is instant
+            $bank_details = ['notes' => 'Paid via Wallet'];
+        } elseif ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
             $adminBank = AdminPaymentMethod::findOrFail($request->admin_bank_id);
             if ($request->hasFile('payment_receipt')) {
                 $payment_receipt = $request->file('payment_receipt')->store('receipts', 'public');
@@ -314,6 +321,29 @@ class VoucherController extends Controller
 
         DB::beginTransaction();
         try {
+            // Process Wallet Payment Logic
+            if ($request->payment_type == 'wallet') {
+                // Debit User
+                WalletService::debit(
+                    $user,
+                    $totalAmount,
+                    'order_purchase',
+                    "Payment for Voucher Order: {$voucher->brand_name} (Qty: {$request->quantity})"
+                );
+
+                // Credit Admin (First admin found)
+                $admin = User::where('account_type', 'admin')->first();
+                if ($admin) {
+                    WalletService::credit(
+                        $admin,
+                        $totalAmount,
+                        'order_revenue',
+                        "Revenue from User {$user->name} for Order of {$voucher->brand_name}",
+                        true // Admin can withdraw revenue
+                    );
+                }
+            }
+
             // Create Order
             $orderData = [
                 'order_id' => 'PUR-' . date('Ymd') . '-' . str_pad(Order::whereDate('created_at', now())->count() + 1, 4, '0', STR_PAD_LEFT),

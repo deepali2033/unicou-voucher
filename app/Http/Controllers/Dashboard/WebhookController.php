@@ -8,6 +8,56 @@ use App\Models\Webhook;
 
 class WebhookController extends Controller
 {
+
+    public function handleWebhook(Request $request)
+    {
+        $endpoint_secret = config('services.stripe.webhook_secret');
+
+        $payload = $request->getContent();
+        $sig_header = $request->header('Stripe-Signature');
+
+        try {
+            $event = Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
+        } catch (\Exception $e) {
+            return response('Invalid signature', 400);
+        }
+
+        // 🔥 MAIN EVENT
+        if ($event->type === 'checkout.session.completed') {
+
+            $session = $event->data->object;
+
+            if ($session->payment_status === 'paid') {
+
+                $user = User::find($session->metadata->user_id ?? null);
+
+                if ($user) {
+                    $amount = $session->amount_total / 100;
+
+                    // Duplicate check
+                    $exists = WalletLedger::where('transaction_id', $session->id)->exists();
+
+                    if (!$exists) {
+
+                        $user->wallet_balance += $amount;
+                        $user->save();
+
+                        WalletLedger::create([
+                            'transaction_id' => $session->id,
+                            'user_id' => $user->id,
+                            'type' => 'credit',
+                            'amount' => $amount,
+                            'source' => 'stripe',
+                            'description' => 'Wallet Top-up via Stripe',
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return response('Webhook handled', 200);
+    }
+
     public function save(Request $request)
     {
         $request->validate([

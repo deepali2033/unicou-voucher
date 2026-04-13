@@ -40,7 +40,7 @@ Route::get('/', function () {
 Route::get('/test-mail', function () {
     Mail::raw('Test mail from Laravel', function ($message) {
         $message->to('sharma@yopmail.com')
-                ->subject('Test Email');
+            ->subject('Test Email');
     });
 
     return "Mail Sent!";
@@ -50,9 +50,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-    
-    
-     Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+
+
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
@@ -125,7 +125,6 @@ Route::get('/job-applications', [JobController::class, 'jobApplication'])->name(
 Route::get('/shufti/redirect', function () {
 
     return redirect('/dashboard')->with('success', 'Verification completed successfully');
-
 })->name('shufti.redirect');
 
 Route::post('/shufti/callback', [AuthController::class, 'shuftiCallback'])->name('shufti.callback');
@@ -162,7 +161,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/pricing/{id}/update', [PricingController::class, 'update'])->name('pricing.update');
     Route::post('/pricing/{id}/toggle-status', [PricingController::class, 'toggleStatus'])->name('pricing.toggle-status');
     Route::delete('/pricing/{id}', [PricingController::class, 'destroy'])->name('pricing.destroy');
-      Route::post('/users/bulk-verify', [UserController::class, 'bulkVerify'])->name('users.bulk-verify');
+    Route::post('/users/bulk-verify', [UserController::class, 'bulkVerify'])->name('users.bulk-verify');
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users.management');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
@@ -175,15 +174,15 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::post('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
     Route::post('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions.update');
-   
-    Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
-  Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
- Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
 
-  Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
+    Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::get('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
+    Route::get('/users-download-pdf', [UserController::class, 'downloadPDF'])->name('users.pdf');
+
+    Route::post('/users/{user}/category', [UserController::class, 'updateCategory'])->name('users.category.update');
     Route::post('/users/{user}/limit', [UserController::class, 'updateLimit'])->name('users.limit.update');
 
-//pages
+    //pages
     Route::get('/mangers', [UserController::class, 'managers'])->name('manager.page');
     Route::get('/mangers-export', [UserController::class, 'managersDownloadCSV'])->name('manager.export');
     Route::get('/support-team', [UserController::class, 'SupportTeam'])->name('support.team');
@@ -257,6 +256,7 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/refunds/{id}/process', [RefundController::class, 'processRefund'])->name('refunds.process');
     Route::post('/refunds/{id}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
 
+    Route::post('/stripe-checkout-session', [BankController::class, 'createSession'])->name('stripe.checkout.session');
     // Wallet Management
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/credit', [WalletController::class, 'credit'])->name('wallet.credit');
@@ -297,13 +297,18 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::delete('/settings/risk-level/{id}', [SettingsController::class, 'deleteRiskLevel'])->name('settings.risk-level.delete');
 
     // BANK
+    Route::post('/wallet-topup', [WalletController::class, 'createSession'])->name('wallet.topup');
+    Route::post('/create-payment-intent', [BankController::class, 'createPaymentIntent']);
+    Route::get('/wallet/success', [BankController::class, 'success'])->name('wallet.success');
+    Route::get('/wallet/cancel', [BankController::class, 'cancel'])->name('wallet.cancel');
+    Route::post('/finalize-stripe-link', [BankController::class, 'finalizeStripeLink'])->name('bank.finalize-stripe-link');
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');
     Route::post('/bank-link', [BankController::class, 'linkBank'])->name('bank.store');
-    Route::post('/wallet/add-money', [BankController::class, 'addMoneyToWallet'])->name('wallet.add-money');
+    Route::post('/bank-payment', [BankController::class, 'createBankPayment'])->name('bank.payment');
     Route::get('/banks', [BankController::class, 'bankreport'])->name('banks.bank-table');
     Route::get('/banks-export', [BankController::class, 'exportBankReport'])->name('banks.bank-table.export');
     Route::post('/webhook/save', [WebhookController::class, 'save'])->name('webhook.save');
-
+    Route::post('/stripe/webhook', [App\Http\Controllers\StripeWebhookController::class, 'handleWebhook']);
     // Admin Payment Methods
     Route::get('/payment-methods', [BankController::class, 'index'])->name('payment-methods.index');
     Route::post('/payment-methods', [BankController::class, 'store'])->name('payment-methods.store');
@@ -338,23 +343,6 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/disputes/{id}/transfer', [DisputeController::class, 'transfer'])->name('disputes.transfer');
     Route::post('/disputes/{id}/feedback', [DisputeController::class, 'submitFeedback'])->name('disputes.feedback');
 
-    // Other placeholder routes
-
-    Route::get('/credits', function () {
-        return "Add Credit";
-    })->name('credits.add');
-    Route::get('/contact-us', function () {
-        return "Contact-Us";
-    })->name('contact-us.index');
-    Route::get('/categories', function () {
-        return "Categories";
-    })->name('categories.index');
-    Route::get('/job-categories', function () {
-        return "Job Categories";
-    })->name('job-categories.index');
-    Route::get('/analytics', function () {
-        return "Analytics";
-    })->name('analytics');
 
     // Agent Specific
     Route::prefix('agent')->name('agent.')->middleware(['account_type:reseller_agent'])->group(function () {
