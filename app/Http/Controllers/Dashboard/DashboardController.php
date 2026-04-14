@@ -269,8 +269,15 @@ class DashboardController extends Controller
 
     public function notifications(Request $request)
     {
+        $user = auth()->user();
+        // Mark all notifications as read when visiting the notifications page
+        $user->unreadNotifications()->update(['read_at' => now()]);
+        
+        // Refresh the unreadNotifications collection so the count in header becomes 0
+        $user->load('unreadNotifications');
+        
         $perPage = $request->get('per_page', 10);
-        $notifications = auth()->user()->notifications()->paginate($perPage)->withQueryString();
+        $notifications = $user->notifications()->paginate($perPage)->withQueryString();
         return view('dashboard.notifications.index', compact('notifications'));
     }
 

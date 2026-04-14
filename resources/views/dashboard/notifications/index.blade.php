@@ -43,7 +43,7 @@
         <div class="card-body p-0">
             <div class="list-group list-group-flush">
                 @forelse($notifications as $notification)
-                <div class="list-group-item p-4 {{ $notification->unread() ? 'bg-light' : '' }} notification-item">
+                <div class="list-group-item p-4 notification-item">
                     <div class="d-flex w-100 justify-content-between align-items-start">
                         <div class="d-flex gap-3">
                             <div class="form-check mt-2">
@@ -70,11 +70,6 @@
                                 <small class="text-secondary">{{ $notification->created_at->diffForHumans() }}</small>
                             </div>
                         </div>
-                        @if($notification->unread())
-                        <span class="badge bg-primary rounded-pill p-1">
-                            <span class="visually-hidden">Unread</span>
-                        </span>
-                        @endif
                     </div>
                 </div>
                 @empty

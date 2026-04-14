@@ -43,19 +43,31 @@ $isNotifications = request()->routeIs('notifications.*');
         @endif
 
         <div class="notification-bell position-relative">
-            <a href="{{ route('notifications.index') }}" class="text-decoration-none nav-link {{ $isNotifications ? 'active' : '' }}" data-toggle="Notifications" title="Notifications">
+            <a href="{{ route('notifications.index') }}" class="text-decoration-none nav-link {{ $isNotifications ? 'active' : '' }}" data-toggle="Notifications" title="Notifications" id="notification-bell-btn">
                 <i class="{{ $isNotifications ? 'fas' : 'far' }} fa-bell" style="font-size: 1.2rem; color: {{ $isNotifications ? '#23AAE2' : '#666' }}; cursor: pointer;"></i>
                 @php
-                $unreadCount = auth()->user()->unreadNotifications->count();
+                // Always show 0 count if we are on the notifications page
+                $unreadCount = request()->routeIs('notifications.index') ? 0 : auth()->user()->unreadNotifications->count();
                 @endphp
                 @if($unreadCount > 0)
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; padding: 0.25em 0.4em;">
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" style="font-size: 0.6rem; padding: 0.25em 0.4em;">
                     {{ $unreadCount }}
                     <span class="visually-hidden">unread notifications</span>
                 </span>
                 @endif
             </a>
         </div>
+
+        @push('scripts')
+        <script>
+            document.getElementById('notification-bell-btn')?.addEventListener('click', function() {
+                const badge = this.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
+            });
+        </script>
+        @endpush
 
         <div class="d-flex align-items-center gap-2" id="header-country-container">
             <!-- @if(Auth::user()->country_iso)
