@@ -96,221 +96,225 @@
     @endpush
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;700;800&display=swap');
 
-        .bg-white-20 {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .tiny-text {
-            font-size: 0.65rem;
-            letter-spacing: 0.5px;
-        }
-
-        /* Gift Voucher Card Design */
         .gift-voucher-card {
             background: #fff;
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            height: 220px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            height: 300px;
             position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(0, 0, 0, 0.03);
-        }
-
-        .gift-voucher-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .voucher-body {
-            display: flex;
-            height: 100%;
-            background-image: radial-gradient(#e1e1e1 0.5px, transparent 0.5px);
-            background-size: 10px 10px;
-            /* Small dot pattern like in image */
-        }
-
-        .voucher-left {
-            flex: 1;
-            padding: 20px;
+            border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
         }
 
-        .company-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .voucher-top {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+            background: #fff;
         }
 
-        .brand-logo-mini {
-            width: 35px;
-            height: 35px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        .brand-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            border: 1px solid #eee;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .brand-logo-mini img {
-            max-width: 80%;
-            max-height: 80%;
+        .brand-logo-img {
+            /* width: 40px;/ */
+           max-height: 90px;
             object-fit: contain;
         }
 
-        .voucher-title-section {
+        .brand-info h6 {
+            color: #008080;
+            margin: 0;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .brand-info span {
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        .voucher-titles {
+            text-align: start;
             margin-top: 10px;
+                max-width: 150PX;
+    max-height: 150PX;
         }
 
-        .gift-text {
-            font-family: 'Great Vibes', cursive;
-            color: #26b1a5;
-            /* Teal from image */
-            font-size: 2.5rem;
-            line-height: 1;
-            margin-bottom: -15px;
-            margin-left: 10px;
-            z-index: 2;
-            position: relative;
+        .gift-script {
+            font-family: 'Dancing Script', cursive;
+            color: #e63946;
+            font-size: 3.5rem;
+            line-height: 0.8;
+            margin-bottom: -10px;
         }
 
-        .voucher-text {
+        .voucher-bold {
             font-family: 'Montserrat', sans-serif;
             font-weight: 800;
-            color: #e84c71;
-            /* Pink from image */
+            color: #008080;
+            font-size: 3rem;
+            letter-spacing: -2px;
             text-transform: uppercase;
-            font-size: 2.4rem;
-            letter-spacing: -1px;
-            margin-bottom: 0;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .in-stock {
-            background-color: #28a745;
-            box-shadow: 0 0 5px #28a745;
-        }
-
-        .out-stock {
-            background-color: #dc3545;
-            box-shadow: 0 0 5px #dc3545;
-        }
-
-        /* Right Tag Section */
-        .voucher-right {
-            width: 110px;
-            background: #e84c71;
+        /* Jagged Circle Price Tag */
+        .price-ribbon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100px;
+            height: 100px;
+            background: #008080;
             color: #fff;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 15% 50%);
-            /* Ribbon effect */
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 4px dashed rgba(255,255,255,0.3);
         }
 
-        .voucher-right.grayscale {
-            background: #6c757d;
-            clip-path: none;
-        }
-
-        .value-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            opacity: 0.9;
-        }
-
-        .price-display {
-            display: flex;
-            align-items: flex-start;
-            line-height: 1;
-            margin: 5px 0;
-        }
-
-        .currency-symbol {
-            font-size: 1.2rem;
-            font-weight: 700;
-            /* margin-top: 5px; */
-        }
-
-        .price-amount {
-            font-size: 2.8rem;
-            font-weight: 800;
-        }
-
-        .tag-footer {
+        .price-ribbon::before {
+            content: '';
             position: absolute;
-            bottom: 15px;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border: 2px solid #008080;
+            border-radius: 50%;
+            opacity: 0.3;
         }
 
-        .order-action-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid #fff;
+        .price-ribbon .currency {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .price-ribbon .amount {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .price-ribbon .sub-text {
+            font-size: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        /* Voucher Footer */
+        .voucher-footer {
+            background: #008080;
             color: #fff;
-            width: 40px;
-            height: 40px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+        }
+
+        .instructions-section {
+            flex: 1;
+            padding-right: 20px;
+        }
+
+        .instructions-section h6 {
+            color: #ffb703;
+            font-size: 0.8rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .instructions-text {
+            font-size: 0.65rem;
+            line-height: 1.3;
+            opacity: 0.9;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .qr-section {
+            background: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+
+        .qr-section i {
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.65rem;
+        }
+
+        .contact-item i {
+            color: #ffb703;
+        }
+
+        /* Stock Status & Meta */
+        .card-status-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+
+        .btn-order-floating {
+            position: absolute;
+            bottom: -20px;
+            right: 20px;
+            background: #e63946;
+            color: #fff;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+            border: 3px solid #fff;
+            z-index: 11;
+            transition: all 0.3s ease;
         }
 
-        .order-action-btn:hover {
-            background: #fff;
-            color: #e84c71;
+        .btn-order-floating:hover {
             transform: scale(1.1);
+            color: #fff;
         }
 
-        .disabled-action {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 1.2rem;
-        }
-
-        .price-display span {
-            font-size: 20px;
-        }
-
-        .voucher-footer-info.d-flex.justify-content-between.align-items-center {
-            display: grid !important;
-            margin-top: 20px;
-            gap: 10px;
+        .grayscale {
+            filter: grayscale(1);
         }
 
         @media (max-width: 576px) {
-            .gift-voucher-card {
-                height: auto;
-            }
-
-            .voucher-body {
-                flex-direction: column;
-            }
-
-            .voucher-right {
-                width: 100%;
-                height: 80px;
-                clip-path: none;
-                flex-direction: row;
-                gap: 20px;
-            }
-
-            .tag-footer {
-                position: static;
-            }
+            .gift-voucher-card { height: auto; }
+            .voucher-footer { flex-direction: column; gap: 15px; }
+            .price-ribbon { position: relative; margin: 20px auto; transform: none; top: 0; right: 0; }
         }
     </style>
-    @endsection
+</div>
+@endsection

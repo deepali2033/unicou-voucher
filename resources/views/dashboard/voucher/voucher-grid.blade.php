@@ -10,100 +10,89 @@
 
     $countryDisplay = 'N/A';
     if (is_array($voucher->country_region)) {
-    if (in_array('all', $voucher->country_region)) {
-    $countryDisplay = 'GLB';
-    } elseif (count($voucher->country_region) > 1) {
-    $countryDisplay = 'MULTY';
-    } elseif (count($voucher->country_region) === 1) {
-    $countryDisplay = $voucher->country_region[0];
-    }
+        if (in_array('all', $voucher->country_region)) {
+            $countryDisplay = 'GLB';
+        } elseif (count($voucher->country_region) > 1) {
+            $countryDisplay = 'MULTY';
+        } elseif (count($voucher->country_region) === 1) {
+            $countryDisplay = $voucher->country_region[0];
+        }
     } else {
-    $countryDisplay = $voucher->country_region ?? 'N/A';
+        $countryDisplay = $voucher->country_region ?? 'N/A';
     }
     @endphp
-    <div class="col-xl-4 col-lg-6 mb-4">
-        <div class="gift-voucher-card">
-            <div class="voucher-body">
-                <!-- Left Content -->
-                <div class="voucher-left">
-                    <div class="company-info mb-2">
-                        <div class="brand-logo-mini">
-                            @if($voucher->logo)
-                            <img src="{{ asset($voucher->logo) }}" alt="{{ $voucher->brand_name }}">
-                            @else
-                            <i class="fas fa-ticket-alt text-primary"></i>
-                            @endif
-                        </div>
-                        <div class="brand-text">
-                            <h6 class="mb-0 fw-bold text-uppercase">{{ $voucher->brand_name }}</h6>
-                            <span class="text-muted tiny-text">SKU: {{ $voucher->sku_id }}</span>
-                        </div>
-                    </div>
+    <div class="col-xl-4 col-lg-12 mb-5">
+        <div class="gift-voucher-card {{ $stock > 0 ? '' : 'grayscale' }}">
+            <!-- Status & Meta Overlay -->
+            <div class="card-status-overlay">
+                @if($stock > 0)
+                    <span class="badge bg-success shadow-sm">IN STOCK ({{ $stock }})</span>
+                @else
+                    <span class="badge bg-danger shadow-sm">OUT OF STOCK</span>
+                @endif
+                <span class="badge bg-light text-dark shadow-sm ms-1">{{ $countryDisplay }}</span>
+            </div>
 
-                    <div class="voucher-title-section">
-                        <h1 class="voucher-text">Voucher</h1>
-                    </div>
-
-                    <div class="voucher-footer-info d-flex justify-content-between align-items-center mt-auto">
-                        <div class="stock-status">
-                            @if($stock > 0)
-                            <span class="status-indicator in-stock"></span>
-                            <span class="small fw-bold text-success">IN STOCK ({{ $stock }})</span>
-                            @else
-                            <span class="status-indicator out-stock"></span>
-                            <span class="small fw-bold text-danger">OUT OF STOCK</span>
-                            @endif
-                        </div>
-                        <div class="country-info">
-                            <span class="badge bg-light text-dark border-0 small">
-                                <i class="fas fa-globe-americas text-primary me-1"></i> {{ $countryDisplay }}
-                            </span>
-                        </div>
-                        @if($voucher->remaining_limit >= 0)
-                        <div class="limit-info mt-1">
-                            <span class="badge {{ $voucher->is_limited ? 'bg-danger' : 'bg-info' }} text-white border-0 small">
-                                <i class="fas fa-clock me-1"></i> 24h Limit: {{ $voucher->is_limited ? 'Reached' : $voucher->remaining_limit . ' left' }}
-                            </span>
-                            @if($voucher->expiry_date)
-                            <span class="badge bg-warning text-dark border-0 small">
-                                <i class="fas fa-calendar-times me-1"></i> Exp: {{ $voucher->expiry_date->format('d M Y') }}
-                            </span>
-                            @endif
-                        </div>
-                        @endif
-
+            <div class="voucher-top">
+                <!-- Brand Header -->
+                <div class="brand-header">
+                  
+                    <div class="brand-info">
+                        <h6 class="text-uppercase fw-bold">{{ $voucher->brand_name }}</h6>
+                        <span>SKU: {{ $voucher->sku_id }}</span>
                     </div>
                 </div>
 
-                <!-- Right Value Tag -->
-                <div class="voucher-right {{ $stock > 0 ? '' : 'grayscale' }}">
-                    <div class="value-tag-content text-center">
-                        <span class="value-label text-uppercase">Value</span>
-                        <div class="price-display">
-                            <span class="currency-symbol">{{ $voucher->currency }}</span>
-                            <span class="price-amount">{{ number_format($finalPrice, 0) }}</span>
+                <!-- Main Titles -->
+                <div class="voucher-titles">
+                     @if($voucher->logo)
+                        <img src="{{ asset($voucher->logo) }}" alt="{{ $voucher->brand_name }}" class="brand-logo-img">
+                    @else
+                        <div class="brand-logo-img bg-light d-flex align-items-center justify-content-center rounded">
+                            <i class="fas fa-ticket-alt text-teal"></i>
                         </div>
+                    @endif
+                </div>
+
+                <!-- Circular Price Ribbon -->
+                <div class="price-ribbon">
+                    <span class="currency">{{ $voucher->currency }}</span>
+                    <span class="amount">{{ number_format($finalPrice, 0) }}</span>
+                    <span class="sub-text">Value Only</span>
+                </div>
+
+                <!-- Order Button (Floating) -->
+                @if($stock > 0 && !auth()->user()->isSupport() && !$voucher->is_limited)
+                    <a href="{{ route('vouchers.order', $voucher->id) }}" class="btn-order-floating">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                @endif
+            </div>
+
+            <!-- Footer Section -->
+            <div class="voucher-footer">
+                <div class="instructions-section">
+                    <h6>INSTRUCTIONS:</h6>
+                    <div class="instructions-text">
+                        This voucher is valid for {{ $voucher->brand_name }} products. 
+                        @if($voucher->expiry_date) Exp: {{ $voucher->expiry_date->format('d M Y') }}. @endif
+                        @if($voucher->remaining_limit >= 0) 24h Limit: {{ $voucher->is_limited ? 'Reached' : $voucher->remaining_limit . ' left' }}. @endif
                     </div>
-                    <div class="tag-footer">
-                        @if($stock > 0)
-                        @if($voucher->is_limited)
-                        <div class="disabled-action" title="24h Limit Reached">
-                            <i class="fas fa-history text-white-50"></i>
-                        </div>
-                        @elseif(auth()->user()->isSupport())
-                        <div class="disabled-action" title="Support View Only">
-                            <i class="fas fa-eye text-white"></i>
-                        </div>
-                        @else
-                        <a href="{{ route('vouchers.order', $voucher->id) }}" class="order-action-btn" title="Order Now">
-                            <i class="fas fa-shopping-cart"></i>
-                        </a>
-                        @endif
-                        @else
-                        <div class="disabled-action">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        @endif
+                </div>
+
+                <div class="qr-section d-none d-sm-block">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+
+                <div class="contact-info d-none d-md-flex">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i> <span>Region: {{ $countryDisplay }}</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i> <span>support@unicou.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone-alt"></i> <span>+123-456-7890</span>
                     </div>
                 </div>
             </div>
@@ -114,7 +103,7 @@
         <div class="empty-state">
             <i class="fas fa-search fa-4x text-light mb-3"></i>
             <h4 class="fw-bold">No Vouchers Found</h4>
-            <p class="text-muted">Try adjusting your filters to find what you're looking for.</p>
+            <p class="text-muted">Try adjusting your filters.</p>
             <a href="{{ route('vouchers') }}" class="btn btn-primary btn-sm px-4 fw-bold">SHOW ALL</a>
         </div>
     </div>
