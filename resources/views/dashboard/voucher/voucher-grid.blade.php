@@ -8,6 +8,8 @@
     $deliveredCodes = is_array($voucher->delivered_vouchers) ? $voucher->delivered_vouchers : [];
     $stock = count(array_diff($allCodes, $deliveredCodes));
 
+    $isExpired = $voucher->expiry_date && $voucher->expiry_date->isPast();
+
     $countryDisplay = 'N/A';
     if (is_array($voucher->country_region)) {
         if (in_array('all', $voucher->country_region)) {
@@ -37,10 +39,31 @@
                 <!-- Brand Header -->
                 <div class="brand-header">
                   
-                    <div class="brand-info">
-                        <h6 class="text-uppercase fw-bold">{{ $voucher->brand_name }}</h6>
-                        <span>SKU: {{ $voucher->sku_id }}</span>
-                    </div>
+                  
+                  <div class="brand-info">
+    <h6 class="text-uppercase fw-bold mb-1">
+        {{ $voucher->brand_name }}
+    </h6>
+
+    <div class="small text-muted">
+        <span class="me-2">
+            <i class="fas fa-ticket-alt me-1"></i>
+            {{ $voucher->voucher_type ?? 'General Voucher' }}
+        </span>
+
+        <span class="me-2">•</span>
+
+        <span>
+            <i class="fas fa-layer-group me-1"></i>
+            {{ $voucher->voucher_variant ?? 'Standard' }}
+        </span>
+    </div>
+
+    <div class="small text-secondary mt-1">
+        SKU: {{ $voucher->sku_id }}
+    </div>
+</div>
+                    
                 </div>
 
                 <!-- Main Titles -->
@@ -62,7 +85,7 @@
                 </div>
 
                 <!-- Order Button (Floating) -->
-                @if($stock > 0 && !auth()->user()->isSupport() && !$voucher->is_limited)
+                @if($stock > 0 && !auth()->user()->isSupport() && !$isExpired)
                     <a href="{{ route('vouchers.order', $voucher->id) }}" class="btn-order-floating">
                         <i class="fas fa-shopping-cart"></i>
                     </a>

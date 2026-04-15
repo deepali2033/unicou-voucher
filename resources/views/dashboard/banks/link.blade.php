@@ -5,13 +5,18 @@
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if(session('success'))
+@php
+    $successMsg = session('success') ?: request()->get('success');
+@endphp
+
+@if($successMsg)
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         Swal.fire({
             title: 'Success!',
-            text: '{{ session('
-            success ') }}',
+            text: "{{ $successMsg }}",
+            icon: 'success',
+            confirmButtonColor: '#23AAE2'
         });
     });
 </script>
@@ -29,12 +34,12 @@
             <button class="btn btn-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
                 <i class="fas fa-plus-circle me-1"></i> Add Wallet Credit
             </button>
-            <button class="btn btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
+            <!-- <button class="btn btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
                 <i class="fas fa-plus me-1"></i> Manual Link
             </button>
             <button id="linkBankBtn" class="btn btn-outline-primary shadow-sm px-3">
                 <i class="fas fa-link me-1"></i> Link Bank (Secure)
-            </button>
+            </button> -->
         </div>
     </div>
 
@@ -139,6 +144,7 @@
                         <thead class="table-light">
                             <tr class="text-muted small text-uppercase">
                                 <th class="ps-4">Description</th>
+                                <th>Transaction ID</th>
                                 <th>Type</th>
                                 <th>Date</th>
                                 <th class="text-end pe-4">Amount</th>
@@ -161,6 +167,9 @@
                                             <div class="text-muted" style="font-size: 0.7rem;">REF: #WLT-{{ $trx->id }}</div>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <code class="small text-primary fw-bold">{{ $trx->transaction_id ?: 'N/A' }}</code>
                                 </td>
                                 <td>
                                     @if($trx->type == 'credit')
@@ -205,7 +214,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
 
             <!-- ✅ FORM START -->
-            <form method="POST" action="{{ route('stripe.checkout.session') }}">
+            <form id="paymentForm" method="POST" action="{{ route('stripe.checkout.session') }}">
                 @csrf
 
                 <!-- Header -->
@@ -216,6 +225,26 @@
 
                 <!-- Body -->
                 <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">SELECT PAYMENT METHOD</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="payment_method" id="method_stripe" value="stripe" checked autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2" for="method_stripe">
+                                    <i class="fab fa-stripe fa-2x"></i>
+                                    <span class="fw-bold">Stripe</span>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="payment_method" id="method_paypal" value="paypal" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2" for="method_paypal">
+                                    <i class="fab fa-paypal fa-2x"></i>
+                                    <span class="fw-bold">PayPal</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted">ENTER AMOUNT</label>
 
@@ -245,6 +274,19 @@
 
             </form>
             <!-- ✅ FORM END -->
+
+            <script>
+                document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        const form = document.getElementById('paymentForm');
+                        if (this.value === 'stripe') {
+                            form.action = "{{ route('stripe.checkout.session') }}";
+                        } else if (this.value === 'paypal') {
+                            form.action = "{{ route('paypal.checkout') }}";
+                        }
+                    });
+                });
+            </script>
 
         </div>
     </div>

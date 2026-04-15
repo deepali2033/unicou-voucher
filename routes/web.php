@@ -33,6 +33,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 
+Route::get('/test-currency', [VoucherController::class, 'testCurrency']);
 Route::get('/', function () {
     return view('home.home');
 })->name('home');
@@ -257,6 +258,10 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/refunds/{id}/reject', [RefundController::class, 'reject'])->name('refunds.reject');
 
     Route::post('/stripe-checkout-session', [BankController::class, 'createSession'])->name('stripe.checkout.session');
+    Route::post('/paypal-checkout', [BankController::class, 'paypalCheckout'])->name('paypal.checkout');
+    Route::post('/wise-checkout', [BankController::class, 'wiseCheckout'])->name('wise.checkout');
+    Route::get('/paypal-success', [BankController::class, 'paypalSuccess'])->name('paypal.success');
+    Route::get('/paypal-cancel', [BankController::class, 'paypalCancel'])->name('paypal.cancel');
     // Wallet Management
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/credit', [WalletController::class, 'credit'])->name('wallet.credit');
@@ -300,6 +305,8 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
     Route::post('/wallet-topup', [WalletController::class, 'createSession'])->name('wallet.topup');
     Route::post('/create-payment-intent', [BankController::class, 'createPaymentIntent']);
     Route::get('/wallet/success', [BankController::class, 'success'])->name('wallet.success');
+    Route::get('/wallet/processing', [BankController::class, 'processing'])->name('wallet.processing');
+    Route::get('/wallet/check-status', [BankController::class, 'checkStatus'])->name('wallet.checkStatus');
     Route::get('/wallet/cancel', [BankController::class, 'cancel'])->name('wallet.cancel');
     Route::post('/finalize-stripe-link', [BankController::class, 'finalizeStripeLink'])->name('bank.finalize-stripe-link');
     Route::get('/bank-link', [BankController::class, 'bankLink'])->name('bank.link');

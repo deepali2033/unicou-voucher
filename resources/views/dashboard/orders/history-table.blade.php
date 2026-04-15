@@ -41,7 +41,7 @@
                 <td class="text-center">{{ $order->quantity }}</td>
                 <td class="text-end fw-bold text-dark">{{ $order->v_currency ?? 'N/A' }} {{ number_format($order->amount, 2) }}</td>
                 <td>{{ $order->v_taxes ?? 'N/A' }}</td>
-                <td class="text-end">{{ number_format($order->amount / $order->quantity, 2) }}</td>
+                <td class="text-end">{{ $order->v_currency ?? 'N/A' }} {{ number_format($order->amount / $order->quantity, 2) }}</td>
                 <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
                 <td class="text-nowrap">{{ $order->v_expiry_date ? \Carbon\Carbon::parse($order->v_expiry_date)->format('d-m-Y') : 'N/A' }}</td>
                 <td>{{ auth()->user()->voucher_limit ?? 'N/A' }}</td>

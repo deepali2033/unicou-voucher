@@ -231,7 +231,8 @@ class InventoryController extends Controller
     public function update(Request $request, $id)
     {
         $inventory = InventoryVoucher::findOrFail($id);
-        $validated = $request->validate([
+        
+        $rules = [
             'sku_id' => 'required|string|unique:inventory_vouchers,sku_id,' . $id,
             'brand_name' => 'required|string|max:255',
             'country_region' => 'required|array',
@@ -260,7 +261,11 @@ class InventoryController extends Controller
             'student_bonus_points_per_unit' => 'nullable|integer|min:0',
             'upload_vouchers' => 'nullable|string',
             'logo' => 'nullable|image|max:2048',
-        ]);
+        ];
+
+        $request->validate($rules);
+
+        $validated = $request->except(['upload_vouchers', 'quantity', 'logo']);
 
         if ($request->hasFile('logo')) {
             // Delete old logo if exists
@@ -280,7 +285,7 @@ class InventoryController extends Controller
             $allCodes = array_unique(array_merge($existingCodes, $newCodes));
             $validated['upload_vouchers'] = array_values($allCodes);
 
-            // Quantity should be all codes minus delivered codes and non-cancelled orders
+            // Quantity should be all codes minus delivered codes
             $deliveredCodes = $inventory->delivered_vouchers ?: [];
             $remainingCodes = array_diff($allCodes, $deliveredCodes);
 

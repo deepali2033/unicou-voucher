@@ -5,20 +5,30 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Webhook;
+use App\Models\User;
+use App\Models\WalletLedger;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class WebhookController extends Controller
 {
 
     public function handleWebhook(Request $request)
     {
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
         $endpoint_secret = config('services.stripe.webhook_secret');
 
         $payload = $request->getContent();
         $sig_header = $request->header('Stripe-Signature');
+        $event = null;
 
         try {
-            $event = Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
-        } catch (\Exception $e) {
+            $event = \Stripe\Webhook::constructEvent(
+                $payload, $sig_header, $endpoint_secret
+            );
+        } catch (\UnexpectedValueException $e) {
+            return response('Invalid payload', 400);
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
             return response('Invalid signature', 400);
         }
 
@@ -38,18 +48,20 @@ class WebhookController extends Controller
                     $exists = WalletLedger::where('transaction_id', $session->id)->exists();
 
                     if (!$exists) {
+                        DB::transaction(function () use ($user, $amount, $session) {
+                            $user->wallet_balance += $amount;
+                            $user->save();
 
-                        $user->wallet_balance += $amount;
-                        $user->save();
-
-                        WalletLedger::create([
-                            'transaction_id' => $session->id,
-                            'user_id' => $user->id,
-                            'type' => 'credit',
-                            'amount' => $amount,
-                            'source' => 'stripe',
-                            'description' => 'Wallet Top-up via Stripe',
-                        ]);
+                            WalletLedger::create([
+                                'transaction_id' => $session->id,
+                                'user_id' => $user->id,
+                                'type' => 'credit',
+                                'amount' => $amount,
+                                'source' => 'stripe',
+                                'description' => 'Wallet Top-up via Stripe Webhook',
+                                'created_at' => now(),
+                            ]);
+                        });
                     }
                 }
             }

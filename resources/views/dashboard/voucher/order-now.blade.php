@@ -162,13 +162,13 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold small text-uppercase text-muted">Select Payment Method</label>
                             <div class="d-flex flex-wrap gap-3 mb-3">
-                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer active" id="type-card">
+                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer active" id="type-card">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_card" value="card" checked>
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_card">
                                         <i class="fas fa-credit-card me-2 text-primary"></i>
                                         <span>Card Payment</span>
                                     </label>
-                                </div>
+                                </div> -->
                                 <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-admin-bank">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_admin_bank" value="admin_bank">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_admin_bank">
@@ -176,13 +176,13 @@
                                         <span>Direct Transfer (Admin)</span>
                                     </label>
                                 </div>
-                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-linked-bank">
+                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-linked-bank">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_linked_bank" value="linked_bank">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_linked_bank">
                                         <i class="fas fa-link me-2 text-info"></i>
                                         <span>Linked Account</span>
                                     </label>
-                                </div>
+                                </div> -->
                                 <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-wallet">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_wallet" value="wallet">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_wallet">
@@ -190,20 +190,20 @@
                                         <span>Wallet Balance</span>
                                     </label>
                                 </div>
-                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-kuickpay">
+                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-kuickpay">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_kuickpay" value="kuickpay">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_kuickpay">
                                         <i class="fas fa-mobile-alt me-2 text-danger"></i>
                                         <span>Kuickpay (Bank/App)</span>
                                     </label>
-                                </div>
-                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-stripe">
+                                </div> -->
+                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-stripe">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_stripe" value="stripe">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_stripe">
                                         <i class="fab fa-stripe me-2 text-primary"></i>
                                         <span>Stripe (Credit Card)</span>
                                     </label>
-                                </div>
+                                </div> -->
                             </div>
 
                             <!-- Kuickpay Section -->
@@ -253,12 +253,25 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <p class="text-muted small mb-1">Your Wallet Balance</p>
-                                            <h3 class="fw-bold mb-0 text-primary">{{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
+                                            <h3 class="fw-bold mb-0 text-primary">USD {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
                                         </div>
                                         <i class="fas fa-wallet fa-3x opacity-25"></i>
                                     </div>
+                                    <div class="mt-3 pt-3 border-top">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <p class="text-muted small mb-1">Total Payable in USD</p>
+                                                <h4 class="fw-bold mb-0 text-warning">USD <span id="total-usd">0.00</span></h4>
+                                            </div>
+                                            <div class="text-end">
+                                                <p class="text-muted small mb-1">Live Rate</p>
+                                                <p class="fw-bold mb-0 small">1 {{ $rule->currency }} = <span id="live-rate">...</span> USD</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-muted extra-small mt-1 mb-0">*Live conversion using real-time exchange rates</p>
+                                    </div>
                                     <div id="wallet-insufficient" class="alert alert-danger mt-3 py-2 small d-none">
-                                        Insufficient balance in your wallet.
+                                        Insufficient balance in your wallet. (Required: USD <span class="required-usd-text">0.00</span>)
                                     </div>
                                 </div>
                             </div>
@@ -406,16 +419,8 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
     $(document).ready(function() {
-        let finalPrice = {
-            {
-                $rule - > final_price
-            }
-        };
-        let maxQty = {
-            {
-                $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule - > quantity) : $rule - > quantity
-            }
-        };
+        let finalPrice = {{ $rule->final_price }};
+        let maxQty = {{ $userPoints['max_allowed'] > 0 ? min($userPoints['max_allowed'], $rule->quantity) : $rule->quantity }};
         let capturedDetails = null;
 
         // Stripe Integration
@@ -510,6 +515,40 @@
             $('#final-total').text(total.toLocaleString());
             $('.required-amount-text').text(total.toLocaleString());
 
+            // USD Conversion logic for wallet
+            let currency = "{{ $rule->currency }}";
+            if (currency !== 'USD') {
+                $.get("{{ route('currency.convert') }}", {
+                    amount: total,
+                    from: currency,
+                    to: 'USD'
+                }, function(data) {
+                    if (data.success) {
+                        $('#total-usd').text(data.converted.toFixed(2));
+                        $('.required-usd-text').text(data.converted.toFixed(2));
+                        $('#live-rate').text(data.rate.toFixed(4));
+                        
+                        let balance = {{ auth()->user()->wallet_balance }};
+                        if (data.converted > balance) {
+                            $('#wallet-insufficient').removeClass('d-none');
+                        } else {
+                            $('#wallet-insufficient').addClass('d-none');
+                        }
+                    }
+                });
+            } else {
+                $('#total-usd').text(total.toFixed(2));
+                $('.required-usd-text').text(total.toFixed(2));
+                $('#live-rate').text('1.0000');
+                
+                let balance = {{ auth()->user()->wallet_balance }};
+                if (total > balance) {
+                    $('#wallet-insufficient').removeClass('d-none');
+                } else {
+                    $('#wallet-insufficient').addClass('d-none');
+                }
+            }
+
             // Auto fill transfer amount
             $('#transfer-amount').val(total);
 
@@ -534,11 +573,7 @@
                 $('#voucher-quantity').val(qty + 1);
                 updateTotal();
             } else {
-                if (qty >= {
-                        {
-                            $userPoints['max_allowed']
-                        }
-                    }) {
+                if (qty >= {{ $userPoints['max_allowed'] }}) {
                     toastr.warning('Your 24-hour voucher purchase limit has been reached.');
                 } else {
                     toastr.warning('Only this many vouchers are available in stock..');
@@ -593,15 +628,7 @@
                 $('#linked-bank-section').removeClass('d-none');
             } else if (type === 'wallet') {
                 $('#wallet-section').removeClass('d-none');
-                let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
-                let balance = {
-                    {
-                        auth() - > user() - > wallet_balance
-                    }
-                };
-                if (total > balance) {
-                    $('#wallet-insufficient').removeClass('d-none');
-                }
+                updateTotal(); // Ensure conversion and check are up to date
             } else if (type === 'kuickpay') {
                 $('#kuickpay-section').removeClass('d-none');
             } else if (type === 'stripe') {
@@ -649,11 +676,13 @@
 
         $('#pay-now').click(function() {
             let paymentType = $('input[name="payment_type"]:checked').val();
-            let qty = parseInt($('#voucher-quantity').val()) || 1;
+            let qtyElement = $('#voucher-quantity');
+            let qty = parseInt(qtyElement.val()) || 1;
             let btn = $(this);
 
-            console.log('ðŸ”µ Pay Now clicked');
+            console.log('🔵 Pay Now clicked');
             console.log('Payment Type:', paymentType);
+            console.log('Quantity Raw:', qtyElement.val());
             console.log('Quantity Parsed:', qty);
             console.log('Quantity Type:', typeof qty);
 
@@ -717,14 +746,10 @@
                 }
                 formData.append('linked_bank_id', bankId);
             } else if (paymentType === 'wallet') {
-                let total = parseFloat($('#subtotal').text().replace(/,/g, '')) || 0;
-                let balance = {
-                    {
-                        auth() - > user() - > wallet_balance
-                    }
-                };
-                if (total > balance) {
-                    toastr.error('Insufficient wallet balance');
+                let totalUSD = parseFloat($('#total-usd').text()) || 0;
+                let balance = {{ auth()->user()->wallet_balance }};
+                if (totalUSD > balance) {
+                    toastr.error('Insufficient wallet balance in USD');
                     return;
                 }
             } else if (paymentType === 'stripe') {

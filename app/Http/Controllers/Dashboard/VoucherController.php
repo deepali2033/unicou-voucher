@@ -8,10 +8,11 @@ use App\Models\InventoryVoucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
+use App\Notifications\VoucherDeliveredNotification;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Order;
 use App\Services\WalletService;
-
+use App\Helpers\CurrencyHelper;
 use App\Models\BankAccountModel;
 use App\Models\AdminPaymentMethod;
 use App\Models\User;
@@ -21,6 +22,28 @@ use Illuminate\Support\Facades\Http;
 
 class VoucherController extends Controller
 {
+    
+  
+    public function getConversion(Request $request)
+    {
+        $amount = $request->get('amount', 0);
+        $from = $request->get('from', 'PKR');
+        $to = $request->get('to', 'USD');
+
+        try {
+            $converted = CurrencyHelper::convert($amount, $from, $to);
+            return response()->json([
+                'success' => true,
+                'converted' => $converted,
+                'rate' => $converted / ($amount ?: 1)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -217,21 +240,25 @@ class VoucherController extends Controller
             return response()->json(['message' => 'Aapki pichle 24 ghanto ki limit puri ho gayi he. Remaining: ' . max(0, $userTotalLimit - $boughtTotalLast24h)], 400);
         }
 
-        if ($voucher->quantity < $request->quantity) {
+        if ($voucher->upload_vouchers < $request->upload_vouchers) {
             return response()->json(['message' => 'Insufficient stock available.'], 400);
         }
 
         $status = 'pending';
         $payment_receipt = null;
         $bank_details = [];
+        
+        $voucherCurrency = $voucher->currency ?: 'PKR';
+        $amountInUSD = CurrencyHelper::convert($totalAmount, $voucherCurrency, 'USD');
 
         if ($request->payment_type == 'wallet') {
-            if ($user->wallet_balance < $totalAmount) {
+            if ($user->wallet_balance < $amountInUSD) {
                 return response()->json(['message' => 'Insufficient wallet balance.'], 400);
             }
             $status = 'completed'; // Wallet payment is instant
-            $bank_details = ['notes' => 'Paid via Wallet'];
-        } elseif ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
+            $bank_details = ['notes' => 'Paid via Wallet (USD: ' . number_format($amountInUSD, 2) . ')'];
+        } 
+        elseif ($request->payment_type == 'admin_bank' || $request->payment_type == 'wise') {
             $adminBank = AdminPaymentMethod::findOrFail($request->admin_bank_id);
             if ($request->hasFile('payment_receipt')) {
                 $payment_receipt = $request->file('payment_receipt')->store('receipts', 'public');
@@ -323,22 +350,22 @@ class VoucherController extends Controller
         try {
             // Process Wallet Payment Logic
             if ($request->payment_type == 'wallet') {
-                // Debit User
+                // Debit User in USD
                 WalletService::debit(
                     $user,
-                    $totalAmount,
+                    $amountInUSD,
                     'order_purchase',
-                    "Payment for Voucher Order: {$voucher->brand_name} (Qty: {$request->quantity})"
+                    "Payment for Voucher Order: {$voucher->brand_name} (Qty: {$request->quantity}) - Amount in USD: " . number_format($amountInUSD, 2)
                 );
 
-                // Credit Admin (First admin found)
+                // Credit Admin (First admin found) in USD
                 $admin = User::where('account_type', 'admin')->first();
                 if ($admin) {
                     WalletService::credit(
                         $admin,
-                        $totalAmount,
+                        $amountInUSD,
                         'order_revenue',
-                        "Revenue from User {$user->name} for Order of {$voucher->brand_name}",
+                        "Revenue from User {$user->name} for Order of {$voucher->brand_name} - Amount in USD: " . number_format($amountInUSD, 2),
                         true // Admin can withdraw revenue
                     );
                 }
@@ -366,14 +393,30 @@ class VoucherController extends Controller
 
             // Decrement quantity immediately on purchase
             $voucher->decrement('quantity', $request->quantity);
+// ✅ WALLET AUTO DELIVERY
+if ($request->payment_type == 'wallet') {
 
-            // Notify Admins and Managers
-            $adminsAndManagers = User::whereIn('account_type', ['admin', 'manager'])->get();
-            $adminMsg = "A voucher order has been placed by " . $user->name . " (Order ID: " . $order->order_id . ")";
-            Notification::send($adminsAndManagers, new OrderPlacedNotification($order, $adminMsg, 'order_placed'));
+    $inventory = $order->inventoryVoucher;
 
-            // Notify the User
-            $userMsg = "Your order has been successfully placed. Voucher: " . $order->voucher_type . ", Amount: " . $order->amount . ", Order ID: " . $order->order_id;
+    if ($inventory && $inventory->upload_vouchers) {
+
+        $available = array_diff(
+            $inventory->upload_vouchers,
+            $inventory->delivered_vouchers ?? []
+        );
+
+        if (count($available) >= $order->quantity) {
+
+            $codes = array_slice($available, 0, $order->quantity);
+
+            $codesString = implode("\n", $codes);
+
+            // 👉 SAME FUNCTION CALL
+            $this->processDelivery($order, $codesString);
+        }
+    }
+}
+      $userMsg = "Your order has been successfully placed. Voucher: " . $order->voucher_type . ", Amount: " . $order->amount . ", Order ID: " . $order->order_id;
             $user->notify(new OrderPlacedNotification($order, $userMsg, 'order_placed'));
 
             DB::commit();
@@ -391,7 +434,57 @@ class VoucherController extends Controller
             return response()->json(['message' => 'Failed to place order: ' . $e->getMessage()], 500);
         }
     }
+public function processDelivery($order, $codes)
+{
+    // Update Order
+    $order->update([
+        'status' => 'delivered',
+        'delivery_details' => $codes
+    ]);
 
+    // Update Inventory
+    $voucher = InventoryVoucher::where('sku_id', $order->voucher_id)->first();
+
+    if ($voucher) {
+        $newDelivered = array_map('trim', explode("\n", str_replace("\r", "", $codes)));
+        $existingDelivered = $voucher->delivered_vouchers ?: [];
+        $allDelivered = array_unique(array_merge($existingDelivered, $newDelivered));
+
+        $voucher->delivered_vouchers = $allDelivered;
+        $voucher->save();
+    }
+
+    // Notify User
+    try {
+        $user = $order->user;
+
+        $user->notify(new VoucherDeliveredNotification(
+            $order,
+            "You have received voucher codes for Order #{$order->order_id}. Total amount: RS {$order->amount}."
+        ));
+
+        Mail::send('emails.order-delivered', [
+            'order' => $order,
+            'user' => $user,
+            'codes' => $codes
+        ], function ($message) use ($user) {
+            $message->to($user->email);
+            $message->subject('Your Voucher Codes Have Been Delivered! - UniCou');
+        });
+
+    } catch (\Exception $e) {}
+
+    // Notify Staff
+    try {
+        $staff = User::whereIn('account_type', ['admin', 'manager', 'support_team'])->get();
+
+        Notification::send($staff, new VoucherDeliveredNotification(
+            $order,
+            "Voucher codes delivered for Order #{$order->order_id}"
+        ));
+
+    } catch (\Exception $e) {}
+}
     public function create()
     {
         return view('dashboard.voucher.create');

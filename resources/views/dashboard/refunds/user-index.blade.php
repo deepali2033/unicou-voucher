@@ -138,12 +138,21 @@
                         <select name="order_id" id="refund_order_id" class="form-select border-0 bg-light p-3" style="border-radius: 12px;" required>
                             <option value="">Select an eligible order...</option>
                             @foreach($eligibleOrders as $order)
-                            <option value="{{ $order->order_id }}" data-amount="{{ $order->amount }}">
-                                {{ $order->order_id }} - RS {{ number_format($order->amount) }} ({{ ucfirst($order->status) }})
+                            <option value="{{ $order->order_id }}" 
+                                data-amount="{{ $order->amount }}" 
+                                data-method="{{ $order->payment_method }}"
+                                data-trx="{{ $order->transaction_id }}">
+                                {{ $order->order_id }} - RS {{ number_format($order->amount) }} ({{ ucfirst($order->payment_method) }})
                             </option>
                             @endforeach
                         </select>
                         <div class="form-text extra-small mt-1">Only orders not yet delivered are shown.</div>
+                    </div>
+                    <div id="payment_method_info" class="mb-3 d-none">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Payment Method</label>
+                        <div class="p-3 bg-light" style="border-radius: 12px;">
+                            <span id="method_display" class="fw-bold text-primary text-uppercase"></span>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted text-uppercase">Refund Amount (RS)</label>
@@ -154,17 +163,18 @@
                         <textarea name="reason" class="form-control border-0 bg-light p-3" rows="3" placeholder="Why are you requesting a refund?" style="border-radius: 12px;" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">Your Bank Details (For Refund)</label>
-                        <textarea name="bank_details" class="form-control border-0 bg-light p-3" rows="3" placeholder="Bank Name, Account Number, IFSC/SWIFT..." style="border-radius: 12px;" required></textarea>
+                        <label class="form-label small fw-bold text-muted text-uppercase">User Transaction ID</label>
+                        <input type="text" name="user_transaction_id" id="refund_trx_id" class="form-control border-0 bg-light p-3" placeholder="TRX ID..." style="border-radius: 12px;" required>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted text-uppercase">User Transaction ID</label>
-                            <input type="text" name="user_transaction_id" class="form-control border-0 bg-light p-3" placeholder="TRX ID..." style="border-radius: 12px;" required>
+
+                    <div id="manual_details_section" class="d-none">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Your Bank Details (For Refund)</label>
+                            <textarea name="bank_details" id="bank_details" class="form-control border-0 bg-light p-3" rows="3" placeholder="Bank Name, Account Number, IFSC/SWIFT..." style="border-radius: 12px;"></textarea>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3">
                             <label class="form-label small fw-bold text-muted text-uppercase">Transaction Slip (SS)</label>
-                            <input type="file" name="transaction_slip" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
+                            <input type="file" name="transaction_slip" id="transaction_slip" class="form-control border-0 bg-light p-3" style="border-radius: 12px;">
                         </div>
                     </div>
                 </div>
@@ -208,11 +218,33 @@
 <script>
     $(document).ready(function() {
         $('#refund_order_id').on('change', function() {
-            let amount = $(this).find(':selected').data('amount');
+            let selected = $(this).find(':selected');
+            let amount = selected.data('amount');
+            let method = selected.data('method');
+            let trx = selected.data('trx');
+
             if(amount) {
                 $('#refund_amount').val(amount);
+                $('#method_display').text(method);
+                $('#payment_method_info').removeClass('d-none');
+                $('#refund_trx_id').val(trx || '');
+
+                if(method === 'stripe' || method === 'paypal' || method === 'wallet') {
+                    $('#manual_details_section').addClass('d-none');
+                    $('#bank_details').removeAttr('required');
+                    $('#transaction_slip').removeAttr('required');
+                } else {
+                    $('#manual_details_section').removeClass('d-none');
+                    $('#bank_details').attr('required', 'required');
+                    $('#transaction_slip').attr('required', 'required');
+                }
             } else {
                 $('#refund_amount').val('');
+                $('#payment_method_info').addClass('d-none');
+                $('#refund_trx_id').val('');
+                $('#manual_details_section').addClass('d-none');
+                $('#bank_details').removeAttr('required');
+                $('#transaction_slip').removeAttr('required');
             }
         });
 

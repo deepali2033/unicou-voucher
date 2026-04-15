@@ -21,6 +21,13 @@ class SalesController extends Controller
             });
         }
 
+        // Apply Reseller Agent Restriction (Only see sales of users they added)
+        if ($authUser->isResellerAgent()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('sub_agent_id', $authUser->id);
+            });
+        }
+
         // Date Wise Report (From - To)
         if ($request->filled('from_date')) {
             $query->whereDate('created_at', '>=', $request->from_date);
@@ -96,6 +103,13 @@ class SalesController extends Controller
             });
         }
 
+        // Apply Reseller Agent Restriction for filter data
+        if ($authUser->isResellerAgent()) {
+            $filterQuery->whereHas('user', function ($q) use ($authUser) {
+                $q->where('sub_agent_id', $authUser->id);
+            });
+        }
+
         $filterData = $filterQuery->get();
 
         $brands = $filterData->pluck('inventoryVoucher.brand_name')->unique()->filter()->values();
@@ -120,6 +134,13 @@ class SalesController extends Controller
         if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
             $query->whereHas('user', function ($q) use ($authUser) {
                 $q->where('country', $authUser->country);
+            });
+        }
+
+        // Apply Reseller Agent Restriction (Only see sales of users they added)
+        if ($authUser->isResellerAgent()) {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->where('sub_agent_id', $authUser->id);
             });
         }
 

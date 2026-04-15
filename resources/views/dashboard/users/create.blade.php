@@ -73,7 +73,9 @@
                                 <label class="form-label fw-semibold">Account Type</label>
                                 <select name="account_type" class="form-select @error('account_type') is-invalid @enderror" required>
                                     @if(auth()->user()->account_type === 'reseller_agent')
-                                    <option value="agent" selected>Agent</option>
+                                     <option value="" selected disabled>Select Role</option>
+                                    <option value="agent" >Agent</option>
+                                    <option value="student" >Student</option>
                                     @else
                                     <option value="" selected disabled>Select Role</option>
                                     <option value="manager" {{ (old('account_type') == 'manager' || request('role') == 'manager') ? 'selected' : '' }}>Manager</option>
@@ -134,12 +136,17 @@
 
         // Populate Countries
         const countries = Country.getAllCountries();
+        const userPermittedCountries = @json(auth()->user()->permitted_countries ?? []);
+        const canViewAllCountries = @json(auth()->user()->can_view_all_countries || auth()->user()->isAdmin() || auth()->user()->isManager());
+
         countries.forEach(country => {
-            const option = document.createElement('option');
-            option.value = country.name;
-            option.textContent = country.name;
-            option.dataset.code = country.isoCode;
-            countrySelect.appendChild(option);
+            if (canViewAllCountries || userPermittedCountries.includes(country.name)) {
+                const option = document.createElement('option');
+                option.value = country.name;
+                option.textContent = country.name;
+                option.dataset.code = country.isoCode;
+                countrySelect.appendChild(option);
+            }
         });
 
         // Country Change Event

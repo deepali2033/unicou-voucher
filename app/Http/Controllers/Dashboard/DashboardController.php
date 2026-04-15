@@ -267,7 +267,7 @@ class DashboardController extends Controller
         return redirect('/');
     }
 
-    public function notifications(Request $request)
+     public function notifications(Request $request)
     {
         $user = auth()->user();
         // Mark all notifications as read when visiting the notifications page

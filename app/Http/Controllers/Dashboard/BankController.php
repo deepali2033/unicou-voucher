@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Services\WalletService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Customer;
 use Stripe\FinancialConnections\Session;
@@ -22,6 +24,78 @@ class BankController extends Controller
 {
 
 
+    public function processing(Request $request)
+    {
+        $sessionId = $request->get('session_id');
+        if (!$sessionId) {
+            return redirect()->route('bank.link')->with('error', 'Invalid session');
+        }
+        return view('dashboard.banks.processing', compact('sessionId'));
+    }
+
+    public function checkStatus(Request $request)
+    {
+        $sessionId = $request->get('session_id');
+
+        if (!$sessionId) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid session'], 400);
+        }
+
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
+
+            if ($session->payment_status === 'paid') {
+                // Before returning, run the success logic just in case webhook/redirect hasn't yet
+                // This makes the polling very reliable
+                $this->processSuccess($session, $request->ip(), $request->userAgent());
+                return response()->json(['status' => 'paid', 'redirect' => route('bank.link')]);
+            }
+
+            return response()->json(['status' => 'pending']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function processSuccess($session, $ip, $userAgent)
+    {
+        $amount = $session->amount_total / 100;
+        $userId = $session->metadata->user_id ?? null;
+
+        if (!$userId) return false;
+
+        $user = User::find($userId);
+        if (!$user) return false;
+
+        // ✅ Duplicate check using transaction_id
+        $exists = WalletLedger::where('transaction_id', $session->id)->exists();
+
+        if (!$exists) {
+            DB::transaction(function () use ($user, $amount, $session, $ip, $userAgent) {
+                // ✅ Wallet update
+                $user->wallet_balance += $amount;
+                $user->save();
+
+                // ✅ Ledger entry
+                WalletLedger::create([
+                    'transaction_id' => $session->id,
+                    'user_id' => $user->id,
+                    'type' => 'credit',
+                    'amount' => $amount,
+                    'source' => 'stripe',
+                    'description' => 'Wallet Top-up via Stripe',
+                    'ip_address' => $ip,
+                    'user_agent' => $userAgent,
+                    'created_at' => now(),
+                ]);
+            });
+            return true;
+        }
+        return false;
+    }
+
     public function success(Request $request)
     {
         $sessionId = $request->get('session_id');
@@ -30,95 +104,225 @@ class BankController extends Controller
             return redirect()->route('bank.link')->with('error', 'Invalid payment');
         }
 
-
         \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
-        $session = \Stripe\Checkout\Session::retrieve($sessionId);
+        try {
+            $session = \Stripe\Checkout\Session::retrieve($sessionId);
 
-        // dd($session->payment_status);
-
-        if ($session->payment_status === 'paid') {
-
-            $amount = $session->amount_total / 100;
-
-            $user = auth()->user();
-
-            // ✅ Duplicate check using MODEL
-            $exists = WalletLedger::where('transaction_id', $sessionId)->exists();
-
-            if (!$exists) {
-
-                // ✅ Wallet update
-                $user->wallet_balance += $amount;
-                $user->save();
-
-                // ✅ Ledger entry using MODEL
-                WalletLedger::create([
-                    'transaction_id' => $sessionId,
-                    'user_id' => $user->id,
-                    'type' => 'credit',
-                    'amount' => $amount,
-                    'source' => 'stripe',
-                    'description' => 'Wallet Top-up via Stripe',
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'created_at' => now(),
-                ]);
+            if ($session->payment_status === 'paid') {
+                $this->processSuccess($session, $request->ip(), $request->userAgent());
+                return redirect()->route('bank.link')->with('success', 'Amount added successfully!');
             }
 
-            return redirect()->route('bank.link')->with('success', 'Amount added successfully!');
+            return redirect()->route('bank.link')->with('error', 'Payment still processing or failed');
+        } catch (\Exception $e) {
+            return redirect()->route('bank.link')->with('error', 'Error: ' . $e->getMessage());
         }
-
-        return redirect()->route('bank.link')->with('error', 'Payment failed');
     }
 
     public function cancel()
     {
         return view('wallet.cancel');
     }
-    public function createSession(Request $request)
+    public function paypalCheckout(Request $request)
     {
+        $amount = $request->input('amount');
+        if (!$amount) {
+            return back()->with('error', 'Amount missing');
+        }
+
         try {
+            $token = $this->getPaypalAccessToken();
 
-            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            $response = Http::withToken($token)
+                ->post($this->getPaypalBaseUrl() . '/v2/checkout/orders', [
+                    'intent' => 'CAPTURE',
+                    'purchase_units' => [[
+                        'amount' => [
+                            'currency_code' => 'USD',
+                            'value' => number_format($amount, 2, '.', ''),
+                        ],
+                        'description' => 'Wallet Top-up',
+                    ]],
+                    'application_context' => [
+                        'return_url' => route('paypal.success'),
+                        'cancel_url' => route('paypal.cancel'),
+                        'landing_page' => 'BILLING', // Force Guest Checkout / Card entry page
+                        'user_action' => 'PAY_NOW',
+                    ],
+                ]);
 
-            $amount = $request->input('amount');
-
-            if (!$amount) {
-                return back()->with('error', 'Amount missing');
+            if ($response->successful()) {
+                $order = $response->json();
+                foreach ($order['links'] as $link) {
+                    if ($link['rel'] === 'approve') {
+                        return redirect($link['href']);
+                    }
+                }
             }
 
-            $session = \Stripe\Checkout\Session::create([
-                'payment_method_types' => ['card', 'us_bank_account'],
-                'payment_method_options' => [
-                    'us_bank_account' => [
-                        'verification_method' => 'automatic',
-                    ],
-                ],
-
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => 'Wallet Top-up',
-                        ],
-                        'unit_amount' => $amount * 100,
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'success_url' => route('wallet.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('wallet.cancel'),
-            ]);
-
-            return redirect($session->url); // ✅ IMPORTANT
-
+            Log::error('PayPal Order Creation Failed', ['response' => $response->json()]);
+            return back()->with('error', 'PayPal order creation failed.');
         } catch (\Exception $e) {
-
+            Log::error('PayPal Checkout Exception: ' . $e->getMessage());
             return back()->with('error', $e->getMessage());
         }
     }
-    public function finalizeStripeLink(Request $request)
+
+    public function paypalSuccess(Request $request)
+    {
+        $token = $request->get('token'); // PayPal Order ID
+
+        if (!$token) {
+            return redirect()->route('bank.link')->with('error', 'Invalid PayPal payment');
+        }
+
+        try {
+            $accessToken = $this->getPaypalAccessToken();
+
+            $response = Http::withToken($accessToken)
+                ->post($this->getPaypalBaseUrl() . "/v2/checkout/orders/{$token}/capture");
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                if ($data['status'] === 'COMPLETED') {
+                    $amount = $data['purchase_units'][0]['payments']['captures'][0]['amount']['value'];
+                    $user = auth()->user();
+
+                    $exists = WalletLedger::where('transaction_id', $token)->exists();
+
+                    if (!$exists) {
+                        $user->wallet_balance += $amount;
+                        $user->save();
+
+                        WalletLedger::create([
+                            'transaction_id' => $token,
+                            'user_id' => $user->id,
+                            'type' => 'credit',
+                            'amount' => $amount,
+                            'source' => 'paypal',
+                            'description' => 'Wallet Top-up via PayPal',
+                            'ip_address' => $request->ip(),
+                            'user_agent' => $request->userAgent(),
+                            'created_at' => now(),
+                        ]);
+                    }
+
+                    return redirect()->route('bank.link')->with('success', 'Amount added successfully via PayPal!');
+                }
+            }
+
+            Log::error('PayPal Capture Failed', ['response' => $response->json()]);
+            return redirect()->route('bank.link')->with('error', 'PayPal payment capture failed.');
+        } catch (\Exception $e) {
+            Log::error('PayPal Success Exception: ' . $e->getMessage());
+            return redirect()->route('bank.link')->with('error', $e->getMessage());
+        }
+    }
+
+    public function paypalCancel()
+    {
+        return redirect()->route('bank.link')->with('error', 'PayPal payment cancelled.');
+    }
+
+    private function getPaypalAccessToken()
+    {
+        $clientId = config('services.paypal.client_id');
+        $secret = config('services.paypal.secret');
+
+        $response = Http::asForm()
+            ->withBasicAuth($clientId, $secret)
+            ->post($this->getPaypalBaseUrl() . '/v1/oauth2/token', [
+                'grant_type' => 'client_credentials',
+            ]);
+
+        if ($response->successful()) {
+            return $response->json('access_token');
+        }
+
+        throw new \Exception('Could not get PayPal access token.');
+    }
+
+    private function getPaypalBaseUrl()
+    {
+        return config('services.paypal.mode') === 'live'
+            ? 'https://api-m.paypal.com'
+            : 'https://api-m.sandbox.paypal.com';
+    }
+
+    public function createSession(Request $request)
+{
+    try {
+
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+
+        $amount = $request->input('amount');
+        $currency = strtolower($request->input('currency', 'usd'));
+
+        if (!$amount) {
+            return back()->with('error', 'Amount missing');
+        }
+
+        // ✅ Currency-based methods
+        $methods = [];
+
+        switch ($currency) {
+            case 'eur':
+                $methods = ['ideal', 'bancontact', 'sofort', 'giropay', 'eps', 'sepa_debit'];
+                break;
+
+            case 'cny':
+                $methods = ['alipay', 'wechat_pay'];
+                break;
+
+            case 'gbp':
+                $methods = ['alipay'];
+                break;
+
+            case 'pln':
+                $methods = ['p24'];
+                break;
+
+            default:
+                return back()->with('error', 'This currency is not supported for selected payment methods.');
+        }
+
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => $methods,
+
+            'payment_method_options' => [
+                'wechat_pay' => [
+                    'client' => 'web',
+                ],
+            ],
+
+            'metadata' => [
+                'user_id' => auth()->id(),
+            ],
+
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => $currency,
+                    'product_data' => [
+                        'name' => 'Wallet Top-up',
+                    ],
+                    'unit_amount' => $amount * 100,
+                ],
+                'quantity' => 1,
+            ]],
+
+            'mode' => 'payment',
+            'success_url' => route('wallet.processing') . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('wallet.cancel'),
+        ]);
+
+        return redirect($session->url);
+
+    } catch (\Exception $e) {
+        return back()->with('error', $e->getMessage());
+    }
+}    public function finalizeStripeLink(Request $request)
     {
         try {
             $secretKey = config('services.stripe.secret');

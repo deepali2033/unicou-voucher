@@ -16,6 +16,7 @@
                         </div>
                     </div>
                 </div>
+    
                 <hr class="my-0">
                 <div class="card-body p-5">
                     <div class="row mb-5">
@@ -35,6 +36,10 @@
 
                     <div class="row mb-4">
                         <div class="col-sm-6">
+                   <p class="mb-1">
+    <span class="text-muted">Expiry Date:</span> 
+    <strong>{{ $order->inventoryVoucher->expiry_date?->format('d M, Y') ?? 'N/A' }}</strong>
+</p>
                             <p class="mb-1"><span class="text-muted">Purchase Date:</span> <strong>{{ $order->created_at->format('d M, Y') }}</strong></p>
                             <p class="mb-1"><span class="text-muted">Status:</span> <span class="badge bg-success">{{ strtoupper($order->status) }}</span></p>
                         </div>
@@ -66,7 +71,7 @@
                                     </td>
                                     <td class="text-center py-4">{{ $order->quantity }}</td>
                                     <td class="text-end py-4">{{ number_format($order->amount / $order->quantity, 2) }}</td>
-                                    <td class="text-end px-4 py-4 fw-bold">RS {{ number_format($order->amount, 2) }}</td>
+                                    <td class="text-end px-4 py-4 fw-bold">{{ $order->inventoryVoucher->currency ?? 'N/A' }} {{ number_format($order->amount, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -76,16 +81,16 @@
                         <div class="col-md-5 col-lg-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Subtotal:</span>
-                                <span>RS {{ number_format($order->amount, 2) }}</span>
+                                <span>{{$order->inventoryVoucher->currency ?? 'N/A' }} {{ number_format($order->amount, 2) }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Tax (0%):</span>
-                                <span>RS 0.00</span>
+                                <span>{{ $order->tax ?? 'N/A' }}</span>
                             </div>
                             <hr>
                             <div class="d-flex justify-content-between align-items-center mb-0">
                                 <h5 class="fw-bold text-dark mb-0">Grand Total:</h5>
-                                <h4 class="fw-bold text-primary mb-0">RS {{ number_format($order->amount, 2) }}</h4>
+                                <h4 class="fw-bold text-primary mb-0">{{ $order->inventoryVoucher->currency ?? 'N/A' }} {{ number_format($order->amount, 2) }}</h4>
                             </div>
                         </div>
                     </div>

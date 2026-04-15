@@ -28,13 +28,18 @@ class UserController extends Controller
             $query->where('account_type', '!=', 'admin');
         }
 
-   // Apply Country Visibility Restrictions
+        // Apply Country Visibility Restrictions
         $authUser = auth()->user();
         if (($authUser->isManager() || $authUser->isSupport()) && !$authUser->isAdmin()) {
             if (!$authUser->can_view_all_countries) {
                 $permitted = $authUser->permitted_countries ?? [];
                 $query->whereIn('country', $permitted);
             }
+        }
+
+        // Apply Reseller Agent Restriction (Only see users they added)
+        if ($authUser->isResellerAgent()) {
+            $query->where('sub_agent_id', $authUser->id);
         }
 
         if ($request->has('role') && $request->role != 'all' && $request->role != '') {
@@ -100,7 +105,14 @@ class UserController extends Controller
 
         $accountTypeRule = 'required|in:manager,reseller_agent,support_team,student,agent';
         if (auth()->user()->account_type === 'reseller_agent') {
-            $accountTypeRule = 'required|in:agent';
+            $accountTypeRule = 'required|in:agent,student';
+        }
+
+        $countryRule = 'required|string|max:255';
+        $authUser = auth()->user();
+        if ($authUser->isResellerAgent() && !$authUser->can_view_all_countries) {
+            $permitted = $authUser->permitted_countries ?? [];
+            $countryRule = 'required|string|in:' . implode(',', $permitted);
         }
 
         $request->validate([
@@ -110,7 +122,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'account_type' => $accountTypeRule,
             'phone' => 'nullable|string|max:20',
-            'country' => 'required|string|max:255',
+            'country' => $countryRule,
             'state' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
         ]);
@@ -1007,8 +1019,12 @@ class UserController extends Controller
         $query = User::where('account_type', 'student');
 
         if (auth()->user()->account_type === 'reseller_agent') {
-            $query->where('country', auth()->user()->country)
-                  ->where('state', auth()->user()->state);
+            $authUser = auth()->user();
+            if (!$authUser->can_view_all_countries) {
+                $permitted = $authUser->permitted_countries ?? [];
+                $query->whereIn('country', $permitted);
+            }
+            $query->where('sub_agent_id', auth()->id());
         }
 
         if ($request->has('status') && $request->status != 'all' && $request->status != '') {

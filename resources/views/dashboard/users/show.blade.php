@@ -333,7 +333,7 @@
                             <a class="nav-link py-3 px-4" id="security-tab" data-bs-toggle="tab" href="#security" role="tab">Security</a>
                         </li>
                         @endif
-                        @if(in_array($user->account_type, ['manager', 'support_team']))
+                        @if(in_array($user->account_type, ['manager', 'support_team', 'reseller_agent']))
                         <li class="nav-item">
                             <a class="nav-link py-3 px-4" id="permissions-tab" data-bs-toggle="tab" href="#permissions" role="tab">Permissions</a>
                         </li>
@@ -759,13 +759,14 @@
                         </div>
 
                         <!-- Permissions Tab -->
-                        @if(in_array($user->account_type, ['manager', 'support_team']))
+                        @if(in_array($user->account_type, ['manager', 'support_team', 'reseller_agent']))
                         <div class="tab-pane fade" id="permissions" role="tabpanel">
                             <h6 class="fw-bold mb-3 text-dark">{{ ucfirst(str_replace('_', ' ', $user->account_type)) }} Capabilities</h6>
                             <p class="text-muted small mb-4">Define what administrative actions this {{ str_replace('_', ' ', $user->account_type) }} is authorized to perform across the platform.</p>
 
                             <form action="{{ route('users.permissions.update', $user->id) }}#permissions" method="POST">
                                 @csrf
+                            
                                 <div class="row g-4">
                                     @php
                                     $perms = [
@@ -796,6 +797,13 @@
                                             return in_array($p['name'], $supportPerms);
                                         });
                                     }
+
+                                    if ($user->account_type === 'reseller_agent') {
+                                        $resellerPerms = [ ];
+                                        $perms = array_filter($perms, function($p) use ($resellerPerms) {
+                                            return in_array($p['name'], $resellerPerms);
+                                        });
+                                    }
                                     @endphp
 
                                     @foreach($perms as $p)
@@ -810,7 +818,7 @@
                                     </div>
                                     @endforeach
                                 </div>
-                                
+                          
                                 <div class="mt-5 pt-4 border-top">
                                     <h6 class="fw-bold mb-3 text-dark">Country Visibility Permission</h6>
                                     <p class="text-muted small mb-4">Control which countries this {{ str_replace('_', ' ', $user->account_type) }} can monitor. If restricted, they will only see data from selected countries.</p>

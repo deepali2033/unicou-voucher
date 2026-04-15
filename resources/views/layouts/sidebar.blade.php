@@ -24,6 +24,22 @@ $isNotifications = request()->routeIs('notifications.*');
                 </a>
             </li>
             @endif
+             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() )
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('vouchers') ? 'active' : '' }}" href="{{ route('vouchers') }}">
+                    <i class="fas fa-ticket-alt me-2"></i> Voucher
+                </a>
+            </li>
+
+            @endif
+               @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() 
+             )
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('bank.link') ? 'active' : '' }}" href="{{ route('bank.link') }}">
+                    <i class="fas fa-university me-2"></i> Linked Banks
+                </a>
+            </li>
+            @endif
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_users))
             <!-- User Management -->
             <li class="nav-item">
@@ -116,27 +132,14 @@ $isNotifications = request()->routeIs('notifications.*');
                     <i class="fas fa-undo me-2"></i> My Refunds
                 </a>
             </li>
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() || auth()->user()->isAdmin() || auth()->user()->isManager())
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('bank.link') ? 'active' : '' }}" href="{{ route('bank.link') }}">
-                    <i class="fas fa-university me-2"></i> Linked Banks
-                </a>
-            </li>
-            @endif
+         
 
             <!-- Voucher Management -->
 
 
             @endif
 
-            @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() )
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('vouchers') ? 'active' : '' }}" href="{{ route('vouchers') }}">
-                    <i class="fas fa-ticket-alt me-2"></i> Voucher
-                </a>
-            </li>
-
-            @endif
+         
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent() || auth()->user()->isSupport())
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('profile.index') ? 'active' : '' }}" href="{{ route('profile.index') }}">
@@ -199,11 +202,7 @@ $isNotifications = request()->routeIs('notifications.*');
             @endif
             @if(auth()->user()->isAdmin() || auth()->user()->isManager() || auth()->user()->isSupport())
             <!-- Support Center -->
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('customer.query') ? 'active' : '' }}" href="{{ route('customer.query') }}">
-                    <i class="fas fa-headset me-2"></i> Customer Query
-                </a>
-            </li>
+           
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_reports_page) || (auth()->user()->isSupport() && auth()->user()->can_view_sales_report))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}" href="{{ route('reports.index') }}">
@@ -314,12 +313,21 @@ $isNotifications = request()->routeIs('notifications.*');
 
             <!-- @endif -->
 
+             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() ) )
+            
+             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('customer.query') ? 'active' : '' }}" href="{{ route('customer.query') }}">
+                    <i class="fas fa-headset me-2"></i> Customer Query
+                </a>
+            </li>
+            @endif
             @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->has_job_permission) )
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('jobApplication') ? 'active' : '' }}" href="{{ route('jobApplication') }}">
                     <i class="fas fa-tools me-2"></i>Job Applications
                 </a>
             </li>
+
             @endif
             @if(auth()->user()->isAgent() || auth()->user()->isStudent() || auth()->user()->isResellerAgent())
             <li class="nav-item">
