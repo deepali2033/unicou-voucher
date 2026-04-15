@@ -15,26 +15,18 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
-    // private function getLocationData()
-    // {
-
-    //     $response = Http::get('https://ipapi.co/json/');
-
-
-    //     return [
-    //         'countryCode' => $countryCode,
-    //         'timezone'    => $response['timezone'] ?? 'UTC',
-    //         'currency'    => $response['currency'] ?? 'USD',
-    //         'flag'        => $flagUrl,
-    //     ];
-    // }
-
 
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
-        //
+        // Pagination styling (optional - Bootstrap)
+        Paginator::useBootstrap();
+
+        // 🔥 Load all helper files automatically
+        foreach (glob(app_path('Helpers/*.php')) as $file) {
+            require_once $file;
+        }
     }
 }

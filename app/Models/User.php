@@ -57,8 +57,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_updated_at',
         'pending_profile_data',
         'wallet_balance',
-        'withdrawable_balance',
+           'withdrawable_balance',
         'currency',
+        
         'latitude',
         'longitude',
         'last_login_at',
