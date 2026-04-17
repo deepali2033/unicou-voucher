@@ -183,7 +183,7 @@ class VoucherController extends Controller
             ->sum('quantity');
 
         if ($boughtTotalLast24h >= $userTotalLimit) {
-            return redirect()->route('vouchers')->with('error', 'Aapne pichle 24 ghanto me apni voucher kharidne ki limit puri kar li he.');
+            return redirect()->route('vouchers')->with('error', 'You have reached your voucher purchase limit in the last 24 hours.');
         }
 
         $maxAllowed = $userTotalLimit - $boughtTotalLast24h;
@@ -237,7 +237,7 @@ class VoucherController extends Controller
             ->sum('quantity');
 
         if ($boughtTotalLast24h + $request->quantity > $userTotalLimit) {
-            return response()->json(['message' => 'Aapki pichle 24 ghanto ki limit puri ho gayi he. Remaining: ' . max(0, $userTotalLimit - $boughtTotalLast24h)], 400);
+            return response()->json(['message' => 'Your last 24 hours limit has been reached. Remaining: ' . max(0, $userTotalLimit - $boughtTotalLast24h)], 400);
         }
 
         if ($voucher->upload_vouchers < $request->upload_vouchers) {
@@ -327,7 +327,7 @@ class VoucherController extends Controller
         }
 
         if ($request->payment_type == 'stripe' && $totalAmount < 150) {
-            return response()->json(['message' => 'Stripe payment ke liye minimum amount 150 PKR honi chahiye.'], 400);
+            return response()->json(['message' => 'For Stripe payment, the minimum amount is 150 PKR.'], 400);
         }
 
         $referralPointsPerUnit = 0;
