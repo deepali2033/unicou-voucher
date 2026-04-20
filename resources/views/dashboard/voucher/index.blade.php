@@ -201,13 +201,13 @@
         }
 
         .price-ribbon .amount {
-            font-size: 2rem;
+            font-size: 1.2rem;
             font-weight: 800;
             line-height: 1;
         }
 
         .price-ribbon .sub-text {
-            font-size: 0.4rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             opacity: 0.8;

@@ -4,10 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Models\User;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\InventoryOutOfStockNotification;
 
 class InventoryVoucher extends Model
 {
     protected $table = 'inventory_vouchers';
+
+    protected static function booted()
+    {
+        static::updating(function ($inventory) {
+            if ($inventory->isDirty('quantity') && $inventory->quantity <= 0) {
+                $inventory->status = 'OUT OF STOCK';
+            }
+        });
+
+        static::updated(function ($inventory) {
+            if ($inventory->isDirty('quantity') && $inventory->quantity <= 0 && $inventory->getOriginal('quantity') > 0) {
+                $staff = User::whereIn('account_type', ['admin', 'manager'])->get();
+                Notification::send($staff, new InventoryOutOfStockNotification($inventory));
+            }
+        });
+    }
 
     protected $fillable = [
         'sku_id',
