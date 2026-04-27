@@ -51,4 +51,16 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
+        'mode' => env('PAYPAL_MODE', 'sandbox'), // sandbox or live
+    ],
+
+    'wise' => [
+        'api_key' => env('WISE_API_KEY'),
+        'profile_id' => env('WISE_PROFILE_ID'),
+        'base_url' => env('WISE_BASE_URL', 'https://api.sandbox.transferwise.tech'),
+    ],
+
 ];

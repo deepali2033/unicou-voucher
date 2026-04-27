@@ -247,7 +247,7 @@ class OrderController extends Controller
 
     public function orderHistory(Request $request)
     {
-        $query = Order::query()
+        $query = Order::with(['inventoryVoucher'])
             ->leftJoin('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
             ->select(
                 'orders.*',
@@ -256,7 +256,8 @@ class OrderController extends Controller
                 'inventory_vouchers.country_region as v_country_region',
                 'inventory_vouchers.voucher_variant as v_voucher_variant',
                 'inventory_vouchers.voucher_type as v_voucher_type',
-                'inventory_vouchers.expiry_date as v_expiry_date'
+                'inventory_vouchers.expiry_date as v_expiry_date',
+                'inventory_vouchers.taxes as v_taxes'
             )
             ->where('orders.user_id', auth()->id());
 
@@ -311,7 +312,7 @@ class OrderController extends Controller
 
     public function userExport(Request $request)
     {
-        $query = Order::query()
+        $query = Order::with(['inventoryVoucher'])
             ->leftJoin('inventory_vouchers', 'orders.voucher_id', '=', 'inventory_vouchers.sku_id')
             ->select(
                 'orders.*',
@@ -383,24 +384,34 @@ class OrderController extends Controller
 
         $user = auth()->user();
         foreach ($orders as $index => $order) {
+            // Handle Country/Region formatting
+            $countryRegion = 'N/A';
+            if (isset($order->inventoryVoucher->country_region)) {
+                $cr = $order->inventoryVoucher->country_region;
+                $cr = is_array($cr) ? $cr : [$cr];
+                $countryRegion = in_array('all', $cr) || in_array('GLB', $cr) ? 'GLB' : (count($cr) > 1 ? 'MULTY' : ($cr[0] ?? 'N/A'));
+            } else {
+                $countryRegion = $order->v_country_region ?? 'N/A';
+            }
+
             fputcsv($handle, [
                 $index + 1,
                 $order->order_id,
                 $order->created_at->format('Y-m-d'),
                 $order->created_at->format('H:i:s'),
-                $order->v_brand_name ?? 'N/A',
-                $order->v_currency ?? 'N/A',
-                $order->v_country_region ?? 'N/A',
-                $order->v_voucher_variant ?? 'N/A',
-                $order->v_voucher_type ?? $order->voucher_type ?? 'N/A',
+                $order->inventoryVoucher->brand_name ?? $order->v_brand_name ?? 'N/A',
+                $order->inventoryVoucher->currency ?? $order->v_currency ?? 'N/A',
+                $countryRegion,
+                $order->inventoryVoucher->voucher_variant ?? $order->v_voucher_variant ?? 'N/A',
+                $order->inventoryVoucher->voucher_type ?? $order->v_voucher_type ?? $order->voucher_type ?? 'N/A',
                 $order->order_id,
                 $order->created_at->format('Y-m-d'),
                 $order->quantity,
                 $order->amount,
-                '0.00',
-                number_format($order->amount / $order->quantity, 2, '.', ''),
+                $order->inventoryVoucher->taxes ?? '0.00',
+                number_format($order->amount / max(1, $order->quantity), 2, '.', ''),
                 $order->created_at->format('Y-m-d'),
-                $order->v_expiry_date ? \Carbon\Carbon::parse($order->v_expiry_date)->format('Y-m-d') : 'N/A',
+                ($order->inventoryVoucher->expiry_date ?? $order->v_expiry_date) ? \Carbon\Carbon::parse($order->inventoryVoucher->expiry_date ?? $order->v_expiry_date)->format('Y-m-d') : 'N/A',
                 $user->voucher_limit ?? 'N/A',
                 $order->status
             ]);

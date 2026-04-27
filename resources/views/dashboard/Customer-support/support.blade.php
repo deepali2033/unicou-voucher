@@ -176,7 +176,7 @@
                             <th class="py-3 border-0">Topic</th>
                             <th class="py-3 border-0">Issue</th>
                             <th class="py-3 border-0">Message</th>
-                            <th class="py-3 border-0 text-center">Status</th>
+                            <!-- <th class="py-3 border-0 text-center">Status</th> -->
                             <th class="px-4 py-3 border-0 text-end">Action</th>
                         </tr>
                     </thead>
@@ -200,15 +200,15 @@
                             <td>{{ $query->topic }}</td>
                             <td>{{ $query->issue }}</td>
                             <td>
-                                <div class="text-truncate" style="max-width: 200px;" title="{{ $query->description }}">
+                                <div class="text" style="max-width: 200px;" title="{{ $query->description }}">
                                     {{ $query->description }}
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <!-- <td class="text-center">
                                 <span class="badge rounded-pill px-3 py-2 bg-{{ $query->status == 'pending' ? 'soft-warning text-warning' : ($query->status == 'closed' ? 'soft-success text-success' : 'soft-secondary text-secondary') }}">
                                     {{ ucfirst($query->status) }}
                                 </span>
-                            </td>
+                            </td> -->
                             <td class="px-4 text-end">
                                 <button class="btn btn-link text-primary p-0 view-query" 
                                     data-user-name="{{ $query->user?->name ?? 'Guest' }}"

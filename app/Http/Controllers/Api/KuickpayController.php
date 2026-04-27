@@ -21,8 +21,8 @@ class KuickpayController extends Controller
 
     private function validateAuth(Request $request)
     {
-        $user = $request->header('username');
-        $pass = $request->header('password');
+        $user = $request->header('username') ?? $request->input('username');
+        $pass = $request->header('password') ?? $request->input('password');
 
         if ($user !== $this->username || $pass !== $this->password) {
             return false;
@@ -64,7 +64,7 @@ class KuickpayController extends Controller
         $billingMonth = Carbon::parse($order->created_at)->format('ym');
         
         // Formatting amount: +0000000186900 (14 chars total including +, last 2 digits are minor units)
-        $formattedAmount = '+' . str_pad(number_format($order->amount * 100, 0, '', ''), 12, '0', STR_PAD_LEFT);
+        $formattedAmount = '+' . str_pad(number_format($order->amount * 100, 0, '', ''), 13, '0', STR_PAD_LEFT);
 
         $response = [
             'response_Code' => '00',
@@ -77,7 +77,7 @@ class KuickpayController extends Controller
             'contact_number' => $order->user->phone ?? '03000000000',
             'billing_month' => $billingMonth,
             'date_paid' => $order->status === 'completed' ? Carbon::parse($order->updated_at)->format('Ymd') : '',
-            'amount_paid' => $order->status === 'completed' ? str_pad(number_format($order->amount * 100, 0, '', ''), 12, '0', STR_PAD_LEFT) : '',
+            'amount_paid' => $order->status === 'completed' ? str_pad(number_format($order->amount * 100, 0, '', ''), 13, '0', STR_PAD_LEFT) : '',
             'tran_auth_Id' => $order->status === 'completed' ? substr($order->transaction_id, -6) : '',
             'reserved' => ''
         ];
@@ -101,23 +101,68 @@ class KuickpayController extends Controller
         $order = Order::where('kuickpay_consumer_number', $consumerNumber)->first();
 
         if (!$order) {
-            return response()->json(['response_Code' => '01']); // Invalid voucher
+            return response()->json(['response_Code' => '01', 'message' => 'Invalid Order']); 
         }
 
-        if ($order->status === 'completed') {
+        if ($order->status === 'completed' || $order->status === 'delivered') {
             return response()->json(['response_Code' => '03', 'message' => 'Duplicate/Already Paid']);
         }
 
-        // Validate amount (ignoring minor units for simple comparison if needed, but here we just trust the payment notification if order exists)
-        // You might want to add more strict validation here.
+        // Validate amount (Kuickpay sends amount in minor units, e.g., 100.00 as 10000)
+        $expectedAmount = number_format($order->amount * 100, 0, '', '');
+        // Sometimes Kuickpay sends it with leading zeros or as string, so we compare as numeric strings
+        if ((int)$amount !== (int)$expectedAmount) {
+            Log::warning("Kuickpay Amount Mismatch: Expected $expectedAmount, Got $amount");
+            return response()->json(['response_Code' => '02', 'message' => 'Amount Mismatch']);
+        }
 
         $order->status = 'completed';
         $order->transaction_id = $tranAuthId;
-        $order->amount_transferred = $amount;
+        $order->amount_transferred = $amount / 100; // Store as decimal
         $order->save();
 
-        // Optional: Trigger any post-payment logic (sending vouchers, notifications etc)
-        // This is usually handled in an event listener or directly here.
+        // Handle Wallet Top-up
+        if ($order->voucher_type === 'wallet_topup') {
+            $user = $order->user;
+            if ($user) {
+                $user->wallet_balance += $order->amount;
+                $user->save();
+
+                \App\Models\WalletLedger::create([
+                    'transaction_id' => $tranAuthId,
+                    'user_id' => $user->id,
+                    'type' => 'credit',
+                    'amount' => $order->amount,
+                    'source' => 'kuickpay',
+                    'description' => 'Wallet Top-up via KuickPay',
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'created_at' => now(),
+                ]);
+            }
+        } else {
+            // ✅ AUTO DELIVERY FOR VOUCHERS
+            try {
+                $inventory = $order->inventoryVoucher;
+                if ($inventory && $inventory->upload_vouchers) {
+                    $available = array_diff(
+                        $inventory->upload_vouchers,
+                        $inventory->delivered_vouchers ?? []
+                    );
+
+                    if (count($available) >= $order->quantity) {
+                        $codes = array_slice($available, 0, $order->quantity);
+                        $codesString = implode("\n", $codes);
+
+                        // Call processDelivery from VoucherController
+                        $voucherController = new \App\Http\Controllers\Dashboard\VoucherController();
+                        $voucherController->processDelivery($order, $codesString);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Kuickpay Auto-delivery Failed for Order #{$order->order_id}: " . $e->getMessage());
+            }
+        }
 
         $response = [
             'response_Code' => '00',

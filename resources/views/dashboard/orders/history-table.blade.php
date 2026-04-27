@@ -31,19 +31,40 @@
                 <td class="fw-bold text-primary">{{ $order->order_id }}</td>
                 <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
                 <td class="text-nowrap">{{ $order->created_at->format('H:i:s') }}</td>
-                <td>{{ $order->v_brand_name ?? 'N/A' }}</td>
-                <td>{{ $order->v_currency ?? 'N/A' }}</td>
-                <td>{{ $order->v_country_region ?? 'N/A' }}</td>
-                <td>{{ $order->v_voucher_variant ?? 'N/A' }}</td>
-                <td>{{ $order->v_voucher_type ?? $order->voucher_type ?? 'N/A' }}</td>
+                <td>{{ $order->inventoryVoucher->brand_name ?? $order->v_brand_name ?? 'N/A' }}</td>
+                <td>{{ $order->inventoryVoucher->currency ?? $order->v_currency ?? 'N/A' }}</td>
+                <td>
+                    @if(isset($order->inventoryVoucher->country_region))
+                        @php
+                            $cr = $order->inventoryVoucher->country_region;
+                            $cr = is_array($cr) ? $cr : [$cr];
+                        @endphp
+                        {{ in_array('all', $cr) || in_array('GLB', $cr) ? 'GLB' : (count($cr) > 1 ? 'MULTY' : ($cr[0] ?? 'N/A')) }}
+                    @else
+                        {{ $order->v_country_region ?? 'N/A' }}
+                    @endif
+                </td>
+                <td>{{ $order->inventoryVoucher->voucher_variant ?? $order->v_voucher_variant ?? 'N/A' }}</td>
+                <td>{{ $order->inventoryVoucher->voucher_type ?? $order->v_voucher_type ?? $order->voucher_type ?? 'N/A' }}</td>
                 <td>{{ $order->order_id }}</td>
                 <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
                 <td class="text-center">{{ $order->quantity }}</td>
-                <td class="text-end fw-bold text-dark">{{ $order->v_currency ?? 'N/A' }} {{ number_format($order->amount, 2) }}</td>
-                <td>{{ $order->v_taxes ?? 'N/A' }}</td>
-                <td class="text-end">{{ $order->v_currency ?? 'N/A' }} {{ number_format($order->amount / $order->quantity, 2) }}</td>
+                <td class="text-end fw-bold text-dark">
+                    {{ $order->inventoryVoucher->currency ?? $order->v_currency ?? 'N/A' }} 
+                    {{ number_format($order->amount, 2) }}
+                </td>
+                <td>{{ $order->inventoryVoucher->taxes ?? $order->v_taxes ?? 'N/A' }}</td>
+                <td class="text-end">
+                    {{ $order->inventoryVoucher->currency ?? $order->v_currency ?? 'N/A' }} 
+                    {{ number_format($order->amount / max(1, $order->quantity), 2) }}
+                </td>
                 <td class="text-nowrap">{{ $order->created_at->format('d-m-Y') }}</td>
-                <td class="text-nowrap">{{ $order->v_expiry_date ? \Carbon\Carbon::parse($order->v_expiry_date)->format('d-m-Y') : 'N/A' }}</td>
+                <td class="text-nowrap">
+                    @php
+                        $expiry = $order->inventoryVoucher->expiry_date ?? $order->v_expiry_date;
+                    @endphp
+                    {{ $expiry ? \Carbon\Carbon::parse($expiry)->format('d-m-Y') : 'N/A' }}
+                </td>
                 <td>{{ auth()->user()->voucher_limit ?? 'N/A' }}</td>
                 <td class="text-center">
                     @if($order->status == 'delivered')

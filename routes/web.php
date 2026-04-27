@@ -33,7 +33,16 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 
+Route::get('/storage-link', function () {
+    try {
+        Artisan::call('storage:link');
+        return Artisan::output();
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
+});
 Route::get('/test-currency', [VoucherController::class, 'testCurrency']);
+Route::get('/currency-conversion', [VoucherController::class, 'getConversion'])->name('currency.convert');
 Route::get('/', function () {
     return view('home.home');
 })->name('home');
@@ -259,9 +268,16 @@ Route::prefix('dashboard')->middleware(['auth'])->group(function () {
 
     Route::post('/stripe-checkout-session', [BankController::class, 'createSession'])->name('stripe.checkout.session');
     Route::post('/paypal-checkout', [BankController::class, 'paypalCheckout'])->name('paypal.checkout');
-    Route::post('/wise-checkout', [BankController::class, 'wiseCheckout'])->name('wise.checkout');
     Route::get('/paypal-success', [BankController::class, 'paypalSuccess'])->name('paypal.success');
     Route::get('/paypal-cancel', [BankController::class, 'paypalCancel'])->name('paypal.cancel');
+
+    Route::post('/wise-checkout', [BankController::class, 'wiseCheckout'])->name('wise.checkout');
+    Route::get('/wise-success', [BankController::class, 'wiseSuccess'])->name('wise.success');
+    Route::get('/wise-cancel', [BankController::class, 'wiseCancel'])->name('wise.cancel');
+
+    Route::post('/kuickpay-checkout', [BankController::class, 'kuickpayCheckout'])->name('kuickpay.checkout');
+    Route::get('/kuickpay-success', [BankController::class, 'kuickpaySuccess'])->name('kuickpay.success');
+    Route::get('/kuickpay-cancel', [BankController::class, 'kuickpayCancel'])->name('kuickpay.cancel');
     // Wallet Management
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/credit', [WalletController::class, 'credit'])->name('wallet.credit');

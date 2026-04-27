@@ -27,7 +27,7 @@
             <div class="card-body">
                <div class="text-muted small mb-1">Total Purchase Amount</div>
                <div class="d-flex align-items-center">
-                  <h3 class="fw-bold mb-0">RS {{ number_format($totalPurchaseAmount, 2) }}</h3>
+                  <h3 class="fw-bold mb-0">{{ auth()->user()->currency }} {{ number_format($totalPurchaseAmount, 2) }}</h3>
                   <span class="ms-auto text-warning small fw-bold"><i class="fas fa-money-bill-wave me-1"></i>Total Spent</span>
                </div>
             </div>

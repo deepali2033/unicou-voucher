@@ -20,8 +20,147 @@ use Stripe\FinancialConnections\Session;
 use Stripe\PaymentIntent;
 
 
+use App\Models\Order;
+use App\Models\Voucher; // Check if needed, but Order model uses it
+
 class BankController extends Controller
 {
+    public function wiseCheckout(Request $request)
+    {
+        $amount = $request->input('amount');
+        if (!$amount) {
+            return back()->with('error', 'Amount missing');
+        }
+
+        try {
+            $apiKey = config('services.wise.api_key');
+            $profileId = config('services.wise.profile_id');
+            $baseUrl = config('services.wise.base_url');
+
+            // 1. Create a Quote
+            $quoteResponse = Http::withToken($apiKey)
+                ->post($baseUrl . '/v3/quotes', [
+                    'sourceCurrency' => 'USD',
+                    'targetCurrency' => 'USD',
+                    'sourceAmount' => (float)$amount,
+                    'targetAmount' => null,
+                    'profileId' => (int)$profileId,
+                ]);
+
+            if (!$quoteResponse->successful()) {
+                Log::error('Wise Quote Failed', ['response' => $quoteResponse->json(), 'profileId' => $profileId]);
+                throw new \Exception('Wise quote creation failed: ' . ($quoteResponse->json('message') ?? 'Unknown error'));
+            }
+
+            $quoteId = $quoteResponse->json('id');
+
+            // 2. Create Checkout Session for actual payment
+            $orderId = 'WISE-' . strtoupper(uniqid());
+            $checkoutResponse = Http::withToken($apiKey)
+                ->post($baseUrl . "/v1/profiles/$profileId/checkout-sessions", [
+                    'quoteId' => $quoteId,
+                    'customerTransactionId' => $orderId,
+                    'payInMethods' => ['CARD', 'BANK_TRANSFER'],
+                    'redirectUrl' => route('wise.success', ['order_id' => $orderId, 'amount' => $amount]),
+                ]);
+
+            if ($checkoutResponse->successful()) {
+                $checkoutUrl = $checkoutResponse->json('checkoutUrl');
+                
+                // No Order creation here, just redirect to Wise
+                return redirect($checkoutUrl);
+            }
+
+            // Fallback if Checkout Session fails (maybe not enabled on account)
+            Log::warning('Wise Checkout Session Failed, falling back to simulation', ['response' => $checkoutResponse->json()]);
+
+            return redirect()->route('wise.success', ['order_id' => $orderId, 'amount' => $amount]);
+
+        } catch (\Exception $e) {
+            Log::error('Wise Checkout Exception: ' . $e->getMessage());
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function wiseSuccess(Request $request)
+    {
+        $orderId = $request->get('order_id');
+        $amount = $request->get('amount');
+
+        if (!$orderId) {
+            return redirect()->route('bank.link')->with('error', 'Invalid Wise payment');
+        }
+
+        $user = auth()->user();
+        $exists = WalletLedger::where('transaction_id', $orderId)->exists();
+
+        if (!$exists) {
+            $user->wallet_balance += $amount;
+            $user->save();
+
+            WalletLedger::create([
+                'transaction_id' => $orderId,
+                'user_id' => $user->id,
+                'type' => 'credit',
+                'amount' => $amount,
+                'source' => 'wise',
+                'description' => 'Wallet Top-up via Wise',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'created_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('bank.link')->with('success', 'Amount added successfully via Wise!');
+    }
+
+    public function wiseCancel()
+    {
+        return redirect()->route('bank.link')->with('error', 'Wise payment cancelled.');
+    }
+
+    public function kuickpayCheckout(Request $request)
+    {
+        $amount = $request->input('amount');
+        if (!$amount) {
+            return back()->with('error', 'Amount missing');
+        }
+
+        try {
+            $user = auth()->user();
+            $prefix = config('services.kuickpay.prefix', '01520');
+            $orderCount = Order::whereDate('created_at', now())->count() + 1;
+            $consumerNumber = $prefix . date('ymd') . str_pad($orderCount, 5, '0', STR_PAD_LEFT);
+
+            // Create a pending top-up order
+            Order::create([
+                'order_id' => 'TOP-' . date('Ymd') . '-' . str_pad($orderCount, 4, '0', STR_PAD_LEFT),
+                'user_id' => $user->id,
+                'user_role' => $user->account_type,
+                'voucher_type' => 'wallet_topup',
+                'amount' => $amount,
+                'status' => 'pending',
+                'payment_method' => 'kuickpay',
+                'kuickpay_consumer_number' => $consumerNumber,
+            ]);
+
+            return redirect()->route('bank.link')->with('success', "KuickPay Consumer Number: $consumerNumber. Please pay via your bank app (Bill Payment -> KuickPay). Funds will be added to your wallet automatically upon successful payment.");
+
+        } catch (\Exception $e) {
+            Log::error('KuickPay Checkout Exception: ' . $e->getMessage());
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function kuickpaySuccess()
+    {
+        return redirect()->route('bank.link')->with('success', 'KuickPay payment processed.');
+    }
+
+    public function kuickpayCancel()
+    {
+        return redirect()->route('bank.link')->with('error', 'KuickPay payment cancelled.');
+    }
 
 
     public function processing(Request $request)
@@ -252,77 +391,51 @@ class BankController extends Controller
     }
 
     public function createSession(Request $request)
-{
-    try {
+    {
+        try {
 
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
 
-        $amount = $request->input('amount');
-        $currency = strtolower($request->input('currency', 'usd'));
+            $amount = $request->input('amount');
 
-        if (!$amount) {
-            return back()->with('error', 'Amount missing');
-        }
+            if (!$amount) {
+                return back()->with('error', 'Amount missing');
+            }
 
-        // ✅ Currency-based methods
-        $methods = [];
-
-        switch ($currency) {
-            case 'eur':
-                $methods = ['ideal', 'bancontact', 'sofort', 'giropay', 'eps', 'sepa_debit'];
-                break;
-
-            case 'cny':
-                $methods = ['alipay', 'wechat_pay'];
-                break;
-
-            case 'gbp':
-                $methods = ['alipay'];
-                break;
-
-            case 'pln':
-                $methods = ['p24'];
-                break;
-
-            default:
-                return back()->with('error', 'This currency is not supported for selected payment methods.');
-        }
-
-        $session = \Stripe\Checkout\Session::create([
-            'payment_method_types' => $methods,
-
-            'payment_method_options' => [
-                'wechat_pay' => [
-                    'client' => 'web',
-                ],
-            ],
-
-            'metadata' => [
-                'user_id' => auth()->id(),
-            ],
-
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => $currency,
-                    'product_data' => [
-                        'name' => 'Wallet Top-up',
+            $session = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['us_bank_account'],
+                'payment_method_options' => [
+                    'us_bank_account' => [
+                        'verification_method' => 'automatic',
                     ],
-                    'unit_amount' => $amount * 100,
                 ],
-                'quantity' => 1,
-            ]],
+                'metadata' => [
+                    'user_id' => auth()->id(),
+                ],
 
-            'mode' => 'payment',
-            'success_url' => route('wallet.processing') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('wallet.cancel'),
-        ]);
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'Wallet Top-up',
+                        ],
+                        'unit_amount' => $amount * 100,
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => route('wallet.processing') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('wallet.cancel'),
+            ]);
 
-        return redirect($session->url);
+            return redirect($session->url); // ✅ IMPORTANT
 
-    } catch (\Exception $e) {
-        return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+
+            return back()->with('error', $e->getMessage());
+        }
     }
-}    public function finalizeStripeLink(Request $request)
+    public function finalizeStripeLink(Request $request)
     {
         try {
             $secretKey = config('services.stripe.secret');

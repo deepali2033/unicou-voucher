@@ -150,7 +150,7 @@ class UserController extends Controller
         $user = User::create($userData);
 
         // Send Welcome Email
-        try {
+      try {
             if (auth()->user()->account_type === 'reseller_agent') {
                 // Custom message for agents created by resellers including credentials
                 $resellerName = auth()->user()->name;

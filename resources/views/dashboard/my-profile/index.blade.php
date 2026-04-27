@@ -263,11 +263,11 @@
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Full Name</label>
-                                            <input type="text" name="name" class="form-control bg-light border-0 p-3 rounded-3" readonly value="{{ $user->name }}">
+                                            <input type="text" name="name" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->name }}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Date of Birth</label>
-                                            <input type="date" name="dob" class="form-control bg-light border-0 p-3 rounded-3" readonly value="{{ $user->dob }}">
+                                            <input type="date" name="dob" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->dob }}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Designation</label>
@@ -275,15 +275,15 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">WhatsApp No</label>
-                                            <input type="tel" name="whatsapp_number" class="form-control bg-light border-0 p-3 rounded-3"  value="{{ $user->whatsapp_number }}">
+                                            <input type="tel" name="whatsapp_number" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->whatsapp_number }}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Social Media Link</label>
-                                            <input type="url" name="social_link" class="form-control bg-light border-0 p-3 rounded-3" readonly value="{{ $user->social_link }}">
+                                            <input type="url" name="social_link" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->social_link }}">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Country</label>
-                                            <input type="text" name="country" class="form-control bg-light border-0 p-3 rounded-3" readonly value="{{ $user->country }}">
+                                            <input type="text" name="country" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->country }}">
                                         </div>
                                         <div class="col-md-12">
                                             <label class="text-muted small mb-1 d-block text-uppercase fw-bold">Address</label>
@@ -295,7 +295,7 @@
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <label class="text-muted small mb-1">Reference Name</label>
-                                                    <input type="text" name="reference_name" readonly class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->reference_name }}">
+                                                    <input type="text" name="reference_name" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->reference_name }}">
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="text-muted small mb-1">Organization</label>
@@ -303,7 +303,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="text-muted small mb-1">Reference Email</label>
-                                                    <input type="email" name="reference_email" readonly class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->reference_email }}">
+                                                    <input type="email" name="reference_email" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->reference_email }}">
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="text-muted small mb-1">Reference Contact</label>
@@ -317,7 +317,7 @@
                                             <div class="row g-3">
                                                 <div class="col-md-4">
                                                     <label class="text-muted small mb-1">Bank Name</label>
-                                                    <input type="text" name="bank_name" readonly class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->bank_name }}">
+                                                    <input type="text" name="bank_name" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->bank_name }}">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="text-muted small mb-1">Bank Country</label>
@@ -325,7 +325,7 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="text-muted small mb-1">Account No / IBAN</label>
-                                                    <input type="text" name="bank_account_number" readonly class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->bank_account_number }}">
+                                                    <input type="text" name="bank_account_number" class="form-control bg-light border-0 p-3 rounded-3" value="{{ $user->bank_account_number }}">
                                                 </div>
                                             </div>
                                         </div>

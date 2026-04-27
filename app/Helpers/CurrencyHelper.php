@@ -7,26 +7,31 @@ use Illuminate\Support\Facades\Cache;
 
 class CurrencyHelper
 {
-    public static function convert($amount, $from, $to = 'USD')
-    {
-        // Cache for 1 hour
-        $rates = Cache::remember("currency_rates_{$from}", 3600, function () use ($from) {
-            $response = Http::get("https://api.exchangerate-api.com/v4/latest/{$from}");
+public static function convert($amount, $from, $to)
+{
+    $from = strtoupper(trim($from));
+    $to = strtoupper(trim($to));
 
-            if ($response->failed()) {
-                throw new \Exception('Currency API failed');
-            }
-
-            return $response->json();
-        });
-
-        if (!isset($rates['rates'][$to])) {
-            throw new \Exception("Conversion rate not available");
-        }
-
-        $rate = $rates['rates'][$to];
-
-        return $amount * $rate;
+    if (!$from || !$to) {
+        throw new \Exception("Currency missing");
     }
 
+    $response = Http::get("https://open.er-api.com/v6/latest/{$from}");
+
+    if ($response->failed()) {
+        throw new \Exception("HTTP Error: " . $response->status());
+    }
+
+    $data = $response->json();
+
+    if (($data['result'] ?? '') !== 'success') {
+        throw new \Exception("API Error: " . json_encode($data));
+    }
+
+    if (!isset($data['rates'][$to])) {
+        throw new \Exception("Currency not supported: {$to}");
+    }
+
+    return $amount * $data['rates'][$to];
+}
 }

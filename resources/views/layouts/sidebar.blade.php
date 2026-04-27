@@ -210,7 +210,7 @@ $isNotifications = request()->routeIs('notifications.*');
                 </a>
             </li>
             @endif
-            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_disputes) || (auth()->user()->isSupport() && auth()->user()->can_view_disputes))
+            @if(auth()->user()->isAdmin() || (auth()->user()->isManager() && auth()->user()->can_view_disputes) || (auth()->user()->isSupport() ))
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('disputes.index') ? 'active' : '' }}" href="{{ route('disputes.index') }}">
                     <i class="fas fa-gavel me-2"></i> Disputes Management

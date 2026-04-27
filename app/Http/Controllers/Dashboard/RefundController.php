@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\WalletLedger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RefundController extends Controller
 {
@@ -233,63 +234,72 @@ class RefundController extends Controller
         return back()->with('success', 'Refund request submitted successfully.');
     }
 
-    public function processRefund(Request $request, $id)
-    {
-        $refund = RefundRequest::with('order')->findOrFail($id);
-        $method = $refund->order->payment_method ?? '';
-        $isManual = !in_array($method, ['stripe', 'paypal', 'wallet']);
+   
+ public function processRefund(Request $request, $id)
+{
+    $refund = RefundRequest::with('order')->findOrFail($id);
+    $method = $refund->order->payment_method ?? '';
+    $isManual = !in_array($method, ['stripe', 'paypal', 'wallet']);
 
-        $rules = [
-            'transaction_id' => $isManual ? 'required|string' : 'nullable|string',
-            'processed_date' => 'required|date',
-            'processed_time' => 'required',
-        ];
+    $rules = [
+        'transaction_id' => $isManual ? 'required|string' : 'nullable|string',
+        'processed_date' => 'required|date',
+        'processed_time' => 'required',
+    ];
 
-        if ($isManual) {
-            $rules['refund_receipt'] = 'required|image|mimes:jpeg,png,jpg,gif|max:2048';
-        } else {
-            $rules['refund_receipt'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+    $rules['refund_receipt'] = $isManual
+        ? 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        : 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+
+    $request->validate($rules);
+
+    DB::transaction(function () use ($request, $refund, $method) {
+
+        $receiptPath = $refund->refund_receipt;
+
+        if ($request->hasFile('refund_receipt')) {
+            $receiptPath = $request->file('refund_receipt')->store('refund_receipts', 'public');
         }
 
-        $request->validate($rules);
+        $processedAt = $request->processed_date . ' ' . $request->processed_time;
 
-        DB::transaction(function () use ($request, $refund, $method) {
-            $receiptPath = $refund->refund_receipt;
-            if ($request->hasFile('refund_receipt')) {
-                $receiptPath = $request->file('refund_receipt')->store('refund_receipts', 'public');
-            }
+        // 👉 SAFE transaction id
+        $transactionId = $refund->transaction_id
+            ?? 'AUTO-' . strtoupper(Str::random(10));
 
-            $processedAt = $request->processed_date . ' ' . $request->processed_time;
+        $refund->update([
+            'status' => 'approved',
+            'transaction_id' => $transactionId,
+            'refund_receipt' => $receiptPath,
+            'processed_at' => $processedAt,
+        ]);
 
-            $refund->update([
-                'status' => 'approved',
-                'transaction_id' => $request->transaction_id ?? 'AUTO-' . strtoupper(\Illuminate\Support\Str::random(10)),
-                'refund_receipt' => $receiptPath,
-                'processed_at' => $processedAt,
-            ]);
+        // Wallet refund
+        if ($method === 'wallet') {
 
-            // If it was a wallet payment, credit the user back automatically
-            if ($method === 'wallet') {
-                $user = User::find($refund->user_id);
-                if ($user) {
-                    $user->wallet_balance += $refund->amount;
-                    $user->save();
+            $user = User::find($refund->user_id);
 
+            if ($user) {
+                $user->wallet_balance += $refund->amount;
+                $user->save();
+
+                // 👉 DUPLICATE SAFE LOGIC
+                if (!WalletLedger::where('transaction_id', $transactionId)->exists()) {
                     WalletLedger::create([
-                        'transaction_id' => $refund->transaction_id,
+                        'transaction_id' => $transactionId,
                         'user_id' => $user->id,
                         'type' => 'credit',
                         'amount' => $refund->amount,
                         'source' => 'wallet',
                         'description' => 'Refund for Order #' . $refund->order_id,
-                        'created_at' => now(),
                     ]);
                 }
             }
-        });
+        }
+    });
 
-        return back()->with('success', 'Refund processed successfully.');
-    }
+    return back()->with('success', 'Refund processed successfully.');
+}
 
     public function approve($id)
     {

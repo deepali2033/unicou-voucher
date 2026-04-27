@@ -163,8 +163,9 @@
     <div class="v-card {{ $bgClasses[$index % count($bgClasses)] }}">
         <div class="v-card-top">
             <div class="v-icon-box">
-                @if($v->logo)
-                    <img src="{{ $v->logo }}" alt="{{ $v->brand_name }}">
+               @if($v->logo)
+                   
+                   <img src="{{ Str::startsWith($v->logo, 'http') ? $v->logo : asset($v->logo) }}" alt="{{ $v->brand_name }}">
                 @else
                     <i class="fas fa-ticket-alt text-muted"></i>
                 @endif

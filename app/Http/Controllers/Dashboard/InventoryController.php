@@ -199,7 +199,7 @@ class InventoryController extends Controller
             'logo' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('logo')) {
+       if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('inventory_logos', 'public');
         }
 
@@ -267,7 +267,7 @@ class InventoryController extends Controller
 
         $validated = $request->except(['upload_vouchers', 'quantity', 'logo']);
 
-        if ($request->hasFile('logo')) {
+ if ($request->hasFile('logo')) {
             // Delete old logo if exists
             if ($inventory->logo) {
                 Storage::disk('public')->delete($inventory->logo);

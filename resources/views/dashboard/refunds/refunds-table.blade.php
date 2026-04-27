@@ -26,7 +26,7 @@
                     <div class="text-muted small">{{ $refund->user->state ?? 'N/A' }}</div>
                 </td>
                 <td><span class="fw-bold">{{ $refund->order_id }}</span></td>
-                <td><span class="fw-bold text-primary">RS {{ number_format($refund->amount) }}</span></td>
+                <td><span class="fw-bold text-primary">{{ $refund->order->inventoryVoucher->currency ?? 'RS' }} {{ number_format($refund->amount) }}</span></td>
                 <td>
                     <div class="text-muted small" title="{{ $refund->reason }}">
                         {{ Str::limit($refund->reason, 20) }}

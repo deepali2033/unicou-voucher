@@ -39,7 +39,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1">Available Store Credit </div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ number_format($userPoints['store_credit'], 0) }}</h3>
+                        <h3 class="fw-bold mb-0">${{ number_format($userPoints['store_credit'], 0) }}</h3>
                         <span class="ms-auto text-success small fw-bold"><i class="fas fa-arrow-up me-1"></i>12%</span>
                     </div>
                 </div>
@@ -176,13 +176,14 @@
                                         <span>Direct Transfer (Admin)</span>
                                     </label>
                                 </div>
-                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-linked-bank">
+                              <!--  <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-linked-bank">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_linked_bank" value="linked_bank">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_linked_bank">
                                         <i class="fas fa-link me-2 text-info"></i>
                                         <span>Linked Account</span>
                                     </label>
-                                </div> -->
+                                </div>
+                                 -->
                                 <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-wallet">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_wallet" value="wallet">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_wallet">
@@ -190,20 +191,22 @@
                                         <span>Wallet Balance</span>
                                     </label>
                                 </div>
-                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-kuickpay">
+                                <!--
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-kuickpay">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_kuickpay" value="kuickpay">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_kuickpay">
                                         <i class="fas fa-mobile-alt me-2 text-danger"></i>
                                         <span>Kuickpay (Bank/App)</span>
                                     </label>
-                                </div> -->
-                                <!-- <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-stripe">
+                                </div>
+                                <div class="form-check payment-type-card p-3 border rounded-3 flex-fill cursor-pointer" id="type-stripe">
                                     <input class="form-check-input d-none" type="radio" name="payment_type" id="payment_stripe" value="stripe">
                                     <label class="form-check-label d-flex align-items-center cursor-pointer" for="payment_stripe">
                                         <i class="fab fa-stripe me-2 text-primary"></i>
                                         <span>Stripe (Credit Card)</span>
                                     </label>
-                                </div> -->
+                                </div>
+                                 -->
                             </div>
 
                             <!-- Kuickpay Section -->

@@ -34,7 +34,7 @@
             <button class="btn btn-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#addMoneyModal">
                 <i class="fas fa-plus-circle me-1"></i> Add Wallet Credit
             </button>
-            <!-- <button class="btn btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
+              <!-- <button class="btn btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#linkBankModal">
                 <i class="fas fa-plus me-1"></i> Manual Link
             </button>
             <button id="linkBankBtn" class="btn btn-outline-primary shadow-sm px-3">
@@ -50,7 +50,7 @@
                 <div class="card-body">
                     <div class="text-muted small mb-1 text-uppercase fw-bold">Wallet Balance</div>
                     <div class="d-flex align-items-center">
-                        <h3 class="fw-bold mb-0">{{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
+                        <h3 class="fw-bold mb-0">${{ auth()->user()->currency }} {{ number_format(auth()->user()->wallet_balance, 2) }}</h3>
                         <span class="ms-auto text-primary fw-bold small"><i class="fas fa-wallet me-1"></i>Available</span>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                             <div class="text-muted">
                                 <i class="fas fa-university fa-3x mb-2 opacity-25"></i>
                                 <p>No bank accounts linked yet.</p>
-                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#linkBankModal">Link Now</button>
+                               <button class="btn btn-sm btn-primary"  data-bs-toggle="modal" data-bs-target="#addMoneyModal">Link Now</button>
                             </div>
                         </div>
                         @endforelse
@@ -242,6 +242,20 @@
                                     <span class="fw-bold">PayPal</span>
                                 </label>
                             </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="payment_method" id="method_wise" value="wise" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2" for="method_wise">
+                                    <i class="fas fa-university fa-2x"></i>
+                                    <span class="fw-bold">Wise</span>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="payment_method" id="method_kuickpay" value="kuickpay" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2" for="method_kuickpay">
+                                    <i class="fas fa-mobile-alt fa-2x"></i>
+                                    <span class="fw-bold">KuickPay</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -283,6 +297,10 @@
                             form.action = "{{ route('stripe.checkout.session') }}";
                         } else if (this.value === 'paypal') {
                             form.action = "{{ route('paypal.checkout') }}";
+                        } else if (this.value === 'wise') {
+                            form.action = "{{ route('wise.checkout') }}";
+                        } else if (this.value === 'kuickpay') {
+                            form.action = "{{ route('kuickpay.checkout') }}";
                         }
                     });
                 });
